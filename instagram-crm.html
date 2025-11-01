@@ -165,14 +165,17 @@
 
         .name-cell {
             font-weight: 600;
-            color: #333;
+            color: #E1306C;
             cursor: pointer;
-            transition: color 0.2s;
+            transition: all 0.2s;
+            text-decoration: underline;
+            text-decoration-style: dotted;
+            text-underline-offset: 3px;
         }
 
         .name-cell:hover {
-            color: #E1306C;
-            text-decoration: underline;
+            color: #C13584;
+            text-decoration-style: solid;
         }
 
         .instagram-cell {
@@ -594,7 +597,10 @@
                 </div>
                 <div class="form-group">
                     <label>Pseudo Instagram *</label>
-                    <input type="text" id="instagram" required placeholder="Ex: @marie_dupont">
+                    <div style="position: relative;">
+                        <span style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #999; font-weight: 600;">@</span>
+                        <input type="text" id="instagram" required placeholder="Ex: marie_dupont" style="padding-left: 32px;" oninput="this.value = this.value.toLowerCase().replace('@', '')">
+                    </div>
                 </div>
                 <div class="form-group">
                     <label>Type de relation *</label>
@@ -646,21 +652,6 @@
                 <div class="form-group">
                     <label>Centres d'intérêt / Passions</label>
                     <input type="text" id="interests" placeholder="Ex: Techno, Voyage, Cuisine...">
-                </div>
-                <div class="form-group">
-                    <label>Dernière interaction</label>
-                    <input type="date" id="lastInteraction">
-                </div>
-                <div class="form-group">
-                    <label>Appréciation (1-5 ⭐)</label>
-                    <select id="rating">
-                        <option value="">Non évalué</option>
-                        <option value="5">⭐⭐⭐⭐⭐ Excellente</option>
-                        <option value="4">⭐⭐⭐⭐ Très bonne</option>
-                        <option value="3">⭐⭐⭐ Bonne</option>
-                        <option value="2">⭐⭐ Moyenne</option>
-                        <option value="1">⭐ Faible</option>
-                    </select>
                 </div>
                 <div class="form-group">
                     <label>Notes personnelles</label>
@@ -717,14 +708,6 @@
                     <div class="profile-info-item" id="profileInterestsContainer" style="display: none;">
                         <strong>Centres d'intérêt</strong>
                         <span id="profileInterests"></span>
-                    </div>
-                    <div class="profile-info-item" id="profileLastInteractionContainer" style="display: none;">
-                        <strong>Dernière interaction</strong>
-                        <span id="profileLastInteraction"></span>
-                    </div>
-                    <div class="profile-info-item" id="profileRatingContainer" style="display: none;">
-                        <strong>Appréciation</strong>
-                        <span id="profileRating"></span>
                     </div>
                     <div class="profile-info-item" id="profileNotesContainer" style="display: none;">
                         <strong>Notes</strong>
@@ -886,10 +869,16 @@
         function saveContact(event) {
             event.preventDefault();
             
+            // S'assurer que le @ est toujours présent et en minuscule
+            let instagramValue = document.getElementById('instagram').value.toLowerCase().trim();
+            if (!instagramValue.startsWith('@')) {
+                instagramValue = '@' + instagramValue;
+            }
+            
             const contact = {
                 id: currentEditId || Date.now().toString(),
                 firstName: document.getElementById('firstName').value,
-                instagram: document.getElementById('instagram').value,
+                instagram: instagramValue,
                 relationType: document.getElementById('relationType').value,
                 meetingPlace: document.getElementById('meetingPlace').value,
                 discussionStatus: document.getElementById('discussionStatus').value,
@@ -898,8 +887,6 @@
                 age: document.getElementById('age').value,
                 phone: document.getElementById('phone').value,
                 interests: document.getElementById('interests').value,
-                lastInteraction: document.getElementById('lastInteraction').value,
-                rating: document.getElementById('rating').value,
                 notes: document.getElementById('notes').value,
                 dateAdded: currentEditId ? 
                     contacts.find(c => c.id === currentEditId).dateAdded : 
@@ -981,25 +968,6 @@
                 document.getElementById('profileInterestsContainer').style.display = 'none';
             }
             
-            if (contact.lastInteraction) {
-                document.getElementById('profileLastInteractionContainer').style.display = 'flex';
-                document.getElementById('profileLastInteraction').textContent = new Date(contact.lastInteraction).toLocaleDateString('fr-FR', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                });
-            } else {
-                document.getElementById('profileLastInteractionContainer').style.display = 'none';
-            }
-            
-            if (contact.rating) {
-                document.getElementById('profileRatingContainer').style.display = 'flex';
-                const stars = '⭐'.repeat(parseInt(contact.rating));
-                document.getElementById('profileRating').textContent = stars;
-            } else {
-                document.getElementById('profileRatingContainer').style.display = 'none';
-            }
-            
             document.getElementById('profileDate').textContent = new Date(contact.dateAdded).toLocaleDateString('fr-FR', {
                 year: 'numeric',
                 month: 'long',
@@ -1037,7 +1005,8 @@
             
             // Remplir le formulaire
             document.getElementById('firstName').value = contact.firstName;
-            document.getElementById('instagram').value = contact.instagram;
+            // Retirer le @ pour l'édition
+            document.getElementById('instagram').value = contact.instagram.replace('@', '');
             document.getElementById('relationType').value = contact.relationType;
             document.getElementById('meetingPlace').value = contact.meetingPlace;
             document.getElementById('discussionStatus').value = contact.discussionStatus;
@@ -1046,8 +1015,6 @@
             document.getElementById('age').value = contact.age || '';
             document.getElementById('phone').value = contact.phone || '';
             document.getElementById('interests').value = contact.interests || '';
-            document.getElementById('lastInteraction').value = contact.lastInteraction || '';
-            document.getElementById('rating').value = contact.rating || '';
             document.getElementById('notes').value = contact.notes || '';
             
             closeViewModal();
