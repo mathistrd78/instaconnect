@@ -165,29 +165,26 @@
 
         .name-cell {
             font-weight: 600;
-            color: #E1306C;
+            color: #333;
             cursor: pointer;
             transition: all 0.2s;
-            text-decoration: underline;
-            text-decoration-style: dotted;
-            text-underline-offset: 3px;
         }
 
         .name-cell:hover {
-            color: #C13584;
-            text-decoration-style: solid;
+            color: #E1306C;
+            text-decoration: underline;
         }
 
         .instagram-cell {
-            color: #E1306C;
+            color: #333;
             cursor: pointer;
             font-weight: 500;
             transition: all 0.2s;
         }
 
         .instagram-cell:hover {
+            color: #E1306C;
             text-decoration: underline;
-            transform: scale(1.05);
         }
 
         .inline-select {
@@ -211,6 +208,126 @@
             border-color: #E1306C;
             box-shadow: 0 0 0 3px rgba(225, 48, 108, 0.1);
         }
+
+        /* Tag System */
+        .tag-cell {
+            position: relative;
+        }
+
+        .tag-display {
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 13px;
+            font-weight: 600;
+            display: inline-block;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .tag-display:hover {
+            border-color: #E1306C;
+            transform: scale(1.05);
+        }
+
+        .tag-display.empty {
+            background: #f5f5f5;
+            color: #999;
+            border: 2px dashed #ddd;
+        }
+
+        .tag-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            z-index: 1000;
+            min-width: 200px;
+            margin-top: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .tag-dropdown.active {
+            display: block;
+        }
+
+        .tag-search {
+            padding: 10px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .tag-search input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .tag-search input:focus {
+            outline: none;
+            border-color: #E1306C;
+        }
+
+        .tag-options {
+            padding: 5px;
+        }
+
+        .tag-option {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tag-option:hover {
+            background: #f8f9ff;
+        }
+
+        .tag-option-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+
+        .tag-create {
+            padding: 8px 12px;
+            color: #E1306C;
+            font-weight: 600;
+            border-top: 1px solid #f0f0f0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tag-create:hover {
+            background: #f8f9ff;
+        }
+
+        /* Tag Colors */
+        .tag-ami { background: #a29bfe; color: white; }
+        .tag-famille { background: #fd79a8; color: white; }
+        .tag-connaissance { background: #74b9ff; color: white; }
+        .tag-sexe { background: #ff7675; color: white; }
+        .tag-irl { background: #55efc4; color: #2d3436; }
+        .tag-insta { background: #E1306C; color: white; }
+        .tag-tinder { background: #ff6348; color: white; }
+        .tag-hinge { background: #a55eea; color: white; }
+        .tag-soiree-tech { background: #feca57; color: #2d3436; }
+        .tag-deja-parle { background: #00b894; color: white; }
+        .tag-jamais-parle { background: #dfe6e9; color: #2d3436; }
+        .tag-en-vu { background: #fdcb6e; color: #2d3436; }
+        .tag-en-cours { background: #0984e3; color: white; }
 
         .empty-state {
             text-align: center;
@@ -734,6 +851,36 @@
         let currentViewId = null;
         let currentEditId = null;
 
+        // Configuration des tags par défaut
+        const defaultTagOptions = {
+            relationType: [
+                { value: 'Ami', label: '👥 Ami', color: '#a29bfe', class: 'tag-ami' },
+                { value: 'Famille', label: '👨‍👩‍👧 Famille', color: '#fd79a8', class: 'tag-famille' },
+                { value: 'Connaissance', label: '🤝 Connaissance', color: '#74b9ff', class: 'tag-connaissance' },
+                { value: 'Sexe', label: '❤️ Sexe', color: '#ff7675', class: 'tag-sexe' }
+            ],
+            meetingPlace: [
+                { value: 'IRL', label: '🌍 IRL', color: '#55efc4', class: 'tag-irl' },
+                { value: 'Insta', label: '📸 Insta', color: '#E1306C', class: 'tag-insta' },
+                { value: 'Tinder', label: '🔥 Tinder', color: '#ff6348', class: 'tag-tinder' },
+                { value: 'Hinge', label: '💜 Hinge', color: '#a55eea', class: 'tag-hinge' },
+                { value: 'Soirée Tech', label: '🎵 Soirée Tech', color: '#feca57', class: 'tag-soiree-tech' }
+            ],
+            discussionStatus: [
+                { value: 'Déjà parlé', label: '💬 Déjà parlé', color: '#00b894', class: 'tag-deja-parle' },
+                { value: 'Jamais parlé', label: '🤐 Jamais parlé', color: '#dfe6e9', class: 'tag-jamais-parle' },
+                { value: 'En vu', label: '👀 En vu', color: '#fdcb6e', class: 'tag-en-vu' },
+                { value: 'En cours', label: '📝 En cours', color: '#0984e3', class: 'tag-en-cours' }
+            ]
+        };
+
+        // Stockage des tags personnalisés
+        let customTagOptions = {
+            relationType: [],
+            meetingPlace: [],
+            discussionStatus: []
+        };
+
         // Charger les données au démarrage
         window.onload = function() {
             loadContacts();
@@ -747,10 +894,54 @@
             if (saved) {
                 contacts = JSON.parse(saved);
             }
+            
+            const savedTags = localStorage.getItem('instaConnectCustomTags');
+            if (savedTags) {
+                customTagOptions = JSON.parse(savedTags);
+            }
         }
 
         function saveToStorage() {
             localStorage.setItem('instaConnectContacts', JSON.stringify(contacts));
+            localStorage.setItem('instaConnectCustomTags', JSON.stringify(customTagOptions));
+        }
+
+        // Obtenir toutes les options de tags pour un type
+        function getAllTagOptions(type) {
+            return [...defaultTagOptions[type], ...customTagOptions[type]];
+        }
+
+        // Trouver un tag par sa valeur
+        function findTag(type, value) {
+            const allOptions = getAllTagOptions(type);
+            return allOptions.find(opt => opt.value === value);
+        }
+
+        // Générer une couleur aléatoire pour les nouveaux tags
+        function generateRandomColor() {
+            const colors = ['#a29bfe', '#fd79a8', '#74b9ff', '#ff7675', '#55efc4', '#E1306C', '#ff6348', '#a55eea', '#feca57', '#00b894', '#dfe6e9', '#fdcb6e', '#0984e3'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        // Ajouter un nouveau tag personnalisé
+        function addCustomTag(type, value, emoji = '🏷️') {
+            const color = generateRandomColor();
+            const className = 'tag-custom-' + Date.now();
+            const newTag = {
+                value: value,
+                label: emoji + ' ' + value,
+                color: color,
+                class: className
+            };
+            customTagOptions[type].push(newTag);
+            
+            // Ajouter le style dynamiquement
+            const style = document.createElement('style');
+            style.textContent = `.${className} { background: ${color}; color: white; }`;
+            document.head.appendChild(style);
+            
+            saveToStorage();
+            return newTag;
         }
 
         // Event listeners
@@ -803,7 +994,12 @@
             table.style.display = 'table';
             emptyState.style.display = 'none';
             
-            tbody.innerHTML = filteredContacts.map(contact => `
+            tbody.innerHTML = filteredContacts.map(contact => {
+                const relationTag = findTag('relationType', contact.relationType);
+                const meetingTag = findTag('meetingPlace', contact.meetingPlace);
+                const statusTag = findTag('discussionStatus', contact.discussionStatus);
+                
+                return `
                 <tr>
                     <td>
                         <span class="name-cell" onclick="viewProfile('${contact.id}')">
@@ -815,33 +1011,27 @@
                             ${contact.instagram}
                         </span>
                     </td>
-                    <td>
-                        <select class="inline-select" onchange="updateField('${contact.id}', 'relationType', this.value)">
-                            <option value="Ami" ${contact.relationType === 'Ami' ? 'selected' : ''}>👥 Ami</option>
-                            <option value="Famille" ${contact.relationType === 'Famille' ? 'selected' : ''}>👨‍👩‍👧 Famille</option>
-                            <option value="Connaissance" ${contact.relationType === 'Connaissance' ? 'selected' : ''}>🤝 Connaissance</option>
-                            <option value="Sexe" ${contact.relationType === 'Sexe' ? 'selected' : ''}>❤️ Sexe</option>
-                        </select>
+                    <td class="tag-cell">
+                        <span class="tag-display ${relationTag ? relationTag.class : 'empty'}" 
+                              onclick="showTagDropdown(event, '${contact.id}', 'relationType')">
+                            ${relationTag ? relationTag.label : 'Sélectionner...'}
+                        </span>
                     </td>
-                    <td>
-                        <select class="inline-select" onchange="updateField('${contact.id}', 'meetingPlace', this.value)">
-                            <option value="IRL" ${contact.meetingPlace === 'IRL' ? 'selected' : ''}>🌍 IRL</option>
-                            <option value="Insta" ${contact.meetingPlace === 'Insta' ? 'selected' : ''}>📸 Insta</option>
-                            <option value="Tinder" ${contact.meetingPlace === 'Tinder' ? 'selected' : ''}>🔥 Tinder</option>
-                            <option value="Hinge" ${contact.meetingPlace === 'Hinge' ? 'selected' : ''}>💜 Hinge</option>
-                            <option value="Soirée Tech" ${contact.meetingPlace === 'Soirée Tech' ? 'selected' : ''}>🎵 Soirée Tech</option>
-                        </select>
+                    <td class="tag-cell">
+                        <span class="tag-display ${meetingTag ? meetingTag.class : 'empty'}" 
+                              onclick="showTagDropdown(event, '${contact.id}', 'meetingPlace')">
+                            ${meetingTag ? meetingTag.label : 'Sélectionner...'}
+                        </span>
                     </td>
-                    <td>
-                        <select class="inline-select" onchange="updateField('${contact.id}', 'discussionStatus', this.value)">
-                            <option value="Déjà parlé" ${contact.discussionStatus === 'Déjà parlé' ? 'selected' : ''}>💬 Déjà parlé</option>
-                            <option value="Jamais parlé" ${contact.discussionStatus === 'Jamais parlé' ? 'selected' : ''}>🤐 Jamais parlé</option>
-                            <option value="En vu" ${contact.discussionStatus === 'En vu' ? 'selected' : ''}>👀 En vu</option>
-                            <option value="En cours" ${contact.discussionStatus === 'En cours' ? 'selected' : ''}>📝 En cours</option>
-                        </select>
+                    <td class="tag-cell">
+                        <span class="tag-display ${statusTag ? statusTag.class : 'empty'}" 
+                              onclick="showTagDropdown(event, '${contact.id}', 'discussionStatus')">
+                            ${statusTag ? statusTag.label : 'Sélectionner...'}
+                        </span>
                     </td>
                 </tr>
-            `).join('');
+            `;
+            }).join('');
         }
 
         // Mise à jour d'un champ inline
@@ -850,8 +1040,99 @@
             if (contact) {
                 contact[field] = value;
                 saveToStorage();
+                renderTable();
             }
         }
+
+        // Système de dropdown pour les tags
+        let currentDropdown = null;
+
+        function showTagDropdown(event, contactId, fieldType) {
+            event.stopPropagation();
+            
+            // Fermer le dropdown actuel s'il existe
+            if (currentDropdown) {
+                currentDropdown.remove();
+            }
+            
+            const tagCell = event.target.closest('.tag-cell');
+            const allOptions = getAllTagOptions(fieldType);
+            const contact = contacts.find(c => c.id === contactId);
+            
+            // Créer le dropdown
+            const dropdown = document.createElement('div');
+            dropdown.className = 'tag-dropdown active';
+            dropdown.innerHTML = `
+                <div class="tag-search">
+                    <input type="text" placeholder="Rechercher ou créer..." id="tagSearchInput" />
+                </div>
+                <div class="tag-options" id="tagOptionsList"></div>
+            `;
+            
+            tagCell.appendChild(dropdown);
+            currentDropdown = dropdown;
+            
+            const searchInput = dropdown.querySelector('#tagSearchInput');
+            const optionsList = dropdown.querySelector('#tagOptionsList');
+            
+            // Fonction pour rendre les options
+            function renderOptions(filter = '') {
+                const filtered = allOptions.filter(opt => 
+                    opt.label.toLowerCase().includes(filter.toLowerCase())
+                );
+                
+                let html = filtered.map(opt => `
+                    <div class="tag-option" onclick="selectTag('${contactId}', '${fieldType}', '${opt.value.replace(/'/g, "\\'")}')">
+                        <div class="tag-option-color" style="background: ${opt.color};"></div>
+                        <span>${opt.label}</span>
+                    </div>
+                `).join('');
+                
+                // Option pour créer un nouveau tag
+                if (filter && !allOptions.find(opt => opt.value.toLowerCase() === filter.toLowerCase())) {
+                    html += `
+                        <div class="tag-create" onclick="createAndSelectTag('${contactId}', '${fieldType}', '${filter.replace(/'/g, "\\'")}')">
+                            ➕ Créer "${filter}"
+                        </div>
+                    `;
+                }
+                
+                optionsList.innerHTML = html;
+            }
+            
+            // Initialiser avec toutes les options
+            renderOptions();
+            
+            // Recherche en temps réel
+            searchInput.addEventListener('input', (e) => {
+                renderOptions(e.target.value);
+            });
+            
+            searchInput.focus();
+        }
+
+        // Sélectionner un tag
+        function selectTag(contactId, fieldType, value) {
+            updateField(contactId, fieldType, value);
+            if (currentDropdown) {
+                currentDropdown.remove();
+                currentDropdown = null;
+            }
+        }
+
+        // Créer et sélectionner un nouveau tag
+        function createAndSelectTag(contactId, fieldType, value) {
+            addCustomTag(fieldType, value);
+            selectTag(contactId, fieldType, value);
+        }
+
+        // Fermer le dropdown en cliquant ailleurs
+        document.addEventListener('click', (e) => {
+            if (currentDropdown && !e.target.closest('.tag-dropdown')) {
+                currentDropdown.remove();
+                currentDropdown = null;
+            }
+        });
 
         // Ouvrir modal d'ajout
         function openAddModal() {
