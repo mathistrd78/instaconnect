@@ -628,6 +628,41 @@
                     </select>
                 </div>
                 <div class="form-group">
+                    <label>Études / Profession</label>
+                    <input type="text" id="profession" placeholder="Ex: Étudiante en marketing, Développeur...">
+                </div>
+                <div class="form-group">
+                    <label>Lieu d'habitation</label>
+                    <input type="text" id="location" placeholder="Ex: Paris 11ème, Lyon...">
+                </div>
+                <div class="form-group">
+                    <label>Âge</label>
+                    <input type="number" id="age" min="18" max="99" placeholder="Ex: 25">
+                </div>
+                <div class="form-group">
+                    <label>Numéro de téléphone</label>
+                    <input type="tel" id="phone" placeholder="Ex: 06 12 34 56 78">
+                </div>
+                <div class="form-group">
+                    <label>Centres d'intérêt / Passions</label>
+                    <input type="text" id="interests" placeholder="Ex: Techno, Voyage, Cuisine...">
+                </div>
+                <div class="form-group">
+                    <label>Dernière interaction</label>
+                    <input type="date" id="lastInteraction">
+                </div>
+                <div class="form-group">
+                    <label>Appréciation (1-5 ⭐)</label>
+                    <select id="rating">
+                        <option value="">Non évalué</option>
+                        <option value="5">⭐⭐⭐⭐⭐ Excellente</option>
+                        <option value="4">⭐⭐⭐⭐ Très bonne</option>
+                        <option value="3">⭐⭐⭐ Bonne</option>
+                        <option value="2">⭐⭐ Moyenne</option>
+                        <option value="1">⭐ Faible</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label>Notes personnelles</label>
                     <textarea id="notes" placeholder="Ajoutez des notes..."></textarea>
                 </div>
@@ -663,6 +698,34 @@
                         <strong>Statut de discussion</strong>
                         <span id="profileStatus"></span>
                     </div>
+                    <div class="profile-info-item" id="profileProfessionContainer" style="display: none;">
+                        <strong>Études / Profession</strong>
+                        <span id="profileProfession"></span>
+                    </div>
+                    <div class="profile-info-item" id="profileLocationContainer" style="display: none;">
+                        <strong>Lieu d'habitation</strong>
+                        <span id="profileLocation"></span>
+                    </div>
+                    <div class="profile-info-item" id="profileAgeContainer" style="display: none;">
+                        <strong>Âge</strong>
+                        <span id="profileAge"></span>
+                    </div>
+                    <div class="profile-info-item" id="profilePhoneContainer" style="display: none;">
+                        <strong>Téléphone</strong>
+                        <span id="profilePhone"></span>
+                    </div>
+                    <div class="profile-info-item" id="profileInterestsContainer" style="display: none;">
+                        <strong>Centres d'intérêt</strong>
+                        <span id="profileInterests"></span>
+                    </div>
+                    <div class="profile-info-item" id="profileLastInteractionContainer" style="display: none;">
+                        <strong>Dernière interaction</strong>
+                        <span id="profileLastInteraction"></span>
+                    </div>
+                    <div class="profile-info-item" id="profileRatingContainer" style="display: none;">
+                        <strong>Appréciation</strong>
+                        <span id="profileRating"></span>
+                    </div>
                     <div class="profile-info-item" id="profileNotesContainer" style="display: none;">
                         <strong>Notes</strong>
                         <span id="profileNotes"></span>
@@ -671,6 +734,9 @@
                         <strong>Ajouté le</strong>
                         <span id="profileDate"></span>
                     </div>
+                </div>
+                <div class="form-actions" style="margin-top: 20px;">
+                    <button class="btn btn-primary" onclick="editProfile()">✏️ Modifier</button>
                 </div>
                 <div class="action-delete">
                     <button class="btn btn-danger" onclick="deleteContact()">🗑️ Supprimer ce contact</button>
@@ -683,6 +749,7 @@
         // Variables globales
         let contacts = [];
         let currentViewId = null;
+        let currentEditId = null;
 
         // Charger les données au démarrage
         window.onload = function() {
@@ -805,12 +872,14 @@
 
         // Ouvrir modal d'ajout
         function openAddModal() {
+            currentEditId = null;
             document.getElementById('contactForm').reset();
             document.getElementById('addModal').classList.add('active');
         }
 
         function closeAddModal() {
             document.getElementById('addModal').classList.remove('active');
+            currentEditId = null;
         }
 
         // Sauvegarder un contact
@@ -818,20 +887,38 @@
             event.preventDefault();
             
             const contact = {
-                id: Date.now().toString(),
+                id: currentEditId || Date.now().toString(),
                 firstName: document.getElementById('firstName').value,
                 instagram: document.getElementById('instagram').value,
                 relationType: document.getElementById('relationType').value,
                 meetingPlace: document.getElementById('meetingPlace').value,
                 discussionStatus: document.getElementById('discussionStatus').value,
+                profession: document.getElementById('profession').value,
+                location: document.getElementById('location').value,
+                age: document.getElementById('age').value,
+                phone: document.getElementById('phone').value,
+                interests: document.getElementById('interests').value,
+                lastInteraction: document.getElementById('lastInteraction').value,
+                rating: document.getElementById('rating').value,
                 notes: document.getElementById('notes').value,
-                dateAdded: new Date().toISOString()
+                dateAdded: currentEditId ? 
+                    contacts.find(c => c.id === currentEditId).dateAdded : 
+                    new Date().toISOString()
             };
 
-            contacts.push(contact);
+            if (currentEditId) {
+                const index = contacts.findIndex(c => c.id === currentEditId);
+                contacts[index] = contact;
+            } else {
+                contacts.push(contact);
+            }
+
             saveToStorage();
             renderTable();
             closeAddModal();
+            if (currentViewId) {
+                viewProfile(currentViewId);
+            }
         }
 
         // Ouvrir profil Instagram
@@ -857,6 +944,62 @@
             document.getElementById('profileRelation').textContent = contact.relationType;
             document.getElementById('profileMeeting').textContent = contact.meetingPlace;
             document.getElementById('profileStatus').textContent = contact.discussionStatus;
+            
+            // Nouveaux champs
+            if (contact.profession) {
+                document.getElementById('profileProfessionContainer').style.display = 'flex';
+                document.getElementById('profileProfession').textContent = contact.profession;
+            } else {
+                document.getElementById('profileProfessionContainer').style.display = 'none';
+            }
+            
+            if (contact.location) {
+                document.getElementById('profileLocationContainer').style.display = 'flex';
+                document.getElementById('profileLocation').textContent = contact.location;
+            } else {
+                document.getElementById('profileLocationContainer').style.display = 'none';
+            }
+            
+            if (contact.age) {
+                document.getElementById('profileAgeContainer').style.display = 'flex';
+                document.getElementById('profileAge').textContent = contact.age + ' ans';
+            } else {
+                document.getElementById('profileAgeContainer').style.display = 'none';
+            }
+            
+            if (contact.phone) {
+                document.getElementById('profilePhoneContainer').style.display = 'flex';
+                document.getElementById('profilePhone').innerHTML = `<a href="tel:${contact.phone}" style="color: #E1306C;">${contact.phone}</a>`;
+            } else {
+                document.getElementById('profilePhoneContainer').style.display = 'none';
+            }
+            
+            if (contact.interests) {
+                document.getElementById('profileInterestsContainer').style.display = 'flex';
+                document.getElementById('profileInterests').textContent = contact.interests;
+            } else {
+                document.getElementById('profileInterestsContainer').style.display = 'none';
+            }
+            
+            if (contact.lastInteraction) {
+                document.getElementById('profileLastInteractionContainer').style.display = 'flex';
+                document.getElementById('profileLastInteraction').textContent = new Date(contact.lastInteraction).toLocaleDateString('fr-FR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            } else {
+                document.getElementById('profileLastInteractionContainer').style.display = 'none';
+            }
+            
+            if (contact.rating) {
+                document.getElementById('profileRatingContainer').style.display = 'flex';
+                const stars = '⭐'.repeat(parseInt(contact.rating));
+                document.getElementById('profileRating').textContent = stars;
+            } else {
+                document.getElementById('profileRatingContainer').style.display = 'none';
+            }
+            
             document.getElementById('profileDate').textContent = new Date(contact.dateAdded).toLocaleDateString('fr-FR', {
                 year: 'numeric',
                 month: 'long',
@@ -883,6 +1026,32 @@
             if (contact) {
                 openInstagramProfile(contact.instagram);
             }
+        }
+
+        // Modifier le profil depuis la vue
+        function editProfile() {
+            const contact = contacts.find(c => c.id === currentViewId);
+            if (!contact) return;
+
+            currentEditId = currentViewId;
+            
+            // Remplir le formulaire
+            document.getElementById('firstName').value = contact.firstName;
+            document.getElementById('instagram').value = contact.instagram;
+            document.getElementById('relationType').value = contact.relationType;
+            document.getElementById('meetingPlace').value = contact.meetingPlace;
+            document.getElementById('discussionStatus').value = contact.discussionStatus;
+            document.getElementById('profession').value = contact.profession || '';
+            document.getElementById('location').value = contact.location || '';
+            document.getElementById('age').value = contact.age || '';
+            document.getElementById('phone').value = contact.phone || '';
+            document.getElementById('interests').value = contact.interests || '';
+            document.getElementById('lastInteraction').value = contact.lastInteraction || '';
+            document.getElementById('rating').value = contact.rating || '';
+            document.getElementById('notes').value = contact.notes || '';
+            
+            closeViewModal();
+            document.getElementById('addModal').classList.add('active');
         }
 
         // Supprimer un contact
