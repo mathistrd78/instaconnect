@@ -187,29 +187,7 @@
             text-decoration: underline;
         }
 
-        .inline-select {
-            padding: 8px 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
-            background: white;
-            cursor: pointer;
-            transition: all 0.2s;
-            width: 100%;
-            max-width: 180px;
-        }
-
-        .inline-select:hover {
-            border-color: #E1306C;
-        }
-
-        .inline-select:focus {
-            outline: none;
-            border-color: #E1306C;
-            box-shadow: 0 0 0 3px rgba(225, 48, 108, 0.1);
-        }
-
-        /* Tag System */
+        /* Tag System Style Notion */
         .tag-cell {
             position: relative;
         }
@@ -223,11 +201,12 @@
             cursor: pointer;
             transition: all 0.2s;
             border: 2px solid transparent;
+            min-width: 100px;
+            text-align: center;
         }
 
         .tag-display:hover {
-            border-color: #E1306C;
-            transform: scale(1.05);
+            opacity: 0.8;
         }
 
         .tag-display.empty {
@@ -236,36 +215,36 @@
             border: 2px dashed #ddd;
         }
 
-        .tag-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
+        .tag-display.empty:hover {
+            background: #e8e8e8;
+        }
+
+        /* Dropdown fixe style Notion */
+        .tag-dropdown-container {
+            position: fixed;
             background: white;
-            border: 2px solid #e0e0e0;
             border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            z-index: 1000;
-            min-width: 200px;
-            margin-top: 5px;
-            max-height: 300px;
-            overflow-y: auto;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.15);
+            z-index: 10000;
+            width: 280px;
+            max-height: 420px;
             display: none;
         }
 
-        .tag-dropdown.active {
+        .tag-dropdown-container.active {
             display: block;
         }
 
         .tag-search {
-            padding: 10px;
+            padding: 12px;
             border-bottom: 1px solid #f0f0f0;
         }
 
         .tag-search input {
             width: 100%;
-            padding: 8px 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
+            padding: 10px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
             font-size: 14px;
         }
 
@@ -275,46 +254,58 @@
         }
 
         .tag-options {
-            padding: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 8px;
         }
 
         .tag-option {
-            padding: 8px 12px;
+            padding: 10px 12px;
             cursor: pointer;
-            border-radius: 8px;
+            border-radius: 6px;
             transition: background 0.2s;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            margin-bottom: 2px;
         }
 
         .tag-option:hover {
-            background: #f8f9ff;
+            background: #f5f5f5;
         }
 
-        .tag-option-color {
-            width: 20px;
-            height: 20px;
-            border-radius: 4px;
+        .tag-option-preview {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
             flex-shrink: 0;
         }
 
         .tag-create {
-            padding: 8px 12px;
-            color: #E1306C;
-            font-weight: 600;
-            border-top: 1px solid #f0f0f0;
+            padding: 10px 12px;
+            margin: 8px;
+            margin-top: 0;
+            color: #666;
+            font-size: 13px;
             cursor: pointer;
+            border-top: 1px solid #f0f0f0;
             display: flex;
             align-items: center;
             gap: 8px;
+            border-radius: 6px;
         }
 
         .tag-create:hover {
-            background: #f8f9ff;
+            background: #f5f5f5;
         }
 
-        /* Tag Colors */
+        .tag-create-icon {
+            color: #E1306C;
+            font-weight: bold;
+        }
+
+        /* Couleurs des tags */
         .tag-ami { background: #a29bfe; color: white; }
         .tag-famille { background: #fd79a8; color: white; }
         .tag-connaissance { background: #74b9ff; color: white; }
@@ -620,11 +611,6 @@
                 font-size: 13px;
             }
 
-            .inline-select {
-                font-size: 13px;
-                padding: 6px 10px;
-            }
-
             .modal-content {
                 padding: 20px;
             }
@@ -700,6 +686,14 @@
         </div>
     </div>
 
+    <!-- Dropdown global pour les tags -->
+    <div id="tagDropdown" class="tag-dropdown-container">
+        <div class="tag-search">
+            <input type="text" id="tagSearchInput" placeholder="Rechercher...">
+        </div>
+        <div class="tag-options" id="tagOptionsList"></div>
+    </div>
+
     <!-- Modal Add Contact -->
     <div id="addModal" class="modal">
         <div class="modal-content">
@@ -752,11 +746,11 @@
                 </div>
                 <div class="form-group">
                     <label>Études / Profession</label>
-                    <input type="text" id="profession" placeholder="Ex: Étudiante en marketing, Développeur...">
+                    <input type="text" id="profession" placeholder="Ex: Étudiante en marketing">
                 </div>
                 <div class="form-group">
                     <label>Lieu d'habitation</label>
-                    <input type="text" id="location" placeholder="Ex: Paris 11ème, Lyon...">
+                    <input type="text" id="location" placeholder="Ex: Paris 11ème">
                 </div>
                 <div class="form-group">
                     <label>Âge</label>
@@ -767,7 +761,7 @@
                     <input type="tel" id="phone" placeholder="Ex: 06 12 34 56 78">
                 </div>
                 <div class="form-group">
-                    <label>Centres d'intérêt / Passions</label>
+                    <label>Centres d'intérêt</label>
                     <input type="text" id="interests" placeholder="Ex: Techno, Voyage, Cuisine...">
                 </div>
                 <div class="form-group">
@@ -850,51 +844,50 @@
         let contacts = [];
         let currentViewId = null;
         let currentEditId = null;
+        let currentTagContext = null;
 
-        // Configuration des tags par défaut
+        // Configuration des tags
         const defaultTagOptions = {
             relationType: [
-                { value: 'Ami', label: '👥 Ami', color: '#a29bfe', class: 'tag-ami' },
-                { value: 'Famille', label: '👨‍👩‍👧 Famille', color: '#fd79a8', class: 'tag-famille' },
-                { value: 'Connaissance', label: '🤝 Connaissance', color: '#74b9ff', class: 'tag-connaissance' },
-                { value: 'Sexe', label: '❤️ Sexe', color: '#ff7675', class: 'tag-sexe' }
+                { value: 'Ami', label: '👥 Ami', class: 'tag-ami' },
+                { value: 'Famille', label: '👨‍👩‍👧 Famille', class: 'tag-famille' },
+                { value: 'Connaissance', label: '🤝 Connaissance', class: 'tag-connaissance' },
+                { value: 'Sexe', label: '❤️ Sexe', class: 'tag-sexe' }
             ],
             meetingPlace: [
-                { value: 'IRL', label: '🌍 IRL', color: '#55efc4', class: 'tag-irl' },
-                { value: 'Insta', label: '📸 Insta', color: '#E1306C', class: 'tag-insta' },
-                { value: 'Tinder', label: '🔥 Tinder', color: '#ff6348', class: 'tag-tinder' },
-                { value: 'Hinge', label: '💜 Hinge', color: '#a55eea', class: 'tag-hinge' },
-                { value: 'Soirée Tech', label: '🎵 Soirée Tech', color: '#feca57', class: 'tag-soiree-tech' }
+                { value: 'IRL', label: '🌍 IRL', class: 'tag-irl' },
+                { value: 'Insta', label: '📸 Insta', class: 'tag-insta' },
+                { value: 'Tinder', label: '🔥 Tinder', class: 'tag-tinder' },
+                { value: 'Hinge', label: '💜 Hinge', class: 'tag-hinge' },
+                { value: 'Soirée Tech', label: '🎵 Soirée Tech', class: 'tag-soiree-tech' }
             ],
             discussionStatus: [
-                { value: 'Déjà parlé', label: '💬 Déjà parlé', color: '#00b894', class: 'tag-deja-parle' },
-                { value: 'Jamais parlé', label: '🤐 Jamais parlé', color: '#dfe6e9', class: 'tag-jamais-parle' },
-                { value: 'En vu', label: '👀 En vu', color: '#fdcb6e', class: 'tag-en-vu' },
-                { value: 'En cours', label: '📝 En cours', color: '#0984e3', class: 'tag-en-cours' }
+                { value: 'Déjà parlé', label: '💬 Déjà parlé', class: 'tag-deja-parle' },
+                { value: 'Jamais parlé', label: '🤐 Jamais parlé', class: 'tag-jamais-parle' },
+                { value: 'En vu', label: '👀 En vu', class: 'tag-en-vu' },
+                { value: 'En cours', label: '📝 En cours', class: 'tag-en-cours' }
             ]
         };
 
-        // Stockage des tags personnalisés
         let customTagOptions = {
             relationType: [],
             meetingPlace: [],
             discussionStatus: []
         };
 
-        // Charger les données au démarrage
+        // Chargement initial
         window.onload = function() {
             loadContacts();
             renderTable();
             setupEventListeners();
         };
 
-        // Gestion du localStorage
+        // LocalStorage
         function loadContacts() {
             const saved = localStorage.getItem('instaConnectContacts');
             if (saved) {
                 contacts = JSON.parse(saved);
             }
-            
             const savedTags = localStorage.getItem('instaConnectCustomTags');
             if (savedTags) {
                 customTagOptions = JSON.parse(savedTags);
@@ -906,36 +899,52 @@
             localStorage.setItem('instaConnectCustomTags', JSON.stringify(customTagOptions));
         }
 
-        // Obtenir toutes les options de tags pour un type
+        // Event listeners
+        function setupEventListeners() {
+            document.getElementById('searchBox').addEventListener('input', renderTable);
+            document.getElementById('filterRelation').addEventListener('change', renderTable);
+            document.getElementById('filterLieu').addEventListener('change', renderTable);
+            document.getElementById('filterStatut').addEventListener('change', renderTable);
+
+            document.getElementById('addModal').addEventListener('click', function(e) {
+                if (e.target === this) closeAddModal();
+            });
+            document.getElementById('viewModal').addEventListener('click', function(e) {
+                if (e.target === this) closeViewModal();
+            });
+
+            // Fermer dropdown en cliquant ailleurs
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.tag-display') && !e.target.closest('.tag-dropdown-container')) {
+                    closeTagDropdown();
+                }
+            });
+        }
+
+        // Gestion des tags
         function getAllTagOptions(type) {
             return [...defaultTagOptions[type], ...customTagOptions[type]];
         }
 
-        // Trouver un tag par sa valeur
         function findTag(type, value) {
-            const allOptions = getAllTagOptions(type);
-            return allOptions.find(opt => opt.value === value);
+            return getAllTagOptions(type).find(opt => opt.value === value);
         }
 
-        // Générer une couleur aléatoire pour les nouveaux tags
         function generateRandomColor() {
             const colors = ['#a29bfe', '#fd79a8', '#74b9ff', '#ff7675', '#55efc4', '#E1306C', '#ff6348', '#a55eea', '#feca57', '#00b894', '#dfe6e9', '#fdcb6e', '#0984e3'];
             return colors[Math.floor(Math.random() * colors.length)];
         }
 
-        // Ajouter un nouveau tag personnalisé
-        function addCustomTag(type, value, emoji = '🏷️') {
+        function addCustomTag(type, value) {
             const color = generateRandomColor();
             const className = 'tag-custom-' + Date.now();
             const newTag = {
                 value: value,
-                label: emoji + ' ' + value,
-                color: color,
+                label: '🏷️ ' + value,
                 class: className
             };
             customTagOptions[type].push(newTag);
             
-            // Ajouter le style dynamiquement
             const style = document.createElement('style');
             style.textContent = `.${className} { background: ${color}; color: white; }`;
             document.head.appendChild(style);
@@ -944,23 +953,7 @@
             return newTag;
         }
 
-        // Event listeners
-        function setupEventListeners() {
-            document.getElementById('searchBox').addEventListener('input', renderTable);
-            document.getElementById('filterRelation').addEventListener('change', renderTable);
-            document.getElementById('filterLieu').addEventListener('change', renderTable);
-            document.getElementById('filterStatut').addEventListener('change', renderTable);
-
-            // Fermer les modals en cliquant à l'extérieur
-            document.getElementById('addModal').addEventListener('click', function(e) {
-                if (e.target === this) closeAddModal();
-            });
-            document.getElementById('viewModal').addEventListener('click', function(e) {
-                if (e.target === this) closeViewModal();
-            });
-        }
-
-        // Filtrage et recherche
+        // Filtrage
         function getFilteredContacts() {
             const searchTerm = document.getElementById('searchBox').value.toLowerCase();
             const filterRelation = document.getElementById('filterRelation').value;
@@ -975,10 +968,10 @@
                 const matchStatut = !filterStatut || contact.discussionStatus === filterStatut;
                 
                 return matchSearch && matchRelation && matchLieu && matchStatut;
-            }).sort((a, b) => a.firstName.localeCompare(b.firstName, 'fr')); // Tri alphabétique
+            }).sort((a, b) => a.firstName.localeCompare(b.firstName, 'fr'));
         }
 
-        // Rendu du tableau
+        // Rendu tableau
         function renderTable() {
             const filteredContacts = getFilteredContacts();
             const tbody = document.getElementById('contactsBody');
@@ -1030,115 +1023,98 @@
                         </span>
                     </td>
                 </tr>
-            `;
+                `;
             }).join('');
         }
 
-        // Mise à jour d'un champ inline
-        function updateField(id, field, value) {
-            const contact = contacts.find(c => c.id === id);
-            if (contact) {
-                contact[field] = value;
-                saveToStorage();
-                renderTable();
-            }
-        }
-
-        // Système de dropdown pour les tags
-        let currentDropdown = null;
-
+        // Système de dropdown des tags (style Notion)
         function showTagDropdown(event, contactId, fieldType) {
             event.stopPropagation();
             
-            // Fermer le dropdown actuel s'il existe
-            if (currentDropdown) {
-                currentDropdown.remove();
-            }
+            currentTagContext = { contactId, fieldType };
             
-            const tagCell = event.target.closest('.tag-cell');
+            const dropdown = document.getElementById('tagDropdown');
             const allOptions = getAllTagOptions(fieldType);
-            const contact = contacts.find(c => c.id === contactId);
             
-            // Créer le dropdown
-            const dropdown = document.createElement('div');
-            dropdown.className = 'tag-dropdown active';
-            dropdown.innerHTML = `
-                <div class="tag-search">
-                    <input type="text" placeholder="Rechercher ou créer..." id="tagSearchInput" />
-                </div>
-                <div class="tag-options" id="tagOptionsList"></div>
-            `;
+            // Positionner le dropdown
+            const rect = event.target.getBoundingClientRect();
+            dropdown.style.left = rect.left + 'px';
+            dropdown.style.top = (rect.bottom + 5) + 'px';
             
-            tagCell.appendChild(dropdown);
-            currentDropdown = dropdown;
+            // Rendre les options
+            renderTagOptions(allOptions);
             
-            const searchInput = dropdown.querySelector('#tagSearchInput');
-            const optionsList = dropdown.querySelector('#tagOptionsList');
+            dropdown.classList.add('active');
             
-            // Fonction pour rendre les options
-            function renderOptions(filter = '') {
-                const filtered = allOptions.filter(opt => 
-                    opt.label.toLowerCase().includes(filter.toLowerCase())
-                );
-                
-                let html = filtered.map(opt => `
-                    <div class="tag-option" onclick="selectTag('${contactId}', '${fieldType}', '${opt.value.replace(/'/g, "\\'")}')">
-                        <div class="tag-option-color" style="background: ${opt.color};"></div>
-                        <span>${opt.label}</span>
-                    </div>
-                `).join('');
-                
-                // Option pour créer un nouveau tag
-                if (filter && !allOptions.find(opt => opt.value.toLowerCase() === filter.toLowerCase())) {
-                    html += `
-                        <div class="tag-create" onclick="createAndSelectTag('${contactId}', '${fieldType}', '${filter.replace(/'/g, "\\'")}')">
-                            ➕ Créer "${filter}"
-                        </div>
-                    `;
-                }
-                
-                optionsList.innerHTML = html;
-            }
-            
-            // Initialiser avec toutes les options
-            renderOptions();
+            const searchInput = document.getElementById('tagSearchInput');
+            searchInput.value = '';
+            searchInput.focus();
             
             // Recherche en temps réel
-            searchInput.addEventListener('input', (e) => {
-                renderOptions(e.target.value);
-            });
+            searchInput.oninput = function() {
+                const filtered = allOptions.filter(opt => 
+                    opt.label.toLowerCase().includes(this.value.toLowerCase())
+                );
+                renderTagOptions(filtered, this.value);
+            };
+        }
+
+        function renderTagOptions(options, searchValue = '') {
+            const list = document.getElementById('tagOptionsList');
             
-            searchInput.focus();
-        }
-
-        // Sélectionner un tag
-        function selectTag(contactId, fieldType, value) {
-            updateField(contactId, fieldType, value);
-            if (currentDropdown) {
-                currentDropdown.remove();
-                currentDropdown = null;
+            let html = options.map(opt => `
+                <div class="tag-option" onclick="selectTag('${opt.value.replace(/'/g, "\\'")}')">
+                    <span class="tag-option-preview ${opt.class}">${opt.label}</span>
+                </div>
+            `).join('');
+            
+            // Option créer
+            if (searchValue && !options.find(opt => opt.value.toLowerCase() === searchValue.toLowerCase())) {
+                html += `
+                    <div class="tag-create" onclick="createAndSelectTag('${searchValue.replace(/'/g, "\\'")}')">
+                        <span class="tag-create-icon">+</span>
+                        Créer "${searchValue}"
+                    </div>
+                `;
             }
+            
+            list.innerHTML = html;
         }
 
-        // Créer et sélectionner un nouveau tag
-        function createAndSelectTag(contactId, fieldType, value) {
-            addCustomTag(fieldType, value);
-            selectTag(contactId, fieldType, value);
-        }
-
-        // Fermer le dropdown en cliquant ailleurs
-        document.addEventListener('click', (e) => {
-            if (currentDropdown && !e.target.closest('.tag-dropdown')) {
-                currentDropdown.remove();
-                currentDropdown = null;
+        function selectTag(value) {
+            if (!currentTagContext) return;
+            
+            const contact = contacts.find(c => c.id === currentTagContext.contactId);
+            if (contact) {
+                contact[currentTagContext.fieldType] = value;
+                saveToStorage();
+                renderTable();
             }
-        });
+            
+            closeTagDropdown();
+        }
 
-        // Ouvrir modal d'ajout
+        function createAndSelectTag(value) {
+            if (!currentTagContext) return;
+            
+            addCustomTag(currentTagContext.fieldType, value);
+            selectTag(value);
+        }
+
+        function closeTagDropdown() {
+            document.getElementById('tagDropdown').classList.remove('active');
+            currentTagContext = null;
+        }
+
+        // Modals
         function openAddModal() {
             currentEditId = null;
             document.getElementById('contactForm').reset();
-            document.getElementById('addModal').classList.add('active');
+            const modal = document.getElementById('addModal');
+            modal.classList.add('active');
+            // Réinitialiser le scroll
+            const modalContent = modal.querySelector('.modal-content');
+            modalContent.scrollTop = 0;
         }
 
         function closeAddModal() {
@@ -1146,11 +1122,10 @@
             currentEditId = null;
         }
 
-        // Sauvegarder un contact
+        // Sauvegarder contact
         function saveContact(event) {
             event.preventDefault();
             
-            // S'assurer que le @ est toujours présent et en minuscule
             let instagramValue = document.getElementById('instagram').value.toLowerCase().trim();
             if (!instagramValue.startsWith('@')) {
                 instagramValue = '@' + instagramValue;
@@ -1189,17 +1164,16 @@
             }
         }
 
-        // Ouvrir profil Instagram
+        // Instagram
         function openInstagramProfile(username) {
             const cleanUsername = username.replace('@', '');
-            // Tente d'ouvrir l'app Instagram, sinon ouvre le navigateur
             window.location.href = `instagram://user?username=${cleanUsername}`;
             setTimeout(() => {
                 window.open(`https://instagram.com/${cleanUsername}`, '_blank');
             }, 500);
         }
 
-        // Voir le profil
+        // Voir profil
         function viewProfile(id) {
             const contact = contacts.find(c => c.id === id);
             if (!contact) return;
@@ -1213,21 +1187,24 @@
             document.getElementById('profileMeeting').textContent = contact.meetingPlace;
             document.getElementById('profileStatus').textContent = contact.discussionStatus;
             
-            // Nouveaux champs
-            if (contact.profession) {
-                document.getElementById('profileProfessionContainer').style.display = 'flex';
-                document.getElementById('profileProfession').textContent = contact.profession;
-            } else {
-                document.getElementById('profileProfessionContainer').style.display = 'none';
-            }
-            
-            if (contact.location) {
-                document.getElementById('profileLocationContainer').style.display = 'flex';
-                document.getElementById('profileLocation').textContent = contact.location;
-            } else {
-                document.getElementById('profileLocationContainer').style.display = 'none';
-            }
-            
+            // Champs optionnels
+            ['profession', 'location', 'phone', 'interests', 'notes'].forEach(field => {
+                const container = document.getElementById(`profile${field.charAt(0).toUpperCase() + field.slice(1)}Container`);
+                const element = document.getElementById(`profile${field.charAt(0).toUpperCase() + field.slice(1)}`);
+                if (contact[field]) {
+                    container.style.display = 'flex';
+                    if (field === 'phone') {
+                        element.innerHTML = `<a href="tel:${contact[field]}" style="color: #E1306C;">${contact[field]}</a>`;
+                    } else if (field === 'age') {
+                        element.textContent = contact[field] + ' ans';
+                    } else {
+                        element.textContent = contact[field];
+                    }
+                } else {
+                    container.style.display = 'none';
+                }
+            });
+
             if (contact.age) {
                 document.getElementById('profileAgeContainer').style.display = 'flex';
                 document.getElementById('profileAge').textContent = contact.age + ' ans';
@@ -1235,34 +1212,17 @@
                 document.getElementById('profileAgeContainer').style.display = 'none';
             }
             
-            if (contact.phone) {
-                document.getElementById('profilePhoneContainer').style.display = 'flex';
-                document.getElementById('profilePhone').innerHTML = `<a href="tel:${contact.phone}" style="color: #E1306C;">${contact.phone}</a>`;
-            } else {
-                document.getElementById('profilePhoneContainer').style.display = 'none';
-            }
-            
-            if (contact.interests) {
-                document.getElementById('profileInterestsContainer').style.display = 'flex';
-                document.getElementById('profileInterests').textContent = contact.interests;
-            } else {
-                document.getElementById('profileInterestsContainer').style.display = 'none';
-            }
-            
             document.getElementById('profileDate').textContent = new Date(contact.dateAdded).toLocaleDateString('fr-FR', {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric'
             });
-            
-            if (contact.notes) {
-                document.getElementById('profileNotesContainer').style.display = 'flex';
-                document.getElementById('profileNotes').textContent = contact.notes;
-            } else {
-                document.getElementById('profileNotesContainer').style.display = 'none';
-            }
 
-            document.getElementById('viewModal').classList.add('active');
+            const modal = document.getElementById('viewModal');
+            modal.classList.add('active');
+            // Réinitialiser le scroll
+            const modalContent = modal.querySelector('.modal-content');
+            modalContent.scrollTop = 0;
         }
 
         function closeViewModal() {
@@ -1277,16 +1237,14 @@
             }
         }
 
-        // Modifier le profil depuis la vue
+        // Modifier profil
         function editProfile() {
             const contact = contacts.find(c => c.id === currentViewId);
             if (!contact) return;
 
             currentEditId = currentViewId;
             
-            // Remplir le formulaire
             document.getElementById('firstName').value = contact.firstName;
-            // Retirer le @ pour l'édition
             document.getElementById('instagram').value = contact.instagram.replace('@', '');
             document.getElementById('relationType').value = contact.relationType;
             document.getElementById('meetingPlace').value = contact.meetingPlace;
@@ -1302,7 +1260,7 @@
             document.getElementById('addModal').classList.add('active');
         }
 
-        // Supprimer un contact
+        // Supprimer
         function deleteContact() {
             if (!confirm('Êtes-vous sûr de vouloir supprimer ce contact ?')) return;
             
