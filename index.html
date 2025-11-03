@@ -103,10 +103,52 @@
 
         <!-- Section Unfollowers -->
         <div id="unfollowersSection" class="section">
-            <div class="coming-soon">
-                <div class="coming-soon-icon">🔴</div>
-                <div class="coming-soon-text">Unfollowers</div>
-                <div class="coming-soon-desc">Fonctionnalité à venir...</div>
+            <div class="unfollowers-header">
+                <div class="unfollowers-title">🔴 Unfollowers</div>
+                <div class="unfollowers-subtitle">Découvrez qui ne vous suit pas en retour</div>
+                
+                <div class="upload-zone" id="uploadZone" onclick="document.getElementById('zipFileInput').click()">
+                    <div class="upload-icon">📤</div>
+                    <div class="upload-text">Cliquez ou glissez votre export Instagram</div>
+                    <div class="upload-subtext">Fichier ZIP uniquement</div>
+                </div>
+                <input type="file" id="zipFileInput" accept=".zip" onchange="unfollowers.handleFileUpload(event)">
+            </div>
+
+            <div id="analyzingState" class="analyzing" style="display: none;">
+                <div class="spinner"></div>
+                <div style="font-size: 16px; color: #495057; font-weight: 600;">Analyse en cours...</div>
+            </div>
+
+            <div id="unfollowersResults" style="display: none;">
+                <div class="unfollowers-stats">
+                    <div class="unfollower-stat-card">
+                        <div class="unfollower-stat-value" id="followingCount">0</div>
+                        <div class="unfollower-stat-label">Following</div>
+                    </div>
+                    <div class="unfollower-stat-card">
+                        <div class="unfollower-stat-value" id="followersCount">0</div>
+                        <div class="unfollower-stat-label">Followers</div>
+                    </div>
+                    <div class="unfollower-stat-card">
+                        <div class="unfollower-stat-value" id="unfollowersCount">0</div>
+                        <div class="unfollower-stat-label">Unfollowers</div>
+                    </div>
+                </div>
+
+                <div class="unfollowers-list">
+                    <div class="unfollowers-list-header">
+                        <span>Liste des unfollowers</span>
+                        <button class="reset-btn" onclick="unfollowers.reset()" style="padding: 8px 16px; margin: 0;">🔄 Nouvelle analyse</button>
+                    </div>
+                    <div id="unfollowersList"></div>
+                </div>
+            </div>
+
+            <div id="emptyUnfollowers" class="empty-unfollowers" style="display: none;">
+                <div class="empty-unfollowers-icon">🎉</div>
+                <div style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">Aucun unfollower !</div>
+                <div style="font-size: 14px;">Tout le monde que vous suivez vous suit en retour</div>
             </div>
         </div>
     </div>
@@ -275,6 +317,7 @@
     <script src="js/tags.js"></script>
     <script src="js/contacts.js"></script>
     <script src="js/stats.js"></script>
+    <script src="js/unfollowers.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>
