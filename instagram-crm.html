@@ -36,7 +36,7 @@
 
         .header-top {
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
             margin-bottom: 12px;
         }
@@ -45,17 +45,6 @@
             color: #E1306C;
             font-size: 24px;
             font-weight: 700;
-        }
-
-        .btn-add-header {
-            background: linear-gradient(135deg, #E1306C 0%, #C13584 100%);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 15px;
-            font-weight: 600;
-            min-height: 44px;
         }
 
         .search-box {
@@ -680,7 +669,6 @@
     <div class="header">
         <div class="header-top">
             <h1>📱 InstaConnect</h1>
-            <button class="btn-add-header" onclick="openAddModal()">➕ Ajouter</button>
         </div>
         
         <input type="text" class="search-box" id="searchBox" placeholder="🔍 Rechercher...">
@@ -720,7 +708,7 @@
         <div id="emptyState" class="empty-state" style="display: none;">
             <div class="empty-state-icon">📱</div>
             <div class="empty-state-text">Aucun contact pour le moment</div>
-            <button class="btn-add-header" onclick="openAddModal()">Ajouter votre premier contact</button>
+            <button class="btn btn-primary" onclick="openAddModal()" style="margin: 0 auto;">Ajouter votre premier contact</button>
         </div>
         <div class="contacts-grid" id="contactsGrid"></div>
     </div>
