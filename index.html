@@ -76,21 +76,9 @@
             </div>
 
             <div class="stats-cards">
-                <div class="stat-card-mini">
+                <div class="stat-card-mini" style="grid-column: 1 / -1; max-width: 200px; margin: 0 auto;">
                     <div class="stat-value" id="statTotal">0</div>
                     <div class="stat-label">Total contacts</div>
-                </div>
-                <div class="stat-card-mini">
-                    <div class="stat-value" id="statWeek">0</div>
-                    <div class="stat-label">Cette semaine</div>
-                </div>
-                <div class="stat-card-mini">
-                    <div class="stat-value" id="statMonth">0</div>
-                    <div class="stat-label">Ce mois</div>
-                </div>
-                <div class="stat-card-mini">
-                    <div class="stat-value" id="statFavorites">0</div>
-                    <div class="stat-label">Proches</div>
                 </div>
             </div>
 
@@ -184,7 +172,10 @@
 
     <!-- Tag Dropdown -->
     <div id="tagDropdown" class="tag-dropdown-container">
-        <div class="tag-dropdown-handle"></div>
+        <div class="tag-dropdown-header">
+            <div class="tag-dropdown-title">Sélectionner un tag</div>
+            <button class="tag-dropdown-close" onclick="tags.closeDropdown()">✕</button>
+        </div>
         <div class="tag-search">
             <input type="text" id="tagSearchInput" placeholder="Rechercher...">
         </div>
