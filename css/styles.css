@@ -633,6 +633,16 @@ body.hide-header .container {
     display: block;
 }
 
+/* Tag edit modal needs higher z-index */
+#tagEditModal {
+    z-index: 12000;
+}
+
+#tagEditModal.active ~ .overlay,
+#tagEditModal.active ~ #overlay {
+    z-index: 11999 !important;
+}
+
 .modal-header {
     position: sticky;
     top: 0;
@@ -962,6 +972,14 @@ body.hide-header .container {
     margin-bottom: 24px;
 }
 
+.tag-edit-section label {
+    display: block;
+    margin-bottom: 12px;
+    color: #495057;
+    font-size: 15px;
+    font-weight: 600;
+}
+
 .emoji-picker {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
@@ -979,6 +997,10 @@ body.hide-header .container {
     border-radius: 12px;
     text-align: center;
     cursor: pointer;
+}
+
+.emoji-option:active {
+    background: #e9ecef;
 }
 
 .emoji-option.selected {
