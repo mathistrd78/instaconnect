@@ -51,6 +51,7 @@ const app = {
         this.setupEventListeners();
         contacts.render();
         stats.render();
+        unfollowers.init();
     },
 
     setupEventListeners() {
@@ -70,18 +71,24 @@ const app = {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
 
+        // Gérer l'affichage du header
+        const header = document.querySelector('.header');
+        
         // Activer la nouvelle section
         if (section === 'contacts') {
             document.getElementById('contactsSection').classList.add('active');
             document.querySelectorAll('.nav-item')[0].classList.add('active');
+            header.style.display = 'block';
             contacts.render();
         } else if (section === 'stats') {
             document.getElementById('statsSection').classList.add('active');
             document.querySelectorAll('.nav-item')[2].classList.add('active');
+            header.style.display = 'none';
             stats.render();
         } else if (section === 'unfollowers') {
             document.getElementById('unfollowersSection').classList.add('active');
             document.querySelectorAll('.nav-item')[3].classList.add('active');
+            header.style.display = 'none';
         }
     },
 
