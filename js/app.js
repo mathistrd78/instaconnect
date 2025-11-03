@@ -70,9 +70,28 @@ const app = {
         document.getElementById('filterLieu').addEventListener('change', () => contacts.render());
         document.getElementById('filterStatut').addEventListener('change', () => contacts.render());
 
-        document.getElementById('overlay').addEventListener('click', () => {
-            tags.closeDropdown();
-            tags.closeEditModal();
+        // Overlay click handling
+        const overlay = document.getElementById('overlay');
+        overlay.addEventListener('click', (e) => {
+            // Check which modal is open
+            const tagEditModal = document.getElementById('tagEditModal');
+            const tagDropdown = document.getElementById('tagDropdown');
+            
+            // If tag edit modal is open, close only that
+            if (tagEditModal && tagEditModal.classList.contains('active')) {
+                tags.closeEditModal();
+            }
+            // Otherwise close tag dropdown
+            else if (tagDropdown && tagDropdown.classList.contains('active')) {
+                tags.closeDropdown();
+            }
+        });
+        
+        // Prevent clicks inside modals from propagating to overlay
+        document.querySelectorAll('.modal, .tag-dropdown-container').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
         });
     },
 
