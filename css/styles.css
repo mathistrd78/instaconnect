@@ -691,6 +691,44 @@ body.hide-header .container {
     min-height: 100px;
 }
 
+.tag-selector {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    font-size: 16px;
+    min-height: 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    background: white;
+    transition: border-color 0.2s;
+}
+
+.tag-selector:active {
+    border-color: #E1306C;
+}
+
+.tag-selector-placeholder {
+    color: #868e96;
+}
+
+.tag-selector-value {
+    font-weight: 600;
+    color: #495057;
+}
+
+.tag-selector-arrow {
+    color: #868e96;
+    font-size: 12px;
+}
+
+.form-group input[type="hidden"] {
+    display: none;
+}
+
+
 .form-actions {
     position: sticky;
     bottom: 0;
