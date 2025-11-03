@@ -18,26 +18,36 @@ const unfollowers = {
         // Setup drag & drop
         const uploadZone = document.getElementById('uploadZone');
         
-        uploadZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadZone.classList.add('dragover');
-        });
+        if (uploadZone) {
+            uploadZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadZone.classList.add('dragover');
+            });
 
-        uploadZone.addEventListener('dragleave', () => {
-            uploadZone.classList.remove('dragover');
-        });
+            uploadZone.addEventListener('dragleave', () => {
+                uploadZone.classList.remove('dragover');
+            });
 
-        uploadZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadZone.classList.remove('dragover');
-            
-            const files = e.dataTransfer.files;
-            if (files.length > 0 && files[0].name.endsWith('.zip')) {
-                this.processZipFile(files[0]);
-            } else {
-                alert('Veuillez déposer un fichier ZIP');
-            }
-        });
+            uploadZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadZone.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0 && files[0].name.endsWith('.zip')) {
+                    this.processZipFile(files[0]);
+                } else {
+                    alert('Veuillez déposer un fichier ZIP');
+                }
+            });
+        }
+        
+        // Prevent tag edit modal from closing when clicking inside
+        const tagEditModal = document.getElementById('tagEditModal');
+        if (tagEditModal) {
+            tagEditModal.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+        }
     },
 
     saveNormalUnfollowers() {
