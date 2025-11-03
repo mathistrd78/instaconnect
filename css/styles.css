@@ -452,6 +452,23 @@ body.hide-header .container {
     align-items: center;
 }
 
+.letter-section {
+    margin-bottom: 0;
+}
+
+.letter-header {
+    padding: 12px 16px;
+    background: linear-gradient(135deg, #E1306C 0%, #C13584 100%);
+    color: white;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
 .unfollower-item {
     display: flex;
     justify-content: space-between;
@@ -527,6 +544,17 @@ body.hide-header .container {
     border: none;
     border-radius: 8px;
     font-size: 13px;
+    cursor: pointer;
+}
+
+.btn-normal {
+    padding: 8px 12px;
+    background: #feca57;
+    color: #2d3436;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
     cursor: pointer;
 }
 
