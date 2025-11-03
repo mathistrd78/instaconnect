@@ -19,7 +19,7 @@ const stats = {
             new Date(c.dateAdded) > monthAgo
         ).length;
         document.getElementById('statFavorites').textContent = contacts.filter(c => 
-            c.relationType === 'Ami' || c.relationType === 'Amour' || c.relationType === 'Sexe'
+            c.relationType === 'Ami' || c.relationType === 'Famille' || c.relationType === 'Sexe'
         ).length;
     },
 
