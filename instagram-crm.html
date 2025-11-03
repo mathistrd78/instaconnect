@@ -2,11 +2,11 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#E1306C">
-    <title>InstaConnect - Mon CRM Instagram</title>
+    <title>InstaConnect</title>
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon.png">
     <style>
@@ -14,501 +14,208 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: #f5f7fa;
+            background: #f8f9fa;
             min-height: 100vh;
+            padding-bottom: 80px;
         }
 
+        /* Header optimisé mobile */
         .header {
             background: white;
-            padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 12px 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             position: sticky;
             top: 0;
             z-index: 100;
         }
 
-        .header-content {
-            max-width: 1400px;
-            margin: 0 auto;
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
         }
 
         h1 {
             color: #E1306C;
-            font-size: 28px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            font-size: 24px;
+            font-weight: 700;
         }
 
-        .controls {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            align-items: center;
+        .btn-add-header {
+            background: linear-gradient(135deg, #E1306C 0%, #C13584 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 15px;
+            font-weight: 600;
+            min-height: 44px;
         }
 
         .search-box {
-            flex: 1;
-            min-width: 250px;
-            padding: 12px 20px;
-            border: 2px solid #e0e0e0;
-            border-radius: 25px;
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
             font-size: 16px;
-            transition: all 0.3s;
+            margin-bottom: 8px;
         }
 
         .search-box:focus {
             outline: none;
             border-color: #E1306C;
-            box-shadow: 0 0 0 3px rgba(225, 48, 108, 0.1);
         }
 
-        .filters {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .filter-select {
-            padding: 10px 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 20px;
-            font-size: 14px;
-            background: white;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .filter-select:hover {
-            border-color: #E1306C;
-        }
-
-        .filter-select:focus {
-            outline: none;
-            border-color: #E1306C;
-        }
-
-        .btn-add {
-            padding: 12px 24px;
-            background: linear-gradient(135deg, #E1306C 0%, #C13584 100%);
-            color: white;
-            border: none;
-            border-radius: 25px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            white-space: nowrap;
-        }
-
-        .btn-add:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(225, 48, 108, 0.3);
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .table-wrapper {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-
-        table {
+        .filters-toggle {
             width: 100%;
-            border-collapse: collapse;
-        }
-
-        thead {
-            background: linear-gradient(135deg, #E1306C 0%, #C13584 100%);
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-
-        th {
-            color: white;
-            padding: 16px;
+            padding: 12px 16px;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            font-size: 15px;
             text-align: left;
-            font-weight: 600;
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        tbody tr {
-            border-bottom: 1px solid #f0f0f0;
-            transition: background 0.2s;
-        }
-
-        tbody tr:hover {
-            background: #f8f9ff;
-        }
-
-        td {
-            padding: 16px;
-            vertical-align: middle;
-        }
-
-        .name-cell {
-            font-weight: 600;
-            color: #333;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .name-cell:hover {
-            color: #E1306C;
-            text-decoration: underline;
-        }
-
-        .instagram-cell {
-            color: #333;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-
-        .instagram-cell:hover {
-            color: #E1306C;
-            text-decoration: underline;
-        }
-
-        /* Tag System Style Notion */
-        .tag-cell {
-            position: relative;
-        }
-
-        .tag-display {
-            padding: 6px 12px;
-            border-radius: 16px;
-            font-size: 13px;
-            font-weight: 600;
-            display: inline-block;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 2px solid transparent;
-            min-width: 100px;
-            text-align: center;
-        }
-
-        .tag-display:hover {
-            opacity: 0.8;
-        }
-
-        .tag-display.empty {
-            background: #f5f5f5;
-            color: #999;
-            border: 2px dashed #ddd;
-        }
-
-        .tag-display.empty:hover {
-            background: #e8e8e8;
-        }
-
-        /* Dropdown fixe style Notion */
-        .tag-dropdown-container {
-            position: fixed;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 40px rgba(0,0,0,0.15);
-            z-index: 10000;
-            width: 280px;
-            max-height: 420px;
-            display: none;
-        }
-
-        .tag-dropdown-container.active {
-            display: block;
-        }
-
-        .tag-search {
-            padding: 12px;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .tag-search input {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #e0e0e0;
-            border-radius: 6px;
-            font-size: 14px;
-        }
-
-        .tag-search input:focus {
-            outline: none;
-            border-color: #E1306C;
-        }
-
-        .tag-options {
-            max-height: 300px;
-            overflow-y: auto;
-            padding: 8px;
-        }
-
-        .tag-option {
-            padding: 10px 12px;
-            cursor: pointer;
-            border-radius: 6px;
-            transition: background 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 2px;
-        }
-
-        .tag-option:hover {
-            background: #f5f5f5;
-        }
-
-        .tag-option-preview {
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
-            flex-shrink: 0;
-        }
-
-        .tag-create {
-            padding: 10px 12px;
-            margin: 8px;
-            margin-top: 0;
-            color: #666;
-            font-size: 13px;
-            cursor: pointer;
-            border-top: 1px solid #f0f0f0;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border-radius: 6px;
-        }
-
-        .tag-create:hover {
-            background: #f5f5f5;
-        }
-
-        .tag-create-icon {
-            color: #E1306C;
-            font-weight: bold;
-        }
-
-        .tag-edit-btn {
-            padding: 4px 8px;
-            background: #f0f0f0;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 13px;
-            opacity: 1;
-            transition: all 0.2s;
-            flex-shrink: 0;
-            margin-left: auto;
-        }
-
-        .tag-option:hover .tag-edit-btn {
-            opacity: 1;
-        }
-
-        .tag-edit-btn:hover {
-            background: #E1306C;
-            color: white;
-            transform: scale(1.1);
-        }
-
-        /* Modale d'édition de tag */
-        .tag-edit-modal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 25px;
-            border-radius: 16px;
-            box-shadow: 0 10px 50px rgba(0,0,0,0.3);
-            z-index: 20000;
-            width: 400px;
-            max-width: 90%;
-            display: none;
-        }
-
-        .tag-edit-modal.active {
-            display: block;
-        }
-
-        .tag-edit-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 19999;
-            display: none;
-        }
-
-        .tag-edit-overlay.active {
-            display: block;
-        }
-
-        .tag-edit-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #f0f0f0;
+            min-height: 44px;
         }
 
-        .tag-edit-header h3 {
-            color: #333;
+        .filters-panel {
+            display: none;
+            padding: 12px 0;
+            gap: 8px;
+        }
+
+        .filters-panel.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            font-size: 16px;
+            background: white;
+            min-height: 44px;
+        }
+
+        /* Container */
+        .container {
+            padding: 12px;
+        }
+
+        /* Mode CARDS pour mobile au lieu du tableau */
+        .contacts-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .contact-card {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            transition: all 0.2s;
+        }
+
+        .contact-card:active {
+            transform: scale(0.98);
+        }
+
+        .contact-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .contact-info {
+            flex: 1;
+        }
+
+        .contact-name {
             font-size: 18px;
+            font-weight: 700;
+            color: #212529;
+            margin-bottom: 4px;
         }
 
-        .tag-edit-close {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #999;
-            padding: 0;
-        }
-
-        .tag-edit-close:hover {
+        .contact-instagram {
+            font-size: 15px;
             color: #E1306C;
+            font-weight: 500;
         }
 
-        .tag-edit-section {
-            margin-bottom: 20px;
+        .contact-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #E1306C 0%, #C13584 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+            font-weight: 700;
+            flex-shrink: 0;
         }
 
-        .tag-edit-section label {
-            display: block;
+        .contact-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
             margin-bottom: 8px;
-            color: #666;
+        }
+
+        .tag-mini {
+            padding: 6px 12px;
+            border-radius: 12px;
             font-size: 13px;
             font-weight: 600;
+            white-space: nowrap;
+            min-height: 32px;
+            display: inline-flex;
+            align-items: center;
         }
 
-        .emoji-picker {
-            display: grid;
-            grid-template-columns: repeat(8, 1fr);
-            gap: 8px;
-            max-height: 200px;
-            overflow-y: auto;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-
-        .emoji-option {
-            font-size: 24px;
-            padding: 8px;
-            cursor: pointer;
-            border-radius: 6px;
-            text-align: center;
-            transition: background 0.2s;
-        }
-
-        .emoji-option:hover {
-            background: #e9ecef;
-        }
-
-        .emoji-option.selected {
-            background: #E1306C;
-            transform: scale(1.1);
-        }
-
-        .color-picker {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 10px;
-        }
-
-        .color-option {
-            width: 100%;
-            aspect-ratio: 1;
-            border-radius: 8px;
-            cursor: pointer;
-            border: 3px solid transparent;
-            transition: all 0.2s;
-        }
-
-        .color-option:hover {
-            transform: scale(1.1);
-        }
-
-        .color-option.selected {
-            border-color: #333;
-            transform: scale(1.15);
-        }
-
-        .tag-preview-section {
-            margin: 20px 0;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            text-align: center;
-        }
-
-        .tag-preview-label {
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 10px;
-        }
-
-        .tag-preview {
-            padding: 8px 16px;
-            border-radius: 16px;
-            font-size: 14px;
-            font-weight: 600;
-            display: inline-block;
-        }
-
-        .tag-edit-actions {
+        .contact-actions {
             display: flex;
-            gap: 10px;
-            margin-top: 20px;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #f1f3f5;
         }
 
-        .tag-edit-actions button {
+        .btn-action {
             flex: 1;
-            padding: 12px;
+            padding: 10px;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 14px;
             font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
         }
 
-        .btn-save-tag {
+        .btn-view {
             background: #E1306C;
             color: white;
         }
 
-        .btn-save-tag:hover {
-            background: #C13584;
-        }
-
-        .btn-delete-tag {
-            background: #ff4757;
-            color: white;
-        }
-
-        .btn-delete-tag:hover {
-            background: #ee5a6f;
+        .btn-insta {
+            background: #f8f9fa;
+            color: #495057;
         }
 
         /* Couleurs des tags */
@@ -526,23 +233,61 @@
         .tag-en-vu { background: #fdcb6e; color: #2d3436; }
         .tag-en-cours { background: #0984e3; color: white; }
 
+        /* Empty state */
         .empty-state {
             text-align: center;
-            padding: 80px 20px;
-            color: #999;
+            padding: 60px 20px;
+            color: #868e96;
         }
 
         .empty-state-icon {
             font-size: 64px;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
         .empty-state-text {
-            font-size: 18px;
+            font-size: 16px;
             margin-bottom: 20px;
         }
 
-        /* Modal */
+        /* Bottom navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0;
+            padding-bottom: max(8px, env(safe-area-inset-bottom));
+            z-index: 1000;
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px;
+            color: #868e96;
+            font-size: 11px;
+            font-weight: 600;
+            text-decoration: none;
+            min-height: 44px;
+        }
+
+        .nav-item.active {
+            color: #E1306C;
+        }
+
+        .nav-icon {
+            font-size: 24px;
+        }
+
+        /* Modal plein écran sur mobile */
         .modal {
             display: none;
             position: fixed;
@@ -550,74 +295,50 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.6);
-            z-index: 1000;
+            background: white;
+            z-index: 2000;
             overflow-y: auto;
-            padding: 20px;
         }
 
         .modal.active {
+            display: block;
+        }
+
+        .modal-header {
+            position: sticky;
+            top: 0;
+            background: white;
+            padding: 16px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .modal-header h2 {
+            font-size: 20px;
+            color: #212529;
+        }
+
+        .close-btn {
+            background: #f8f9fa;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 24px;
+            color: #495057;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
         .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            max-width: 600px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            animation: slideUp 0.3s;
+            padding: 20px;
         }
 
-        @keyframes slideUp {
-            from {
-                transform: translateY(50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #f0f0f0;
-        }
-
-        .modal-header h2 {
-            color: #E1306C;
-            font-size: 24px;
-        }
-
-        .close-btn {
-            background: none;
-            border: none;
-            font-size: 32px;
-            cursor: pointer;
-            color: #999;
-            padding: 0;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-
-        .close-btn:hover {
-            color: #E1306C;
-            transform: rotate(90deg);
-        }
-
+        /* Formulaire optimisé mobile */
         .form-group {
             margin-bottom: 20px;
         }
@@ -625,21 +346,21 @@
         .form-group label {
             display: block;
             margin-bottom: 8px;
-            color: #333;
+            color: #495057;
             font-weight: 600;
-            font-size: 14px;
+            font-size: 15px;
         }
 
         .form-group input,
         .form-group select,
         .form-group textarea {
             width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e0e0e0;
+            padding: 14px 16px;
+            border: 2px solid #e9ecef;
             border-radius: 12px;
             font-size: 16px;
             font-family: inherit;
-            transition: all 0.3s;
+            min-height: 48px;
         }
 
         .form-group input:focus,
@@ -647,7 +368,6 @@
         .form-group textarea:focus {
             outline: none;
             border-color: #E1306C;
-            box-shadow: 0 0 0 3px rgba(225, 48, 108, 0.1);
         }
 
         .form-group textarea {
@@ -656,20 +376,24 @@
         }
 
         .form-actions {
+            position: sticky;
+            bottom: 0;
+            background: white;
+            padding: 16px;
+            border-top: 1px solid #e9ecef;
             display: flex;
-            gap: 10px;
-            margin-top: 30px;
+            gap: 12px;
+            margin: 0 -20px -20px;
         }
 
         .btn {
-            padding: 12px 24px;
+            flex: 1;
+            padding: 14px 24px;
             border: none;
-            border-radius: 25px;
+            border-radius: 12px;
             font-size: 16px;
             font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            flex: 1;
+            min-height: 52px;
         }
 
         .btn-primary {
@@ -677,18 +401,9 @@
             color: white;
         }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(225, 48, 108, 0.3);
-        }
-
         .btn-secondary {
-            background: #f5f5f5;
-            color: #333;
-        }
-
-        .btn-secondary:hover {
-            background: #e0e0e0;
+            background: #f8f9fa;
+            color: #495057;
         }
 
         .btn-danger {
@@ -696,18 +411,12 @@
             color: white;
         }
 
-        .btn-danger:hover {
-            background: #ee5a6f;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(255, 71, 87, 0.3);
-        }
-
-        /* Profile Modal */
+        /* Profile view */
         .profile-view {
             text-align: center;
         }
 
-        .profile-avatar {
+        .profile-avatar-large {
             width: 100px;
             height: 100px;
             border-radius: 50%;
@@ -717,183 +426,327 @@
             justify-content: center;
             font-size: 40px;
             color: white;
-            margin: 0 auto 20px;
-            font-weight: bold;
+            margin: 20px auto;
+            font-weight: 700;
         }
 
         .profile-name {
-            font-size: 28px;
-            color: #333;
-            margin-bottom: 10px;
+            font-size: 26px;
+            font-weight: 700;
+            color: #212529;
+            margin-bottom: 8px;
         }
 
         .profile-instagram {
             color: #E1306C;
             font-size: 18px;
             font-weight: 600;
-            margin-bottom: 30px;
-            display: inline-block;
-            cursor: pointer;
-        }
-
-        .profile-instagram:hover {
-            text-decoration: underline;
+            margin-bottom: 20px;
         }
 
         .profile-info {
             text-align: left;
-            margin: 30px 0;
+            margin: 20px 0;
         }
 
         .profile-info-item {
-            display: flex;
-            padding: 15px;
-            border-bottom: 1px solid #f0f0f0;
-            align-items: center;
-        }
-
-        .profile-info-item:last-child {
-            border-bottom: none;
+            padding: 16px 0;
+            border-bottom: 1px solid #f1f3f5;
         }
 
         .profile-info-item strong {
-            flex: 0 0 180px;
-            color: #666;
-            font-size: 14px;
+            display: block;
+            color: #868e96;
+            font-size: 13px;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .profile-info-item span {
-            flex: 1;
-            color: #333;
+            color: #212529;
+            font-size: 16px;
             font-weight: 500;
         }
 
-        .action-delete {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 2px solid #f0f0f0;
+        /* Tag dropdown mobile-optimized */
+        .tag-dropdown-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 20px 20px 0 0;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+            z-index: 10000;
+            max-height: 70vh;
+            display: none;
+            flex-direction: column;
         }
 
-        @media (max-width: 768px) {
-            .header {
-                padding: 15px;
-            }
+        .tag-dropdown-container.active {
+            display: flex;
+        }
 
-            h1 {
-                font-size: 22px;
-            }
+        .tag-dropdown-handle {
+            width: 40px;
+            height: 4px;
+            background: #dee2e6;
+            border-radius: 2px;
+            margin: 12px auto 8px;
+        }
 
-            .controls {
-                flex-direction: column;
-            }
+        .tag-search {
+            padding: 16px;
+            border-bottom: 1px solid #f1f3f5;
+        }
 
-            .search-box,
-            .btn-add {
-                width: 100%;
-            }
+        .tag-search input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            font-size: 16px;
+        }
 
-            .filters {
-                width: 100%;
-            }
+        .tag-options {
+            overflow-y: auto;
+            padding: 8px 16px;
+            flex: 1;
+        }
 
-            .filter-select {
-                flex: 1;
-            }
+        .tag-option {
+            padding: 14px 16px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 56px;
+        }
 
-            .container {
-                padding: 10px;
-            }
+        .tag-option:active {
+            background: #f8f9fa;
+        }
 
-            .table-wrapper {
-                overflow-x: auto;
-            }
+        .tag-option-preview {
+            padding: 6px 14px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 600;
+        }
 
-            table {
-                min-width: 900px;
-            }
+        .tag-edit-btn {
+            padding: 8px 16px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            font-size: 16px;
+            min-width: 44px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-            th, td {
-                padding: 12px 8px;
-                font-size: 13px;
-            }
+        .tag-create {
+            padding: 16px;
+            color: #495057;
+            font-size: 15px;
+            border-top: 1px solid #f1f3f5;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-height: 56px;
+        }
 
-            .modal-content {
-                padding: 20px;
-            }
+        .tag-create-icon {
+            color: #E1306C;
+            font-size: 20px;
+            font-weight: 700;
+        }
 
-            .profile-info-item {
-                flex-direction: column;
-                align-items: flex-start;
-            }
+        /* Tag edit modal */
+        .tag-edit-modal {
+            background: white;
+            padding: 20px;
+        }
 
-            .profile-info-item strong {
-                margin-bottom: 5px;
+        .emoji-picker {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+
+        .emoji-option {
+            font-size: 32px;
+            padding: 12px;
+            border-radius: 12px;
+            text-align: center;
+            min-height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .emoji-option:active {
+            background: #e9ecef;
+        }
+
+        .emoji-option.selected {
+            background: #E1306C;
+        }
+
+        .color-picker {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .color-option {
+            aspect-ratio: 1;
+            border-radius: 12px;
+            border: 3px solid transparent;
+            min-height: 60px;
+        }
+
+        .color-option.selected {
+            border-color: #212529;
+            transform: scale(1.1);
+        }
+
+        .tag-preview-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .tag-preview {
+            padding: 10px 20px;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .tag-edit-section {
+            margin-bottom: 24px;
+        }
+
+        .tag-edit-section label {
+            display: block;
+            margin-bottom: 12px;
+            color: #495057;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        /* Overlay */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 9999;
+            display: none;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        @media (min-width: 768px) {
+            .contacts-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .contacts-grid {
+                grid-template-columns: repeat(3, 1fr);
             }
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <div class="header-content">
+        <div class="header-top">
             <h1>📱 InstaConnect</h1>
-            <div class="controls">
-                <input type="text" class="search-box" id="searchBox" placeholder="🔍 Rechercher par prénom ou pseudo Instagram...">
-                <div class="filters">
-                    <select class="filter-select" id="filterRelation">
-                        <option value="">Type de relation</option>
-                        <option value="Ami">👥 Ami</option>
-                        <option value="Famille">👨‍👩‍👧 Famille</option>
-                        <option value="Connaissance">🤝 Connaissance</option>
-                        <option value="Sexe">❤️ Sexe</option>
-                    </select>
-                    <select class="filter-select" id="filterLieu">
-                        <option value="">Lieu de rencontre</option>
-                        <option value="IRL">🌍 IRL</option>
-                        <option value="Insta">📸 Insta</option>
-                        <option value="Tinder">🔥 Tinder</option>
-                        <option value="Hinge">💜 Hinge</option>
-                        <option value="Soirée Tech">🎵 Soirée Tech</option>
-                    </select>
-                    <select class="filter-select" id="filterStatut">
-                        <option value="">Statut de discussion</option>
-                        <option value="Déjà parlé">💬 Déjà parlé</option>
-                        <option value="Jamais parlé">🤐 Jamais parlé</option>
-                        <option value="En vu">👀 En vu</option>
-                        <option value="En cours">📝 En cours</option>
-                    </select>
-                </div>
-                <button class="btn-add" onclick="openAddModal()">
-                    ➕ Ajouter un contact
-                </button>
-            </div>
+            <button class="btn-add-header" onclick="openAddModal()">➕ Ajouter</button>
+        </div>
+        
+        <input type="text" class="search-box" id="searchBox" placeholder="🔍 Rechercher...">
+        
+        <button class="filters-toggle" onclick="toggleFilters()">
+            <span>Filtres</span>
+            <span id="filterIcon">▼</span>
+        </button>
+        
+        <div class="filters-panel" id="filtersPanel">
+            <select class="filter-select" id="filterRelation">
+                <option value="">Type de relation</option>
+                <option value="Ami">👥 Ami</option>
+                <option value="Famille">👨‍👩‍👧 Famille</option>
+                <option value="Connaissance">🤝 Connaissance</option>
+                <option value="Sexe">❤️ Sexe</option>
+            </select>
+            <select class="filter-select" id="filterLieu">
+                <option value="">Lieu de rencontre</option>
+                <option value="IRL">🌍 IRL</option>
+                <option value="Insta">📸 Insta</option>
+                <option value="Tinder">🔥 Tinder</option>
+                <option value="Hinge">💜 Hinge</option>
+                <option value="Soirée Tech">🎵 Soirée Tech</option>
+            </select>
+            <select class="filter-select" id="filterStatut">
+                <option value="">Statut de discussion</option>
+                <option value="Déjà parlé">💬 Déjà parlé</option>
+                <option value="Jamais parlé">🤐 Jamais parlé</option>
+                <option value="En vu">👀 En vu</option>
+                <option value="En cours">📝 En cours</option>
+            </select>
         </div>
     </div>
 
     <div class="container">
-        <div class="table-wrapper">
-            <div id="emptyState" class="empty-state" style="display: none;">
-                <div class="empty-state-icon">📱</div>
-                <div class="empty-state-text">Aucun contact pour le moment</div>
-                <button class="btn-add" onclick="openAddModal()">Ajouter votre premier contact</button>
-            </div>
-            <table id="contactsTable" style="display: none;">
-                <thead>
-                    <tr>
-                        <th>Prénom</th>
-                        <th>Instagram</th>
-                        <th>Type de relation</th>
-                        <th>Lieu de rencontre</th>
-                        <th>Statut de discussion</th>
-                    </tr>
-                </thead>
-                <tbody id="contactsBody">
-                </tbody>
-            </table>
+        <div id="emptyState" class="empty-state" style="display: none;">
+            <div class="empty-state-icon">📱</div>
+            <div class="empty-state-text">Aucun contact pour le moment</div>
+            <button class="btn-add-header" onclick="openAddModal()">Ajouter votre premier contact</button>
         </div>
+        <div class="contacts-grid" id="contactsGrid"></div>
     </div>
 
-    <!-- Dropdown global pour les tags -->
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <a href="#" class="nav-item active">
+            <span class="nav-icon">🏠</span>
+            <span>Accueil</span>
+        </a>
+        <a href="#" class="nav-item" onclick="event.preventDefault(); openAddModal()">
+            <span class="nav-icon">➕</span>
+            <span>Ajouter</span>
+        </a>
+        <a href="#" class="nav-item">
+            <span class="nav-icon">📊</span>
+            <span>Stats</span>
+        </a>
+    </div>
+
+    <!-- Overlay -->
+    <div id="overlay" class="overlay"></div>
+
+    <!-- Tag Dropdown -->
     <div id="tagDropdown" class="tag-dropdown-container">
+        <div class="tag-dropdown-handle"></div>
         <div class="tag-search">
             <input type="text" id="tagSearchInput" placeholder="Rechercher...">
         </div>
@@ -902,11 +755,11 @@
 
     <!-- Modal Add Contact -->
     <div id="addModal" class="modal">
+        <div class="modal-header">
+            <h2>➕ Nouveau contact</h2>
+            <button class="close-btn" onclick="closeAddModal()">✕</button>
+        </div>
         <div class="modal-content">
-            <div class="modal-header">
-                <h2>➕ Ajouter un contact</h2>
-                <button class="close-btn" onclick="closeAddModal()">&times;</button>
-            </div>
             <form id="contactForm" onsubmit="saveContact(event)">
                 <div class="form-group">
                     <label>Prénom *</label>
@@ -915,8 +768,8 @@
                 <div class="form-group">
                     <label>Pseudo Instagram *</label>
                     <div style="position: relative;">
-                        <span style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #999; font-weight: 600;">@</span>
-                        <input type="text" id="instagram" required placeholder="Ex: marie_dupont" style="padding-left: 32px;" oninput="this.value = this.value.toLowerCase().replace('@', '')">
+                        <span style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #868e96; font-weight: 600;">@</span>
+                        <input type="text" id="instagram" required placeholder="Ex: marie_dupont" style="padding-left: 36px;" oninput="this.value = this.value.toLowerCase().replace('@', '')">
                     </div>
                 </div>
                 <div class="form-group">
@@ -968,7 +821,7 @@
                 </div>
                 <div class="form-group">
                     <label>Centres d'intérêt</label>
-                    <input type="text" id="interests" placeholder="Ex: Techno, Voyage, Cuisine...">
+                    <input type="text" id="interests" placeholder="Ex: Techno, Voyage...">
                 </div>
                 <div class="form-group">
                     <label>Notes personnelles</label>
@@ -984,13 +837,13 @@
 
     <!-- Modal View Profile -->
     <div id="viewModal" class="modal">
+        <div class="modal-header">
+            <h2>👤 Profil</h2>
+            <button class="close-btn" onclick="closeViewModal()">✕</button>
+        </div>
         <div class="modal-content">
-            <div class="modal-header">
-                <h2>👤 Profil</h2>
-                <button class="close-btn" onclick="closeViewModal()">&times;</button>
-            </div>
             <div class="profile-view">
-                <div class="profile-avatar" id="profileAvatar"></div>
+                <div class="profile-avatar-large" id="profileAvatar"></div>
                 <h3 class="profile-name" id="profileName"></h3>
                 <div class="profile-instagram" id="profileInsta" onclick="openInstagram()"></div>
                 <div class="profile-info">
@@ -1037,40 +890,38 @@
                 </div>
                 <div class="form-actions" style="margin-top: 20px;">
                     <button class="btn btn-primary" onclick="editProfile()">✏️ Modifier</button>
-                </div>
-                <div class="action-delete">
-                    <button class="btn btn-danger" onclick="deleteContact()">🗑️ Supprimer ce contact</button>
+                    <button class="btn btn-danger" onclick="deleteContact()">🗑️ Supprimer</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Overlay et modale d'édition de tag -->
-    <div id="tagEditOverlay" class="tag-edit-overlay"></div>
-    <div id="tagEditModal" class="tag-edit-modal">
-        <div class="tag-edit-header">
-            <h3>✏️ Modifier le tag</h3>
-            <button class="tag-edit-close" onclick="closeTagEditModal()">&times;</button>
+    <!-- Modal Tag Edit -->
+    <div id="tagEditModal" class="modal">
+        <div class="modal-header">
+            <h2>✏️ Modifier le tag</h2>
+            <button class="close-btn" onclick="closeTagEditModal()">✕</button>
         </div>
-        
-        <div class="tag-preview-section">
-            <div class="tag-preview-label">Aperçu</div>
-            <span class="tag-preview" id="tagPreview">🏷️ Exemple</span>
-        </div>
+        <div class="modal-content tag-edit-modal">
+            <div class="tag-preview-section">
+                <div style="font-size: 13px; color: #868e96; margin-bottom: 10px;">Aperçu</div>
+                <span class="tag-preview" id="tagPreview">🏷️ Exemple</span>
+            </div>
 
-        <div class="tag-edit-section">
-            <label>Choisir un emoji</label>
-            <div class="emoji-picker" id="emojiPicker"></div>
-        </div>
+            <div class="tag-edit-section">
+                <label>Choisir un emoji</label>
+                <div class="emoji-picker" id="emojiPicker"></div>
+            </div>
 
-        <div class="tag-edit-section">
-            <label>Choisir une couleur</label>
-            <div class="color-picker" id="colorPicker"></div>
-        </div>
+            <div class="tag-edit-section">
+                <label>Choisir une couleur</label>
+                <div class="color-picker" id="colorPicker"></div>
+            </div>
 
-        <div class="tag-edit-actions">
-            <button class="btn-save-tag" onclick="saveTagEdit()">💾 Enregistrer</button>
-            <button class="btn-delete-tag" onclick="deleteTag()">🗑️ Supprimer</button>
+            <div class="form-actions">
+                <button class="btn btn-primary" onclick="saveTagEdit()">💾 Enregistrer</button>
+                <button class="btn btn-danger" onclick="deleteTag()">🗑️ Supprimer</button>
+            </div>
         </div>
     </div>
 
@@ -1082,42 +933,29 @@
         let currentTagContext = null;
         let currentTagEdit = null;
 
-        // Emojis disponibles (300+)
+        // Emojis disponibles (sélection optimisée mobile)
         const availableEmojis = [
-            // Personnes & Corps
-            '😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂', '🙂', '🙃', '😉', '😊', '😇', '🥰', '😍', '🤩', '😘', '😗', '☺️', '😚', '😙', '🥲', '😋', '😛', '😜', '🤪', '😝', '🤑', '🤗', '🤭', '🤫', '🤔', '🤐', '🤨', '😐', '😑', '😶', '😏', '😒', '🙄', '😬', '🤥', '😌', '😔', '😪', '🤤', '😴', '😷', '🤒', '🤕', '🤢', '🤮', '🤧', '🥵', '🥶', '🥴', '😵', '🤯', '🤠', '🥳', '🥸', '😎', '🤓', '🧐',
-            // Émotions
-            '😕', '😟', '🙁', '☹️', '😮', '😯', '😲', '😳', '🥺', '😦', '😧', '😨', '😰', '😥', '😢', '😭', '😱', '😖', '😣', '😞', '😓', '😩', '😫', '🥱', '😤', '😡', '😠', '🤬', '😈', '👿', '💀', '☠️', '💩', '🤡', '👹', '👺', '👻', '👽', '👾', '🤖',
-            // Gestes & Mains
-            '👋', '🤚', '🖐', '✋', '🖖', '👌', '🤌', '🤏', '✌️', '🤞', '🤟', '🤘', '🤙', '👈', '👉', '👆', '🖕', '👇', '☝️', '👍', '👎', '✊', '👊', '🤛', '🤜', '👏', '🙌', '👐', '🤲', '🤝', '🙏', '✍️', '💅', '🤳', '💪', '🦾', '🦿', '🦵', '🦶',
-            // Personnes
-            '👤', '👥', '👶', '👧', '🧒', '👦', '👩', '🧑', '👨', '👩‍🦱', '🧑‍🦱', '👨‍🦱', '👩‍🦰', '🧑‍🦰', '👨‍🦰', '👱‍♀️', '👱', '👱‍♂️', '👩‍🦳', '🧑‍🦳', '👨‍🦳', '👩‍🦲', '🧑‍🦲', '👨‍🦲', '🧔', '👵', '🧓', '👴', '👲', '👳‍♀️', '👳', '👳‍♂️', '🧕', '👮‍♀️', '👮', '👮‍♂️', '👷‍♀️', '👷', '👷‍♂️', '💂‍♀️', '💂', '💂‍♂️',
-            // Animaux
-            '🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐻‍❄️', '🐨', '🐯', '🦁', '🐮', '🐷', '🐽', '🐸', '🐵', '🙈', '🙉', '🙊', '🐒', '🐔', '🐧', '🐦', '🐤', '🐣', '🐥', '🦆', '🦅', '🦉', '🦇', '🐺', '🐗', '🐴', '🦄', '🐝', '🪱', '🐛', '🦋', '🐌', '🐞', '🐜', '🪰', '🪲', '🪳', '🦟', '🦗', '🕷', '🕸', '🦂', '🐢', '🐍', '🦎', '🦖', '🦕', '🐙', '🦑', '🦐', '🦞', '🦀', '🐡', '🐠', '🐟', '🐬', '🐳', '🐋', '🦈', '🐊', '🐅', '🐆', '🦓', '🦍', '🦧', '🦣', '🐘', '🦛', '🦏', '🐪', '🐫', '🦒', '🦘', '🦬', '🐃', '🐂', '🐄', '🐎', '🐖', '🐏', '🐑', '🦙', '🐐', '🦌', '🐕', '🐩', '🦮', '🐕‍🦺', '🐈', '🐈‍⬛', '🪶', '🐓', '🦃', '🦤', '🦚', '🦜', '🦢', '🦩', '🕊', '🐇', '🦝', '🦨', '🦡', '🦫', '🦦', '🦥', '🐁', '🐀', '🐿', '🦔',
-            // Nature
-            '🌸', '💮', '🏵', '🌹', '🥀', '🌺', '🌻', '🌼', '🌷', '🌱', '🪴', '🌲', '🌳', '🌴', '🌵', '🌾', '🌿', '☘️', '🍀', '🍁', '🍂', '🍃', '🍄',
-            // Nourriture
-            '🍇', '🍈', '🍉', '🍊', '🍋', '🍌', '🍍', '🥭', '🍎', '🍏', '🍐', '🍑', '🍒', '🍓', '🫐', '🥝', '🍅', '🫒', '🥥', '🥑', '🍆', '🥔', '🥕', '🌽', '🌶', '🫑', '🥒', '🥬', '🥦', '🧄', '🧅', '🍄', '🥜', '🌰', '🍞', '🥐', '🥖', '🫓', '🥨', '🥯', '🥞', '🧇', '🧀', '🍖', '🍗', '🥩', '🥓', '🍔', '🍟', '🍕', '🌭', '🥪', '🌮', '🌯', '🫔', '🥙', '🧆', '🥚', '🍳', '🥘', '🍲', '🫕', '🥣', '🥗', '🍿', '🧈', '🧂', '🥫', '🍱', '🍘', '🍙', '🍚', '🍛', '🍜', '🍝', '🍠', '🍢', '🍣', '🍤', '🍥', '🥮', '🍡', '🥟', '🥠', '🥡', '🦀', '🦞', '🦐', '🦑', '🦪', '🍦', '🍧', '🍨', '🍩', '🍪', '🎂', '🍰', '🧁', '🥧', '🍫', '🍬', '🍭', '🍮', '🍯',
-            // Boissons
-            '🍼', '🥛', '☕', '🫖', '🍵', '🍶', '🍾', '🍷', '🍸', '🍹', '🍺', '🍻', '🥂', '🥃', '🥤', '🧋', '🧃', '🧉', '🧊',
-            // Activités & Sports
-            '⚽', '🏀', '🏈', '⚾', '🥎', '🎾', '🏐', '🏉', '🥏', '🎱', '🪀', '🏓', '🏸', '🏒', '🏑', '🥍', '🏏', '🪃', '🥅', '⛳', '🪁', '🏹', '🎣', '🤿', '🥊', '🥋', '🎽', '🛹', '🛼', '🛷', '⛸', '🥌', '🎿', '⛷', '🏂', '🪂', '🏋️', '🤼', '🤸', '🤺', '⛹️', '🤾', '🏌️', '🏇', '🧘', '🏊', '🤽', '🚣', '🧗', '🚵', '🚴', '🏆', '🥇', '🥈', '🥉', '🏅', '🎖', '🎗',
-            // Musique & Art
-            '🎹', '🎸', '🎺', '🎷', '🥁', '🪘', '🎻', '🪕', '🎬', '🎤', '🎧', '🎼', '🎹', '🎨', '🎭', '🎪', '🎟', '🎫',
-            // Voyage & Lieux
-            '✈️', '🚀', '🛸', '🚁', '🛶', '⛵', '🚤', '🛳', '⛴', '🚢', '🚗', '🚕', '🚙', '🚌', '🚎', '🏎', '🚓', '🚑', '🚒', '🚐', '🛻', '🚚', '🚛', '🚜', '🦯', '🦽', '🦼', '🛴', '🚲', '🛵', '🏍', '🛺', '🚨', '🚔', '🚍', '🚘', '🚖', '🚡', '🚠', '🚟', '🚃', '🚋', '🚞', '🚝', '🚄', '🚅', '🚈', '🚂', '🚆', '🚇', '🚊', '🚉', '🛤', '🛣', '🗺', '🗿', '🗽', '🗼', '🏰', '🏯', '🏟', '🎡', '🎢', '🎠', '⛲', '⛱', '🏖', '🏝', '🏜', '🌋', '⛰', '🏔', '🗻', '🏕', '⛺', '🏠', '🏡', '🏘', '🏚', '🏗', '🏭', '🏢', '🏬', '🏣', '🏤', '🏥', '🏦', '🏨', '🏪', '🏫', '🏩', '💒', '🏛', '⛪', '🕌', '🕍', '🛕', '🕋', '⛩', '🛤', '🛣',
-            // Objets
-            '⌚', '📱', '📲', '💻', '⌨️', '🖥', '🖨', '🖱', '🖲', '🕹', '🗜', '💾', '💿', '📀', '📼', '📷', '📸', '📹', '🎥', '📽', '🎞', '📞', '☎️', '📟', '📠', '📺', '📻', '🎙', '🎚', '🎛', '🧭', '⏱', '⏲', '⏰', '🕰', '⌛', '⏳', '📡', '🔋', '🔌', '💡', '🔦', '🕯', '🪔', '🧯', '🛢', '💸', '💵', '💴', '💶', '💷', '🪙', '💰', '💳', '💎', '⚖️', '🪜', '🧰', '🪛', '🔧', '🔨', '⚒', '🛠', '⛏', '🪚', '🔩', '⚙️', '🪤', '🧱', '⛓', '🧲', '🔫', '💣', '🧨', '🪓', '🔪', '🗡', '⚔️', '🛡', '🚬', '⚰️', '🪦', '⚱️', '🏺', '🔮', '📿', '🧿', '💈', '⚗️', '🔭', '🔬', '🕳', '🩹', '🩺', '💊', '💉', '🩸', '🧬', '🦠', '🧫', '🧪', '🌡', '🧹', '🪠', '🧺', '🧻', '🚽', '🚰', '🚿', '🛁', '🛀', '🧼', '🪥', '🪒', '🧽', '🪣', '🧴', '🛎', '🔑', '🗝', '🚪', '🪑', '🛋', '🛏', '🛌', '🧸', '🪆', '🖼', '🪞', '🪟', '🛍', '🎁', '🎈', '🎏', '🎀', '🪄', '🪅', '🎊', '🎉', '🎎', '🏮', '🎐', '🧧', '✉️', '📩', '📨', '📧', '💌', '📥', '📤', '📦', '🏷', '🪧', '📪', '📫', '📬', '📭', '📮', '📯', '📜', '📃', '📄', '📑', '🧾', '📊', '📈', '📉', '🗒', '🗓', '📆', '📅', '🗑', '📇', '🗃', '🗳', '🗄', '📋', '📁', '📂', '🗂', '🗞', '📰', '📓', '📔', '📒', '📕', '📗', '📘', '📙', '📚', '📖', '🔖', '🧷', '🔗', '📎', '🖇', '📐', '📏', '🧮', '📌', '📍', '✂️', '🖊', '🖋', '✒️', '🖌', '🖍', '📝', '✏️', '🔍', '🔎', '🔏', '🔐', '🔒', '🔓',
-            // Symboles
-            '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '❣️', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '💟', '☮️', '✝️', '☪️', '🕉', '☸️', '✡️', '🔯', '🕎', '☯️', '☦️', '🛐', '⛎', '♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓', '🆔', '⚛️', '🉑', '☢️', '☣️', '📴', '📳', '🈶', '🈚', '🈸', '🈺', '🈷️', '✴️', '🆚', '💮', '🉐', '㊙️', '㊗️', '🈴', '🈵', '🈹', '🈲', '🅰️', '🅱️', '🆎', '🆑', '🅾️', '🆘', '❌', '⭕', '🛑', '⛔', '📛', '🚫', '💯', '💢', '♨️', '🚷', '🚯', '🚳', '🚱', '🔞', '📵', '🚭', '❗', '❕', '❓', '❔', '‼️', '⁉️', '🔅', '🔆', '〽️', '⚠️', '🚸', '🔱', '⚜️', '🔰', '♻️', '✅', '🈯', '💹', '❇️', '✳️', '❎', '🌐', '💠', 'Ⓜ️', '🌀', '💤', '🏧', '🚾', '♿', '🅿️', '🛗', '🈳', '🈂️', '🛂', '🛃', '🛄', '🛅', '🚹', '🚺', '🚼', '⚧', '🚻', '🚮', '🎦', '📶', '🈁', '🔣', 'ℹ️', '🔤', '🔡', '🔠', '🆖', '🆗', '🆙', '🆒', '🆕', '🆓', '0️⃣', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟', '🔢', '#️⃣', '*️⃣', '⏏️', '▶️', '⏸', '⏯', '⏹', '⏺', '⏭', '⏮', '⏩', '⏪', '⏫', '⏬', '◀️', '🔼', '🔽', '➡️', '⬅️', '⬆️', '⬇️', '↗️', '↘️', '↙️', '↖️', '↕️', '↔️', '↪️', '↩️', '⤴️', '⤵️', '🔀', '🔁', '🔂', '🔄', '🔃', '🎵', '🎶', '➕', '➖', '➗', '✖️', '🟰', '♾', '💲', '💱', '™️', '©️', '®️', '〰️', '➰', '➿', '🔚', '🔙', '🔛', '🔝', '🔜', '✔️', '☑️', '🔘', '🔴', '🟠', '🟡', '🟢', '🔵', '🟣', '⚫', '⚪', '🟤', '🔺', '🔻', '🔸', '🔹', '🔶', '🔷', '🔳', '🔲', '▪️', '▫️', '◾', '◽', '◼️', '◻️', '🟥', '🟧', '🟨', '🟩', '🟦', '🟪', '⬛', '⬜', '🟫', '🔈', '🔇', '🔉', '🔊', '🔔', '🔕', '📣', '📢', '💬', '💭', '🗯', '♠️', '♣️', '♥️', '♦️', '🃏', '🎴', '🀄', '🕐', '🕑', '🕒', '🕓', '🕔', '🕕', '🕖', '🕗', '🕘', '🕙', '🕚', '🕛', '🕜', '🕝', '🕞', '🕟', '🕠', '🕡', '🕢', '🕣', '🕤', '🕥', '🕦', '🕧'
+            '👥', '👨‍👩‍👧', '🤝', '❤️', '🌍', '📸', '🔥', '💜', '🎵', '💬', '🤐', '👀', '📝', 
+            '🏷️', '✨', '⭐', '🎯', '🎨', '🎭', '🎪', '🎬', '🎮', '🎲', '🎰', '🏆', '🏅',
+            '⚽', '🏀', '🎾', '🎳', '🏊', '🚴', '🏋️', '🤸', '🧘', '💃', '🕺', '🎤', '🎧',
+            '🎼', '🎹', '🎸', '🎺', '🎷', '🥁', '📚', '📖', '✍️', '💼', '🎓', '🏫', '🏢',
+            '🏦', '🏪', '🏨', '✈️', '🚗', '🏠', '🍕', '🍔', '🍰', '☕', '🍷', '🎂', '💐',
+            '🌹', '🌺', '🌸', '🌼', '🌻', '🦋', '🐶', '🐱', '🦁', '🐯', '🦊', '🐻','😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂', '🙂', '🙃', '😉', '😊', '😇',
+            '🥰', '😍', '🤩', '😘', '😗', '☺️', '😚', '😙', '🥲', '😋', '😛', '😜', '🤪',
+            '😝', '🤑', '🤗', '🤭', '🤫', '🤔', '🤐', '🤨', '😐', '😑', '😶', '😏', '😒',
+            '🙄', '😬', '🤥', '😌', '😔', '😪', '🤤', '😴', '😷', '🤒', '🤕', '🤢', '🤮',
+            '🤧', '🥵', '🥶', '🥴', '😵', '🤯', '🤠', '🥳', '🥸', '😎', '🤓', '🧐', '💪',
+            '👋', '🤚', '🖐', '✋', '🖖', '👌', '🤌', '🤏', '✌️', '🤞', '🤟', '🤘', '🤙',
+            '👈', '👉', '👆', '👇', '☝️', '👍', '👎', '✊', '👊', '🤛', '🤜', '👏', '🙌',
+            '👐', '🤲', '🤝', '🙏'
         ];
 
         // Couleurs disponibles
         const availableColors = [
             '#a29bfe', '#fd79a8', '#74b9ff', '#ff7675', '#55efc4', '#E1306C',
             '#ff6348', '#a55eea', '#feca57', '#00b894', '#dfe6e9', '#fdcb6e',
-            '#0984e3', '#6c5ce7', '#00cec9', '#fdcb6e', '#e17055', '#d63031',
-            '#00b894', '#00cec9', '#0984e3', '#6c5ce7', '#b2bec3', '#636e72'
+            '#0984e3', '#6c5ce7', '#00cec9', '#e17055', '#d63031', '#00b894',
+            '#00cec9', '#0984e3', '#6c5ce7', '#b2bec3', '#636e72', '#2d3436'
         ];
 
         // Configuration des tags
@@ -1152,7 +990,7 @@
         // Chargement initial
         window.onload = function() {
             loadContacts();
-            renderTable();
+            renderContacts();
             setupEventListeners();
         };
 
@@ -1175,24 +1013,23 @@
 
         // Event listeners
         function setupEventListeners() {
-            document.getElementById('searchBox').addEventListener('input', renderTable);
-            document.getElementById('filterRelation').addEventListener('change', renderTable);
-            document.getElementById('filterLieu').addEventListener('change', renderTable);
-            document.getElementById('filterStatut').addEventListener('change', renderTable);
+            document.getElementById('searchBox').addEventListener('input', renderContacts);
+            document.getElementById('filterRelation').addEventListener('change', renderContacts);
+            document.getElementById('filterLieu').addEventListener('change', renderContacts);
+            document.getElementById('filterStatut').addEventListener('change', renderContacts);
 
-            document.getElementById('addModal').addEventListener('click', function(e) {
-                if (e.target === this) closeAddModal();
+            document.getElementById('overlay').addEventListener('click', function() {
+                closeTagDropdown();
+                closeTagEditModal();
             });
-            document.getElementById('viewModal').addEventListener('click', function(e) {
-                if (e.target === this) closeViewModal();
-            });
+        }
 
-            // Fermer dropdown en cliquant ailleurs
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('.tag-display') && !e.target.closest('.tag-dropdown-container')) {
-                    closeTagDropdown();
-                }
-            });
+        // Toggle filters
+        function toggleFilters() {
+            const panel = document.getElementById('filtersPanel');
+            const icon = document.getElementById('filterIcon');
+            panel.classList.toggle('active');
+            icon.textContent = panel.classList.contains('active') ? '▲' : '▼';
         }
 
         // Gestion des tags
@@ -1205,8 +1042,7 @@
         }
 
         function generateRandomColor() {
-            const colors = ['#a29bfe', '#fd79a8', '#74b9ff', '#ff7675', '#55efc4', '#E1306C', '#ff6348', '#a55eea', '#feca57', '#00b894', '#dfe6e9', '#fdcb6e', '#0984e3'];
-            return colors[Math.floor(Math.random() * colors.length)];
+            return availableColors[Math.floor(Math.random() * availableColors.length)];
         }
 
         function addCustomTag(type, value) {
@@ -1245,86 +1081,78 @@
             }).sort((a, b) => a.firstName.localeCompare(b.firstName, 'fr'));
         }
 
-        // Rendu tableau
-        function renderTable() {
+        // Rendu des contacts en mode CARDS
+        function renderContacts() {
             const filteredContacts = getFilteredContacts();
-            const tbody = document.getElementById('contactsBody');
-            const table = document.getElementById('contactsTable');
+            const grid = document.getElementById('contactsGrid');
             const emptyState = document.getElementById('emptyState');
 
             if (filteredContacts.length === 0) {
-                table.style.display = 'none';
+                grid.style.display = 'none';
                 emptyState.style.display = 'block';
                 return;
             }
 
-            table.style.display = 'table';
+            grid.style.display = 'grid';
             emptyState.style.display = 'none';
             
-            tbody.innerHTML = filteredContacts.map(contact => {
+            grid.innerHTML = filteredContacts.map(contact => {
                 const relationTag = findTag('relationType', contact.relationType);
                 const meetingTag = findTag('meetingPlace', contact.meetingPlace);
                 const statusTag = findTag('discussionStatus', contact.discussionStatus);
                 
                 return `
-                <tr>
-                    <td>
-                        <span class="name-cell" onclick="viewProfile('${contact.id}')">
-                            ${contact.firstName}
-                        </span>
-                    </td>
-                    <td>
-                        <span class="instagram-cell" onclick="openInstagramProfile('${contact.instagram}')">
-                            ${contact.instagram}
-                        </span>
-                    </td>
-                    <td class="tag-cell">
-                        <span class="tag-display ${relationTag ? relationTag.class : 'empty'}" 
+                <div class="contact-card">
+                    <div class="contact-header">
+                        <div class="contact-info">
+                            <div class="contact-name">${contact.firstName}</div>
+                            <div class="contact-instagram">${contact.instagram}</div>
+                        </div>
+                        <div class="contact-avatar">${contact.firstName.charAt(0).toUpperCase()}</div>
+                    </div>
+                    <div class="contact-tags">
+                        <span class="tag-mini ${relationTag ? relationTag.class : ''}" 
                               onclick="showTagDropdown(event, '${contact.id}', 'relationType')">
-                            ${relationTag ? relationTag.label : 'Sélectionner...'}
+                            ${relationTag ? relationTag.label : 'Type'}
                         </span>
-                    </td>
-                    <td class="tag-cell">
-                        <span class="tag-display ${meetingTag ? meetingTag.class : 'empty'}" 
+                        <span class="tag-mini ${meetingTag ? meetingTag.class : ''}" 
                               onclick="showTagDropdown(event, '${contact.id}', 'meetingPlace')">
-                            ${meetingTag ? meetingTag.label : 'Sélectionner...'}
+                            ${meetingTag ? meetingTag.label : 'Lieu'}
                         </span>
-                    </td>
-                    <td class="tag-cell">
-                        <span class="tag-display ${statusTag ? statusTag.class : 'empty'}" 
+                        <span class="tag-mini ${statusTag ? statusTag.class : ''}" 
                               onclick="showTagDropdown(event, '${contact.id}', 'discussionStatus')">
-                            ${statusTag ? statusTag.label : 'Sélectionner...'}
+                            ${statusTag ? statusTag.label : 'Statut'}
                         </span>
-                    </td>
-                </tr>
+                    </div>
+                    <div class="contact-actions">
+                        <button class="btn-action btn-view" onclick="viewProfile('${contact.id}')">
+                            👁️ Voir profil
+                        </button>
+                        <button class="btn-action btn-insta" onclick="openInstagramProfile('${contact.instagram}')">
+                            📸 Instagram
+                        </button>
+                    </div>
+                </div>
                 `;
             }).join('');
         }
 
-        // Système de dropdown des tags (style Notion)
+        // Tag dropdown
         function showTagDropdown(event, contactId, fieldType) {
             event.stopPropagation();
             
             currentTagContext = { contactId, fieldType };
-            
-            const dropdown = document.getElementById('tagDropdown');
             const allOptions = getAllTagOptions(fieldType);
             
-            // Positionner le dropdown
-            const rect = event.target.getBoundingClientRect();
-            dropdown.style.left = rect.left + 'px';
-            dropdown.style.top = (rect.bottom + 5) + 'px';
-            
-            // Rendre les options
             renderTagOptions(allOptions);
             
-            dropdown.classList.add('active');
+            document.getElementById('overlay').classList.add('active');
+            document.getElementById('tagDropdown').classList.add('active');
             
             const searchInput = document.getElementById('tagSearchInput');
             searchInput.value = '';
             searchInput.focus();
             
-            // Recherche en temps réel
             searchInput.oninput = function() {
                 const filtered = allOptions.filter(opt => 
                     opt.label.toLowerCase().includes(this.value.toLowerCase())
@@ -1338,14 +1166,13 @@
             
             let html = options.map(opt => `
                 <div class="tag-option">
-                    <div class="tag-option-content" onclick="selectTag('${opt.value.replace(/'/g, "\\'")}')">
+                    <div onclick="selectTag('${opt.value.replace(/'/g, "\\'")}')">
                         <span class="tag-option-preview ${opt.class}">${opt.label}</span>
                     </div>
                     <span class="tag-edit-btn" onclick="event.stopPropagation(); openTagEditModal('${currentTagContext.fieldType}', '${opt.value.replace(/'/g, "\\'")}')">✏️</span>
                 </div>
             `).join('');
             
-            // Option créer
             if (searchValue && !options.find(opt => opt.value.toLowerCase() === searchValue.toLowerCase())) {
                 html += `
                     <div class="tag-create" onclick="createAndSelectTag('${searchValue.replace(/'/g, "\\'")}')">
@@ -1358,10 +1185,6 @@
             list.innerHTML = html;
         }
 
-        function isCustomTag(fieldType, value) {
-            return customTagOptions[fieldType].some(tag => tag.value === value);
-        }
-
         function selectTag(value) {
             if (!currentTagContext) return;
             
@@ -1369,7 +1192,7 @@
             if (contact) {
                 contact[currentTagContext.fieldType] = value;
                 saveToStorage();
-                renderTable();
+                renderContacts();
             }
             
             closeTagDropdown();
@@ -1377,12 +1200,12 @@
 
         function createAndSelectTag(value) {
             if (!currentTagContext) return;
-            
             addCustomTag(currentTagContext.fieldType, value);
             selectTag(value);
         }
 
         function closeTagDropdown() {
+            document.getElementById('overlay').classList.remove('active');
             document.getElementById('tagDropdown').classList.remove('active');
             currentTagContext = null;
         }
@@ -1391,11 +1214,8 @@
         function openAddModal() {
             currentEditId = null;
             document.getElementById('contactForm').reset();
-            const modal = document.getElementById('addModal');
-            modal.classList.add('active');
-            // Réinitialiser le scroll
-            const modalContent = modal.querySelector('.modal-content');
-            modalContent.scrollTop = 0;
+            document.getElementById('addModal').classList.add('active');
+            document.querySelector('#addModal .modal-content').scrollTop = 0;
         }
 
         function closeAddModal() {
@@ -1403,7 +1223,6 @@
             currentEditId = null;
         }
 
-        // Sauvegarder contact
         function saveContact(event) {
             event.preventDefault();
             
@@ -1438,14 +1257,13 @@
             }
 
             saveToStorage();
-            renderTable();
+            renderContacts();
             closeAddModal();
             if (currentViewId) {
                 viewProfile(currentViewId);
             }
         }
 
-        // Instagram
         function openInstagramProfile(username) {
             const cleanUsername = username.replace('@', '');
             window.location.href = `instagram://user?username=${cleanUsername}`;
@@ -1454,7 +1272,6 @@
             }, 500);
         }
 
-        // Voir profil
         function viewProfile(id) {
             const contact = contacts.find(c => c.id === id);
             if (!contact) return;
@@ -1468,16 +1285,13 @@
             document.getElementById('profileMeeting').textContent = contact.meetingPlace;
             document.getElementById('profileStatus').textContent = contact.discussionStatus;
             
-            // Champs optionnels
             ['profession', 'location', 'phone', 'interests', 'notes'].forEach(field => {
                 const container = document.getElementById(`profile${field.charAt(0).toUpperCase() + field.slice(1)}Container`);
                 const element = document.getElementById(`profile${field.charAt(0).toUpperCase() + field.slice(1)}`);
                 if (contact[field]) {
-                    container.style.display = 'flex';
+                    container.style.display = 'block';
                     if (field === 'phone') {
                         element.innerHTML = `<a href="tel:${contact[field]}" style="color: #E1306C;">${contact[field]}</a>`;
-                    } else if (field === 'age') {
-                        element.textContent = contact[field] + ' ans';
                     } else {
                         element.textContent = contact[field];
                     }
@@ -1487,7 +1301,7 @@
             });
 
             if (contact.age) {
-                document.getElementById('profileAgeContainer').style.display = 'flex';
+                document.getElementById('profileAgeContainer').style.display = 'block';
                 document.getElementById('profileAge').textContent = contact.age + ' ans';
             } else {
                 document.getElementById('profileAgeContainer').style.display = 'none';
@@ -1499,11 +1313,8 @@
                 day: 'numeric'
             });
 
-            const modal = document.getElementById('viewModal');
-            modal.classList.add('active');
-            // Réinitialiser le scroll
-            const modalContent = modal.querySelector('.modal-content');
-            modalContent.scrollTop = 0;
+            document.getElementById('viewModal').classList.add('active');
+            document.querySelector('#viewModal .modal-content').scrollTop = 0;
         }
 
         function closeViewModal() {
@@ -1518,7 +1329,6 @@
             }
         }
 
-        // Modifier profil
         function editProfile() {
             const contact = contacts.find(c => c.id === currentViewId);
             if (!contact) return;
@@ -1541,21 +1351,19 @@
             document.getElementById('addModal').classList.add('active');
         }
 
-        // Supprimer
         function deleteContact() {
-            if (!confirm('Êtes-vous sûr de vouloir supprimer ce contact ?')) return;
+            if (!confirm('Supprimer ce contact ?')) return;
             
             contacts = contacts.filter(c => c.id !== currentViewId);
             saveToStorage();
-            renderTable();
+            renderContacts();
             closeViewModal();
         }
 
-        // Système d'édition de tags
+        // Tag edit
         function openTagEditModal(fieldType, value) {
             closeTagDropdown();
             
-            // Chercher dans les tags par défaut ET personnalisés
             let tag = customTagOptions[fieldType].find(t => t.value === value);
             let isDefault = false;
             
@@ -1568,7 +1376,6 @@
             
             currentTagEdit = { fieldType, value, tag, isDefault };
             
-            // Rendre les emojis
             const emojiPicker = document.getElementById('emojiPicker');
             const currentEmoji = tag.label.split(' ')[0];
             emojiPicker.innerHTML = availableEmojis.map(emoji => `
@@ -1576,7 +1383,6 @@
                      onclick="selectEmoji('${emoji}')">${emoji}</div>
             `).join('');
             
-            // Rendre les couleurs
             const colorPicker = document.getElementById('colorPicker');
             colorPicker.innerHTML = availableColors.map(color => `
                 <div class="color-option" 
@@ -1586,12 +1392,12 @@
             
             updateTagPreview();
             
-            document.getElementById('tagEditOverlay').classList.add('active');
+            document.getElementById('overlay').classList.add('active');
             document.getElementById('tagEditModal').classList.add('active');
         }
 
         function closeTagEditModal() {
-            document.getElementById('tagEditOverlay').classList.remove('active');
+            document.getElementById('overlay').classList.remove('active');
             document.getElementById('tagEditModal').classList.remove('active');
             currentTagEdit = null;
         }
@@ -1599,11 +1405,9 @@
         function selectEmoji(emoji) {
             if (!currentTagEdit) return;
             
-            // Mettre à jour le label avec le nouvel emoji
             const tagName = currentTagEdit.tag.label.replace(/^.+?\s/, '');
             currentTagEdit.tag.label = emoji + ' ' + tagName;
             
-            // Mettre à jour la sélection visuelle
             document.querySelectorAll('.emoji-option').forEach(el => el.classList.remove('selected'));
             event.target.classList.add('selected');
             
@@ -1615,7 +1419,6 @@
             
             currentTagEdit.selectedColor = color;
             
-            // Mettre à jour la sélection visuelle
             document.querySelectorAll('.color-option').forEach(el => el.classList.remove('selected'));
             event.target.classList.add('selected');
             
@@ -1627,33 +1430,16 @@
             
             const preview = document.getElementById('tagPreview');
             preview.textContent = currentTagEdit.tag.label;
-            preview.style.background = currentTagEdit.selectedColor || extractColorFromClass(currentTagEdit.tag.class);
+            preview.style.background = currentTagEdit.selectedColor || '#868e96';
             preview.style.color = 'white';
-        }
-
-        function extractColorFromClass(className) {
-            const tempDiv = document.createElement('div');
-            tempDiv.className = className;
-            tempDiv.style.display = 'none';
-            document.body.appendChild(tempDiv);
-            const color = getComputedStyle(tempDiv).backgroundColor;
-            document.body.removeChild(tempDiv);
-            
-            // Convertir rgb en hex si nécessaire
-            if (color.startsWith('rgb')) {
-                const rgb = color.match(/\d+/g);
-                return '#' + rgb.map(x => parseInt(x).toString(16).padStart(2, '0')).join('');
-            }
-            return color;
         }
 
         function saveTagEdit() {
             if (!currentTagEdit) return;
             
             const { fieldType, value, tag, isDefault } = currentTagEdit;
-            const newColor = currentTagEdit.selectedColor || extractColorFromClass(tag.class);
+            const newColor = currentTagEdit.selectedColor || '#868e96';
             
-            // Si c'est un tag par défaut, on crée une version personnalisée
             if (isDefault) {
                 const className = 'tag-custom-' + Date.now();
                 const newTag = {
@@ -1662,7 +1448,6 @@
                     class: className
                 };
                 
-                // Vérifier s'il existe déjà une version custom
                 const existingIndex = customTagOptions[fieldType].findIndex(t => t.value === value);
                 if (existingIndex >= 0) {
                     customTagOptions[fieldType][existingIndex] = newTag;
@@ -1670,13 +1455,11 @@
                     customTagOptions[fieldType].push(newTag);
                 }
                 
-                // Créer le style
                 const style = document.createElement('style');
                 style.id = 'style-' + className;
                 style.textContent = `.${className} { background: ${newColor}; color: white; }`;
                 document.head.appendChild(style);
             } else {
-                // Mettre à jour le style du tag personnalisé
                 const styleId = 'style-' + tag.class;
                 let styleElement = document.getElementById(styleId);
                 if (!styleElement) {
@@ -1687,9 +1470,8 @@
                 styleElement.textContent = `.${tag.class} { background: ${newColor}; color: white; }`;
             }
             
-            // Sauvegarder
             saveToStorage();
-            renderTable();
+            renderContacts();
             closeTagEditModal();
         }
 
@@ -1698,20 +1480,15 @@
             
             const { fieldType, value, isDefault } = currentTagEdit;
             
-            // Ne pas permettre la suppression des tags par défaut
             if (isDefault) {
-                alert('Impossible de supprimer un tag par défaut. Vous pouvez seulement le personnaliser.');
+                alert('Impossible de supprimer un tag par défaut.');
                 return;
             }
             
-            if (!confirm(`Supprimer le tag "${currentTagEdit.tag.label}" ?\n\nAttention : tous les contacts utilisant ce tag seront réinitialisés.`)) {
-                return;
-            }
+            if (!confirm('Supprimer ce tag ?')) return;
             
-            // Supprimer le tag des options
             customTagOptions[fieldType] = customTagOptions[fieldType].filter(t => t.value !== value);
             
-            // Réinitialiser les contacts qui utilisaient ce tag
             contacts.forEach(contact => {
                 if (contact[fieldType] === value) {
                     contact[fieldType] = '';
@@ -1719,12 +1496,9 @@
             });
             
             saveToStorage();
-            renderTable();
+            renderContacts();
             closeTagEditModal();
         }
-
-        // Fermer avec overlay
-        document.getElementById('tagEditOverlay').addEventListener('click', closeTagEditModal);
     </script>
 </body>
 </html>
