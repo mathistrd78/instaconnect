@@ -2,6 +2,30 @@
 const contacts = {
     currentViewId: null,
     currentEditId: null,
+    currentFieldType: null,
+
+    openTagSelector(fieldType) {
+        this.currentFieldType = fieldType;
+        tags.showDropdown(event, 'form', fieldType);
+    },
+
+    selectFormTag(value) {
+        if (!this.currentFieldType) return;
+        
+        // Set hidden input value
+        document.getElementById(this.currentFieldType).value = value;
+        
+        // Update display
+        const tag = tags.findTag(this.currentFieldType, value);
+        if (tag) {
+            const displayEl = document.getElementById(this.currentFieldType + 'Display');
+            displayEl.textContent = tag.label;
+            displayEl.className = 'tag-selector-value';
+        }
+        
+        tags.closeDropdown();
+        this.currentFieldType = null;
+    },
 
     render() {
         const filtered = this.getFiltered();
@@ -174,9 +198,24 @@ const contacts = {
         
         document.getElementById('firstName').value = contact.firstName;
         document.getElementById('instagram').value = contact.instagram.replace('@', '');
-        document.getElementById('relationType').value = contact.relationType;
-        document.getElementById('meetingPlace').value = contact.meetingPlace;
-        document.getElementById('discussionStatus').value = contact.discussionStatus;
+        
+        // Set tag selectors
+        const fields = [
+            {id: 'relationType', value: contact.relationType},
+            {id: 'meetingPlace', value: contact.meetingPlace},
+            {id: 'discussionStatus', value: contact.discussionStatus}
+        ];
+        
+        fields.forEach(field => {
+            document.getElementById(field.id).value = field.value;
+            const tag = tags.findTag(field.id, field.value);
+            if (tag) {
+                const displayEl = document.getElementById(field.id + 'Display');
+                displayEl.textContent = tag.label;
+                displayEl.className = 'tag-selector-value';
+            }
+        });
+        
         document.getElementById('profession').value = contact.profession || '';
         document.getElementById('location').value = contact.location || '';
         document.getElementById('age').value = contact.age || '';
