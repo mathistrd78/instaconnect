@@ -46,12 +46,22 @@ const app = {
         }
     },
 
+    currentSection: 'contacts',
+
     init() {
         this.dataStore.load();
+        
+        // Restore last active section
+        const savedSection = localStorage.getItem('currentSection') || 'contacts';
+        this.currentSection = savedSection;
+        
         this.setupEventListeners();
         contacts.render();
         stats.render();
         unfollowers.init();
+        
+        // Switch to saved section
+        this.switchSection(savedSection);
     },
 
     setupEventListeners() {
@@ -67,6 +77,10 @@ const app = {
     },
 
     switchSection(section) {
+        // Save current section
+        this.currentSection = section;
+        localStorage.setItem('currentSection', section);
+        
         // Retirer active de toutes les sections
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -102,6 +116,16 @@ const app = {
     openAddModal() {
         contacts.currentEditId = null;
         document.getElementById('contactForm').reset();
+        
+        // Reset tag selectors
+        ['relationType', 'meetingPlace', 'discussionStatus'].forEach(fieldId => {
+            const displayEl = document.getElementById(fieldId + 'Display');
+            if (displayEl) {
+                displayEl.textContent = 'Sélectionner...';
+                displayEl.className = 'tag-selector-placeholder';
+            }
+        });
+        
         document.getElementById('modalTitle').textContent = '➕ Nouveau contact';
         document.getElementById('addModal').classList.add('active');
         document.querySelector('#addModal .modal-content').scrollTop = 0;
