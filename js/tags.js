@@ -173,6 +173,7 @@ const tags = {
         
         this.updatePreview();
         
+        // Show overlay and modal - overlay BEHIND modal
         document.getElementById('overlay').classList.add('active');
         document.getElementById('tagEditModal').classList.add('active');
     },
@@ -301,8 +302,8 @@ const tags = {
 
     // Fermer la modale d'édition
     closeEditModal() {
-        document.getElementById('overlay').classList.remove('active');
         document.getElementById('tagEditModal').classList.remove('active');
+        document.getElementById('overlay').classList.remove('active');
         this.currentEdit = null;
     }
 };
