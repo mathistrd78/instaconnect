@@ -185,7 +185,14 @@ const tags = {
         this.currentEdit.tag.label = emoji + ' ' + tagName;
         
         document.querySelectorAll('.emoji-option').forEach(el => el.classList.remove('selected'));
-        event.target.classList.add('selected');
+        
+        // Find and select the clicked emoji
+        const emojiOptions = document.querySelectorAll('.emoji-option');
+        emojiOptions.forEach(el => {
+            if (el.textContent === emoji) {
+                el.classList.add('selected');
+            }
+        });
         
         this.updatePreview();
     },
@@ -196,10 +203,22 @@ const tags = {
         
         this.currentEdit.selectedColor = color;
         
-        document.querySelectorAll('.color-option').forEach(el => el.classList.remove('selected'));
-        event.target.classList.add('selected');
+        document.querySelectorAll('.color-option').forEach(el => {
+            el.classList.remove('selected');
+            // Check if this element has the selected color
+            const bgColor = el.style.background || el.style.backgroundColor;
+            if (bgColor === color || this.normalizeColor(bgColor) === this.normalizeColor(color)) {
+                el.classList.add('selected');
+            }
+        });
         
         this.updatePreview();
+    },
+
+    normalizeColor(color) {
+        // Convert rgb/rgba to hex if needed
+        if (!color) return '';
+        return color.toLowerCase().replace(/\s/g, '');
     },
 
     // Mettre à jour l'aperçu
