@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#E1306C">
+    <title>InstaConnect</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon.png">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-top">
+            <h1>📱 InstaConnect</h1>
+        </div>
+        
+        <input type="text" class="search-box" id="searchBox" placeholder="🔍 Rechercher...">
+        
+        <button class="filters-toggle" onclick="app.toggleFilters()">
+            <span>Filtres</span>
+            <span id="filterIcon">▼</span>
+        </button>
+        
+        <div class="filters-panel" id="filtersPanel">
+            <select class="filter-select" id="filterRelation">
+                <option value="">Type de relation</option>
+                <option value="Ami">👥 Ami</option>
+                <option value="Famille">👨‍👩‍👧 Famille</option>
+                <option value="Connaissance">🤝 Connaissance</option>
+                <option value="Sexe">❤️ Sexe</option>
+            </select>
+            <select class="filter-select" id="filterLieu">
+                <option value="">Lieu de rencontre</option>
+                <option value="IRL">🌍 IRL</option>
+                <option value="Insta">📸 Insta</option>
+                <option value="Tinder">🔥 Tinder</option>
+                <option value="Hinge">💜 Hinge</option>
+                <option value="Soirée Tech">🎵 Soirée Tech</option>
+            </select>
+            <select class="filter-select" id="filterStatut">
+                <option value="">Statut de discussion</option>
+                <option value="Déjà parlé">💬 Déjà parlé</option>
+                <option value="Jamais parlé">🤐 Jamais parlé</option>
+                <option value="En vu">👀 En vu</option>
+                <option value="En cours">📝 En cours</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Container Principal -->
+    <div class="container">
+        <!-- Section Contacts (Accueil) -->
+        <div id="contactsSection" class="section active">
+            <div id="emptyState" class="empty-state" style="display: none;">
+                <div class="empty-state-icon">📱</div>
+                <div class="empty-state-text">Aucun contact pour le moment</div>
+                <button class="btn btn-primary" onclick="app.openAddModal()" style="margin: 0 auto;">Ajouter votre premier contact</button>
+            </div>
+            <div class="contacts-grid" id="contactsGrid"></div>
+        </div>
+
+        <!-- Section Stats -->
+        <div id="statsSection" class="section">
+            <div class="stats-header">
+                <select class="stats-select" id="statsType" onchange="stats.renderChart()">
+                    <option value="relation">📊 Par type de relation</option>
+                    <option value="lieu">📍 Par lieu de rencontre</option>
+                    <option value="statut">💬 Par statut de discussion</option>
+                    <option value="age">🎂 Par tranche d'âge</option>
+                    <option value="mois">📅 Par mois d'ajout</option>
+                </select>
+            </div>
+
+            <div class="stats-cards">
+                <div class="stat-card-mini">
+                    <div class="stat-value" id="statTotal">0</div>
+                    <div class="stat-label">Total contacts</div>
+                </div>
+                <div class="stat-card-mini">
+                    <div class="stat-value" id="statWeek">0</div>
+                    <div class="stat-label">Cette semaine</div>
+                </div>
+                <div class="stat-card-mini">
+                    <div class="stat-value" id="statMonth">0</div>
+                    <div class="stat-label">Ce mois</div>
+                </div>
+                <div class="stat-card-mini">
+                    <div class="stat-value" id="statFavorites">0</div>
+                    <div class="stat-label">Favoris</div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h3 class="chart-title" id="chartTitle">Répartition par type de relation</h3>
+                <svg id="chartSvg" class="chart-svg" viewBox="0 0 300 300"></svg>
+                <div class="chart-legend" id="chartLegend"></div>
+            </div>
+        </div>
+
+        <!-- Section Unfollowers -->
+        <div id="unfollowersSection" class="section">
+            <div class="coming-soon">
+                <div class="coming-soon-icon">🔴</div>
+                <div class="coming-soon-text">Unfollowers</div>
+                <div class="coming-soon-desc">Fonctionnalité à venir...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="app.switchSection('contacts')">
+            <span class="nav-icon">🏠</span>
+            <span>Accueil</span>
+        </div>
+        <div class="nav-item" onclick="app.openAddModal()">
+            <span class="nav-icon">➕</span>
+            <span>Ajouter</span>
+        </div>
+        <div class="nav-item" onclick="app.switchSection('stats')">
+            <span class="nav-icon">📊</span>
+            <span>Stats</span>
+        </div>
+        <div class="nav-item" onclick="app.switchSection('unfollowers')">
+            <span class="nav-icon">🔴</span>
+            <span>Unfollowers</span>
+        </div>
+    </div>
+
+    <!-- Overlay -->
+    <div id="overlay" class="overlay"></div>
+
+    <!-- Tag Dropdown -->
+    <div id="tagDropdown" class="tag-dropdown-container">
+        <div class="tag-dropdown-handle"></div>
+        <div class="tag-search">
+            <input type="text" id="tagSearchInput" placeholder="Rechercher...">
+        </div>
+        <div class="tag-options" id="tagOptionsList"></div>
+    </div>
+
+    <!-- Modal Add/Edit Contact -->
+    <div id="addModal" class="modal">
+        <div class="modal-header">
+            <h2 id="modalTitle">➕ Nouveau contact</h2>
+            <button class="close-btn" onclick="app.closeAddModal()">✕</button>
+        </div>
+        <div class="modal-content">
+            <form id="contactForm" onsubmit="contacts.saveContact(event)">
+                <div class="form-group">
+                    <label>Prénom *</label>
+                    <input type="text" id="firstName" required placeholder="Ex: Marie">
+                </div>
+                <div class="form-group">
+                    <label>Pseudo Instagram *</label>
+                    <div style="position: relative;">
+                        <span style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #868e96; font-weight: 600;">@</span>
+                        <input type="text" id="instagram" required placeholder="Ex: marie_dupont" style="padding-left: 36px;" oninput="this.value = this.value.toLowerCase().replace('@', '')">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Type de relation *</label>
+                    <select id="relationType" required>
+                        <option value="">Sélectionner...</option>
+                        <option value="Ami">👥 Ami</option>
+                        <option value="Famille">👨‍👩‍👧 Famille</option>
+                        <option value="Connaissance">🤝 Connaissance</option>
+                        <option value="Sexe">❤️ Sexe</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Lieu de rencontre *</label>
+                    <select id="meetingPlace" required>
+                        <option value="">Sélectionner...</option>
+                        <option value="IRL">🌍 IRL</option>
+                        <option value="Insta">📸 Insta</option>
+                        <option value="Tinder">🔥 Tinder</option>
+                        <option value="Hinge">💜 Hinge</option>
+                        <option value="Soirée Tech">🎵 Soirée Tech</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Statut de discussion *</label>
+                    <select id="discussionStatus" required>
+                        <option value="">Sélectionner...</option>
+                        <option value="Déjà parlé">💬 Déjà parlé</option>
+                        <option value="Jamais parlé">🤐 Jamais parlé</option>
+                        <option value="En vu">👀 En vu</option>
+                        <option value="En cours">📝 En cours</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Études / Profession</label>
+                    <input type="text" id="profession" placeholder="Ex: Étudiante en marketing">
+                </div>
+                <div class="form-group">
+                    <label>Lieu d'habitation</label>
+                    <input type="text" id="location" placeholder="Ex: Paris 11ème">
+                </div>
+                <div class="form-group">
+                    <label>Âge</label>
+                    <input type="number" id="age" min="18" max="99" placeholder="Ex: 25">
+                </div>
+                <div class="form-group">
+                    <label>Numéro de téléphone</label>
+                    <input type="tel" id="phone" placeholder="Ex: 06 12 34 56 78">
+                </div>
+                <div class="form-group">
+                    <label>Centres d'intérêt</label>
+                    <input type="text" id="interests" placeholder="Ex: Techno, Voyage...">
+                </div>
+                <div class="form-group">
+                    <label>Notes personnelles</label>
+                    <textarea id="notes" placeholder="Ajoutez des notes..."></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">💾 Enregistrer</button>
+                    <button type="button" class="btn btn-secondary" onclick="app.closeAddModal()">Annuler</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal View Profile -->
+    <div id="viewModal" class="modal">
+        <div class="modal-header">
+            <h2>👤 Profil</h2>
+            <button class="close-btn" onclick="app.closeViewModal()">✕</button>
+        </div>
+        <div class="modal-content">
+            <div class="profile-view">
+                <div class="profile-avatar-large" id="profileAvatar"></div>
+                <h3 class="profile-name" id="profileName"></h3>
+                <div class="profile-instagram" id="profileInsta" onclick="contacts.openInstagram()"></div>
+                <div class="profile-info" id="profileInfo"></div>
+                <div class="form-actions" style="margin-top: 20px;">
+                    <button class="btn btn-primary" onclick="contacts.editProfile()">✏️ Modifier</button>
+                    <button class="btn btn-danger" onclick="contacts.deleteContact()">🗑️ Supprimer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Tag Edit -->
+    <div id="tagEditModal" class="modal">
+        <div class="modal-header">
+            <h2>✏️ Modifier le tag</h2>
+            <button class="close-btn" onclick="tags.closeEditModal()">✕</button>
+        </div>
+        <div class="modal-content tag-edit-modal">
+            <div class="tag-preview-section">
+                <div style="font-size: 13px; color: #868e96; margin-bottom: 10px;">Aperçu</div>
+                <span class="tag-preview" id="tagPreview">🏷️ Exemple</span>
+            </div>
+            <div class="tag-edit-section">
+                <label>Choisir un emoji</label>
+                <div class="emoji-picker" id="emojiPicker"></div>
+            </div>
+            <div class="tag-edit-section">
+                <label>Choisir une couleur</label>
+                <div class="color-picker" id="colorPicker"></div>
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-primary" onclick="tags.saveEdit()">💾 Enregistrer</button>
+                <button class="btn btn-danger" onclick="tags.deleteTag()">🗑️ Supprimer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/tags.js"></script>
+    <script src="js/contacts.js"></script>
+    <script src="js/stats.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
