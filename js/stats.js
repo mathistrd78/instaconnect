@@ -7,20 +7,7 @@ const stats = {
 
     updateCards() {
         const contacts = app.dataStore.contacts;
-        const now = new Date();
-        const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
-        const monthAgo = new Date(now - 30 * 24 * 60 * 60 * 1000);
-
         document.getElementById('statTotal').textContent = contacts.length;
-        document.getElementById('statWeek').textContent = contacts.filter(c => 
-            new Date(c.dateAdded) > weekAgo
-        ).length;
-        document.getElementById('statMonth').textContent = contacts.filter(c => 
-            new Date(c.dateAdded) > monthAgo
-        ).length;
-        document.getElementById('statFavorites').textContent = contacts.filter(c => 
-            c.relationType === 'Ami' || c.relationType === 'Famille' || c.relationType === 'Sexe'
-        ).length;
     },
 
     renderChart() {
