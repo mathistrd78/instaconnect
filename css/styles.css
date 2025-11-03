@@ -825,14 +825,16 @@ body.hide-header .container {
 
 .tag-dropdown-container {
     position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     background: white;
-    border-radius: 20px 20px 0 0;
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
     z-index: 10000;
-    max-height: 70vh;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
     display: none;
     flex-direction: column;
 }
@@ -841,16 +843,36 @@ body.hide-header .container {
     display: flex;
 }
 
-.tag-dropdown-handle {
-    width: 40px;
-    height: 4px;
-    background: #dee2e6;
-    border-radius: 2px;
-    margin: 12px auto 8px;
+.tag-dropdown-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.tag-dropdown-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #212529;
+}
+
+.tag-dropdown-close {
+    background: #f8f9fa;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 20px;
+    color: #495057;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .tag-search {
-    padding: 16px;
+    padding: 16px 20px;
     border-bottom: 1px solid #f1f3f5;
 }
 
@@ -874,7 +896,12 @@ body.hide-header .container {
     margin-bottom: 8px;
     display: flex;
     justify-content: space-between;
+    align-items: center;
     min-height: 56px;
+}
+
+.tag-option:active {
+    background: #f8f9fa;
 }
 
 .tag-option-preview {
@@ -888,20 +915,31 @@ body.hide-header .container {
     padding: 8px 16px;
     background: #f8f9fa;
     border-radius: 10px;
+    font-size: 16px;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
 }
 
 .tag-create {
     padding: 16px;
+    color: #495057;
+    font-size: 15px;
     border-top: 1px solid #f1f3f5;
     display: flex;
+    align-items: center;
     gap: 12px;
+    min-height: 56px;
     cursor: pointer;
 }
 
 .tag-create-icon {
     color: #E1306C;
     font-size: 20px;
+    font-weight: 700;
 }
 
 /* Tag Edit */
