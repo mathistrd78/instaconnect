@@ -51,7 +51,7 @@ const tags = {
         
         const searchInput = document.getElementById('tagSearchInput');
         searchInput.value = '';
-        searchInput.focus();
+        // Don't auto-focus to prevent keyboard popup on mobile
         
         searchInput.oninput = () => {
             const filtered = allOptions.filter(opt => 
@@ -89,6 +89,12 @@ const tags = {
     // Sélectionner un tag
     selectTag(value) {
         if (!this.currentContext) return;
+        
+        // Check if it's a form context
+        if (this.currentContext.contactId === 'form') {
+            contacts.selectFormTag(value);
+            return;
+        }
         
         const contact = app.dataStore.contacts.find(c => c.id === this.currentContext.contactId);
         if (contact) {
