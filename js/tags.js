@@ -240,6 +240,7 @@ const tags = {
         const newColor = this.currentEdit.selectedColor || '#868e96';
         
         if (isDefault) {
+            // Editing a default tag → create/update custom override
             const className = 'tag-custom-' + Date.now();
             const newTag = {
                 value: tag.value,
@@ -259,6 +260,14 @@ const tags = {
             style.textContent = `.${className} { background: ${newColor}; color: white; }`;
             document.head.appendChild(style);
         } else {
+            // Editing an existing custom tag → update it in place
+            const existingIndex = app.customTags[fieldType].findIndex(t => t.value === value);
+            if (existingIndex >= 0) {
+                // Update the label (emoji) in the custom tags array
+                app.customTags[fieldType][existingIndex].label = tag.label;
+            }
+            
+            // Update the style
             const styleId = 'style-' + tag.class;
             let styleElement = document.getElementById(styleId);
             if (!styleElement) {
