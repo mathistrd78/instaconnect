@@ -236,33 +236,29 @@ const tags = {
     saveEdit() {
         if (!this.currentEdit) return;
         
-        const { fieldType, value, tag, isDefault } = this.currentEdit;
+        const { fieldType, value, tag } = this.currentEdit;
         const newColor = this.currentEdit.selectedColor || '#868e96';
         
-        console.log('💾 Saving tag edit:', { fieldType, value, isDefault, label: tag.label, color: newColor });
+        console.log('💾 Saving tag edit:', { fieldType, value, label: tag.label, color: newColor });
         
         // Find existing custom tag
         const existingIndex = app.customTags[fieldType].findIndex(t => t.value === value);
         
+        let className;
+        
         if (existingIndex >= 0) {
-            // Custom tag already exists → update it
+            // Custom tag already exists → update it (KEEP THE SAME CLASS!)
             console.log('✏️ Updating existing custom tag at index:', existingIndex);
+            
+            className = app.customTags[fieldType][existingIndex].class;
             app.customTags[fieldType][existingIndex].label = tag.label;
             
-            // Update style
-            const className = app.customTags[fieldType][existingIndex].class;
-            const styleId = 'style-' + className;
-            let styleElement = document.getElementById(styleId);
-            if (!styleElement) {
-                styleElement = document.createElement('style');
-                styleElement.id = styleId;
-                document.head.appendChild(styleElement);
-            }
-            styleElement.textContent = `.${className} { background: ${newColor}; color: white; }`;
+            console.log('📝 Keeping same class:', className);
         } else {
-            // New custom tag (first time editing a default tag)
+            // New custom tag (first time editing)
             console.log('➕ Creating new custom tag');
-            const className = 'tag-custom-' + Date.now();
+            
+            className = 'tag-custom-' + Date.now();
             const newTag = {
                 value: value,
                 label: tag.label,
@@ -270,12 +266,18 @@ const tags = {
             };
             
             app.customTags[fieldType].push(newTag);
-            
-            const style = document.createElement('style');
-            style.id = 'style-' + className;
-            style.textContent = `.${className} { background: ${newColor}; color: white; }`;
-            document.head.appendChild(style);
+            console.log('🆕 New class created:', className);
         }
+        
+        // Update or create style for this class
+        const styleId = 'style-' + className;
+        let styleElement = document.getElementById(styleId);
+        if (!styleElement) {
+            styleElement = document.createElement('style');
+            styleElement.id = styleId;
+            document.head.appendChild(styleElement);
+        }
+        styleElement.textContent = `.${className} { background: ${newColor}; color: white; }`;
         
         console.log('💾 Custom tags after save:', app.customTags[fieldType]);
         
