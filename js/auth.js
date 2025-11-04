@@ -160,13 +160,39 @@ const authManager = {
             // Charger les contacts avec écoute en temps réel
             db.collection('users').doc(userId).collection('contacts')
                 .onSnapshot((snapshot) => {
-                    app.dataStore.contacts = [];
-                    snapshot.forEach((doc) => {
-                        app.dataStore.contacts.push(doc.data());
+                    console.log('🔄 Firebase snapshot received');
+                    
+                    // Process changes
+                    snapshot.docChanges().forEach(change => {
+                        const contact = change.doc.data();
+                        
+                        if (change.type === 'added') {
+                            // Check if contact already exists (avoid duplicates)
+                            const exists = app.dataStore.contacts.find(c => c.id === contact.id);
+                            if (!exists) {
+                                app.dataStore.contacts.push(contact);
+                                console.log('➕ Contact added:', contact.firstName);
+                            }
+                        }
+                        
+                        if (change.type === 'modified') {
+                            const index = app.dataStore.contacts.findIndex(c => c.id === contact.id);
+                            if (index !== -1) {
+                                app.dataStore.contacts[index] = contact;
+                                console.log('✏️ Contact modified:', contact.firstName);
+                            }
+                        }
+                        
+                        if (change.type === 'removed') {
+                            app.dataStore.contacts = app.dataStore.contacts.filter(c => c.id !== contact.id);
+                            console.log('🗑️ Contact removed:', contact.firstName);
+                        }
                     });
+                    
+                    // Re-render UI
                     contacts.render();
                     stats.render();
-                    console.log('✅ Contacts loaded from Firebase:', app.dataStore.contacts.length);
+                    console.log('✅ Total contacts:', app.dataStore.contacts.length);
                 });
 
         } catch (error) {
