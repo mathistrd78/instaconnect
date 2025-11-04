@@ -53,7 +53,6 @@ const contacts = {
                         <div class="contact-name">${contact.firstName}</div>
                         <div class="contact-instagram">${contact.instagram}</div>
                     </div>
-                    <div class="contact-avatar">${contact.firstName[0].toUpperCase()}</div>
                 </div>
                 <div class="contact-tags">
                     <span class="tag-mini ${relTag?.class || ''}" onclick="tags.showDropdown(event, '${contact.id}', 'relationType')">
@@ -143,7 +142,6 @@ const contacts = {
 
         this.currentViewId = id;
         
-        document.getElementById('profileAvatar').textContent = contact.firstName[0].toUpperCase();
         document.getElementById('profileName').textContent = contact.firstName;
         document.getElementById('profileInsta').textContent = contact.instagram;
         
