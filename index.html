@@ -12,10 +12,53 @@
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+    <!-- Auth Page (Login/Signup) -->
+    <div id="authPage" class="auth-page">
+        <div class="auth-container">
+            <div class="auth-logo">📱 InstaConnect</div>
+            <div class="auth-subtitle">Votre CRM Instagram</div>
+            
+            <div id="loginForm" class="auth-form">
+                <h2>Connexion</h2>
+                <input type="email" id="loginEmail" placeholder="Email" class="auth-input">
+                <input type="password" id="loginPassword" placeholder="Mot de passe" class="auth-input">
+                <button onclick="handleLogin()" class="auth-btn auth-btn-primary">Se connecter</button>
+                <div class="auth-link" onclick="showSignup()">Pas de compte ? S'inscrire</div>
+                <div class="auth-link" onclick="showResetPassword()">Mot de passe oublié ?</div>
+            </div>
+
+            <div id="signupForm" class="auth-form" style="display: none;">
+                <h2>Inscription</h2>
+                <input type="email" id="signupEmail" placeholder="Email" class="auth-input">
+                <input type="password" id="signupPassword" placeholder="Mot de passe (min. 6 caractères)" class="auth-input">
+                <input type="password" id="signupPasswordConfirm" placeholder="Confirmer le mot de passe" class="auth-input">
+                <button onclick="handleSignup()" class="auth-btn auth-btn-primary">S'inscrire</button>
+                <div class="auth-link" onclick="showLogin()">Déjà un compte ? Se connecter</div>
+            </div>
+
+            <div id="resetForm" class="auth-form" style="display: none;">
+                <h2>Réinitialiser</h2>
+                <input type="email" id="resetEmail" placeholder="Email" class="auth-input">
+                <button onclick="handleResetPassword()" class="auth-btn auth-btn-primary">Envoyer le lien</button>
+                <div class="auth-link" onclick="showLogin()">Retour à la connexion</div>
+            </div>
+
+            <div id="authMessage" class="auth-message"></div>
+        </div>
+    </div>
+
+    <!-- App Page (Main Application) -->
+    <div id="appPage" style="display: none;">
     <!-- Header -->
     <div class="header">
         <div class="header-top">
             <h1>📱 InstaConnect</h1>
+            <div class="user-menu" onclick="toggleUserMenu()">
+                <span id="userEmail"></span> ▼
+            </div>
+            <div id="userMenuDropdown" class="user-menu-dropdown">
+                <div class="user-menu-item" onclick="authManager.logout()">🚪 Déconnexion</div>
+            </div>
         </div>
         
         <input type="text" class="search-box" id="searchBox" placeholder="🔍 Rechercher...">
@@ -268,7 +311,6 @@
         </div>
         <div class="modal-content">
             <div class="profile-view">
-                <div class="profile-avatar-large" id="profileAvatar"></div>
                 <h3 class="profile-name" id="profileName"></h3>
                 <div class="profile-instagram" id="profileInsta" onclick="contacts.openInstagram()"></div>
                 <div class="profile-info" id="profileInfo"></div>
@@ -307,10 +349,124 @@
     </div>
 
     <!-- Scripts -->
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <!-- App Scripts -->
+    <script src="js/firebase-config.js"></script>
+    <script src="js/auth.js"></script>
     <script src="js/tags.js"></script>
     <script src="js/contacts.js"></script>
     <script src="js/stats.js"></script>
     <script src="js/unfollowers.js"></script>
     <script src="js/app.js"></script>
+    
+    <!-- Auth Functions -->
+    <script>
+        function showLogin() {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('signupForm').style.display = 'none';
+            document.getElementById('resetForm').style.display = 'none';
+            document.getElementById('authMessage').textContent = '';
+        }
+        
+        function showSignup() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('signupForm').style.display = 'block';
+            document.getElementById('resetForm').style.display = 'none';
+            document.getElementById('authMessage').textContent = '';
+        }
+        
+        function showResetPassword() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('signupForm').style.display = 'none';
+            document.getElementById('resetForm').style.display = 'block';
+            document.getElementById('authMessage').textContent = '';
+        }
+        
+        async function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const message = document.getElementById('authMessage');
+            
+            if (!email || !password) {
+                message.textContent = '⚠️ Veuillez remplir tous les champs';
+                message.className = 'auth-message auth-message-error';
+                return;
+            }
+            
+            const result = await authManager.login(email, password);
+            if (!result.success) {
+                message.textContent = '❌ ' + result.error;
+                message.className = 'auth-message auth-message-error';
+            }
+        }
+        
+        async function handleSignup() {
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            const passwordConfirm = document.getElementById('signupPasswordConfirm').value;
+            const message = document.getElementById('authMessage');
+            
+            if (!email || !password || !passwordConfirm) {
+                message.textContent = '⚠️ Veuillez remplir tous les champs';
+                message.className = 'auth-message auth-message-error';
+                return;
+            }
+            
+            if (password !== passwordConfirm) {
+                message.textContent = '⚠️ Les mots de passe ne correspondent pas';
+                message.className = 'auth-message auth-message-error';
+                return;
+            }
+            
+            const result = await authManager.signup(email, password);
+            if (result.success) {
+                message.textContent = '✅ Compte créé avec succès !';
+                message.className = 'auth-message auth-message-success';
+            } else {
+                message.textContent = '❌ ' + result.error;
+                message.className = 'auth-message auth-message-error';
+            }
+        }
+        
+        async function handleResetPassword() {
+            const email = document.getElementById('resetEmail').value;
+            const message = document.getElementById('authMessage');
+            
+            if (!email) {
+                message.textContent = '⚠️ Veuillez entrer votre email';
+                message.className = 'auth-message auth-message-error';
+                return;
+            }
+            
+            const result = await authManager.resetPassword(email);
+            if (result.success) {
+                message.textContent = '✅ Email de réinitialisation envoyé !';
+                message.className = 'auth-message auth-message-success';
+                setTimeout(() => showLogin(), 2000);
+            } else {
+                message.textContent = '❌ ' + result.error;
+                message.className = 'auth-message auth-message-error';
+            }
+        }
+        
+        function toggleUserMenu() {
+            const dropdown = document.getElementById('userMenuDropdown');
+            dropdown.classList.toggle('active');
+        }
+        
+        // Close user menu when clicking outside
+        document.addEventListener('click', (e) => {
+            const menu = document.querySelector('.user-menu');
+            const dropdown = document.getElementById('userMenuDropdown');
+            if (menu && !menu.contains(e.target) && dropdown) {
+                dropdown.classList.remove('active');
+            }
+        });
+    </script>
+</div> <!-- End of appPage -->
 </body>
 </html>
