@@ -53,12 +53,15 @@
     <div class="header">
         <div class="header-top">
             <h1>📱 InstaConnect</h1>
-            <div class="user-menu" onclick="toggleUserMenu()">
-                <span id="userEmail"></span> ▼
+            <div class="user-menu-icon" onclick="toggleUserMenu()">
+                👤
             </div>
-            <div id="userMenuDropdown" class="user-menu-dropdown">
-                <div class="user-menu-item" onclick="authManager.logout()">🚪 Déconnexion</div>
-            </div>
+        </div>
+        
+        <div id="userMenuDropdown" class="user-menu-dropdown">
+            <div class="user-menu-email" id="userEmail"></div>
+            <div class="user-menu-divider"></div>
+            <div class="user-menu-item" onclick="authManager.logout()">🚪 Déconnexion</div>
         </div>
         
         <input type="text" class="search-box" id="searchBox" placeholder="🔍 Rechercher...">
@@ -460,9 +463,9 @@
         
         // Close user menu when clicking outside
         document.addEventListener('click', (e) => {
-            const menu = document.querySelector('.user-menu');
+            const icon = document.querySelector('.user-menu-icon');
             const dropdown = document.getElementById('userMenuDropdown');
-            if (menu && !menu.contains(e.target) && dropdown) {
+            if (icon && dropdown && !icon.contains(e.target) && !dropdown.contains(e.target)) {
                 dropdown.classList.remove('active');
             }
         });
