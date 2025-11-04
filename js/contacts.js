@@ -229,9 +229,14 @@ const contacts = {
     deleteContact() {
         if (!confirm('Supprimer ce contact ?')) return;
         
+        // Delete from Firebase
+        app.dataStore.deleteContact(this.currentViewId);
+        
+        // Remove from local array (will be synced by Firebase listener)
         app.dataStore.contacts = app.dataStore.contacts.filter(c => c.id !== this.currentViewId);
-        app.dataStore.save();
+        
         this.render();
+        stats.render();
         app.closeViewModal();
     }
 };
