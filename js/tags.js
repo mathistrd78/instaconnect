@@ -239,44 +239,45 @@ const tags = {
         const { fieldType, value, tag, isDefault } = this.currentEdit;
         const newColor = this.currentEdit.selectedColor || '#868e96';
         
-        if (isDefault) {
-            // Editing a default tag → create/update custom override
-            const className = 'tag-custom-' + Date.now();
-            const newTag = {
-                value: tag.value,
-                label: tag.label,
-                class: className
-            };
+        console.log('💾 Saving tag edit:', { fieldType, value, isDefault, label: tag.label, color: newColor });
+        
+        // Find existing custom tag
+        const existingIndex = app.customTags[fieldType].findIndex(t => t.value === value);
+        
+        if (existingIndex >= 0) {
+            // Custom tag already exists → update it
+            console.log('✏️ Updating existing custom tag at index:', existingIndex);
+            app.customTags[fieldType][existingIndex].label = tag.label;
             
-            const existingIndex = app.customTags[fieldType].findIndex(t => t.value === value);
-            if (existingIndex >= 0) {
-                app.customTags[fieldType][existingIndex] = newTag;
-            } else {
-                app.customTags[fieldType].push(newTag);
-            }
-            
-            const style = document.createElement('style');
-            style.id = 'style-' + className;
-            style.textContent = `.${className} { background: ${newColor}; color: white; }`;
-            document.head.appendChild(style);
-        } else {
-            // Editing an existing custom tag → update it in place
-            const existingIndex = app.customTags[fieldType].findIndex(t => t.value === value);
-            if (existingIndex >= 0) {
-                // Update the label (emoji) in the custom tags array
-                app.customTags[fieldType][existingIndex].label = tag.label;
-            }
-            
-            // Update the style
-            const styleId = 'style-' + tag.class;
+            // Update style
+            const className = app.customTags[fieldType][existingIndex].class;
+            const styleId = 'style-' + className;
             let styleElement = document.getElementById(styleId);
             if (!styleElement) {
                 styleElement = document.createElement('style');
                 styleElement.id = styleId;
                 document.head.appendChild(styleElement);
             }
-            styleElement.textContent = `.${tag.class} { background: ${newColor}; color: white; }`;
+            styleElement.textContent = `.${className} { background: ${newColor}; color: white; }`;
+        } else {
+            // New custom tag (first time editing a default tag)
+            console.log('➕ Creating new custom tag');
+            const className = 'tag-custom-' + Date.now();
+            const newTag = {
+                value: value,
+                label: tag.label,
+                class: className
+            };
+            
+            app.customTags[fieldType].push(newTag);
+            
+            const style = document.createElement('style');
+            style.id = 'style-' + className;
+            style.textContent = `.${className} { background: ${newColor}; color: white; }`;
+            document.head.appendChild(style);
         }
+        
+        console.log('💾 Custom tags after save:', app.customTags[fieldType]);
         
         app.dataStore.save();
         contacts.render();
