@@ -30,7 +30,18 @@ const tags = {
 
     // Récupérer tous les tags pour un type donné
     getAllOptions(type) {
-        return [...app.defaultTags[type], ...app.customTags[type]];
+        // Merge defaults and customs, with customs overriding defaults with same value
+        const defaults = app.defaultTags[type];
+        const customs = app.customTags[type];
+        
+        // Get values that have custom overrides
+        const customValues = new Set(customs.map(t => t.value));
+        
+        // Filter out defaults that have been customized
+        const filteredDefaults = defaults.filter(t => !customValues.has(t.value));
+        
+        // Return filtered defaults + all customs
+        return [...filteredDefaults, ...customs];
     },
 
     // Trouver un tag par valeur
