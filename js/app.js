@@ -33,35 +33,81 @@ const app = {
         contacts: [],
         
         load() {
-            const saved = localStorage.getItem('instaConnectContacts');
-            if (saved) app.dataStore.contacts = JSON.parse(saved);
-            
-            const savedTags = localStorage.getItem('instaConnectCustomTags');
-            if (savedTags) app.customTags = JSON.parse(savedTags);
+            // Les données sont maintenant chargées depuis Firebase dans auth.js
+            // Cette fonction est gardée pour compatibilité mais ne fait plus rien
+            console.log('📦 Data will be loaded from Firebase');
         },
         
-        save() {
-            localStorage.setItem('instaConnectContacts', JSON.stringify(app.dataStore.contacts));
-            localStorage.setItem('instaConnectCustomTags', JSON.stringify(app.customTags));
+        async save() {
+            // Sauvegarder dans Firebase au lieu de localStorage
+            if (!authManager.currentUser) {
+                console.warn('⚠️ No user logged in, cannot save to Firebase');
+                return;
+            }
+
+            try {
+                const userId = authManager.currentUser.uid;
+                const batch = db.batch();
+
+                // Sauvegarder tous les contacts
+                const contactsRef = db.collection('users').doc(userId).collection('contacts');
+                this.contacts.forEach(contact => {
+                    batch.set(contactsRef.doc(contact.id), contact);
+                });
+
+                // Sauvegarder les tags personnalisés
+                const userDoc = db.collection('users').doc(userId);
+                batch.set(userDoc, {
+                    customTags: app.customTags
+                }, { merge: true });
+
+                await batch.commit();
+                console.log('✅ Data saved to Firebase');
+            } catch (error) {
+                console.error('❌ Error saving to Firebase:', error);
+            }
+        },
+
+        async deleteContact(contactId) {
+            if (!authManager.currentUser) return;
+            
+            try {
+                const userId = authManager.currentUser.uid;
+                await db.collection('users').doc(userId).collection('contacts').doc(contactId).delete();
+                console.log('✅ Contact deleted from Firebase');
+            } catch (error) {
+                console.error('❌ Error deleting contact:', error);
+            }
         }
     },
 
     currentSection: 'contacts',
 
-    init() {
-        this.dataStore.load();
+    async init() {
+        // Attendre l'initialisation de Firebase
+        if (!initFirebase()) {
+            alert('Erreur de chargement de Firebase');
+            return;
+        }
+
+        // Vérifier l'authentification
+        const isLoggedIn = await authManager.checkAuth();
         
-        // Restore last active section
-        const savedSection = localStorage.getItem('currentSection') || 'contacts';
-        this.currentSection = savedSection;
-        
-        this.setupEventListeners();
-        contacts.render();
-        stats.render();
-        unfollowers.init();
-        
-        // Switch to saved section
-        this.switchSection(savedSection);
+        if (isLoggedIn) {
+            // Restaurer la dernière section active
+            const savedSection = localStorage.getItem('currentSection') || 'contacts';
+            this.currentSection = savedSection;
+            
+            this.setupEventListeners();
+            unfollowers.init();
+            
+            // Attendre un peu que les données Firebase soient chargées
+            setTimeout(() => {
+                contacts.render();
+                stats.render();
+                this.switchSection(savedSection);
+            }, 500);
+        }
     },
 
     setupEventListeners() {
