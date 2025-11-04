@@ -1107,10 +1107,13 @@ body.hide-header .container {
 
 /* Tag Edit */
 .tag-preview-section {
-    margin: 20px 0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    margin: 0 0 20px 0;
     padding: 20px;
-    background: #f8f9fa;
-    border-radius: 12px;
+    background: white;
+    border-bottom: 2px solid #e9ecef;
     text-align: center;
 }
 
@@ -1162,20 +1165,21 @@ body.hide-header .container {
 
 .color-picker {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
 }
 
 .color-option {
     aspect-ratio: 1;
-    border-radius: 12px;
-    border: 3px solid transparent;
+    border-radius: 8px;
+    border: 2px solid transparent;
     cursor: pointer;
+    min-height: 40px;
 }
 
 .color-option.selected {
     border-color: #212529;
-    transform: scale(1.1);
+    transform: scale(1.05);
 }
 
 /* Empty State */
