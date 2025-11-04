@@ -130,7 +130,7 @@ body {
 /* User Menu */
 .user-menu-icon {
     position: absolute;
-    top: 20px;
+    top: 14px;
     right: 20px;
     background: white;
     width: 44px;
@@ -206,7 +206,8 @@ body {
 .header-top {
     display: flex;
     justify-content: center;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
+    position: relative;
 }
 
 h1 {
