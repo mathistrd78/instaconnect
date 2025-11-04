@@ -130,8 +130,8 @@ body {
 /* User Menu */
 .user-menu-icon {
     position: absolute;
-    top: 14px;
-    right: 20px;
+    top: 0;
+    right: 0;
     background: white;
     width: 44px;
     height: 44px;
@@ -151,8 +151,8 @@ body {
 
 .user-menu-dropdown {
     position: absolute;
-    top: 70px;
-    right: 20px;
+    top: 54px;
+    right: 0;
     background: white;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
