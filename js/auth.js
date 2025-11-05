@@ -96,8 +96,9 @@ const authManager = {
             const localContacts = localStorage.getItem('instaConnectContacts');
             const localTags = localStorage.getItem('instaConnectCustomTags');
             const normalUnfollowers = localStorage.getItem('normalUnfollowers');
+            const doNotFollowList = localStorage.getItem('doNotFollowList');
 
-            if (localContacts || localTags || normalUnfollowers) {
+            if (localContacts || localTags || normalUnfollowers || doNotFollowList) {
                 console.log('📦 Migrating local data to Firebase...');
                 
                 const userId = this.currentUser.uid;
@@ -125,6 +126,14 @@ const authManager = {
                     const userDoc = db.collection('users').doc(userId);
                     batch.set(userDoc, {
                         normalUnfollowers: JSON.parse(normalUnfollowers)
+                    }, { merge: true });
+                }
+                
+                // Sauvegarder la liste "à ne plus suivre"
+                if (doNotFollowList) {
+                    const userDoc = db.collection('users').doc(userId);
+                    batch.set(userDoc, {
+                        doNotFollowList: JSON.parse(doNotFollowList)
                     }, { merge: true });
                 }
 
@@ -197,6 +206,12 @@ const authManager = {
                 if (data.normalUnfollowers) {
                     unfollowers.data.normalUnfollowers = new Set(data.normalUnfollowers);
                 }
+                if (data.doNotFollowList) {
+                    unfollowers.data.doNotFollowList = new Set(data.doNotFollowList);
+                }
+                
+                // Update counts
+                unfollowers.updateCounts();
             }
 
             // Charger les contacts avec écoute en temps réel
