@@ -56,13 +56,14 @@ const app = {
                 });
 
                 // Sauvegarder les tags personnalisés
+                console.log('📤 Saving customTags to Firebase:', JSON.stringify(app.customTags));
                 const userDoc = db.collection('users').doc(userId);
                 batch.set(userDoc, {
                     customTags: app.customTags
                 }, { merge: true });
 
                 await batch.commit();
-                console.log('✅ Data saved to Firebase');
+                console.log('✅ Data saved to Firebase successfully');
             } catch (error) {
                 console.error('❌ Error saving to Firebase:', error);
             }
