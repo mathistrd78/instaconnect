@@ -5,15 +5,26 @@ const unfollowers = {
         followers: [],
         unfollowers: [],
         marked: new Set(),
-        normalUnfollowers: new Set() // Ceux qu'on veut ignorer
+        normalUnfollowers: new Set(), // Influenceurs, marques...
+        doNotFollowList: new Set() // Personnes à ne plus suivre
     },
+    
+    pendingFile: null, // Fichier en attente d'analyse
 
     init() {
-        // Load saved normal unfollowers
-        const saved = localStorage.getItem('normalUnfollowers');
-        if (saved) {
-            this.data.normalUnfollowers = new Set(JSON.parse(saved));
+        // Load saved lists
+        const savedNormal = localStorage.getItem('normalUnfollowers');
+        if (savedNormal) {
+            this.data.normalUnfollowers = new Set(JSON.parse(savedNormal));
         }
+        
+        const savedDoNotFollow = localStorage.getItem('doNotFollowList');
+        if (savedDoNotFollow) {
+            this.data.doNotFollowList = new Set(JSON.parse(savedDoNotFollow));
+        }
+        
+        // Update counts
+        this.updateCounts();
 
         // Setup drag & drop
         const uploadZone = document.getElementById('uploadZone');
@@ -34,11 +45,17 @@ const unfollowers = {
                 
                 const files = e.dataTransfer.files;
                 if (files.length > 0 && files[0].name.endsWith('.zip')) {
-                    this.processZipFile(files[0]);
+                    this.handleFileUpload({target: {files: [files[0]]}});
                 } else {
                     alert('Veuillez déposer un fichier ZIP');
                 }
             });
+        }
+        
+        // Setup file input
+        const fileInput = document.getElementById('zipFileInput');
+        if (fileInput) {
+            fileInput.addEventListener('change', (e) => this.handleFileUpload(e));
         }
         
         // Prevent tag edit modal from closing when clicking inside
@@ -50,8 +67,36 @@ const unfollowers = {
         }
     },
 
+    updateCounts() {
+        document.getElementById('normalCount').textContent = this.data.normalUnfollowers.size;
+        document.getElementById('doNotFollowCount').textContent = this.data.doNotFollowList.size;
+    },
+
     saveNormalUnfollowers() {
         localStorage.setItem('normalUnfollowers', JSON.stringify([...this.data.normalUnfollowers]));
+        this.updateCounts();
+        this.saveToFirebase();
+    },
+    
+    saveDoNotFollowList() {
+        localStorage.setItem('doNotFollowList', JSON.stringify([...this.data.doNotFollowList]));
+        this.updateCounts();
+        this.saveToFirebase();
+    },
+    
+    async saveToFirebase() {
+        if (!authManager.currentUser) return;
+        
+        try {
+            const userId = authManager.currentUser.uid;
+            await db.collection('users').doc(userId).set({
+                normalUnfollowers: [...this.data.normalUnfollowers],
+                doNotFollowList: [...this.data.doNotFollowList]
+            }, { merge: true });
+            console.log('✅ Unfollowers lists saved to Firebase');
+        } catch (error) {
+            console.error('❌ Error saving unfollowers lists:', error);
+        }
     },
 
     handleFileUpload(event) {
@@ -63,7 +108,20 @@ const unfollowers = {
             return;
         }
 
-        this.processZipFile(file);
+        // Store file and show discover button
+        this.pendingFile = file;
+        document.getElementById('discoverButtonContainer').style.display = 'block';
+        
+        // Update upload zone text
+        const uploadZone = document.getElementById('uploadZone');
+        uploadZone.querySelector('.upload-text').textContent = '✅ Fichier chargé : ' + file.name;
+        uploadZone.querySelector('.upload-subtext').textContent = 'Cliquez sur "Découvrir" pour analyser';
+    },
+    
+    async analyzeFile() {
+        if (!this.pendingFile) return;
+        
+        await this.processZipFile(this.pendingFile);
     },
 
     async processZipFile(file) {
@@ -224,12 +282,27 @@ const unfollowers = {
     },
 
     markAsUnfollowed(username) {
-        this.data.marked.add(username);
-        this.renderList();
+        if (!confirm(`Ajouter @${username} à la liste "À ne plus suivre" ?\n\nCette personne sera retirée des unfollowers et vous serez alerté si vous tentez de la re-suivre.`)) {
+            return;
+        }
+
+        // Add to do not follow list
+        this.data.doNotFollowList.add(username);
+        this.saveDoNotFollowList();
+        
+        // Remove from unfollowers list
+        this.data.unfollowers = this.data.unfollowers.filter(u => u !== username);
         
         // Update counter
-        const remaining = this.data.unfollowers.filter(u => !this.data.marked.has(u)).length;
-        document.getElementById('unfollowersCount').textContent = remaining;
+        document.getElementById('unfollowersCount').textContent = this.data.unfollowers.length;
+        
+        // Re-render
+        if (this.data.unfollowers.length === 0) {
+            document.getElementById('unfollowersResults').style.display = 'none';
+            document.getElementById('emptyUnfollowers').style.display = 'block';
+        } else {
+            this.renderList();
+        }
     },
 
     markAsNormal(username) {
@@ -310,17 +383,78 @@ const unfollowers = {
         alert(`@${username} retiré des unfollowers normaux.\nIl réapparaîtra lors de la prochaine analyse.`);
     },
 
+    showDoNotFollowList() {
+        if (this.data.doNotFollowList.size === 0) {
+            alert('Aucun utilisateur dans la liste "À ne plus suivre"');
+            return;
+        }
+
+        const list = [...this.data.doNotFollowList].sort();
+        const html = `
+            <div style="max-height: 60vh; overflow-y: auto;">
+                ${list.map(username => `
+                    <div class="unfollower-item">
+                        <div class="unfollower-info">
+                            <div class="unfollower-avatar">${username.charAt(0).toUpperCase()}</div>
+                            <div class="unfollower-username">@${username}</div>
+                        </div>
+                        <button class="btn-mark" onclick="unfollowers.removeFromDoNotFollow('${username}')" style="background: #ff4757; color: white;">
+                            ✕ Retirer
+                        </button>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+
+        // Show in overlay modal
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px;';
+        overlay.innerHTML = `
+            <div style="background: white; border-radius: 16px; max-width: 500px; width: 100%; max-height: 80vh; overflow: hidden; display: flex; flex-direction: column;">
+                <div style="padding: 20px; border-bottom: 1px solid #e9ecef; display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="margin: 0; font-size: 18px;">🚫 À ne plus suivre (${this.data.doNotFollowList.size})</h3>
+                    <button onclick="this.parentElement.parentElement.parentElement.remove()" style="background: #f8f9fa; border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 20px;">✕</button>
+                </div>
+                <div style="padding: 16px; overflow-y: auto; flex: 1;">
+                    ${html}
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+        overlay.onclick = (e) => {
+            if (e.target === overlay) overlay.remove();
+        };
+    },
+
+    removeFromDoNotFollow(username) {
+        this.data.doNotFollowList.delete(username);
+        this.saveDoNotFollowList();
+        
+        // Close and refresh the modal
+        document.querySelector('body > div[style*="position: fixed"]')?.remove();
+        
+        alert(`@${username} retiré de la liste "À ne plus suivre".`);
+    },
+
     reset() {
         this.data.following = [];
         this.data.followers = [];
         this.data.unfollowers = [];
         this.data.marked = new Set();
-        // Keep normalUnfollowers saved
+        this.pendingFile = null;
+        // Keep normalUnfollowers and doNotFollowList saved
 
         document.querySelector('.unfollowers-header').style.display = 'block';
+        document.getElementById('discoverButtonContainer').style.display = 'none';
         document.getElementById('analyzingState').style.display = 'none';
         document.getElementById('unfollowersResults').style.display = 'none';
         document.getElementById('emptyUnfollowers').style.display = 'none';
         document.getElementById('zipFileInput').value = '';
+        
+        // Reset upload zone text
+        const uploadZone = document.getElementById('uploadZone');
+        uploadZone.querySelector('.upload-text').textContent = 'Cliquez ou glissez votre export Instagram';
+        uploadZone.querySelector('.upload-subtext').textContent = 'Fichier ZIP uniquement';
     }
 };
