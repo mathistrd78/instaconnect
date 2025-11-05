@@ -183,15 +183,18 @@ const tags = {
         
         if (!tag) return;
         
-        // Get current color from CSS
-        let currentColor = '#868e96'; // Default gray
-        const styleElement = document.getElementById('style-' + tag.class);
-        if (styleElement) {
-            // Extract color from CSS like: .class { background: #e74c3c; color: white; }
-            const cssText = styleElement.textContent;
-            const match = cssText.match(/background:\s*(#[0-9a-fA-F]{6})/);
-            if (match) {
-                currentColor = match[1];
+        // Get current color - prefer tag.color if available, otherwise read from CSS
+        let currentColor = tag.color || '#868e96'; // Use saved color if exists
+        
+        if (!currentColor || currentColor === '#868e96') {
+            // Fallback: try to read from CSS if color not saved
+            const styleElement = document.getElementById('style-' + tag.class);
+            if (styleElement) {
+                const cssText = styleElement.textContent;
+                const match = cssText.match(/background:\s*(#[0-9a-fA-F]{6})/);
+                if (match) {
+                    currentColor = match[1];
+                }
             }
         }
         
@@ -281,7 +284,13 @@ const tags = {
         const { fieldType, value, tag } = this.currentEdit;
         const newColor = this.currentEdit.selectedColor || '#868e96';
         
-        console.log('💾 Saving tag edit:', { fieldType, value, label: tag.label, color: newColor });
+        console.log('💾 Saving tag edit:', { 
+            fieldType, 
+            value, 
+            label: tag.label, 
+            color: newColor,
+            currentEdit: this.currentEdit 
+        });
         
         // Find existing custom tag
         const existingIndex = app.customTags[fieldType].findIndex(t => t.value === value);
@@ -291,11 +300,14 @@ const tags = {
         if (existingIndex >= 0) {
             // Custom tag already exists → update it (KEEP THE SAME CLASS!)
             console.log('✏️ Updating existing custom tag at index:', existingIndex);
+            console.log('   Before:', JSON.stringify(app.customTags[fieldType][existingIndex]));
             
             className = app.customTags[fieldType][existingIndex].class;
             app.customTags[fieldType][existingIndex].label = tag.label;
+            app.customTags[fieldType][existingIndex].color = newColor; // 🔑 Save color!
             
-            console.log('📝 Keeping same class:', className);
+            console.log('   After:', JSON.stringify(app.customTags[fieldType][existingIndex]));
+            console.log('   📝 Color saved:', newColor);
         } else {
             // New custom tag (first time editing)
             console.log('➕ Creating new custom tag');
@@ -304,11 +316,12 @@ const tags = {
             const newTag = {
                 value: value,
                 label: tag.label,
-                class: className
+                class: className,
+                color: newColor  // 🔑 Save color!
             };
             
             app.customTags[fieldType].push(newTag);
-            console.log('🆕 New class created:', className);
+            console.log('   🆕 New tag:', JSON.stringify(newTag));
         }
         
         // Update or create style for this class
@@ -321,7 +334,8 @@ const tags = {
         }
         styleElement.textContent = `.${className} { background: ${newColor}; color: white; }`;
         
-        console.log('💾 Custom tags after save:', app.customTags[fieldType]);
+        console.log('💾 Full customTags object:', JSON.stringify(app.customTags[fieldType]));
+        console.log('📤 Calling save to Firebase...');
         
         app.dataStore.save();
         contacts.render();
