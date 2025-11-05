@@ -99,6 +99,23 @@ const contacts = {
         let instagram = document.getElementById('instagram').value.toLowerCase().trim();
         if (!instagram.startsWith('@')) instagram = '@' + instagram;
         
+        // Remove @ for checking
+        const cleanUsername = instagram.replace('@', '');
+        
+        // Check if in "do not follow" list
+        if (unfollowers.data.doNotFollowList.has(cleanUsername) && !this.currentEditId) {
+            const proceed = confirm(
+                `⚠️ ATTENTION !\n\n` +
+                `@${cleanUsername} est dans votre liste "À ne plus suivre".\n\n` +
+                `Vous avez marqué ce profil comme quelqu'un à ne plus suivre.\n\n` +
+                `Voulez-vous quand même l'ajouter à vos contacts ?`
+            );
+            
+            if (!proceed) {
+                return; // Cancel adding
+            }
+        }
+        
         const contact = {
             id: this.currentEditId || Date.now().toString(),
             firstName: document.getElementById('firstName').value,
