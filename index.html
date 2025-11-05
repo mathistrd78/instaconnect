@@ -146,7 +146,23 @@
                     <div class="upload-text">Cliquez ou glissez votre export Instagram</div>
                     <div class="upload-subtext">Fichier ZIP uniquement</div>
                 </div>
-                <input type="file" id="zipFileInput" accept=".zip" onchange="unfollowers.handleFileUpload(event)">
+                <input type="file" id="zipFileInput" accept=".zip" style="display: none;">
+                
+                <div id="discoverButtonContainer" style="display: none; text-align: center; margin-top: 16px;">
+                    <button class="btn btn-primary" onclick="unfollowers.analyzeFile()" style="width: 100%;">
+                        🔍 Découvrir les unfollowers
+                    </button>
+                </div>
+            </div>
+
+            <!-- Boutons toujours visibles -->
+            <div class="unfollowers-permanent-actions">
+                <button class="unfollowers-action-btn" onclick="unfollowers.showNormalUnfollowers()" style="background: #feca57; color: #2d3436;">
+                    ⭐ Voir unfollowers normaux (<span id="normalCount">0</span>)
+                </button>
+                <button class="unfollowers-action-btn" onclick="unfollowers.showDoNotFollowList()" style="background: #ff7675; color: white;">
+                    🚫 Utilisateurs à ne plus suivre (<span id="doNotFollowCount">0</span>)
+                </button>
             </div>
 
             <div id="analyzingState" class="analyzing" style="display: none;">
@@ -168,12 +184,6 @@
                         <div class="unfollower-stat-value" id="unfollowersCount">0</div>
                         <div class="unfollower-stat-label">Unfollowers</div>
                     </div>
-                </div>
-
-                <div style="text-align: center; margin-bottom: 12px;">
-                    <button class="reset-btn" onclick="unfollowers.showNormalUnfollowers()" style="background: #feca57; color: #2d3436;">
-                        ⭐ Voir unfollowers normaux (<span id="normalCount">0</span>)
-                    </button>
                 </div>
 
                 <div class="unfollowers-list">
