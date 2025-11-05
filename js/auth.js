@@ -151,6 +151,29 @@ const authManager = {
                 const data = userDoc.data();
                 if (data.customTags) {
                     app.customTags = data.customTags;
+                    
+                    // Recreate CSS styles for custom tags
+                    console.log('🎨 Recreating CSS styles for custom tags...');
+                    Object.keys(app.customTags).forEach(fieldType => {
+                        app.customTags[fieldType].forEach(tag => {
+                            if (tag.class) {
+                                const styleId = 'style-' + tag.class;
+                                
+                                // Remove old style if exists
+                                const oldStyle = document.getElementById(styleId);
+                                if (oldStyle) oldStyle.remove();
+                                
+                                // Create new style
+                                const styleElement = document.createElement('style');
+                                styleElement.id = styleId;
+                                document.head.appendChild(styleElement);
+                                
+                                const color = tag.color || '#868e96';
+                                styleElement.textContent = `.${tag.class} { background: ${color}; color: white; }`;
+                                console.log('✅ Style created for', tag.label, ':', color);
+                            }
+                        });
+                    });
                 }
                 if (data.normalUnfollowers) {
                     unfollowers.data.normalUnfollowers = new Set(data.normalUnfollowers);
