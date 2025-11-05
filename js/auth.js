@@ -157,6 +157,19 @@ const authManager = {
                     Object.keys(app.customTags).forEach(fieldType => {
                         app.customTags[fieldType].forEach(tag => {
                             if (tag.class) {
+                                // If color not saved, try to get it from existing CSS
+                                if (!tag.color) {
+                                    const existingStyle = document.getElementById('style-' + tag.class);
+                                    if (existingStyle) {
+                                        const cssText = existingStyle.textContent;
+                                        const match = cssText.match(/background:\s*(#[0-9a-fA-F]{6})/);
+                                        if (match) {
+                                            tag.color = match[1];
+                                            console.log('🔄 Initialized color from CSS for', tag.label, ':', match[1]);
+                                        }
+                                    }
+                                }
+                                
                                 const styleId = 'style-' + tag.class;
                                 
                                 // Remove old style if exists
@@ -174,6 +187,12 @@ const authManager = {
                             }
                         });
                     });
+                    
+                    // Save back to Firebase to persist the initialized colors
+                    console.log('💾 Saving initialized colors back to Firebase...');
+                    setTimeout(() => {
+                        app.dataStore.save();
+                    }, 1000);
                 }
                 if (data.normalUnfollowers) {
                     unfollowers.data.normalUnfollowers = new Set(data.normalUnfollowers);
