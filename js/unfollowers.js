@@ -164,10 +164,14 @@ const unfollowers = {
             const followersData = JSON.parse(followersText);
 
             // Extract usernames with timestamps
+            console.log('🔍 First following item:', followingData.relationships_following[0]);
+            
             const followingList = followingData.relationships_following.map(item => ({
-                username: item.title,
+                username: item.title || item.string_list_data?.[0]?.value,
                 timestamp: item.timestamp || null
             }));
+            
+            console.log('📅 First followingList item:', followingList[0]);
             
             this.data.following = followingList.map(f => f.username);
             this.data.followers = followersData.map(item => item.string_list_data[0].value);
@@ -181,6 +185,8 @@ const unfollowers = {
                     timestamp: item.timestamp
                 }))
                 .sort((a, b) => a.username.localeCompare(b.username));
+            
+            console.log('👤 First unfollower with timestamp:', this.data.unfollowers[0]);
 
             // Reset marked for new analysis
             this.data.marked = new Set();
@@ -266,6 +272,8 @@ const unfollowers = {
                 const timestamp = typeof item === 'object' ? item.timestamp : null;
                 const isMarked = this.data.marked.has(username);
                 
+                console.log(`🔍 Rendering ${username}, timestamp:`, timestamp, 'type:', typeof timestamp);
+                
                 // Format date if available
                 let dateStr = '';
                 if (timestamp) {
@@ -274,6 +282,7 @@ const unfollowers = {
                     const month = String(date.getMonth() + 1).padStart(2, '0');
                     const year = date.getFullYear();
                     dateStr = `<span class="unfollower-date">since ${day}-${month}-${year}</span>`;
+                    console.log(`📅 Date formatted for ${username}:`, dateStr);
                 }
                 
                 return `
