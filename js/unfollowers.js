@@ -163,15 +163,24 @@ const unfollowers = {
             const followingData = JSON.parse(followingText);
             const followersData = JSON.parse(followersText);
 
-            // Extract usernames
-            this.data.following = followingData.relationships_following.map(item => item.title);
+            // Extract usernames with timestamps
+            const followingList = followingData.relationships_following.map(item => ({
+                username: item.title,
+                timestamp: item.timestamp || null
+            }));
+            
+            this.data.following = followingList.map(f => f.username);
             this.data.followers = followersData.map(item => item.string_list_data[0].value);
 
-            // Calculate unfollowers (exclude normal ones)
-            this.data.unfollowers = this.data.following
-                .filter(username => !this.data.followers.includes(username))
-                .filter(username => !this.data.normalUnfollowers.has(username))
-                .sort();
+            // Calculate unfollowers with dates (exclude normal ones)
+            this.data.unfollowers = followingList
+                .filter(item => !this.data.followers.includes(item.username))
+                .filter(item => !this.data.normalUnfollowers.has(item.username))
+                .map(item => ({
+                    username: item.username,
+                    timestamp: item.timestamp
+                }))
+                .sort((a, b) => a.username.localeCompare(b.username));
 
             // Reset marked for new analysis
             this.data.marked = new Set();
@@ -228,10 +237,11 @@ const unfollowers = {
         
         // Group by first letter
         const grouped = {};
-        this.data.unfollowers.forEach(username => {
+        this.data.unfollowers.forEach(item => {
+            const username = typeof item === 'string' ? item : item.username;
             const firstLetter = username.charAt(0).toUpperCase();
             if (!grouped[firstLetter]) grouped[firstLetter] = [];
-            grouped[firstLetter].push(username);
+            grouped[firstLetter].push(item);
         });
 
         // Sort letters
@@ -240,13 +250,25 @@ const unfollowers = {
         // Render with sections
         const html = letters.map(letter => {
             const users = grouped[letter];
-            const usersHtml = users.map(username => {
+            const usersHtml = users.map(item => {
+                const username = typeof item === 'string' ? item : item.username;
+                const timestamp = typeof item === 'object' ? item.timestamp : null;
                 const isMarked = this.data.marked.has(username);
+                
+                // Format date if available
+                let dateStr = '';
+                if (timestamp) {
+                    const date = new Date(timestamp * 1000); // Instagram timestamp is in seconds
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const year = date.getFullYear();
+                    dateStr = `<span class="unfollower-date">since ${day}-${month}-${year}</span>`;
+                }
                 
                 return `
                     <div class="unfollower-item ${isMarked ? 'unfollowed' : ''}" id="user-${username.replace(/[^a-zA-Z0-9]/g, '_')}">
                         <div class="unfollower-info">
-                            <div class="unfollower-avatar">${username.charAt(0).toUpperCase()}</div>
+                            ${dateStr}
                             <div class="unfollower-username">@${username}</div>
                         </div>
                         <div class="unfollower-actions">
@@ -290,8 +312,11 @@ const unfollowers = {
         this.data.doNotFollowList.add(username);
         this.saveDoNotFollowList();
         
-        // Remove from unfollowers list
-        this.data.unfollowers = this.data.unfollowers.filter(u => u !== username);
+        // Remove from unfollowers list (handle both string and object format)
+        this.data.unfollowers = this.data.unfollowers.filter(item => {
+            const user = typeof item === 'string' ? item : item.username;
+            return user !== username;
+        });
         
         // Update counter
         document.getElementById('unfollowersCount').textContent = this.data.unfollowers.length;
@@ -340,7 +365,6 @@ const unfollowers = {
                 ${list.map(username => `
                     <div class="unfollower-item">
                         <div class="unfollower-info">
-                            <div class="unfollower-avatar">${username.charAt(0).toUpperCase()}</div>
                             <div class="unfollower-username">@${username}</div>
                         </div>
                         <button class="btn-mark" onclick="unfollowers.removeFromNormal('${username}')" style="background: #ff4757; color: white;">
@@ -395,7 +419,6 @@ const unfollowers = {
                 ${list.map(username => `
                     <div class="unfollower-item">
                         <div class="unfollower-info">
-                            <div class="unfollower-avatar">${username.charAt(0).toUpperCase()}</div>
                             <div class="unfollower-username">@${username}</div>
                         </div>
                         <button class="btn-mark" onclick="unfollowers.removeFromDoNotFollow('${username}')" style="background: #ff4757; color: white;">
