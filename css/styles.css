@@ -706,6 +706,15 @@ body.hide-header .container {
     word-break: break-all;
 }
 
+.unfollower-date {
+    font-size: 11px;
+    color: #868e96;
+    font-weight: 500;
+    margin-right: 8px;
+    white-space: nowrap;
+}
+
+
 .unfollower-actions {
     display: flex;
     gap: 8px;
