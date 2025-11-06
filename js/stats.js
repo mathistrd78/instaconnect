@@ -6,8 +6,7 @@ const stats = {
     },
 
     updateCards() {
-        const contacts = app.dataStore.contacts;
-        document.getElementById('statTotal').textContent = contacts.length;
+        // Stats cards are now in the chart section only
     },
 
     renderChart() {
@@ -110,11 +109,23 @@ const stats = {
             return;
         }
 
+        // Special case: single slice = full circle
+        if (data.length === 1) {
+            svg.innerHTML = `<circle cx="150" cy="150" r="120" fill="${data[0].color}" stroke="white" stroke-width="2"/>`;
+            return;
+        }
+
         let currentAngle = -90;
         const cx = 150, cy = 150, r = 120;
 
         const paths = data.map(d => {
             const angle = (d.value / total) * 360;
+            
+            // If this slice is almost the full circle (>359°), draw it as a circle
+            if (angle >= 359.9) {
+                return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${d.color}" stroke="white" stroke-width="2"/>`;
+            }
+            
             const startAngle = currentAngle;
             const endAngle = currentAngle + angle;
             
