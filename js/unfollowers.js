@@ -235,17 +235,28 @@ const unfollowers = {
     renderList() {
         const list = document.getElementById('unfollowersList');
         
+        // Helper function to get first meaningful letter (ignore special chars)
+        const getFirstLetter = (username) => {
+            // Remove leading special characters and get first alphabetic character
+            const match = username.match(/[a-zA-Z]/);
+            return match ? match[0].toUpperCase() : '#';
+        };
+        
         // Group by first letter
         const grouped = {};
         this.data.unfollowers.forEach(item => {
             const username = typeof item === 'string' ? item : item.username;
-            const firstLetter = username.charAt(0).toUpperCase();
+            const firstLetter = getFirstLetter(username);
             if (!grouped[firstLetter]) grouped[firstLetter] = [];
             grouped[firstLetter].push(item);
         });
 
-        // Sort letters
-        const letters = Object.keys(grouped).sort();
+        // Sort letters (# at the end)
+        const letters = Object.keys(grouped).sort((a, b) => {
+            if (a === '#') return 1;
+            if (b === '#') return -1;
+            return a.localeCompare(b);
+        });
 
         // Render with sections
         const html = letters.map(letter => {
@@ -268,8 +279,8 @@ const unfollowers = {
                 return `
                     <div class="unfollower-item ${isMarked ? 'unfollowed' : ''}" id="user-${username.replace(/[^a-zA-Z0-9]/g, '_')}">
                         <div class="unfollower-info">
-                            ${dateStr}
                             <div class="unfollower-username">@${username}</div>
+                            ${dateStr}
                         </div>
                         <div class="unfollower-actions">
                             <button class="btn-unfollow" onclick="unfollowers.openInstagram('${username}')" ${isMarked ? 'disabled' : ''}>
