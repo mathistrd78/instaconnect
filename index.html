@@ -10,7 +10,6 @@
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon.png">
     <link rel="stylesheet" href="css/styles.css">
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
 <body>
     <!-- Auth Page (Login/Signup) -->
@@ -54,7 +53,9 @@
     <div class="header">
         <div class="header-top">
             <h1>📱 InstaConnect</h1>
-            <div class="user-menu-icon" onclick="toggleUserMenu()">👤</div>
+            <div class="user-menu-icon" onclick="toggleUserMenu()">
+                👤
+            </div>
         </div>
         
         <div id="userMenuDropdown" class="user-menu-dropdown">
@@ -98,12 +99,12 @@
 
     <!-- Container Principal -->
     <div class="container">
-        <!-- Section Contacts -->
+        <!-- Section Contacts (Accueil) -->
         <div id="contactsSection" class="section active">
             <div id="emptyState" class="empty-state" style="display: none;">
                 <div class="empty-state-icon">📱</div>
                 <div class="empty-state-text">Aucun contact pour le moment</div>
-                <button class="btn btn-primary" onclick="app.openAddModal()">Ajouter votre premier contact</button>
+                <button class="btn btn-primary" onclick="app.openAddModal()" style="margin: 0 auto;">Ajouter votre premier contact</button>
             </div>
             <div class="contacts-grid" id="contactsGrid"></div>
         </div>
@@ -119,6 +120,8 @@
                     <option value="mois">📅 Par mois d'ajout</option>
                 </select>
             </div>
+
+
             <div class="chart-container">
                 <h3 class="chart-title" id="chartTitle">Répartition par type de relation</h3>
                 <svg id="chartSvg" class="chart-svg" viewBox="0 0 300 300"></svg>
@@ -138,37 +141,86 @@
                     <div class="upload-subtext">Fichier ZIP uniquement</div>
                 </div>
                 
+                <!-- Input file VISIBLE pour PWA iOS (seule solution qui marche) -->
                 <div style="text-align: center; margin-top: 12px;">
-                    <input type="file" id="zipFileInput" accept=".zip,application/zip" 
-                        style="display: block; margin: 0 auto; padding: 12px 20px; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; max-width: 280px;">
+                    <input type="file" id="zipFileInput" accept=".zip,application/zip,application/x-zip-compressed,application/octet-stream" 
+                           style="display: block; margin: 0 auto; padding: 12px 20px; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; max-width: 280px;">
                 </div>
                 
                 <div id="discoverButtonContainer" style="display: none; text-align: center; margin-top: 16px;">
-                    <button class="btn btn-primary" onclick="unfollowers.analyzeFile()">🔍 Découvrir les unfollowers</button>
+                    <button class="btn btn-primary" onclick="unfollowers.analyzeFile()" style="width: 100%;">
+                        🔍 Découvrir les unfollowers
+                    </button>
                 </div>
+            </div>
+
+            <!-- Boutons toujours visibles -->
+            <div class="unfollowers-permanent-actions">
+                <button class="unfollowers-action-btn" onclick="unfollowers.showNormalUnfollowers()" style="background: #feca57; color: #2d3436;">
+                    ⭐ Voir unfollowers normaux (<span id="normalCount">0</span>)
+                </button>
+                <button class="unfollowers-action-btn" onclick="unfollowers.showDoNotFollowList()" style="background: #ff7675; color: white;">
+                    🚫 Utilisateurs à ne plus suivre (<span id="doNotFollowCount">0</span>)
+                </button>
+            </div>
+
+            <div id="analyzingState" class="analyzing" style="display: none;">
+                <div class="spinner"></div>
+                <div style="font-size: 16px; color: #495057; font-weight: 600;">Analyse en cours...</div>
+            </div>
+
+            <div id="unfollowersResults" style="display: none;">
+                <div class="unfollowers-stats">
+                    <div class="unfollower-stat-card">
+                        <div class="unfollower-stat-value" id="followersCount">0</div>
+                        <div class="unfollower-stat-label">Followers</div>
+                    </div>
+                    <div class="unfollower-stat-card">
+                        <div class="unfollower-stat-value" id="followingCount">0</div>
+                        <div class="unfollower-stat-label">Following</div>
+                    </div>
+                    <div class="unfollower-stat-card">
+                        <div class="unfollower-stat-value" id="unfollowersCount">0</div>
+                        <div class="unfollower-stat-label">Unfollowers</div>
+                    </div>
+                </div>
+
+                <div class="unfollowers-list">
+                    <div class="unfollowers-list-header">
+                        <span>Liste des unfollowers</span>
+                        <button class="reset-btn" onclick="unfollowers.reset()" style="padding: 8px 16px; margin: 0;">🔄 Nouvelle analyse</button>
+                    </div>
+                    <div id="unfollowersList"></div>
+                </div>
+            </div>
+
+            <div id="emptyUnfollowers" class="empty-unfollowers" style="display: none;">
+                <div class="empty-unfollowers-icon">🎉</div>
+                <div style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">Aucun unfollower !</div>
+                <div style="font-size: 14px;">Tout le monde que vous suivez vous suit en retour</div>
             </div>
         </div>
     </div>
 
-    <!-- 🔮 Liquid Glass Bottom Navigation -->
-    <nav class="glass-nav">
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
         <div class="nav-item active" onclick="app.switchSection('contacts')">
-            <i class="fas fa-home"></i>
+            <span class="nav-icon">🏠</span>
             <span>Accueil</span>
         </div>
         <div class="nav-item" onclick="app.openAddModal()">
-            <i class="fas fa-plus-circle"></i>
+            <span class="nav-icon">➕</span>
             <span>Ajouter</span>
         </div>
         <div class="nav-item" onclick="app.switchSection('stats')">
-            <i class="fas fa-chart-line"></i>
+            <span class="nav-icon">📊</span>
             <span>Stats</span>
         </div>
         <div class="nav-item" onclick="app.switchSection('unfollowers')">
-            <i class="fas fa-user-slash"></i>
+            <span class="nav-icon">🔴</span>
             <span>Unfollowers</span>
         </div>
-    </nav>
+    </div>
 
     <!-- Overlay -->
     <div id="overlay" class="overlay"></div>
@@ -185,11 +237,130 @@
         <div class="tag-options" id="tagOptionsList"></div>
     </div>
 
-    <!-- Modales -->
-    <div id="addModal" class="modal"></div>
-    <div id="viewModal" class="modal"></div>
-    <div id="tagEditModal" class="modal"></div>
+    <!-- Modal Add/Edit Contact -->
+    <div id="addModal" class="modal">
+        <div class="modal-header">
+            <h2 id="modalTitle">➕ Nouveau contact</h2>
+            <button class="close-btn" onclick="app.closeAddModal()">✕</button>
+        </div>
+        <div class="modal-content">
+            <form id="contactForm" onsubmit="contacts.saveContact(event)">
+                <div class="form-group">
+                    <label>Prénom *</label>
+                    <input type="text" id="firstName" required>
+                </div>
+                <div class="form-group">
+                    <label>Pseudo Instagram *</label>
+                    <div style="position: relative;">
+                        <span style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #868e96; font-weight: 600;">@</span>
+                        <input type="text" id="instagram" required style="padding-left: 36px;" oninput="this.value = this.value.toLowerCase().replace('@', '')">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Type de relation *</label>
+                    <div class="tag-selector" id="relationTypeSelector" onclick="contacts.openTagSelector('relationType')">
+                        <span id="relationTypeDisplay" class="tag-selector-placeholder">Sélectionner...</span>
+                        <span class="tag-selector-arrow">▼</span>
+                    </div>
+                    <input type="hidden" id="relationType" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Lieu de rencontre *</label>
+                    <div class="tag-selector" id="meetingPlaceSelector" onclick="contacts.openTagSelector('meetingPlace')">
+                        <span id="meetingPlaceDisplay" class="tag-selector-placeholder">Sélectionner...</span>
+                        <span class="tag-selector-arrow">▼</span>
+                    </div>
+                    <input type="hidden" id="meetingPlace" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Statut de discussion *</label>
+                    <div class="tag-selector" id="discussionStatusSelector" onclick="contacts.openTagSelector('discussionStatus')">
+                        <span id="discussionStatusDisplay" class="tag-selector-placeholder">Sélectionner...</span>
+                        <span class="tag-selector-arrow">▼</span>
+                    </div>
+                    <input type="hidden" id="discussionStatus" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Études / Profession</label>
+                    <input type="text" id="profession">
+                </div>
+                <div class="form-group">
+                    <label>Lieu d'habitation</label>
+                    <input type="text" id="location">
+                </div>
+                <div class="form-group">
+                    <label>Âge</label>
+                    <input type="number" id="age" min="18" max="99">
+                </div>
+                <div class="form-group">
+                    <label>Numéro de téléphone</label>
+                    <input type="tel" id="phone">
+                </div>
+                <div class="form-group">
+                    <label>Centres d'intérêt</label>
+                    <input type="text" id="interests">
+                </div>
+                <div class="form-group">
+                    <label>Notes personnelles</label>
+                    <textarea id="notes"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">💾 Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
+    <!-- Modal View Profile -->
+    <div id="viewModal" class="modal">
+        <div class="modal-header">
+            <h2>👤 Profil</h2>
+            <button class="close-btn" onclick="app.closeViewModal()">✕</button>
+        </div>
+        <div class="modal-content">
+            <div class="profile-view">
+                <h3 class="profile-name" id="profileName"></h3>
+                <div class="profile-instagram" id="profileInsta" onclick="contacts.openInstagram()"></div>
+                <div class="profile-info" id="profileInfo"></div>
+                <div class="form-actions" style="margin-top: 20px;">
+                    <button class="btn btn-primary" onclick="contacts.editProfile()">✏️ Modifier</button>
+                    <button class="btn btn-danger" onclick="contacts.deleteContact()">🗑️ Supprimer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Tag Edit -->
+    <div id="tagEditModal" class="modal">
+        <div class="modal-header">
+            <h2>✏️ Modifier le tag</h2>
+            <button class="close-btn" onclick="tags.closeEditModal()">✕</button>
+        </div>
+        <div class="modal-content tag-edit-modal">
+            <div class="tag-preview-section">
+                <div style="font-size: 13px; color: #868e96; margin-bottom: 10px;">Aperçu</div>
+                <span class="tag-preview" id="tagPreview">🏷️ Exemple</span>
+            </div>
+            <div class="tag-edit-section">
+                <label>Choisir un emoji</label>
+                <div class="emoji-picker" id="emojiPicker"></div>
+            </div>
+            <div class="tag-edit-section">
+                <label>Choisir une couleur</label>
+                <div class="color-picker" id="colorPicker"></div>
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-primary" onclick="tags.saveEdit()">💾 Enregistrer</button>
+                <button class="btn btn-danger" onclick="tags.deleteTag()">🗑️ Supprimer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
@@ -204,6 +375,7 @@
     <script src="js/unfollowers.js"></script>
     <script src="js/app.js"></script>
     
+    <!-- Auth Functions -->
     <script>
         function showLogin() {
             document.getElementById('loginForm').style.display = 'block';
@@ -211,26 +383,94 @@
             document.getElementById('resetForm').style.display = 'none';
             document.getElementById('authMessage').textContent = '';
         }
-
+        
         function showSignup() {
             document.getElementById('loginForm').style.display = 'none';
             document.getElementById('signupForm').style.display = 'block';
             document.getElementById('resetForm').style.display = 'none';
             document.getElementById('authMessage').textContent = '';
         }
-
+        
         function showResetPassword() {
             document.getElementById('loginForm').style.display = 'none';
             document.getElementById('signupForm').style.display = 'none';
             document.getElementById('resetForm').style.display = 'block';
             document.getElementById('authMessage').textContent = '';
         }
-
+        
+        async function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const message = document.getElementById('authMessage');
+            
+            if (!email || !password) {
+                message.textContent = '⚠️ Veuillez remplir tous les champs';
+                message.className = 'auth-message auth-message-error';
+                return;
+            }
+            
+            const result = await authManager.login(email, password);
+            if (!result.success) {
+                message.textContent = '❌ ' + result.error;
+                message.className = 'auth-message auth-message-error';
+            }
+        }
+        
+        async function handleSignup() {
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            const passwordConfirm = document.getElementById('signupPasswordConfirm').value;
+            const message = document.getElementById('authMessage');
+            
+            if (!email || !password || !passwordConfirm) {
+                message.textContent = '⚠️ Veuillez remplir tous les champs';
+                message.className = 'auth-message auth-message-error';
+                return;
+            }
+            
+            if (password !== passwordConfirm) {
+                message.textContent = '⚠️ Les mots de passe ne correspondent pas';
+                message.className = 'auth-message auth-message-error';
+                return;
+            }
+            
+            const result = await authManager.signup(email, password);
+            if (result.success) {
+                message.textContent = '✅ Compte créé avec succès !';
+                message.className = 'auth-message auth-message-success';
+            } else {
+                message.textContent = '❌ ' + result.error;
+                message.className = 'auth-message auth-message-error';
+            }
+        }
+        
+        async function handleResetPassword() {
+            const email = document.getElementById('resetEmail').value;
+            const message = document.getElementById('authMessage');
+            
+            if (!email) {
+                message.textContent = '⚠️ Veuillez entrer votre email';
+                message.className = 'auth-message auth-message-error';
+                return;
+            }
+            
+            const result = await authManager.resetPassword(email);
+            if (result.success) {
+                message.textContent = '✅ Email de réinitialisation envoyé !';
+                message.className = 'auth-message auth-message-success';
+                setTimeout(() => showLogin(), 2000);
+            } else {
+                message.textContent = '❌ ' + result.error;
+                message.className = 'auth-message auth-message-error';
+            }
+        }
+        
         function toggleUserMenu() {
             const dropdown = document.getElementById('userMenuDropdown');
             dropdown.classList.toggle('active');
         }
-
+        
+        // Close user menu when clicking outside
         document.addEventListener('click', (e) => {
             const icon = document.querySelector('.user-menu-icon');
             const dropdown = document.getElementById('userMenuDropdown');
