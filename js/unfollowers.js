@@ -6,8 +6,7 @@ const unfollowers = {
         unfollowers: [],
         marked: new Set(),
         normalUnfollowers: new Set(), // Influenceurs, marques...
-        doNotFollowList: new Set(), // Personnes à ne plus suivre
-        unfollowedList: new Set(), // Personnes déjà unfollowed
+        unfollowedList: new Set(), // Personnes déjà unfollowed (anciennement doNotFollowList fusionné)
         normalCategories: {} // Catégories des unfollowers normaux
     },
     
@@ -35,14 +34,30 @@ const unfollowers = {
             this.data.normalUnfollowers = new Set(JSON.parse(savedNormal));
         }
         
+        // MIGRATION: Fusionner doNotFollowList dans unfollowedList
         const savedDoNotFollow = localStorage.getItem('doNotFollowList');
-        if (savedDoNotFollow) {
-            this.data.doNotFollowList = new Set(JSON.parse(savedDoNotFollow));
+        const savedUnfollowed = localStorage.getItem('unfollowedList');
+        
+        // Créer unfollowedList en fusionnant les deux listes
+        this.data.unfollowedList = new Set();
+        
+        if (savedUnfollowed) {
+            JSON.parse(savedUnfollowed).forEach(username => {
+                this.data.unfollowedList.add(username);
+            });
         }
         
-        const savedUnfollowed = localStorage.getItem('unfollowedList');
-        if (savedUnfollowed) {
-            this.data.unfollowedList = new Set(JSON.parse(savedUnfollowed));
+        if (savedDoNotFollow) {
+            console.log('🔄 Migration: Fusionner doNotFollowList dans unfollowedList');
+            JSON.parse(savedDoNotFollow).forEach(username => {
+                this.data.unfollowedList.add(username);
+            });
+            // Supprimer l'ancienne liste du localStorage
+            localStorage.removeItem('doNotFollowList');
+            console.log('✅ doNotFollowList supprimée du localStorage');
+            
+            // Sauvegarder la liste fusionnée
+            this.saveUnfollowedList();
         }
         
         const savedCategories = localStorage.getItem('normalCategories');
@@ -175,7 +190,7 @@ const unfollowers = {
 
     updateCounts() {
         document.getElementById('normalCount').textContent = this.data.normalUnfollowers.size;
-        document.getElementById('doNotFollowCount').textContent = this.data.doNotFollowList.size;
+        document.getElementById('doNotFollowCount').textContent = this.data.unfollowedList.size;
     },
 
     saveNormalUnfollowers() {
@@ -193,6 +208,7 @@ const unfollowers = {
     
     saveUnfollowedList() {
         localStorage.setItem('unfollowedList', JSON.stringify([...this.data.unfollowedList]));
+        this.updateCounts();
         this.saveToFirebase();
     },
     
@@ -201,13 +217,26 @@ const unfollowers = {
         
         try {
             const userId = authManager.currentUser.uid;
+            
+            // Sauvegarder les données (sans doNotFollowList)
             await db.collection('users').doc(userId).set({
                 normalUnfollowers: [...this.data.normalUnfollowers],
-                doNotFollowList: [...this.data.doNotFollowList],
                 unfollowedList: [...this.data.unfollowedList],
                 normalCategories: this.data.normalCategories
             }, { merge: true });
+            
+            // Supprimer doNotFollowList de Firebase si elle existe
+            await db.collection('users').doc(userId).update({
+                doNotFollowList: firebase.firestore.FieldValue.delete()
+            }).catch(() => {
+                // Ignorer l'erreur si le champ n'existe pas
+            });
+            
             console.log('✅ Unfollowers lists saved to Firebase');
+        } catch (error) {
+            console.error('❌ Error saving unfollowers lists:', error);
+        }
+    },
         } catch (error) {
             console.error('❌ Error saving unfollowers lists:', error);
         }
@@ -480,30 +509,36 @@ const unfollowers = {
     },
 
     openInstagram(username) {
-        // Open Instagram profile - Fix pour éviter la page blanche sur iPhone
+        // Open Instagram profile - Fix pour PWA iOS
         const instagramUrl = `https://instagram.com/${username}`;
+        const instagramApp = `instagram://user?username=${username}`;
         
-        // Essayer d'ouvrir l'app Instagram
-        window.location.href = `instagram://user?username=${username}`;
+        // En PWA, utiliser uniquement window.open (pas window.location)
+        const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
+                     window.navigator.standalone === true;
         
-        // Fallback vers le navigateur après un court délai
-        setTimeout(() => {
-            // Utiliser window.open avec noopener pour éviter la page blanche
-            const newWindow = window.open(instagramUrl, '_blank', 'noopener,noreferrer');
-            if (newWindow) newWindow.opener = null;
-        }, 500);
+        if (isPWA) {
+            // PWA: Ouvrir directement dans un nouvel onglet
+            console.log('📱 PWA mode - opening in new tab');
+            window.open(instagramUrl, '_blank', 'noopener,noreferrer');
+        } else {
+            // Navigateur: Essayer d'ouvrir l'app Instagram d'abord
+            console.log('🌐 Browser mode - trying app first');
+            window.location.href = instagramApp;
+            
+            // Fallback vers le navigateur après un court délai
+            setTimeout(() => {
+                window.open(instagramUrl, '_blank', 'noopener,noreferrer');
+            }, 500);
+        }
     },
 
     markAsUnfollowed(username) {
-        if (!confirm(`Ajouter @${username} à la liste "À ne plus suivre" ?\n\nCette personne sera retirée des unfollowers et vous serez alerté si vous tentez de la re-suivre.`)) {
+        if (!confirm(`Marquer @${username} comme "Unfollowed" ?\n\nCette personne sera retirée des unfollowers et n'apparaîtra plus dans les prochaines analyses.`)) {
             return;
         }
 
-        // Add to do not follow list
-        this.data.doNotFollowList.add(username);
-        this.saveDoNotFollowList();
-        
-        // Add to unfollowed list (pour ne plus l'afficher dans les prochaines analyses)
+        // Add to unfollowed list
         this.data.unfollowedList.add(username);
         this.saveUnfollowedList();
         
@@ -513,7 +548,7 @@ const unfollowers = {
             return user !== username;
         });
         
-        // NOUVEAU: Diminuer le compteur de following
+        // Diminuer le compteur de following
         const followingCountEl = document.getElementById('followingCount');
         if (followingCountEl) {
             const currentFollowing = parseInt(followingCountEl.textContent);
