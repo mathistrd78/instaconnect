@@ -1,479 +1,667 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#E1306C">
-    <title>InstaConnect</title>
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon.png">
-    <link rel="stylesheet" href="css/styles.css">
-</head>
-<body>
-    <!-- Auth Page (Login/Signup) -->
-    <div id="authPage" class="auth-page">
-        <div class="auth-container">
-            <div class="auth-logo">📱 InstaConnect</div>
-            <div class="auth-subtitle">Votre CRM Instagram</div>
-            
-            <div id="loginForm" class="auth-form">
-                <h2>Connexion</h2>
-                <input type="email" id="loginEmail" placeholder="Email" class="auth-input">
-                <input type="password" id="loginPassword" placeholder="Mot de passe" class="auth-input">
-                <button onclick="handleLogin()" class="auth-btn auth-btn-primary">Se connecter</button>
-                <div class="auth-link" onclick="showSignup()">Pas de compte ? S'inscrire</div>
-                <div class="auth-link" onclick="showResetPassword()">Mot de passe oublié ?</div>
-            </div>
-
-            <div id="signupForm" class="auth-form" style="display: none;">
-                <h2>Inscription</h2>
-                <input type="email" id="signupEmail" placeholder="Email" class="auth-input">
-                <input type="password" id="signupPassword" placeholder="Mot de passe (min. 6 caractères)" class="auth-input">
-                <input type="password" id="signupPasswordConfirm" placeholder="Confirmer le mot de passe" class="auth-input">
-                <button onclick="handleSignup()" class="auth-btn auth-btn-primary">S'inscrire</button>
-                <div class="auth-link" onclick="showLogin()">Déjà un compte ? Se connecter</div>
-            </div>
-
-            <div id="resetForm" class="auth-form" style="display: none;">
-                <h2>Réinitialiser</h2>
-                <input type="email" id="resetEmail" placeholder="Email" class="auth-input">
-                <button onclick="handleResetPassword()" class="auth-btn auth-btn-primary">Envoyer le lien</button>
-                <div class="auth-link" onclick="showLogin()">Retour à la connexion</div>
-            </div>
-
-            <div id="authMessage" class="auth-message"></div>
-        </div>
-    </div>
-
-    <!-- App Page (Main Application) -->
-    <div id="appPage" style="display: none;">
-    <!-- Header -->
-    <div class="header">
-        <div class="header-top">
-            <h1>📱 InstaConnect</h1>
-            <div class="user-menu-icon" onclick="toggleUserMenu()">
-                👤
-            </div>
-        </div>
-        
-        <div id="userMenuDropdown" class="user-menu-dropdown">
-            <div class="user-menu-email" id="userEmail"></div>
-            <div class="user-menu-divider"></div>
-            <div class="user-menu-item" onclick="authManager.logout()">🚪 Déconnexion</div>
-        </div>
-        
-        <input type="text" class="search-box" id="searchBox" placeholder="🔍 Rechercher...">
-        
-        <button class="filters-toggle" onclick="app.toggleFilters()">
-            <span>Filtres</span>
-            <span id="filterIcon">▼</span>
-        </button>
-        
-        <div class="filters-panel" id="filtersPanel">
-            <select class="filter-select" id="filterRelation">
-                <option value="">Type de relation</option>
-                <option value="Ami">👥 Ami</option>
-                <option value="Famille">👨‍👩‍👧 Famille</option>
-                <option value="Connaissance">🤝 Connaissance</option>
-                <option value="Sexe">❤️ Sexe</option>
-            </select>
-            <select class="filter-select" id="filterLieu">
-                <option value="">Lieu de rencontre</option>
-                <option value="IRL">🌍 IRL</option>
-                <option value="Insta">📸 Insta</option>
-                <option value="Tinder">🔥 Tinder</option>
-                <option value="Hinge">💜 Hinge</option>
-                <option value="Soirée Tech">🎵 Soirée Tech</option>
-            </select>
-            <select class="filter-select" id="filterStatut">
-                <option value="">Statut de discussion</option>
-                <option value="Déjà parlé">💬 Déjà parlé</option>
-                <option value="Jamais parlé">🤐 Jamais parlé</option>
-                <option value="En vu">👀 En vu</option>
-                <option value="En cours">📝 En cours</option>
-            </select>
-        </div>
-    </div>
-
-    <!-- Container Principal -->
-    <div class="container">
-        <!-- Section Contacts (Accueil) -->
-        <div id="contactsSection" class="section active">
-            <div id="emptyState" class="empty-state" style="display: none;">
-                <div class="empty-state-icon">📱</div>
-                <div class="empty-state-text">Aucun contact pour le moment</div>
-                <button class="btn btn-primary" onclick="app.openAddModal()" style="margin: 0 auto;">Ajouter votre premier contact</button>
-            </div>
-            <div class="contacts-grid" id="contactsGrid"></div>
-        </div>
-
-        <!-- Section Stats -->
-        <div id="statsSection" class="section">
-            <div class="stats-header">
-                <select class="stats-select" id="statsType" onchange="stats.renderChart()">
-                    <option value="relation">📊 Par type de relation</option>
-                    <option value="lieu">📍 Par lieu de rencontre</option>
-                    <option value="statut">💬 Par statut de discussion</option>
-                    <option value="age">🎂 Par tranche d'âge</option>
-                    <option value="mois">📅 Par mois d'ajout</option>
-                </select>
-            </div>
-
-
-            <div class="chart-container">
-                <h3 class="chart-title" id="chartTitle">Répartition par type de relation</h3>
-                <svg id="chartSvg" class="chart-svg" viewBox="0 0 300 300"></svg>
-                <div class="chart-legend" id="chartLegend"></div>
-            </div>
-        </div>
-
-        <!-- Section Unfollowers -->
-        <div id="unfollowersSection" class="section">
-            <div class="unfollowers-header">
-                <div class="unfollowers-title">🔴 Unfollowers</div>
-                <div class="unfollowers-subtitle">Découvrez qui ne vous suit pas en retour</div>
-                
-                <div class="upload-zone" id="uploadZone" onclick="document.getElementById('zipFileInput').click()">
-                    <div class="upload-icon">📤</div>
-                    <div class="upload-text">Cliquez ou glissez votre export Instagram</div>
-                    <div class="upload-subtext">Fichier ZIP uniquement</div>
-                </div>
-                <input type="file" id="zipFileInput" accept=".zip" style="display: none;">
-                
-                <div id="discoverButtonContainer" style="display: none; text-align: center; margin-top: 16px;">
-                    <button class="btn btn-primary" onclick="unfollowers.analyzeFile()" style="width: 100%;">
-                        🔍 Découvrir les unfollowers
-                    </button>
-                </div>
-            </div>
-
-            <!-- Boutons toujours visibles -->
-            <div class="unfollowers-permanent-actions">
-                <button class="unfollowers-action-btn" onclick="unfollowers.showNormalUnfollowers()" style="background: #feca57; color: #2d3436;">
-                    ⭐ Voir unfollowers normaux (<span id="normalCount">0</span>)
-                </button>
-                <button class="unfollowers-action-btn" onclick="unfollowers.showDoNotFollowList()" style="background: #ff7675; color: white;">
-                    🚫 Utilisateurs à ne plus suivre (<span id="doNotFollowCount">0</span>)
-                </button>
-            </div>
-
-            <div id="analyzingState" class="analyzing" style="display: none;">
-                <div class="spinner"></div>
-                <div style="font-size: 16px; color: #495057; font-weight: 600;">Analyse en cours...</div>
-            </div>
-
-            <div id="unfollowersResults" style="display: none;">
-                <div class="unfollowers-stats">
-                    <div class="unfollower-stat-card">
-                        <div class="unfollower-stat-value" id="followersCount">0</div>
-                        <div class="unfollower-stat-label">Followers</div>
-                    </div>
-                    <div class="unfollower-stat-card">
-                        <div class="unfollower-stat-value" id="followingCount">0</div>
-                        <div class="unfollower-stat-label">Following</div>
-                    </div>
-                    <div class="unfollower-stat-card">
-                        <div class="unfollower-stat-value" id="unfollowersCount">0</div>
-                        <div class="unfollower-stat-label">Unfollowers</div>
-                    </div>
-                </div>
-
-                <div class="unfollowers-list">
-                    <div class="unfollowers-list-header">
-                        <span>Liste des unfollowers</span>
-                        <button class="reset-btn" onclick="unfollowers.reset()" style="padding: 8px 16px; margin: 0;">🔄 Nouvelle analyse</button>
-                    </div>
-                    <div id="unfollowersList"></div>
-                </div>
-            </div>
-
-            <div id="emptyUnfollowers" class="empty-unfollowers" style="display: none;">
-                <div class="empty-unfollowers-icon">🎉</div>
-                <div style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">Aucun unfollower !</div>
-                <div style="font-size: 14px;">Tout le monde que vous suivez vous suit en retour</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Bottom Navigation -->
-    <div class="bottom-nav">
-        <div class="nav-item active" onclick="app.switchSection('contacts')">
-            <span class="nav-icon">🏠</span>
-            <span>Accueil</span>
-        </div>
-        <div class="nav-item" onclick="app.openAddModal()">
-            <span class="nav-icon">➕</span>
-            <span>Ajouter</span>
-        </div>
-        <div class="nav-item" onclick="app.switchSection('stats')">
-            <span class="nav-icon">📊</span>
-            <span>Stats</span>
-        </div>
-        <div class="nav-item" onclick="app.switchSection('unfollowers')">
-            <span class="nav-icon">🔴</span>
-            <span>Unfollowers</span>
-        </div>
-    </div>
-
-    <!-- Overlay -->
-    <div id="overlay" class="overlay"></div>
-
-    <!-- Tag Dropdown -->
-    <div id="tagDropdown" class="tag-dropdown-container">
-        <div class="tag-dropdown-header">
-            <div class="tag-dropdown-title">Sélectionner un tag</div>
-            <button class="tag-dropdown-close" onclick="tags.closeDropdown()">✕</button>
-        </div>
-        <div class="tag-search">
-            <input type="text" id="tagSearchInput" placeholder="Rechercher...">
-        </div>
-        <div class="tag-options" id="tagOptionsList"></div>
-    </div>
-
-    <!-- Modal Add/Edit Contact -->
-    <div id="addModal" class="modal">
-        <div class="modal-header">
-            <h2 id="modalTitle">➕ Nouveau contact</h2>
-            <button class="close-btn" onclick="app.closeAddModal()">✕</button>
-        </div>
-        <div class="modal-content">
-            <form id="contactForm" onsubmit="contacts.saveContact(event)">
-                <div class="form-group">
-                    <label>Prénom *</label>
-                    <input type="text" id="firstName" required>
-                </div>
-                <div class="form-group">
-                    <label>Pseudo Instagram *</label>
-                    <div style="position: relative;">
-                        <span style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #868e96; font-weight: 600;">@</span>
-                        <input type="text" id="instagram" required style="padding-left: 36px;" oninput="this.value = this.value.toLowerCase().replace('@', '')">
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label>Type de relation *</label>
-                    <div class="tag-selector" id="relationTypeSelector" onclick="contacts.openTagSelector('relationType')">
-                        <span id="relationTypeDisplay" class="tag-selector-placeholder">Sélectionner...</span>
-                        <span class="tag-selector-arrow">▼</span>
-                    </div>
-                    <input type="hidden" id="relationType" required>
-                </div>
-                
-                <div class="form-group">
-                    <label>Lieu de rencontre *</label>
-                    <div class="tag-selector" id="meetingPlaceSelector" onclick="contacts.openTagSelector('meetingPlace')">
-                        <span id="meetingPlaceDisplay" class="tag-selector-placeholder">Sélectionner...</span>
-                        <span class="tag-selector-arrow">▼</span>
-                    </div>
-                    <input type="hidden" id="meetingPlace" required>
-                </div>
-                
-                <div class="form-group">
-                    <label>Statut de discussion *</label>
-                    <div class="tag-selector" id="discussionStatusSelector" onclick="contacts.openTagSelector('discussionStatus')">
-                        <span id="discussionStatusDisplay" class="tag-selector-placeholder">Sélectionner...</span>
-                        <span class="tag-selector-arrow">▼</span>
-                    </div>
-                    <input type="hidden" id="discussionStatus" required>
-                </div>
-                
-                <div class="form-group">
-                    <label>Études / Profession</label>
-                    <input type="text" id="profession">
-                </div>
-                <div class="form-group">
-                    <label>Lieu d'habitation</label>
-                    <input type="text" id="location">
-                </div>
-                <div class="form-group">
-                    <label>Âge</label>
-                    <input type="number" id="age" min="18" max="99">
-                </div>
-                <div class="form-group">
-                    <label>Numéro de téléphone</label>
-                    <input type="tel" id="phone">
-                </div>
-                <div class="form-group">
-                    <label>Centres d'intérêt</label>
-                    <input type="text" id="interests">
-                </div>
-                <div class="form-group">
-                    <label>Notes personnelles</label>
-                    <textarea id="notes"></textarea>
-                </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">💾 Enregistrer</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal View Profile -->
-    <div id="viewModal" class="modal">
-        <div class="modal-header">
-            <h2>👤 Profil</h2>
-            <button class="close-btn" onclick="app.closeViewModal()">✕</button>
-        </div>
-        <div class="modal-content">
-            <div class="profile-view">
-                <h3 class="profile-name" id="profileName"></h3>
-                <div class="profile-instagram" id="profileInsta" onclick="contacts.openInstagram()"></div>
-                <div class="profile-info" id="profileInfo"></div>
-                <div class="form-actions" style="margin-top: 20px;">
-                    <button class="btn btn-primary" onclick="contacts.editProfile()">✏️ Modifier</button>
-                    <button class="btn btn-danger" onclick="contacts.deleteContact()">🗑️ Supprimer</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Tag Edit -->
-    <div id="tagEditModal" class="modal">
-        <div class="modal-header">
-            <h2>✏️ Modifier le tag</h2>
-            <button class="close-btn" onclick="tags.closeEditModal()">✕</button>
-        </div>
-        <div class="modal-content tag-edit-modal">
-            <div class="tag-preview-section">
-                <div style="font-size: 13px; color: #868e96; margin-bottom: 10px;">Aperçu</div>
-                <span class="tag-preview" id="tagPreview">🏷️ Exemple</span>
-            </div>
-            <div class="tag-edit-section">
-                <label>Choisir un emoji</label>
-                <div class="emoji-picker" id="emojiPicker"></div>
-            </div>
-            <div class="tag-edit-section">
-                <label>Choisir une couleur</label>
-                <div class="color-picker" id="colorPicker"></div>
-            </div>
-            <div class="form-actions">
-                <button class="btn btn-primary" onclick="tags.saveEdit()">💾 Enregistrer</button>
-                <button class="btn btn-danger" onclick="tags.deleteTag()">🗑️ Supprimer</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Scripts -->
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+// unfollowers.js - Analyse des unfollowers Instagram
+const unfollowers = {
+    data: {
+        following: [],
+        followers: [],
+        unfollowers: [],
+        marked: new Set(),
+        normalUnfollowers: new Set(), // Influenceurs, marques...
+        doNotFollowList: new Set(), // Personnes à ne plus suivre
+        unfollowedList: new Set(), // Personnes déjà unfollowed
+        normalCategories: {} // Catégories des unfollowers normaux
+    },
     
-    <!-- App Scripts -->
-    <script src="js/firebase-config.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/tags.js"></script>
-    <script src="js/contacts.js"></script>
-    <script src="js/stats.js"></script>
-    <script src="js/unfollowers.js"></script>
-    <script src="js/app.js"></script>
+    pendingFile: null, // Fichier en attente d'analyse
+
+    init() {
+        // Load saved lists
+        const savedNormal = localStorage.getItem('normalUnfollowers');
+        if (savedNormal) {
+            this.data.normalUnfollowers = new Set(JSON.parse(savedNormal));
+        }
+        
+        const savedDoNotFollow = localStorage.getItem('doNotFollowList');
+        if (savedDoNotFollow) {
+            this.data.doNotFollowList = new Set(JSON.parse(savedDoNotFollow));
+        }
+        
+        const savedUnfollowed = localStorage.getItem('unfollowedList');
+        if (savedUnfollowed) {
+            this.data.unfollowedList = new Set(JSON.parse(savedUnfollowed));
+        }
+        
+        const savedCategories = localStorage.getItem('normalCategories');
+        if (savedCategories) {
+            this.data.normalCategories = JSON.parse(savedCategories);
+        }
+        
+        // Update counts
+        this.updateCounts();
+
+        // Setup drag & drop
+        const uploadZone = document.getElementById('uploadZone');
+        
+        if (uploadZone) {
+            uploadZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadZone.classList.add('dragover');
+            });
+
+            uploadZone.addEventListener('dragleave', () => {
+                uploadZone.classList.remove('dragover');
+            });
+
+            uploadZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadZone.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0 && files[0].name.endsWith('.zip')) {
+                    this.handleFileUpload({target: {files: [files[0]]}});
+                } else {
+                    alert('Veuillez déposer un fichier ZIP');
+                }
+            });
+        }
+        
+        // Setup file input
+        const fileInput = document.getElementById('zipFileInput');
+        if (fileInput) {
+            fileInput.addEventListener('change', (e) => this.handleFileUpload(e));
+        }
+        
+        // Prevent tag edit modal from closing when clicking inside
+        const tagEditModal = document.getElementById('tagEditModal');
+        if (tagEditModal) {
+            tagEditModal.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+        }
+    },
+
+    updateCounts() {
+        document.getElementById('normalCount').textContent = this.data.normalUnfollowers.size;
+        document.getElementById('doNotFollowCount').textContent = this.data.doNotFollowList.size;
+    },
+
+    saveNormalUnfollowers() {
+        localStorage.setItem('normalUnfollowers', JSON.stringify([...this.data.normalUnfollowers]));
+        localStorage.setItem('normalCategories', JSON.stringify(this.data.normalCategories));
+        this.updateCounts();
+        this.saveToFirebase();
+    },
     
-    <!-- Auth Functions -->
-    <script>
-        function showLogin() {
-            document.getElementById('loginForm').style.display = 'block';
-            document.getElementById('signupForm').style.display = 'none';
-            document.getElementById('resetForm').style.display = 'none';
-            document.getElementById('authMessage').textContent = '';
+    saveDoNotFollowList() {
+        localStorage.setItem('doNotFollowList', JSON.stringify([...this.data.doNotFollowList]));
+        this.updateCounts();
+        this.saveToFirebase();
+    },
+    
+    saveUnfollowedList() {
+        localStorage.setItem('unfollowedList', JSON.stringify([...this.data.unfollowedList]));
+        this.saveToFirebase();
+    },
+    
+    async saveToFirebase() {
+        if (!authManager.currentUser) return;
+        
+        try {
+            const userId = authManager.currentUser.uid;
+            await db.collection('users').doc(userId).set({
+                normalUnfollowers: [...this.data.normalUnfollowers],
+                doNotFollowList: [...this.data.doNotFollowList],
+                unfollowedList: [...this.data.unfollowedList],
+                normalCategories: this.data.normalCategories
+            }, { merge: true });
+            console.log('✅ Unfollowers lists saved to Firebase');
+        } catch (error) {
+            console.error('❌ Error saving unfollowers lists:', error);
+        }
+    },
+
+    handleFileUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        if (!file.name.endsWith('.zip')) {
+            alert('Veuillez sélectionner un fichier ZIP');
+            return;
+        }
+
+        // Store file and show discover button
+        this.pendingFile = file;
+        document.getElementById('discoverButtonContainer').style.display = 'block';
+        
+        // Update upload zone text
+        const uploadZone = document.getElementById('uploadZone');
+        uploadZone.querySelector('.upload-text').textContent = '✅ Fichier chargé : ' + file.name;
+        uploadZone.querySelector('.upload-subtext').textContent = 'Cliquez sur "Découvrir" pour analyser';
+    },
+    
+    async analyzeFile() {
+        if (!this.pendingFile) return;
+        
+        await this.processZipFile(this.pendingFile);
+    },
+
+    async processZipFile(file) {
+        // Show analyzing state
+        document.querySelector('.unfollowers-header').style.display = 'none';
+        document.getElementById('analyzingState').style.display = 'block';
+        document.getElementById('unfollowersResults').style.display = 'none';
+        document.getElementById('emptyUnfollowers').style.display = 'none';
+
+        try {
+            // Load JSZip library from CDN
+            if (typeof JSZip === 'undefined') {
+                await this.loadJSZip();
+            }
+
+            const zip = new JSZip();
+            const contents = await zip.loadAsync(file);
+
+            // Find following and followers files
+            let followingFile = null;
+            let followersFile = null;
+
+            contents.forEach((relativePath, zipEntry) => {
+                if (relativePath.includes('following.json')) {
+                    followingFile = zipEntry;
+                } else if (relativePath.includes('followers_1.json')) {
+                    followersFile = zipEntry;
+                }
+            });
+
+            if (!followingFile || !followersFile) {
+                throw new Error('Fichiers following.json ou followers_1.json introuvables dans le ZIP');
+            }
+
+            // Parse JSON files
+            const followingText = await followingFile.async('text');
+            const followersText = await followersFile.async('text');
+
+            const followingData = JSON.parse(followingText);
+            const followersData = JSON.parse(followersText);
+
+            // Extract usernames with timestamps
+            console.log('🔍 First following item:', followingData.relationships_following[0]);
+            
+            const followingList = followingData.relationships_following.map(item => ({
+                username: item.title || item.string_list_data?.[0]?.value,
+                timestamp: item.timestamp || null
+            }));
+            
+            console.log('📅 First followingList item:', followingList[0]);
+            
+            this.data.following = followingList.map(f => f.username);
+            this.data.followers = followersData.map(item => item.string_list_data[0].value);
+
+            // Calculate unfollowers with dates (exclude normal ones AND unfollowed ones)
+            this.data.unfollowers = followingList
+                .filter(item => !this.data.followers.includes(item.username))
+                .filter(item => !this.data.normalUnfollowers.has(item.username))
+                .filter(item => !this.data.unfollowedList.has(item.username)) // NOUVEAU: Exclure les unfollowed
+                .map(item => ({
+                    username: item.username,
+                    timestamp: item.timestamp
+                }))
+                .sort((a, b) => a.username.localeCompare(b.username));
+            
+            console.log('👤 First unfollower with timestamp:', this.data.unfollowers[0]);
+
+            // Reset marked for new analysis
+            this.data.marked = new Set();
+
+            // Display results
+            this.displayResults();
+
+        } catch (error) {
+            console.error('Erreur:', error);
+            alert('Erreur lors de l\'analyse du fichier: ' + error.message);
+            this.reset();
+        }
+    },
+
+    async loadJSZip() {
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
+        });
+    },
+
+    displayResults() {
+        // Hide analyzing
+        document.getElementById('analyzingState').style.display = 'none';
+
+        // Update stats - NOUVEL ORDRE: Followers, Following, Unfollowers
+        document.getElementById('followersCount').textContent = this.data.followers.length;
+        document.getElementById('followingCount').textContent = this.data.following.length;
+        document.getElementById('unfollowersCount').textContent = this.data.unfollowers.length;
+        
+        // Update normal unfollowers count
+        const normalCountEl = document.getElementById('normalCount');
+        if (normalCountEl) {
+            normalCountEl.textContent = this.data.normalUnfollowers.size;
+        }
+
+        if (this.data.unfollowers.length === 0) {
+            document.getElementById('emptyUnfollowers').style.display = 'block';
+            return;
+        }
+
+        // Display results
+        document.getElementById('unfollowersResults').style.display = 'block';
+
+        // Render list
+        this.renderList();
+    },
+
+    renderList() {
+        const list = document.getElementById('unfollowersList');
+        
+        // Helper function to get first meaningful letter (ignore special chars)
+        const getFirstLetter = (username) => {
+            // Remove leading special characters and get first alphabetic character
+            const match = username.match(/[a-zA-Z]/);
+            return match ? match[0].toUpperCase() : '#';
+        };
+        
+        // Group by first letter
+        const grouped = {};
+        this.data.unfollowers.forEach(item => {
+            const username = typeof item === 'string' ? item : item.username;
+            const firstLetter = getFirstLetter(username);
+            if (!grouped[firstLetter]) grouped[firstLetter] = [];
+            grouped[firstLetter].push(item);
+        });
+
+        // Sort letters (# at the end)
+        const letters = Object.keys(grouped).sort((a, b) => {
+            if (a === '#') return 1;
+            if (b === '#') return -1;
+            return a.localeCompare(b);
+        });
+
+        // Render with sections
+        const html = letters.map(letter => {
+            const users = grouped[letter];
+            const usersHtml = users.map(item => {
+                const username = typeof item === 'string' ? item : item.username;
+                const timestamp = typeof item === 'object' ? item.timestamp : null;
+                const isMarked = this.data.marked.has(username);
+                
+                console.log(`🔍 Rendering ${username}, timestamp:`, timestamp, 'type:', typeof timestamp);
+                
+                // Format date if available
+                let dateStr = '';
+                if (timestamp) {
+                    const date = new Date(timestamp * 1000); // Instagram timestamp is in seconds
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const year = date.getFullYear();
+                    dateStr = `<span class="unfollower-date">since ${day}-${month}-${year}</span>`;
+                    console.log(`📅 Date formatted for ${username}:`, dateStr);
+                }
+                
+                return `
+                    <div class="unfollower-item ${isMarked ? 'unfollowed' : ''}" id="user-${username.replace(/[^a-zA-Z0-9]/g, '_')}">
+                        <div class="unfollower-info">
+                            <div class="unfollower-username">@${username}</div>
+                            ${dateStr}
+                        </div>
+                        <div class="unfollower-actions">
+                            <button class="btn-unfollow" onclick="unfollowers.openInstagram('${username}')" ${isMarked ? 'disabled' : ''}>
+                                ${isMarked ? '✓ Fait' : '🔗 Profil'}
+                            </button>
+                            ${!isMarked ? `
+                                <button class="btn-mark" onclick="unfollowers.markAsUnfollowed('${username}')" title="Marquer comme unfollowed">✓</button>
+                                <button class="btn-normal" onclick="unfollowers.markAsNormal('${username}')" title="C'est normal">⭐</button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            return `
+                <div class="letter-section">
+                    <div class="letter-header">${letter}</div>
+                    ${usersHtml}
+                </div>
+            `;
+        }).join('');
+
+        list.innerHTML = html;
+    },
+
+    openInstagram(username) {
+        // Open Instagram profile - Fix pour éviter la page blanche sur iPhone
+        const instagramUrl = `https://instagram.com/${username}`;
+        
+        // Essayer d'ouvrir l'app Instagram
+        window.location.href = `instagram://user?username=${username}`;
+        
+        // Fallback vers le navigateur après un court délai
+        setTimeout(() => {
+            // Utiliser window.open avec noopener pour éviter la page blanche
+            const newWindow = window.open(instagramUrl, '_blank', 'noopener,noreferrer');
+            if (newWindow) newWindow.opener = null;
+        }, 500);
+    },
+
+    markAsUnfollowed(username) {
+        if (!confirm(`Ajouter @${username} à la liste "À ne plus suivre" ?\n\nCette personne sera retirée des unfollowers et vous serez alerté si vous tentez de la re-suivre.`)) {
+            return;
+        }
+
+        // Add to do not follow list
+        this.data.doNotFollowList.add(username);
+        this.saveDoNotFollowList();
+        
+        // Add to unfollowed list (pour ne plus l'afficher dans les prochaines analyses)
+        this.data.unfollowedList.add(username);
+        this.saveUnfollowedList();
+        
+        // Remove from unfollowers list (handle both string and object format)
+        this.data.unfollowers = this.data.unfollowers.filter(item => {
+            const user = typeof item === 'string' ? item : item.username;
+            return user !== username;
+        });
+        
+        // NOUVEAU: Diminuer le compteur de following
+        const followingCountEl = document.getElementById('followingCount');
+        if (followingCountEl) {
+            const currentFollowing = parseInt(followingCountEl.textContent);
+            followingCountEl.textContent = currentFollowing - 1;
         }
         
-        function showSignup() {
-            document.getElementById('loginForm').style.display = 'none';
-            document.getElementById('signupForm').style.display = 'block';
-            document.getElementById('resetForm').style.display = 'none';
-            document.getElementById('authMessage').textContent = '';
+        // Update unfollowers counter
+        document.getElementById('unfollowersCount').textContent = this.data.unfollowers.length;
+        
+        // Re-render
+        if (this.data.unfollowers.length === 0) {
+            document.getElementById('unfollowersResults').style.display = 'none';
+            document.getElementById('emptyUnfollowers').style.display = 'block';
+        } else {
+            this.renderList();
+        }
+    },
+
+    markAsNormal(username) {
+        if (!confirm(`Marquer @${username} comme "unfollower normal" ?\nCe profil n'apparaîtra plus dans les prochaines analyses.`)) {
+            return;
+        }
+
+        this.data.normalUnfollowers.add(username);
+        this.saveNormalUnfollowers();
+        
+        // NOUVEAU: Remove from current list (handle both string and object format)
+        this.data.unfollowers = this.data.unfollowers.filter(item => {
+            const user = typeof item === 'string' ? item : item.username;
+            return user !== username;
+        });
+        
+        // Update counter
+        document.getElementById('unfollowersCount').textContent = this.data.unfollowers.length;
+        
+        // Re-render (disparaît immédiatement)
+        if (this.data.unfollowers.length === 0) {
+            document.getElementById('unfollowersResults').style.display = 'none';
+            document.getElementById('emptyUnfollowers').style.display = 'block';
+        } else {
+            this.renderList();
+        }
+    },
+
+    setCategoryForNormal(username, category) {
+        this.data.normalCategories[username] = category;
+        this.saveNormalUnfollowers();
+    },
+
+    getCategoryIcon(category) {
+        const icons = {
+            'disabled': '🚫',
+            'celebrity': '⭐',
+            'business': '💼'
+        };
+        return icons[category] || '';
+    },
+
+    getCategoryLabel(category) {
+        const labels = {
+            'disabled': 'Désactivé',
+            'celebrity': 'Personnalité',
+            'business': 'Marque/Pro'
+        };
+        return labels[category] || '';
+    },
+
+    showNormalUnfollowers() {
+        if (this.data.normalUnfollowers.size === 0) {
+            alert('Aucun unfollower normal enregistré');
+            return;
+        }
+
+        const list = [...this.data.normalUnfollowers].sort();
+        
+        // Create the modal with filters
+        const overlay = document.createElement('div');
+        overlay.id = 'normalUnfollowersModal';
+        overlay.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px;';
+        overlay.innerHTML = `
+            <div style="background: white; border-radius: 16px; max-width: 600px; width: 100%; max-height: 80vh; overflow: hidden; display: flex; flex-direction: column;">
+                <div style="padding: 20px; border-bottom: 1px solid #e9ecef;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <h3 style="margin: 0; font-size: 18px;">⭐ Unfollowers normaux (${this.data.normalUnfollowers.size})</h3>
+                        <button onclick="document.getElementById('normalUnfollowersModal').remove()" style="background: #f8f9fa; border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 20px;">✕</button>
+                    </div>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button onclick="unfollowers.filterNormalByCategory('all')" id="filterAll" style="background: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px;">
+                            Tous
+                        </button>
+                        <button onclick="unfollowers.filterNormalByCategory('disabled')" id="filterDisabled" style="background: #f8f9fa; color: #495057; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px;">
+                            🚫 Désactivés
+                        </button>
+                        <button onclick="unfollowers.filterNormalByCategory('celebrity')" id="filterCelebrity" style="background: #f8f9fa; color: #495057; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px;">
+                            ⭐ Personnalités
+                        </button>
+                        <button onclick="unfollowers.filterNormalByCategory('business')" id="filterBusiness" style="background: #f8f9fa; color: #495057; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px;">
+                            💼 Marques/Pro
+                        </button>
+                        <button onclick="unfollowers.filterNormalByCategory('uncategorized')" id="filterUncategorized" style="background: #f8f9fa; color: #495057; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px;">
+                            Sans catégorie
+                        </button>
+                    </div>
+                </div>
+                <div id="normalUnfollowersList" style="padding: 16px; overflow-y: auto; flex: 1;">
+                    ${this.renderNormalList(list, 'all')}
+                </div>
+            </div>
+        `;
+
+        // Remove existing overlay if any
+        document.getElementById('normalUnfollowersModal')?.remove();
+        
+        document.body.appendChild(overlay);
+        overlay.onclick = (e) => {
+            if (e.target === overlay) overlay.remove();
+        };
+    },
+    
+    renderNormalList(list, filter) {
+        const filteredList = list.filter(username => {
+            const category = this.data.normalCategories[username] || null;
+            if (filter === 'all') return true;
+            if (filter === 'uncategorized') return !category;
+            return category === filter;
+        });
+        
+        if (filteredList.length === 0) {
+            return '<div style="text-align: center; color: #6c757d; padding: 20px;">Aucun unfollower dans cette catégorie</div>';
         }
         
-        function showResetPassword() {
-            document.getElementById('loginForm').style.display = 'none';
-            document.getElementById('signupForm').style.display = 'none';
-            document.getElementById('resetForm').style.display = 'block';
-            document.getElementById('authMessage').textContent = '';
-        }
-        
-        async function handleLogin() {
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            const message = document.getElementById('authMessage');
-            
-            if (!email || !password) {
-                message.textContent = '⚠️ Veuillez remplir tous les champs';
-                message.className = 'auth-message auth-message-error';
-                return;
-            }
-            
-            const result = await authManager.login(email, password);
-            if (!result.success) {
-                message.textContent = '❌ ' + result.error;
-                message.className = 'auth-message auth-message-error';
-            }
-        }
-        
-        async function handleSignup() {
-            const email = document.getElementById('signupEmail').value;
-            const password = document.getElementById('signupPassword').value;
-            const passwordConfirm = document.getElementById('signupPasswordConfirm').value;
-            const message = document.getElementById('authMessage');
-            
-            if (!email || !password || !passwordConfirm) {
-                message.textContent = '⚠️ Veuillez remplir tous les champs';
-                message.className = 'auth-message auth-message-error';
-                return;
-            }
-            
-            if (password !== passwordConfirm) {
-                message.textContent = '⚠️ Les mots de passe ne correspondent pas';
-                message.className = 'auth-message auth-message-error';
-                return;
-            }
-            
-            const result = await authManager.signup(email, password);
-            if (result.success) {
-                message.textContent = '✅ Compte créé avec succès !';
-                message.className = 'auth-message auth-message-success';
-            } else {
-                message.textContent = '❌ ' + result.error;
-                message.className = 'auth-message auth-message-error';
-            }
-        }
-        
-        async function handleResetPassword() {
-            const email = document.getElementById('resetEmail').value;
-            const message = document.getElementById('authMessage');
-            
-            if (!email) {
-                message.textContent = '⚠️ Veuillez entrer votre email';
-                message.className = 'auth-message auth-message-error';
-                return;
-            }
-            
-            const result = await authManager.resetPassword(email);
-            if (result.success) {
-                message.textContent = '✅ Email de réinitialisation envoyé !';
-                message.className = 'auth-message auth-message-success';
-                setTimeout(() => showLogin(), 2000);
-            } else {
-                message.textContent = '❌ ' + result.error;
-                message.className = 'auth-message auth-message-error';
-            }
-        }
-        
-        function toggleUserMenu() {
-            const dropdown = document.getElementById('userMenuDropdown');
-            dropdown.classList.toggle('active');
-        }
-        
-        // Close user menu when clicking outside
-        document.addEventListener('click', (e) => {
-            const icon = document.querySelector('.user-menu-icon');
-            const dropdown = document.getElementById('userMenuDropdown');
-            if (icon && dropdown && !icon.contains(e.target) && !dropdown.contains(e.target)) {
-                dropdown.classList.remove('active');
+        return filteredList.map(username => {
+            const category = this.data.normalCategories[username] || null;
+            return `
+                <div class="unfollower-item" style="padding: 12px;">
+                    <div class="unfollower-info">
+                        <div class="unfollower-username">
+                            <a href="https://instagram.com/${username}" target="_blank" rel="noopener noreferrer" style="color: #007bff; text-decoration: none;">@${username}</a>
+                            ${category ? `<span style="margin-left: 8px; font-size: 12px; color: #6c757d;">${this.getCategoryIcon(category)} ${this.getCategoryLabel(category)}</span>` : ''}
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 6px; align-items: center;">
+                        <button onclick="unfollowers.setCategoryForNormal('${username}', 'disabled'); unfollowers.refreshNormalList();" 
+                            style="background: ${category === 'disabled' ? '#ff4757' : '#f8f9fa'}; color: ${category === 'disabled' ? 'white' : '#495057'}; border: none; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 16px;" 
+                            title="Compte désactivé">
+                            🚫
+                        </button>
+                        <button onclick="unfollowers.setCategoryForNormal('${username}', 'celebrity'); unfollowers.refreshNormalList();" 
+                            style="background: ${category === 'celebrity' ? '#ffd93d' : '#f8f9fa'}; color: ${category === 'celebrity' ? 'white' : '#495057'}; border: none; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 16px;" 
+                            title="Personnalité publique">
+                            ⭐
+                        </button>
+                        <button onclick="unfollowers.setCategoryForNormal('${username}', 'business'); unfollowers.refreshNormalList();" 
+                            style="background: ${category === 'business' ? '#5f27cd' : '#f8f9fa'}; color: ${category === 'business' ? 'white' : '#495057'}; border: none; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 16px;" 
+                            title="Marque/Contenu pro">
+                            💼
+                        </button>
+                        <button class="btn-mark" onclick="unfollowers.removeFromNormal('${username}')" style="background: #ff4757; color: white; padding: 6px 10px;">
+                            ✕
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    },
+    
+    filterNormalByCategory(category) {
+        // Update button styles
+        ['All', 'Disabled', 'Celebrity', 'Business', 'Uncategorized'].forEach(cat => {
+            const btn = document.getElementById(`filter${cat}`);
+            if (btn) {
+                if (cat.toLowerCase() === category || (cat === 'All' && category === 'all')) {
+                    btn.style.background = '#007bff';
+                    btn.style.color = 'white';
+                } else {
+                    btn.style.background = '#f8f9fa';
+                    btn.style.color = '#495057';
+                }
             }
         });
-    </script>
-</div> <!-- End of appPage -->
-</body>
-</html>
+        
+        // Re-render list with filter
+        const list = [...this.data.normalUnfollowers].sort();
+        const listContainer = document.getElementById('normalUnfollowersList');
+        if (listContainer) {
+            listContainer.innerHTML = this.renderNormalList(list, category);
+        }
+    },
+    
+    refreshNormalList() {
+        // Get current filter
+        const buttons = ['filterAll', 'filterDisabled', 'filterCelebrity', 'filterBusiness', 'filterUncategorized'];
+        let currentFilter = 'all';
+        
+        buttons.forEach(btnId => {
+            const btn = document.getElementById(btnId);
+            if (btn && btn.style.background === 'rgb(0, 123, 255)') {
+                currentFilter = btnId.replace('filter', '').toLowerCase();
+            }
+        });
+        
+        this.filterNormalByCategory(currentFilter);
+    },
+
+    removeFromNormal(username) {
+        this.data.normalUnfollowers.delete(username);
+        delete this.data.normalCategories[username];
+        this.saveNormalUnfollowers();
+        
+        // Close the modal
+        document.getElementById('normalUnfollowersModal')?.remove();
+        
+        // Show confirmation
+        alert(`@${username} retiré des unfollowers normaux.\nIl réapparaîtra lors de la prochaine analyse.`);
+    },
+
+    showDoNotFollowList() {
+        if (this.data.doNotFollowList.size === 0) {
+            alert('Aucun utilisateur dans la liste "À ne plus suivre"');
+            return;
+        }
+
+        const list = [...this.data.doNotFollowList].sort();
+        const html = `
+            <div style="max-height: 60vh; overflow-y: auto;">
+                ${list.map(username => `
+                    <div class="unfollower-item">
+                        <div class="unfollower-info">
+                            <div class="unfollower-username">@${username}</div>
+                        </div>
+                        <button class="btn-mark" onclick="unfollowers.removeFromDoNotFollow('${username}')" style="background: #ff4757; color: white;">
+                            ✕ Retirer
+                        </button>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+
+        // Show in overlay modal
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px;';
+        overlay.innerHTML = `
+            <div style="background: white; border-radius: 16px; max-width: 500px; width: 100%; max-height: 80vh; overflow: hidden; display: flex; flex-direction: column;">
+                <div style="padding: 20px; border-bottom: 1px solid #e9ecef; display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="margin: 0; font-size: 18px;">🚫 À ne plus suivre (${this.data.doNotFollowList.size})</h3>
+                    <button onclick="this.parentElement.parentElement.parentElement.remove()" style="background: #f8f9fa; border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 20px;">✕</button>
+                </div>
+                <div style="padding: 16px; overflow-y: auto; flex: 1;">
+                    ${html}
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+        overlay.onclick = (e) => {
+            if (e.target === overlay) overlay.remove();
+        };
+    },
+
+    removeFromDoNotFollow(username) {
+        this.data.doNotFollowList.delete(username);
+        this.saveDoNotFollowList();
+        
+        // Also remove from unfollowed list
+        this.data.unfollowedList.delete(username);
+        this.saveUnfollowedList();
+        
+        // Close and refresh the modal
+        document.querySelector('body > div[style*="position: fixed"]')?.remove();
+        
+        alert(`@${username} retiré de la liste "À ne plus suivre".`);
+    },
+
+    reset() {
+        this.data.following = [];
+        this.data.followers = [];
+        this.data.unfollowers = [];
+        this.data.marked = new Set();
+        this.pendingFile = null;
+        // Keep normalUnfollowers, doNotFollowList, unfollowedList and normalCategories saved
+
+        document.querySelector('.unfollowers-header').style.display = 'block';
+        document.getElementById('discoverButtonContainer').style.display = 'none';
+        document.getElementById('analyzingState').style.display = 'none';
+        document.getElementById('unfollowersResults').style.display = 'none';
+        document.getElementById('emptyUnfollowers').style.display = 'none';
+        document.getElementById('zipFileInput').value = '';
+        
+        // Reset upload zone text
+        const uploadZone = document.getElementById('uploadZone');
+        uploadZone.querySelector('.upload-text').textContent = 'Cliquez ou glissez votre export Instagram';
+        uploadZone.querySelector('.upload-subtext').textContent = 'Fichier ZIP uniquement';
+    }
+};
