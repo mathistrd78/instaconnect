@@ -139,12 +139,9 @@
                     <div class="upload-icon">📤</div>
                     <div class="upload-text">Cliquez ou glissez votre export Instagram</div>
                     <div class="upload-subtext">Fichier ZIP uniquement</div>
-                </div>
-                
-                <!-- Input file VISIBLE pour compatibilité PWA iOS -->
-                <div style="text-align: center; margin-top: 16px;">
+                    <!-- Input file caché mais accessible (PWA iOS compatible) -->
                     <input type="file" id="zipFileInput" accept=".zip,application/zip,application/x-zip-compressed,application/octet-stream" 
-                           style="display: block; margin: 0 auto; max-width: 280px; padding: 12px; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600;">
+                           style="position: absolute; opacity: 0; width: 100%; height: 100%; top: 0; left: 0; cursor: pointer;">
                 </div>
                 
                 <div id="discoverButtonContainer" style="display: none; text-align: center; margin-top: 16px;">
