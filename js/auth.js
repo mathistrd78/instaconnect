@@ -206,8 +206,21 @@ const authManager = {
                 if (data.normalUnfollowers) {
                     unfollowers.data.normalUnfollowers = new Set(data.normalUnfollowers);
                 }
+                
+                // MIGRATION: Fusionner doNotFollowList dans unfollowedList
+                if (data.unfollowedList) {
+                    unfollowers.data.unfollowedList = new Set(data.unfollowedList);
+                }
                 if (data.doNotFollowList) {
-                    unfollowers.data.doNotFollowList = new Set(data.doNotFollowList);
+                    console.log('🔄 Migration Firebase: Fusionner doNotFollowList dans unfollowedList');
+                    if (!unfollowers.data.unfollowedList) {
+                        unfollowers.data.unfollowedList = new Set();
+                    }
+                    data.doNotFollowList.forEach(username => {
+                        unfollowers.data.unfollowedList.add(username);
+                    });
+                    // Sauvegarder la fusion
+                    unfollowers.saveUnfollowedList();
                 }
                 
                 // Update counts
