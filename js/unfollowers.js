@@ -14,6 +14,8 @@ const unfollowers = {
     pendingFile: null, // Fichier en attente d'analyse
 
     init() {
+        console.log('🚀 Unfollowers init started');
+        
         // Load saved lists
         const savedNormal = localStorage.getItem('normalUnfollowers');
         if (savedNormal) {
@@ -38,10 +40,25 @@ const unfollowers = {
         // Update counts
         this.updateCounts();
 
+        // Setup file input with retry for mobile
+        this.setupFileInput();
+        
+        // Retry after a delay if not found (mobile can be slow)
+        setTimeout(() => {
+            if (!document.getElementById('zipFileInput')._hasListeners) {
+                console.log('🔄 Retrying file input setup...');
+                this.setupFileInput();
+            }
+        }, 1000);
+    },
+    
+    setupFileInput() {
         // Setup drag & drop
         const uploadZone = document.getElementById('uploadZone');
         
         if (uploadZone) {
+            console.log('✅ Upload zone found');
+            
             uploadZone.addEventListener('dragover', (e) => {
                 e.preventDefault();
                 uploadZone.classList.add('dragover');
@@ -62,18 +79,26 @@ const unfollowers = {
                     alert('Veuillez déposer un fichier ZIP');
                 }
             });
+        } else {
+            console.log('❌ Upload zone not found');
         }
         
         // Setup file input
         const fileInput = document.getElementById('zipFileInput');
         if (fileInput) {
+            // Check if already has listeners
+            if (fileInput._hasListeners) {
+                console.log('⏭️ File input already has listeners');
+                return;
+            }
+            
             console.log('📁 File input found, attaching event listeners');
             
             // Multiple event listeners for better mobile compatibility
             fileInput.addEventListener('change', (e) => {
                 console.log('📁 Change event triggered');
                 this.handleFileUpload(e);
-            });
+            }, { passive: true });
             
             // iOS sometimes needs input event
             fileInput.addEventListener('input', (e) => {
@@ -81,7 +106,10 @@ const unfollowers = {
                 if (e.target.files && e.target.files.length > 0) {
                     this.handleFileUpload(e);
                 }
-            });
+            }, { passive: true });
+            
+            // Mark as having listeners
+            fileInput._hasListeners = true;
             
             console.log('✅ File input event listeners attached');
         } else {
@@ -151,10 +179,20 @@ const unfollowers = {
 
         console.log('📁 File selected:', file.name, 'Type:', file.type, 'Size:', file.size);
 
-        // Check file extension (more flexible for mobile)
+        // Check file extension (more flexible for mobile - accept empty type)
         const fileName = file.name.toLowerCase();
-        if (!fileName.endsWith('.zip') && file.type !== 'application/zip' && file.type !== 'application/x-zip-compressed') {
-            console.log('❌ Not a ZIP file');
+        const hasZipExtension = fileName.endsWith('.zip');
+        const hasZipType = file.type === 'application/zip' || 
+                          file.type === 'application/x-zip-compressed' || 
+                          file.type === 'application/x-zip' ||
+                          file.type === 'application/octet-stream' || // iOS sometimes uses this
+                          file.type === ''; // Mobile peut laisser le type vide
+        
+        console.log('📁 Has .zip extension:', hasZipExtension);
+        console.log('📁 Has ZIP type:', hasZipType);
+        
+        if (!hasZipExtension) {
+            console.log('❌ Not a ZIP file (no .zip extension)');
             alert('Veuillez sélectionner un fichier ZIP');
             // Reset input
             event.target.value = '';
@@ -169,6 +207,8 @@ const unfollowers = {
         if (discoverBtn) {
             discoverBtn.style.display = 'block';
             console.log('✅ Discover button shown');
+        } else {
+            console.log('❌ Discover button container not found!');
         }
         
         // Update upload zone text
@@ -177,13 +217,20 @@ const unfollowers = {
             const uploadText = uploadZone.querySelector('.upload-text');
             const uploadSubtext = uploadZone.querySelector('.upload-subtext');
             
-            if (uploadText) uploadText.textContent = '✅ Fichier chargé : ' + file.name;
-            if (uploadSubtext) uploadSubtext.textContent = 'Cliquez sur "Découvrir" pour analyser';
-            
-            console.log('✅ Upload zone updated');
+            if (uploadText) {
+                uploadText.textContent = '✅ Fichier chargé : ' + file.name;
+                console.log('✅ Upload text updated');
+            }
+            if (uploadSubtext) {
+                uploadSubtext.textContent = 'Cliquez sur "Découvrir" pour analyser';
+                console.log('✅ Upload subtext updated');
+            }
+        } else {
+            console.log('❌ Upload zone not found!');
         }
         
         console.log('✅ File upload handling complete');
+        console.log('📁 pendingFile stored:', this.pendingFile ? 'Yes' : 'No');
     },
     
     async analyzeFile() {
