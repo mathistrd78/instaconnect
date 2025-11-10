@@ -6,7 +6,7 @@ const unfollowers = {
         unfollowers: [],
         marked: new Set(),
         normalUnfollowers: new Set(), // Influenceurs, marques...
-        unfollowedList: new Set(), // Personnes déjà unfollowed (anciennement doNotFollowList fusionné)
+        doNotFollowList: new Set(), // Personnes à ne plus suivre (et déjà unfollowed)
         normalCategories: {} // Catégories des unfollowers normaux
     },
     
@@ -34,30 +34,9 @@ const unfollowers = {
             this.data.normalUnfollowers = new Set(JSON.parse(savedNormal));
         }
         
-        // MIGRATION: Fusionner doNotFollowList dans unfollowedList
         const savedDoNotFollow = localStorage.getItem('doNotFollowList');
-        const savedUnfollowed = localStorage.getItem('unfollowedList');
-        
-        // Créer unfollowedList en fusionnant les deux listes
-        this.data.unfollowedList = new Set();
-        
-        if (savedUnfollowed) {
-            JSON.parse(savedUnfollowed).forEach(username => {
-                this.data.unfollowedList.add(username);
-            });
-        }
-        
         if (savedDoNotFollow) {
-            console.log('🔄 Migration: Fusionner doNotFollowList dans unfollowedList');
-            JSON.parse(savedDoNotFollow).forEach(username => {
-                this.data.unfollowedList.add(username);
-            });
-            // Supprimer l'ancienne liste du localStorage
-            localStorage.removeItem('doNotFollowList');
-            console.log('✅ doNotFollowList supprimée du localStorage');
-            
-            // Sauvegarder la liste fusionnée
-            this.saveUnfollowedList();
+            this.data.doNotFollowList = new Set(JSON.parse(savedDoNotFollow));
         }
         
         const savedCategories = localStorage.getItem('normalCategories');
@@ -190,7 +169,7 @@ const unfollowers = {
 
     updateCounts() {
         document.getElementById('normalCount').textContent = this.data.normalUnfollowers.size;
-        document.getElementById('doNotFollowCount').textContent = this.data.unfollowedList.size;
+        document.getElementById('doNotFollowCount').textContent = this.data.doNotFollowList.size;
     },
 
     saveNormalUnfollowers() {
@@ -206,108 +185,39 @@ const unfollowers = {
         this.saveToFirebase();
     },
     
-    saveUnfollowedList() {
-        localStorage.setItem('unfollowedList', JSON.stringify([...this.data.unfollowedList]));
-        this.updateCounts();
-        this.saveToFirebase();
-    },
-    
     async saveToFirebase() {
         if (!authManager.currentUser) return;
         
         try {
             const userId = authManager.currentUser.uid;
-            
-            // Sauvegarder les données (sans doNotFollowList)
             await db.collection('users').doc(userId).set({
                 normalUnfollowers: [...this.data.normalUnfollowers],
-                unfollowedList: [...this.data.unfollowedList],
+                doNotFollowList: [...this.data.doNotFollowList],
                 normalCategories: this.data.normalCategories
             }, { merge: true });
-            
-            // Supprimer doNotFollowList de Firebase si elle existe
-            await db.collection('users').doc(userId).update({
-                doNotFollowList: firebase.firestore.FieldValue.delete()
-            }).catch(() => {
-                // Ignorer l'erreur si le champ n'existe pas
-            });
-            
             console.log('✅ Unfollowers lists saved to Firebase');
-        } catch (error) {
-            console.error('❌ Error saving unfollowers lists:', error);
-        }
-    },
         } catch (error) {
             console.error('❌ Error saving unfollowers lists:', error);
         }
     },
 
     handleFileUpload(event) {
-        console.log('📁 handleFileUpload called');
-        console.log('📁 Event:', event);
-        console.log('📁 Files:', event.target.files);
-        
         const file = event.target.files[0];
-        if (!file) {
-            console.log('❌ No file selected');
-            alert('Aucun fichier sélectionné. Veuillez réessayer.');
-            return;
-        }
+        if (!file) return;
 
-        console.log('📁 File selected:', file.name, 'Type:', file.type, 'Size:', file.size);
-
-        // Check file extension (more flexible for mobile - accept empty type)
-        const fileName = file.name.toLowerCase();
-        const hasZipExtension = fileName.endsWith('.zip');
-        const hasZipType = file.type === 'application/zip' || 
-                          file.type === 'application/x-zip-compressed' || 
-                          file.type === 'application/x-zip' ||
-                          file.type === 'application/octet-stream' || // iOS sometimes uses this
-                          file.type === ''; // Mobile peut laisser le type vide
-        
-        console.log('📁 Has .zip extension:', hasZipExtension);
-        console.log('📁 Has ZIP type:', hasZipType);
-        
-        if (!hasZipExtension) {
-            console.log('❌ Not a ZIP file (no .zip extension)');
+        if (!file.name.endsWith('.zip')) {
             alert('Veuillez sélectionner un fichier ZIP');
-            // Reset input
-            event.target.value = '';
             return;
         }
-
-        console.log('✅ ZIP file validated');
 
         // Store file and show discover button
         this.pendingFile = file;
-        const discoverBtn = document.getElementById('discoverButtonContainer');
-        if (discoverBtn) {
-            discoverBtn.style.display = 'block';
-            console.log('✅ Discover button shown');
-        } else {
-            console.log('❌ Discover button container not found!');
-        }
+        document.getElementById('discoverButtonContainer').style.display = 'block';
         
         // Update upload zone text
         const uploadZone = document.getElementById('uploadZone');
-        if (uploadZone) {
-            const uploadText = uploadZone.querySelector('.upload-text');
-            const uploadSubtext = uploadZone.querySelector('.upload-subtext');
-            
-            if (uploadText) {
-                uploadText.textContent = '✅ Fichier chargé : ' + file.name;
-                console.log('✅ Upload text updated');
-            }
-            if (uploadSubtext) {
-                uploadSubtext.textContent = 'Cliquez sur "Découvrir" pour analyser';
-                console.log('✅ Upload subtext updated');
-            }
-        } else {
-            console.log('❌ Upload zone not found!');
-        }
-        
-        console.log('✅ File upload handling complete');
-        console.log('📁 pendingFile stored:', this.pendingFile ? 'Yes' : 'No');
+        uploadZone.querySelector('.upload-text').textContent = '✅ Fichier chargé : ' + file.name;
+        uploadZone.querySelector('.upload-subtext').textContent = 'Cliquez sur "Découvrir" pour analyser';
     },
     
     async analyzeFile() {
@@ -368,11 +278,11 @@ const unfollowers = {
             this.data.following = followingList.map(f => f.username);
             this.data.followers = followersData.map(item => item.string_list_data[0].value);
 
-            // Calculate unfollowers with dates (exclude normal ones AND unfollowed ones)
+            // Calculate unfollowers with dates (exclude normal ones AND do not follow list)
             this.data.unfollowers = followingList
                 .filter(item => !this.data.followers.includes(item.username))
                 .filter(item => !this.data.normalUnfollowers.has(item.username))
-                .filter(item => !this.data.unfollowedList.has(item.username)) // NOUVEAU: Exclure les unfollowed
+                .filter(item => !this.data.doNotFollowList.has(item.username)) // Exclure ceux qu'on ne veut plus suivre
                 .map(item => ({
                     username: item.username,
                     timestamp: item.timestamp
@@ -534,13 +444,13 @@ const unfollowers = {
     },
 
     markAsUnfollowed(username) {
-        if (!confirm(`Marquer @${username} comme "Unfollowed" ?\n\nCette personne sera retirée des unfollowers et n'apparaîtra plus dans les prochaines analyses.`)) {
+        if (!confirm(`Ajouter @${username} à la liste "À ne plus suivre" ?\n\nCette personne sera retirée des unfollowers et vous serez alerté si vous tentez de la re-suivre.`)) {
             return;
         }
 
-        // Add to unfollowed list
-        this.data.unfollowedList.add(username);
-        this.saveUnfollowedList();
+        // Add to do not follow list
+        this.data.doNotFollowList.add(username);
+        this.saveDoNotFollowList();
         
         // Remove from unfollowers list (handle both string and object format)
         this.data.unfollowers = this.data.unfollowers.filter(item => {
@@ -812,10 +722,6 @@ const unfollowers = {
         this.data.doNotFollowList.delete(username);
         this.saveDoNotFollowList();
         
-        // Also remove from unfollowed list
-        this.data.unfollowedList.delete(username);
-        this.saveUnfollowedList();
-        
         // Close and refresh the modal
         document.querySelector('body > div[style*="position: fixed"]')?.remove();
         
@@ -828,7 +734,7 @@ const unfollowers = {
         this.data.unfollowers = [];
         this.data.marked = new Set();
         this.pendingFile = null;
-        // Keep normalUnfollowers, doNotFollowList, unfollowedList and normalCategories saved
+        // Keep normalUnfollowers, doNotFollowList and normalCategories saved
 
         document.querySelector('.unfollowers-header').style.display = 'block';
         document.getElementById('discoverButtonContainer').style.display = 'none';
