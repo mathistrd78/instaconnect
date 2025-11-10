@@ -203,8 +203,15 @@ const authManager = {
                         app.dataStore.save();
                     }, 1000);
                 }
+                
+                // Load normalUnfollowers
                 if (data.normalUnfollowers) {
                     unfollowers.data.normalUnfollowers = new Set(data.normalUnfollowers);
+                }
+                
+                // Load normalCategories
+                if (data.normalCategories) {
+                    unfollowers.data.normalCategories = data.normalCategories;
                 }
                 
                 // MIGRATION: Fusionner doNotFollowList dans unfollowedList
