@@ -140,7 +140,14 @@
                     <div class="upload-text">Cliquez ou glissez votre export Instagram</div>
                     <div class="upload-subtext">Fichier ZIP uniquement</div>
                 </div>
-                <input type="file" id="zipFileInput" accept=".zip" style="display: none;">
+                <input type="file" id="zipFileInput" accept=".zip,application/zip,application/x-zip-compressed" style="display: none;">
+                
+                <!-- Bouton alternatif pour mobile -->
+                <div style="text-align: center; margin-top: 12px;">
+                    <label for="zipFileInput" class="btn btn-secondary" style="display: inline-block; cursor: pointer; margin: 0;">
+                        📁 Sélectionner un fichier ZIP
+                    </label>
+                </div>
                 
                 <div id="discoverButtonContainer" style="display: none; text-align: center; margin-top: 16px;">
                     <button class="btn btn-primary" onclick="unfollowers.analyzeFile()" style="width: 100%;">
