@@ -16,6 +16,19 @@ const unfollowers = {
     init() {
         console.log('🚀 Unfollowers init started');
         
+        // Detect PWA mode
+        const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
+                     window.navigator.standalone === true ||
+                     document.referrer.includes('android-app://');
+        
+        if (isPWA) {
+            console.log('📱 PWA mode detected - using special handling');
+            this.isPWAMode = true;
+        } else {
+            console.log('🌐 Browser mode detected');
+            this.isPWAMode = false;
+        }
+        
         // Load saved lists
         const savedNormal = localStorage.getItem('normalUnfollowers');
         if (savedNormal) {
@@ -107,6 +120,41 @@ const unfollowers = {
                     this.handleFileUpload(e);
                 }
             }, { passive: true });
+            
+            // PWA iOS FIX: Poll for file selection since events don't fire
+            if (this.isPWAMode) {
+                console.log('📱 PWA mode - setting up polling...');
+                let lastFileCount = 0;
+                
+                const checkForFile = () => {
+                    const currentFileCount = fileInput.files ? fileInput.files.length : 0;
+                    if (currentFileCount > 0 && currentFileCount !== lastFileCount) {
+                        console.log('📱 File detected via polling! Files:', currentFileCount);
+                        lastFileCount = currentFileCount;
+                        this.handleFileUpload({target: fileInput});
+                    }
+                };
+                
+                // Poll every 300ms
+                fileInput._pollInterval = setInterval(checkForFile, 300);
+                console.log('✅ Polling started for PWA (every 300ms)');
+                
+                // Also check on blur (when user closes file picker)
+                fileInput.addEventListener('blur', () => {
+                    console.log('📱 Input blurred - checking for file...');
+                    setTimeout(() => {
+                        if (fileInput.files && fileInput.files.length > 0) {
+                            console.log('📱 File found on blur!');
+                            this.handleFileUpload({target: fileInput});
+                        }
+                    }, 100);
+                });
+                
+                // And on focus (when user returns to input)
+                fileInput.addEventListener('focus', () => {
+                    console.log('📱 Input focused');
+                });
+            }
             
             // Mark as having listeners
             fileInput._hasListeners = true;
