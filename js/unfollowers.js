@@ -6,7 +6,9 @@ const unfollowers = {
         unfollowers: [],
         marked: new Set(),
         normalUnfollowers: new Set(), // Influenceurs, marques...
-        doNotFollowList: new Set() // Personnes à ne plus suivre
+        doNotFollowList: new Set(), // Personnes à ne plus suivre
+        unfollowedList: new Set(), // Personnes déjà unfollowed
+        normalCategories: {} // Catégories des unfollowers normaux
     },
     
     pendingFile: null, // Fichier en attente d'analyse
@@ -21,6 +23,16 @@ const unfollowers = {
         const savedDoNotFollow = localStorage.getItem('doNotFollowList');
         if (savedDoNotFollow) {
             this.data.doNotFollowList = new Set(JSON.parse(savedDoNotFollow));
+        }
+        
+        const savedUnfollowed = localStorage.getItem('unfollowedList');
+        if (savedUnfollowed) {
+            this.data.unfollowedList = new Set(JSON.parse(savedUnfollowed));
+        }
+        
+        const savedCategories = localStorage.getItem('normalCategories');
+        if (savedCategories) {
+            this.data.normalCategories = JSON.parse(savedCategories);
         }
         
         // Update counts
@@ -74,6 +86,7 @@ const unfollowers = {
 
     saveNormalUnfollowers() {
         localStorage.setItem('normalUnfollowers', JSON.stringify([...this.data.normalUnfollowers]));
+        localStorage.setItem('normalCategories', JSON.stringify(this.data.normalCategories));
         this.updateCounts();
         this.saveToFirebase();
     },
@@ -84,6 +97,11 @@ const unfollowers = {
         this.saveToFirebase();
     },
     
+    saveUnfollowedList() {
+        localStorage.setItem('unfollowedList', JSON.stringify([...this.data.unfollowedList]));
+        this.saveToFirebase();
+    },
+    
     async saveToFirebase() {
         if (!authManager.currentUser) return;
         
@@ -91,7 +109,9 @@ const unfollowers = {
             const userId = authManager.currentUser.uid;
             await db.collection('users').doc(userId).set({
                 normalUnfollowers: [...this.data.normalUnfollowers],
-                doNotFollowList: [...this.data.doNotFollowList]
+                doNotFollowList: [...this.data.doNotFollowList],
+                unfollowedList: [...this.data.unfollowedList],
+                normalCategories: this.data.normalCategories
             }, { merge: true });
             console.log('✅ Unfollowers lists saved to Firebase');
         } catch (error) {
@@ -176,10 +196,11 @@ const unfollowers = {
             this.data.following = followingList.map(f => f.username);
             this.data.followers = followersData.map(item => item.string_list_data[0].value);
 
-            // Calculate unfollowers with dates (exclude normal ones)
+            // Calculate unfollowers with dates (exclude normal ones AND unfollowed ones)
             this.data.unfollowers = followingList
                 .filter(item => !this.data.followers.includes(item.username))
                 .filter(item => !this.data.normalUnfollowers.has(item.username))
+                .filter(item => !this.data.unfollowedList.has(item.username)) // NOUVEAU: Exclure les unfollowed
                 .map(item => ({
                     username: item.username,
                     timestamp: item.timestamp
@@ -215,9 +236,9 @@ const unfollowers = {
         // Hide analyzing
         document.getElementById('analyzingState').style.display = 'none';
 
-        // Update stats
-        document.getElementById('followingCount').textContent = this.data.following.length;
+        // Update stats - NOUVEL ORDRE: Followers, Following, Unfollowers
         document.getElementById('followersCount').textContent = this.data.followers.length;
+        document.getElementById('followingCount').textContent = this.data.following.length;
         document.getElementById('unfollowersCount').textContent = this.data.unfollowers.length;
         
         // Update normal unfollowers count
@@ -316,10 +337,17 @@ const unfollowers = {
     },
 
     openInstagram(username) {
-        // Open Instagram profile (no auto-marking)
+        // Open Instagram profile - Fix pour éviter la page blanche sur iPhone
+        const instagramUrl = `https://instagram.com/${username}`;
+        
+        // Essayer d'ouvrir l'app Instagram
         window.location.href = `instagram://user?username=${username}`;
+        
+        // Fallback vers le navigateur après un court délai
         setTimeout(() => {
-            window.open(`https://instagram.com/${username}`, '_blank');
+            // Utiliser window.open avec noopener pour éviter la page blanche
+            const newWindow = window.open(instagramUrl, '_blank', 'noopener,noreferrer');
+            if (newWindow) newWindow.opener = null;
         }, 500);
     },
 
@@ -332,13 +360,24 @@ const unfollowers = {
         this.data.doNotFollowList.add(username);
         this.saveDoNotFollowList();
         
+        // Add to unfollowed list (pour ne plus l'afficher dans les prochaines analyses)
+        this.data.unfollowedList.add(username);
+        this.saveUnfollowedList();
+        
         // Remove from unfollowers list (handle both string and object format)
         this.data.unfollowers = this.data.unfollowers.filter(item => {
             const user = typeof item === 'string' ? item : item.username;
             return user !== username;
         });
         
-        // Update counter
+        // NOUVEAU: Diminuer le compteur de following
+        const followingCountEl = document.getElementById('followingCount');
+        if (followingCountEl) {
+            const currentFollowing = parseInt(followingCountEl.textContent);
+            followingCountEl.textContent = currentFollowing - 1;
+        }
+        
+        // Update unfollowers counter
         document.getElementById('unfollowersCount').textContent = this.data.unfollowers.length;
         
         // Re-render
@@ -358,19 +397,45 @@ const unfollowers = {
         this.data.normalUnfollowers.add(username);
         this.saveNormalUnfollowers();
         
-        // Remove from current list
-        this.data.unfollowers = this.data.unfollowers.filter(u => u !== username);
+        // NOUVEAU: Remove from current list (handle both string and object format)
+        this.data.unfollowers = this.data.unfollowers.filter(item => {
+            const user = typeof item === 'string' ? item : item.username;
+            return user !== username;
+        });
         
         // Update counter
         document.getElementById('unfollowersCount').textContent = this.data.unfollowers.length;
         
-        // Re-render
+        // Re-render (disparaît immédiatement)
         if (this.data.unfollowers.length === 0) {
             document.getElementById('unfollowersResults').style.display = 'none';
             document.getElementById('emptyUnfollowers').style.display = 'block';
         } else {
             this.renderList();
         }
+    },
+
+    setCategoryForNormal(username, category) {
+        this.data.normalCategories[username] = category;
+        this.saveNormalUnfollowers();
+    },
+
+    getCategoryIcon(category) {
+        const icons = {
+            'disabled': '🚫',
+            'celebrity': '⭐',
+            'business': '💼'
+        };
+        return icons[category] || '';
+    },
+
+    getCategoryLabel(category) {
+        const labels = {
+            'disabled': 'Désactivé',
+            'celebrity': 'Personnalité',
+            'business': 'Marque/Pro'
+        };
+        return labels[category] || '';
     },
 
     showNormalUnfollowers() {
@@ -382,16 +447,39 @@ const unfollowers = {
         const list = [...this.data.normalUnfollowers].sort();
         const html = `
             <div style="max-height: 60vh; overflow-y: auto;">
-                ${list.map(username => `
-                    <div class="unfollower-item">
-                        <div class="unfollower-info">
-                            <div class="unfollower-username">@${username}</div>
+                ${list.map(username => {
+                    const category = this.data.normalCategories[username] || null;
+                    return `
+                        <div class="unfollower-item" style="padding: 12px;">
+                            <div class="unfollower-info">
+                                <div class="unfollower-username">
+                                    @${username}
+                                    ${category ? `<span style="margin-left: 8px; font-size: 12px; color: #6c757d;">${this.getCategoryIcon(category)} ${this.getCategoryLabel(category)}</span>` : ''}
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 6px; align-items: center;">
+                                <button onclick="unfollowers.setCategoryForNormal('${username}', 'disabled'); unfollowers.showNormalUnfollowers();" 
+                                    style="background: ${category === 'disabled' ? '#ff4757' : '#f8f9fa'}; color: ${category === 'disabled' ? 'white' : '#495057'}; border: none; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 16px;" 
+                                    title="Compte désactivé">
+                                    🚫
+                                </button>
+                                <button onclick="unfollowers.setCategoryForNormal('${username}', 'celebrity'); unfollowers.showNormalUnfollowers();" 
+                                    style="background: ${category === 'celebrity' ? '#ffd93d' : '#f8f9fa'}; color: ${category === 'celebrity' ? 'white' : '#495057'}; border: none; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 16px;" 
+                                    title="Personnalité publique">
+                                    ⭐
+                                </button>
+                                <button onclick="unfollowers.setCategoryForNormal('${username}', 'business'); unfollowers.showNormalUnfollowers();" 
+                                    style="background: ${category === 'business' ? '#5f27cd' : '#f8f9fa'}; color: ${category === 'business' ? 'white' : '#495057'}; border: none; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 16px;" 
+                                    title="Marque/Contenu pro">
+                                    💼
+                                </button>
+                                <button class="btn-mark" onclick="unfollowers.removeFromNormal('${username}')" style="background: #ff4757; color: white; padding: 6px 10px;">
+                                    ✕
+                                </button>
+                            </div>
                         </div>
-                        <button class="btn-mark" onclick="unfollowers.removeFromNormal('${username}')" style="background: #ff4757; color: white;">
-                            ✕ Retirer
-                        </button>
-                    </div>
-                `).join('')}
+                    `;
+                }).join('')}
             </div>
         `;
 
@@ -399,7 +487,7 @@ const unfollowers = {
         const overlay = document.createElement('div');
         overlay.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px;';
         overlay.innerHTML = `
-            <div style="background: white; border-radius: 16px; max-width: 500px; width: 100%; max-height: 80vh; overflow: hidden; display: flex; flex-direction: column;">
+            <div style="background: white; border-radius: 16px; max-width: 600px; width: 100%; max-height: 80vh; overflow: hidden; display: flex; flex-direction: column;">
                 <div style="padding: 20px; border-bottom: 1px solid #e9ecef; display: flex; justify-content: space-between; align-items: center;">
                     <h3 style="margin: 0; font-size: 18px;">⭐ Unfollowers normaux (${this.data.normalUnfollowers.size})</h3>
                     <button onclick="this.parentElement.parentElement.parentElement.remove()" style="background: #f8f9fa; border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 20px;">✕</button>
@@ -410,6 +498,9 @@ const unfollowers = {
             </div>
         `;
 
+        // Remove existing overlay if any
+        document.querySelector('body > div[style*="position: fixed"]')?.remove();
+        
         document.body.appendChild(overlay);
         overlay.onclick = (e) => {
             if (e.target === overlay) overlay.remove();
@@ -418,6 +509,7 @@ const unfollowers = {
 
     removeFromNormal(username) {
         this.data.normalUnfollowers.delete(username);
+        delete this.data.normalCategories[username];
         this.saveNormalUnfollowers();
         
         // Close and refresh the modal
@@ -474,6 +566,10 @@ const unfollowers = {
         this.data.doNotFollowList.delete(username);
         this.saveDoNotFollowList();
         
+        // Also remove from unfollowed list
+        this.data.unfollowedList.delete(username);
+        this.saveUnfollowedList();
+        
         // Close and refresh the modal
         document.querySelector('body > div[style*="position: fixed"]')?.remove();
         
@@ -486,7 +582,7 @@ const unfollowers = {
         this.data.unfollowers = [];
         this.data.marked = new Set();
         this.pendingFile = null;
-        // Keep normalUnfollowers and doNotFollowList saved
+        // Keep normalUnfollowers, doNotFollowList, unfollowedList and normalCategories saved
 
         document.querySelector('.unfollowers-header').style.display = 'block';
         document.getElementById('discoverButtonContainer').style.display = 'none';
