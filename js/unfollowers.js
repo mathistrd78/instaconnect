@@ -67,7 +67,25 @@ const unfollowers = {
         // Setup file input
         const fileInput = document.getElementById('zipFileInput');
         if (fileInput) {
-            fileInput.addEventListener('change', (e) => this.handleFileUpload(e));
+            console.log('📁 File input found, attaching event listeners');
+            
+            // Multiple event listeners for better mobile compatibility
+            fileInput.addEventListener('change', (e) => {
+                console.log('📁 Change event triggered');
+                this.handleFileUpload(e);
+            });
+            
+            // iOS sometimes needs input event
+            fileInput.addEventListener('input', (e) => {
+                console.log('📁 Input event triggered');
+                if (e.target.files && e.target.files.length > 0) {
+                    this.handleFileUpload(e);
+                }
+            });
+            
+            console.log('✅ File input event listeners attached');
+        } else {
+            console.log('❌ File input not found!');
         }
         
         // Prevent tag edit modal from closing when clicking inside
@@ -120,22 +138,52 @@ const unfollowers = {
     },
 
     handleFileUpload(event) {
+        console.log('📁 handleFileUpload called');
+        console.log('📁 Event:', event);
+        console.log('📁 Files:', event.target.files);
+        
         const file = event.target.files[0];
-        if (!file) return;
-
-        if (!file.name.endsWith('.zip')) {
-            alert('Veuillez sélectionner un fichier ZIP');
+        if (!file) {
+            console.log('❌ No file selected');
+            alert('Aucun fichier sélectionné. Veuillez réessayer.');
             return;
         }
 
+        console.log('📁 File selected:', file.name, 'Type:', file.type, 'Size:', file.size);
+
+        // Check file extension (more flexible for mobile)
+        const fileName = file.name.toLowerCase();
+        if (!fileName.endsWith('.zip') && file.type !== 'application/zip' && file.type !== 'application/x-zip-compressed') {
+            console.log('❌ Not a ZIP file');
+            alert('Veuillez sélectionner un fichier ZIP');
+            // Reset input
+            event.target.value = '';
+            return;
+        }
+
+        console.log('✅ ZIP file validated');
+
         // Store file and show discover button
         this.pendingFile = file;
-        document.getElementById('discoverButtonContainer').style.display = 'block';
+        const discoverBtn = document.getElementById('discoverButtonContainer');
+        if (discoverBtn) {
+            discoverBtn.style.display = 'block';
+            console.log('✅ Discover button shown');
+        }
         
         // Update upload zone text
         const uploadZone = document.getElementById('uploadZone');
-        uploadZone.querySelector('.upload-text').textContent = '✅ Fichier chargé : ' + file.name;
-        uploadZone.querySelector('.upload-subtext').textContent = 'Cliquez sur "Découvrir" pour analyser';
+        if (uploadZone) {
+            const uploadText = uploadZone.querySelector('.upload-text');
+            const uploadSubtext = uploadZone.querySelector('.upload-subtext');
+            
+            if (uploadText) uploadText.textContent = '✅ Fichier chargé : ' + file.name;
+            if (uploadSubtext) uploadSubtext.textContent = 'Cliquez sur "Découvrir" pour analyser';
+            
+            console.log('✅ Upload zone updated');
+        }
+        
+        console.log('✅ File upload handling complete');
     },
     
     async analyzeFile() {
