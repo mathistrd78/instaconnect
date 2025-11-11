@@ -149,8 +149,23 @@ const contacts = {
 
     openInstagramProfile(username) {
         const clean = username.replace('@', '');
-        window.location.href = `instagram://user?username=${clean}`;
-        setTimeout(() => window.open(`https://instagram.com/${clean}`, '_blank'), 500);
+        const instagramUrl = `https://instagram.com/${clean}`;
+        const instagramApp = `instagram://user?username=${clean}`;
+        
+        // Détecter le mode PWA
+        const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
+                     window.navigator.standalone === true;
+        
+        if (isPWA) {
+            // PWA: Ouvrir directement dans un nouvel onglet
+            console.log('📱 PWA mode - opening in new tab');
+            window.open(instagramUrl, '_blank', 'noopener,noreferrer');
+        } else {
+            // Navigateur: Essayer d'ouvrir l'app Instagram d'abord
+            console.log('🌐 Browser mode - trying app first');
+            window.location.href = instagramApp;
+            setTimeout(() => window.open(instagramUrl, '_blank'), 500);
+        }
     },
 
     viewProfile(id) {
