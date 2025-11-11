@@ -534,40 +534,37 @@ const unfollowers = {
 
         const list = [...this.data.normalUnfollowers].sort();
         
-        // Create the modal with filters and search
+        // Create the modal with filters
         const overlay = document.createElement('div');
         overlay.id = 'normalUnfollowersModal';
         overlay.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px;';
         overlay.innerHTML = `
             <div style="background: white; border-radius: 16px; max-width: 600px; width: 100%; max-height: 80vh; overflow: hidden; display: flex; flex-direction: column;">
                 <div style="padding: 20px; border-bottom: 1px solid #e9ecef;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                         <h3 style="margin: 0; font-size: 18px;">⭐ Unfollowers normaux (${this.data.normalUnfollowers.size})</h3>
                         <button onclick="document.getElementById('normalUnfollowersModal').remove()" style="background: #f8f9fa; border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 20px;">✕</button>
                     </div>
-                    <input type="text" id="searchNormal" placeholder="🔍 Rechercher..." 
-                           style="width: 100%; padding: 10px; border: 1px solid #e9ecef; border-radius: 8px; font-size: 14px; box-sizing: border-box; margin-bottom: 12px;"
-                           oninput="unfollowers.filterNormalBySearch(this.value)">
-                    <div style="display: flex; gap: 8px; overflow-x: auto; white-space: nowrap; padding-bottom: 8px; -webkit-overflow-scrolling: touch;">
-                        <button onclick="unfollowers.filterNormalByCategory('all')" id="filterAll" style="background: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; flex-shrink: 0;">
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button onclick="unfollowers.filterNormalByCategory('all')" id="filterAll" style="background: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px;">
                             Tous
                         </button>
-                        <button onclick="unfollowers.filterNormalByCategory('disabled')" id="filterDisabled" style="background: #f8f9fa; color: #495057; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; flex-shrink: 0;">
+                        <button onclick="unfollowers.filterNormalByCategory('disabled')" id="filterDisabled" style="background: #f8f9fa; color: #495057; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px;">
                             🚫 Désactivés
                         </button>
-                        <button onclick="unfollowers.filterNormalByCategory('celebrity')" id="filterCelebrity" style="background: #f8f9fa; color: #495057; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; flex-shrink: 0;">
+                        <button onclick="unfollowers.filterNormalByCategory('celebrity')" id="filterCelebrity" style="background: #f8f9fa; color: #495057; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px;">
                             ⭐ Personnalités
                         </button>
-                        <button onclick="unfollowers.filterNormalByCategory('business')" id="filterBusiness" style="background: #f8f9fa; color: #495057; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; flex-shrink: 0;">
+                        <button onclick="unfollowers.filterNormalByCategory('business')" id="filterBusiness" style="background: #f8f9fa; color: #495057; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px;">
                             💼 Marques/Pro
                         </button>
-                        <button onclick="unfollowers.filterNormalByCategory('uncategorized')" id="filterUncategorized" style="background: #f8f9fa; color: #495057; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; flex-shrink: 0;">
+                        <button onclick="unfollowers.filterNormalByCategory('uncategorized')" id="filterUncategorized" style="background: #f8f9fa; color: #495057; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px;">
                             Sans catégorie
                         </button>
                     </div>
                 </div>
                 <div id="normalUnfollowersList" style="padding: 16px; overflow-y: auto; flex: 1;">
-                    ${this.renderNormalList(list, 'all', '')}
+                    ${this.renderNormalList(list, 'all')}
                 </div>
             </div>
         `;
@@ -581,24 +578,16 @@ const unfollowers = {
         };
     },
     
-    renderNormalList(list, filter, searchTerm = '') {
+    renderNormalList(list, filter) {
         const filteredList = list.filter(username => {
             const category = this.data.normalCategories[username] || null;
-            
-            // Filter by category
-            let categoryMatch = true;
-            if (filter === 'all') categoryMatch = true;
-            else if (filter === 'uncategorized') categoryMatch = !category;
-            else categoryMatch = category === filter;
-            
-            // Filter by search term
-            const searchMatch = username.toLowerCase().includes(searchTerm.toLowerCase());
-            
-            return categoryMatch && searchMatch;
+            if (filter === 'all') return true;
+            if (filter === 'uncategorized') return !category;
+            return category === filter;
         });
         
         if (filteredList.length === 0) {
-            return '<div style="text-align: center; color: #6c757d; padding: 20px;">Aucun résultat</div>';
+            return '<div style="text-align: center; color: #6c757d; padding: 20px;">Aucun unfollower dans cette catégorie</div>';
         }
         
         return filteredList.map(username => {
@@ -608,6 +597,7 @@ const unfollowers = {
                     <div class="unfollower-info">
                         <div class="unfollower-username">
                             <a href="https://instagram.com/${username}" target="_blank" rel="noopener noreferrer" style="color: #007bff; text-decoration: none;">@${username}</a>
+                            ${category ? `<span style="margin-left: 8px; font-size: 12px; color: #6c757d;">${this.getCategoryIcon(category)} ${this.getCategoryLabel(category)}</span>` : ''}
                         </div>
                     </div>
                     <div style="display: flex; gap: 6px; align-items: center;">
@@ -635,36 +625,6 @@ const unfollowers = {
         }).join('');
     },
     
-    filterNormalBySearch(searchTerm) {
-        // Get current category filter
-        const buttons = ['filterAll', 'filterDisabled', 'filterCelebrity', 'filterBusiness', 'filterUncategorized'];
-        let currentFilter = 'all';
-        
-        buttons.forEach(btnId => {
-            const btn = document.getElementById(btnId);
-            if (btn && btn.style.background === 'rgb(0, 123, 255)') {
-                currentFilter = btnId.replace('filter', '').toLowerCase();
-            }
-        });
-        
-        // Re-render with both filters
-        const list = [...this.data.normalUnfollowers].sort();
-        const listContainer = document.getElementById('normalUnfollowersList');
-        if (listContainer) {
-            listContainer.innerHTML = this.renderNormalList(list, currentFilter, searchTerm);
-        }
-    },
-
-        // Remove existing overlay if any
-        document.getElementById('normalUnfollowersModal')?.remove();
-        
-        document.body.appendChild(overlay);
-        overlay.onclick = (e) => {
-            if (e.target === overlay) overlay.remove();
-        };
-    },
-    
-    
     filterNormalByCategory(category) {
         // Update button styles
         ['All', 'Disabled', 'Celebrity', 'Business', 'Uncategorized'].forEach(cat => {
@@ -680,15 +640,11 @@ const unfollowers = {
             }
         });
         
-        // Get current search term
-        const searchInput = document.getElementById('searchNormal');
-        const searchTerm = searchInput ? searchInput.value : '';
-        
-        // Re-render list with filter and search
+        // Re-render list with filter
         const list = [...this.data.normalUnfollowers].sort();
         const listContainer = document.getElementById('normalUnfollowersList');
         if (listContainer) {
-            listContainer.innerHTML = this.renderNormalList(list, category, searchTerm);
+            listContainer.innerHTML = this.renderNormalList(list, category);
         }
     },
     
@@ -726,67 +682,32 @@ const unfollowers = {
         }
 
         const list = [...this.data.doNotFollowList].sort();
-        
-        // Create the modal with search
-        const overlay = document.createElement('div');
-        overlay.id = 'doNotFollowModal';
-        overlay.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px;';
-        overlay.innerHTML = `
-            <div style="background: white; border-radius: 16px; max-width: 500px; width: 100%; max-height: 80vh; overflow: hidden; display: flex; flex-direction: column;">
-                <div style="padding: 20px; border-bottom: 1px solid #e9ecef;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                        <h3 style="margin: 0; font-size: 18px;">🚫 À ne plus suivre (${this.data.doNotFollowList.size})</h3>
-                        <button onclick="document.getElementById('doNotFollowModal').remove()" style="background: #f8f9fa; border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 20px;">✕</button>
+        const html = `
+            <div style="max-height: 60vh; overflow-y: auto;">
+                ${list.map(username => `
+                    <div class="unfollower-item">
+                        <div class="unfollower-info">
+                            <div class="unfollower-username">@${username}</div>
+                        </div>
+                        <button class="btn-mark" onclick="unfollowers.removeFromDoNotFollow('${username}')" style="background: #ff4757; color: white;">
+                            ✕ Retirer
+                        </button>
                     </div>
-                    <input type="text" id="searchDoNotFollow" placeholder="🔍 Rechercher..." 
-                           style="width: 100%; padding: 10px; border: 1px solid #e9ecef; border-radius: 8px; font-size: 14px; box-sizing: border-box;"
-                           oninput="unfollowers.filterDoNotFollowList(this.value)">
-                </div>
-                <div id="doNotFollowList" style="padding: 16px; overflow-y: auto; flex: 1;">
-                    ${this.renderDoNotFollowList(list, '')}
-                </div>
+                `).join('')}
             </div>
         `;
 
-        // Remove existing overlay if any
-        document.getElementById('doNotFollowModal')?.remove();
-        
-        document.body.appendChild(overlay);
-        overlay.onclick = (e) => {
-            if (e.target === overlay) overlay.remove();
-        };
-    },
-    
-    renderDoNotFollowList(list, searchTerm) {
-        const filteredList = list.filter(username => 
-            username.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-        
-        if (filteredList.length === 0) {
-            return '<div style="text-align: center; color: #6c757d; padding: 20px;">Aucun résultat</div>';
-        }
-        
-        return filteredList.map(username => `
-            <div class="unfollower-item">
-                <div class="unfollower-info">
-                    <div class="unfollower-username">
-                        <a href="https://instagram.com/${username}" target="_blank" rel="noopener noreferrer" style="color: #007bff; text-decoration: none;">@${username}</a>
-                    </div>
+        // Show in overlay modal
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px;';
+        overlay.innerHTML = `
+            <div style="background: white; border-radius: 16px; max-width: 500px; width: 100%; max-height: 80vh; overflow: hidden; display: flex; flex-direction: column;">
+                <div style="padding: 20px; border-bottom: 1px solid #e9ecef; display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="margin: 0; font-size: 18px;">🚫 À ne plus suivre (${this.data.doNotFollowList.size})</h3>
+                    <button onclick="this.parentElement.parentElement.parentElement.remove()" style="background: #f8f9fa; border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 20px;">✕</button>
                 </div>
-                <button class="btn-mark" onclick="unfollowers.removeFromDoNotFollow('${username}')" style="background: #ff4757; color: white;">
-                    ✕ Retirer
-                </button>
-            </div>
-        `).join('');
-    },
-    
-    filterDoNotFollowList(searchTerm) {
-        const list = [...this.data.doNotFollowList].sort();
-        const listContainer = document.getElementById('doNotFollowList');
-        if (listContainer) {
-            listContainer.innerHTML = this.renderDoNotFollowList(list, searchTerm);
-        }
-    },
+                <div style="padding: 16px; overflow-y: auto; flex: 1;">
+                    ${html}
                 </div>
             </div>
         `;
