@@ -209,6 +209,9 @@ const authManager = {
                 if (data.doNotFollowList) {
                     unfollowers.data.doNotFollowList = new Set(data.doNotFollowList);
                 }
+                if (data.normalCategories) {
+                    unfollowers.data.normalCategories = data.normalCategories;
+                }
                 
                 // Update counts
                 unfollowers.updateCounts();
