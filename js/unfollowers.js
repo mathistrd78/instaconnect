@@ -38,38 +38,6 @@ const unfollowers = {
         
         // Update counts
         this.updateCounts();
-
-        // Setup drag & drop
-        const uploadZone = document.getElementById('uploadZone');
-        
-        if (uploadZone) {
-            uploadZone.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                uploadZone.classList.add('dragover');
-            });
-
-            uploadZone.addEventListener('dragleave', () => {
-                uploadZone.classList.remove('dragover');
-            });
-
-            uploadZone.addEventListener('drop', (e) => {
-                e.preventDefault();
-                uploadZone.classList.remove('dragover');
-                
-                const files = e.dataTransfer.files;
-                if (files.length > 0 && files[0].name.endsWith('.zip')) {
-                    this.handleFileUpload({target: {files: [files[0]]}});
-                } else {
-                    alert('Veuillez déposer un fichier ZIP');
-                }
-            });
-        }
-        
-        // Setup file input
-        const fileInput = document.getElementById('zipFileInput');
-        if (fileInput) {
-            fileInput.addEventListener('change', (e) => this.handleFileUpload(e));
-        }
         
         // Setup file input for analyse section
         const fileInputAnalyse = document.getElementById('zipFileInputAnalyse');
@@ -250,6 +218,28 @@ const unfollowers = {
             const followingSet = new Set(followingList);
             const followersSet = new Set(followersList);
 
+            // Update unfollowers data (pour affichage dans l'onglet Unfollowers)
+            this.data.following = followingList;
+            this.data.followers = followersList;
+            this.data.unfollowers = followingList.filter(u => !followersSet.has(u) && !this.data.normalUnfollowers.has(u));
+            
+            // Update unfollowers display
+            document.getElementById('followersCount').textContent = followersList.length;
+            document.getElementById('followingCount').textContent = followingList.length;
+            document.getElementById('unfollowersCount').textContent = this.data.unfollowers.length;
+            
+            // Show unfollowers section
+            if (this.data.unfollowers.length === 0) {
+                document.getElementById('unfollowersResults').style.display = 'none';
+                document.getElementById('emptyUnfollowers').style.display = 'block';
+                document.getElementById('emptyUnfollowers').querySelector('div:nth-child(2)').textContent = 'Aucun unfollower !';
+                document.getElementById('emptyUnfollowers').querySelector('div:nth-child(3)').textContent = 'Tout le monde que vous suivez vous suit en retour';
+            } else {
+                document.getElementById('unfollowersResults').style.display = 'block';
+                document.getElementById('emptyUnfollowers').style.display = 'none';
+                this.renderUnfollowersList();
+            }
+
             document.getElementById('analyseProgressText').textContent = 'Identification des followers mutuels...';
 
             // Find mutual followers (people who follow you AND you follow them)
@@ -315,10 +305,7 @@ const unfollowers = {
             document.getElementById('analyseProgressText').textContent = 'Sauvegarde...';
             await app.dataStore.save();
 
-            // Update unfollowers section data
-            this.data.following = followingList;
-            this.data.followers = followersList;
-            this.data.unfollowers = followingList.filter(u => !followersSet.has(u) && !this.data.normalUnfollowers.has(u));
+            // Update counts
             this.updateCounts();
 
             // Show results
@@ -335,8 +322,8 @@ const unfollowers = {
                     <div style="font-size: 13px; color: #6c757d;">Déjà existants</div>
                 </div>
                 <div style="background: white; padding: 16px; border-radius: 8px; text-align: center;">
-                    <div style="font-size: 24px; font-weight: 700; color: #6c757d; margin-bottom: 4px;">${skipped}</div>
-                    <div style="font-size: 13px; color: #6c757d;">Ignorés</div>
+                    <div style="font-size: 24px; font-weight: 700; color: #ff7675; margin-bottom: 4px;">${this.data.unfollowers.length}</div>
+                    <div style="font-size: 13px; color: #6c757d;">Unfollowers</div>
                 </div>
                 <div style="background: white; padding: 16px; border-radius: 8px; text-align: center;">
                     <div style="font-size: 24px; font-weight: 700; color: #007bff; margin-bottom: 4px;">${mutualFollowersFiltered.length}</div>
@@ -346,7 +333,7 @@ const unfollowers = {
 
             document.getElementById('analyseStats').innerHTML = statsHTML;
 
-            // Render contacts
+            // Render contacts and stats
             contacts.render();
             stats.render();
 
