@@ -237,7 +237,7 @@ const unfollowers = {
             } else {
                 document.getElementById('unfollowersResults').style.display = 'block';
                 document.getElementById('emptyUnfollowers').style.display = 'none';
-                this.renderUnfollowersList();
+                this.renderList();
             }
 
             document.getElementById('analyseProgressText').textContent = 'Identification des followers mutuels...';
