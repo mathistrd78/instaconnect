@@ -160,6 +160,10 @@ const app = {
             document.querySelectorAll('.nav-item')[0].classList.add('active');
             header.style.display = 'block';
             contacts.render();
+        } else if (section === 'analyse') {
+            document.getElementById('analyseSection').classList.add('active');
+            document.querySelectorAll('.nav-item')[1].classList.add('active');
+            header.style.display = 'none';
         } else if (section === 'stats') {
             document.getElementById('statsSection').classList.add('active');
             document.querySelectorAll('.nav-item')[2].classList.add('active');
