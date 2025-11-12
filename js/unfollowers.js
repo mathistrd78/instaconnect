@@ -39,6 +39,11 @@ const unfollowers = {
         // Update counts
         this.updateCounts();
         
+        // Load unfollowers data from Firebase
+        setTimeout(() => {
+            this.loadUnfollowersDataFromFirebase();
+        }, 1000);
+        
         // Setup file input for analyse section
         const fileInputAnalyse = document.getElementById('zipFileInputAnalyse');
         if (fileInputAnalyse) {
@@ -116,6 +121,64 @@ const unfollowers = {
             console.log('✅ Unfollowers lists saved to Firebase');
         } catch (error) {
             console.error('❌ Error saving unfollowers lists:', error);
+        }
+    },
+    
+    async saveUnfollowersDataToFirebase() {
+        if (!authManager.currentUser) return;
+        
+        try {
+            const userId = authManager.currentUser.uid;
+            await db.collection('users').doc(userId).set({
+                unfollowersData: {
+                    following: this.data.following,
+                    followers: this.data.followers,
+                    unfollowers: this.data.unfollowers,
+                    lastUpdate: new Date().toISOString()
+                }
+            }, { merge: true });
+            console.log('✅ Unfollowers data saved to Firebase');
+        } catch (error) {
+            console.error('❌ Error saving unfollowers data:', error);
+        }
+    },
+    
+    async loadUnfollowersDataFromFirebase() {
+        if (!authManager.currentUser) return;
+        
+        try {
+            const userId = authManager.currentUser.uid;
+            const userDoc = await db.collection('users').doc(userId).get();
+            
+            if (userDoc.exists) {
+                const data = userDoc.data();
+                if (data.unfollowersData) {
+                    this.data.following = data.unfollowersData.following || [];
+                    this.data.followers = data.unfollowersData.followers || [];
+                    this.data.unfollowers = data.unfollowersData.unfollowers || [];
+                    
+                    // Update display
+                    document.getElementById('followersCount').textContent = this.data.followers.length;
+                    document.getElementById('followingCount').textContent = this.data.following.length;
+                    document.getElementById('unfollowersCount').textContent = this.data.unfollowers.length;
+                    
+                    // Show appropriate section
+                    if (this.data.unfollowers.length === 0) {
+                        document.getElementById('unfollowersResults').style.display = 'none';
+                        document.getElementById('emptyUnfollowers').style.display = 'block';
+                        document.getElementById('emptyUnfollowers').querySelector('div:nth-child(2)').textContent = 'Aucun unfollower !';
+                        document.getElementById('emptyUnfollowers').querySelector('div:nth-child(3)').textContent = 'Tout le monde que vous suivez vous suit en retour';
+                    } else {
+                        document.getElementById('unfollowersResults').style.display = 'block';
+                        document.getElementById('emptyUnfollowers').style.display = 'none';
+                        this.renderList();
+                    }
+                    
+                    console.log('✅ Unfollowers data loaded from Firebase');
+                }
+            }
+        } catch (error) {
+            console.error('❌ Error loading unfollowers data:', error);
         }
     },
 
@@ -222,6 +285,9 @@ const unfollowers = {
             this.data.following = followingList;
             this.data.followers = followersList;
             this.data.unfollowers = followingList.filter(u => !followersSet.has(u) && !this.data.normalUnfollowers.has(u));
+            
+            // Save unfollowers data to Firebase
+            await this.saveUnfollowersDataToFirebase();
             
             // Update unfollowers display
             document.getElementById('followersCount').textContent = followersList.length;
