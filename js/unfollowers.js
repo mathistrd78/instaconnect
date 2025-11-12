@@ -12,6 +12,7 @@ const unfollowers = {
     },
     
     pendingFile: null, // Fichier en attente d'analyse
+    pendingFileAnalyse: null, // Fichier en attente pour création de contacts
 
     init() {
         // Load saved lists
@@ -70,6 +71,37 @@ const unfollowers = {
             fileInput.addEventListener('change', (e) => this.handleFileUpload(e));
         }
         
+        // Setup file input for analyse section
+        const fileInputAnalyse = document.getElementById('zipFileInputAnalyse');
+        if (fileInputAnalyse) {
+            fileInputAnalyse.addEventListener('change', (e) => this.handleFileUploadAnalyse(e));
+        }
+        
+        // Setup drag & drop for analyse section
+        const uploadZoneAnalyse = document.getElementById('uploadZoneAnalyse');
+        if (uploadZoneAnalyse) {
+            uploadZoneAnalyse.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadZoneAnalyse.classList.add('dragover');
+            });
+
+            uploadZoneAnalyse.addEventListener('dragleave', () => {
+                uploadZoneAnalyse.classList.remove('dragover');
+            });
+
+            uploadZoneAnalyse.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadZoneAnalyse.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0 && files[0].name.endsWith('.zip')) {
+                    this.handleFileUploadAnalyse({target: {files: [files[0]]}});
+                } else {
+                    alert('Veuillez déposer un fichier ZIP');
+                }
+            });
+        }
+        
         // Prevent tag edit modal from closing when clicking inside
         const tagEditModal = document.getElementById('tagEditModal');
         if (tagEditModal) {
@@ -119,6 +151,223 @@ const unfollowers = {
         }
     },
 
+    handleFileUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        if (!file.name.endsWith('.zip')) {
+            alert('Veuillez sélectionner un fichier ZIP');
+            return;
+        }
+
+        // Store file and show discover button
+        this.pendingFile = file;
+        document.getElementById('discoverButtonContainer').style.display = 'block';
+        
+        // Update upload zone text
+        const uploadZone = document.getElementById('uploadZone');
+        uploadZone.querySelector('.upload-text').textContent = '✅ Fichier chargé : ' + file.name;
+        uploadZone.querySelector('.upload-subtext').textContent = 'Cliquez sur "Découvrir" pour analyser';
+    },
+    
+    handleFileUploadAnalyse(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        if (!file.name.endsWith('.zip')) {
+            alert('Veuillez sélectionner un fichier ZIP');
+            return;
+        }
+
+        // Store file and show analyse button
+        this.pendingFileAnalyse = file;
+        document.getElementById('analyseButtonContainer').style.display = 'block';
+        
+        // Update upload zone text
+        const uploadZone = document.getElementById('uploadZoneAnalyse');
+        uploadZone.querySelector('.upload-text').textContent = '✅ Fichier chargé : ' + file.name;
+        uploadZone.querySelector('.upload-subtext').textContent = 'Cliquez sur "Créer les fiches" pour continuer';
+    },
+    
+    async analyzeFileForContacts() {
+        if (!this.pendingFileAnalyse) return;
+        
+        await this.processZipFileForContacts(this.pendingFileAnalyse);
+    },
+    
+    async processZipFileForContacts(file) {
+        // Show progress
+        document.getElementById('analyseProgress').style.display = 'block';
+        document.getElementById('analyseResults').style.display = 'none';
+        document.getElementById('analyseProgressText').textContent = 'Extraction du fichier ZIP...';
+
+        try {
+            // Load JSZip library from CDN
+            if (typeof JSZip === 'undefined') {
+                await this.loadJSZip();
+            }
+
+            const zip = new JSZip();
+            const contents = await zip.loadAsync(file);
+
+            // Find following and followers files
+            let followingFile = null;
+            let followersFile = null;
+
+            contents.forEach((relativePath, zipEntry) => {
+                if (relativePath.includes('following.json')) {
+                    followingFile = zipEntry;
+                } else if (relativePath.includes('followers_1.json')) {
+                    followersFile = zipEntry;
+                }
+            });
+
+            if (!followingFile || !followersFile) {
+                throw new Error('Fichiers following.json ou followers_1.json introuvables dans le ZIP');
+            }
+
+            document.getElementById('analyseProgressText').textContent = 'Lecture des fichiers...';
+
+            // Parse JSON files
+            const followingText = await followingFile.async('text');
+            const followersText = await followersFile.async('text');
+
+            const followingData = JSON.parse(followingText);
+            const followersData = JSON.parse(followersText);
+
+            document.getElementById('analyseProgressText').textContent = 'Analyse des followers...';
+
+            // Extract usernames
+            const followingList = followingData.relationships_following.map(item => 
+                item.title || item.string_list_data?.[0]?.value
+            ).filter(Boolean);
+
+            const followersList = followersData.map(item => 
+                item.title || item.string_list_data?.[0]?.value
+            ).filter(Boolean);
+
+            // Create sets for faster lookup
+            const followingSet = new Set(followingList);
+            const followersSet = new Set(followersList);
+
+            document.getElementById('analyseProgressText').textContent = 'Identification des followers mutuels...';
+
+            // Find mutual followers (people who follow you AND you follow them)
+            const mutualFollowers = followingList.filter(username => followersSet.has(username));
+
+            // Exclude normal unfollowers
+            const mutualFollowersFiltered = mutualFollowers.filter(username => 
+                !this.data.normalUnfollowers.has(username)
+            );
+
+            document.getElementById('analyseProgressText').textContent = 'Création des fiches contacts...';
+
+            // Create contact cards
+            let created = 0;
+            let skipped = 0;
+            let alreadyExists = 0;
+
+            for (const username of mutualFollowersFiltered) {
+                // Check if contact already exists (by Instagram username)
+                const existingContact = app.dataStore.contacts.find(c => 
+                    c.instagram.toLowerCase().replace('@', '') === username.toLowerCase()
+                );
+
+                if (existingContact) {
+                    alreadyExists++;
+                    continue;
+                }
+
+                // Check if in "do not follow" list
+                if (this.data.doNotFollowList.has(username)) {
+                    skipped++;
+                    continue;
+                }
+
+                // Create new contact
+                const newContact = {
+                    id: Date.now().toString() + '_' + Math.random().toString(36).substr(2, 9),
+                    firstName: '@' + username,
+                    instagram: '@' + username,
+                    relationType: '',
+                    meetingPlace: '',
+                    discussionStatus: '',
+                    profession: '',
+                    location: '',
+                    age: '',
+                    phone: '',
+                    interests: '',
+                    notes: 'Créé automatiquement depuis l\'analyse Instagram',
+                    dateAdded: new Date().toISOString()
+                };
+
+                app.dataStore.contacts.push(newContact);
+                created++;
+                
+                // Update progress every 10 contacts
+                if (created % 10 === 0) {
+                    document.getElementById('analyseProgressText').textContent = 
+                        `Création des fiches contacts... (${created} créées)`;
+                }
+            }
+
+            // Save to Firebase
+            document.getElementById('analyseProgressText').textContent = 'Sauvegarde...';
+            await app.dataStore.save();
+
+            // Update unfollowers section data
+            this.data.following = followingList;
+            this.data.followers = followersList;
+            this.data.unfollowers = followingList.filter(u => !followersSet.has(u) && !this.data.normalUnfollowers.has(u));
+            this.updateCounts();
+
+            // Show results
+            document.getElementById('analyseProgress').style.display = 'none';
+            document.getElementById('analyseResults').style.display = 'block';
+
+            const statsHTML = `
+                <div style="background: white; padding: 16px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 24px; font-weight: 700; color: #28a745; margin-bottom: 4px;">${created}</div>
+                    <div style="font-size: 13px; color: #6c757d;">Contacts créés</div>
+                </div>
+                <div style="background: white; padding: 16px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 24px; font-weight: 700; color: #ffc107; margin-bottom: 4px;">${alreadyExists}</div>
+                    <div style="font-size: 13px; color: #6c757d;">Déjà existants</div>
+                </div>
+                <div style="background: white; padding: 16px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 24px; font-weight: 700; color: #6c757d; margin-bottom: 4px;">${skipped}</div>
+                    <div style="font-size: 13px; color: #6c757d;">Ignorés</div>
+                </div>
+                <div style="background: white; padding: 16px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 24px; font-weight: 700; color: #007bff; margin-bottom: 4px;">${mutualFollowersFiltered.length}</div>
+                    <div style="font-size: 13px; color: #6c757d;">Followers mutuels</div>
+                </div>
+            `;
+
+            document.getElementById('analyseStats').innerHTML = statsHTML;
+
+            // Render contacts
+            contacts.render();
+            stats.render();
+
+            // Reset file
+            this.pendingFileAnalyse = null;
+            document.getElementById('zipFileInputAnalyse').value = '';
+            document.getElementById('analyseButtonContainer').style.display = 'none';
+            
+            // Reset upload zone
+            const uploadZone = document.getElementById('uploadZoneAnalyse');
+            uploadZone.querySelector('.upload-text').textContent = 'Sélectionnez votre export Instagram';
+            uploadZone.querySelector('.upload-subtext').textContent = 'Fichier ZIP uniquement';
+
+        } catch (error) {
+            console.error('Error processing ZIP for contacts:', error);
+            alert('Erreur lors de l\'analyse : ' + error.message);
+            
+            document.getElementById('analyseProgress').style.display = 'none';
+        }
+    },
+    
     handleFileUpload(event) {
         const file = event.target.files[0];
         if (!file) return;
