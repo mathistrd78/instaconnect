@@ -129,6 +129,58 @@
             </div>
         </div>
 
+        <!-- Section Analyse -->
+        <div id="analyseSection" class="section">
+            <div class="analyse-container">
+                <div class="analyse-header">
+                    <h2 style="font-size: 24px; margin-bottom: 8px;">🔍 Analyse Instagram</h2>
+                    <p style="color: #6c757d; margin-bottom: 24px;">Créez automatiquement des fiches contacts pour vos followers mutuels</p>
+                </div>
+
+                <div class="analyse-instructions" style="background: #e3f2fd; padding: 20px; border-radius: 12px; margin-bottom: 24px;">
+                    <h3 style="font-size: 16px; margin-bottom: 12px; color: #1976d2;">📋 Comment ça marche ?</h3>
+                    <ol style="margin: 0; padding-left: 20px; line-height: 1.8; color: #495057;">
+                        <li>Uploadez votre fichier d'export Instagram (ZIP)</li>
+                        <li>Le système analyse vos followers et following</li>
+                        <li>Des fiches contacts sont créées automatiquement pour tous ceux qui vous suivent ET que vous suivez</li>
+                        <li>Les "unfollowers normaux" (marques, influenceurs) sont exclus</li>
+                        <li>Les doublons sont automatiquement évités</li>
+                    </ol>
+                </div>
+
+                <div class="upload-zone-analyse" id="uploadZoneAnalyse">
+                    <div class="upload-icon">📤</div>
+                    <div class="upload-text">Sélectionnez votre export Instagram</div>
+                    <div class="upload-subtext">Fichier ZIP uniquement</div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 12px;">
+                    <input type="file" id="zipFileInputAnalyse" accept=".zip,application/zip,application/x-zip-compressed,application/octet-stream" 
+                           style="display: block; margin: 0 auto; padding: 12px 20px; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; max-width: 280px;">
+                </div>
+                
+                <div id="analyseButtonContainer" style="display: none; text-align: center; margin-top: 16px;">
+                    <button class="btn btn-primary" onclick="unfollowers.analyzeFileForContacts()" style="width: 100%; max-width: 400px;">
+                        ✨ Créer les fiches contacts
+                    </button>
+                </div>
+
+                <div id="analyseProgress" style="display: none; text-align: center; padding: 40px;">
+                    <div class="spinner"></div>
+                    <div style="font-size: 16px; color: #495057; font-weight: 600; margin-top: 16px;">Analyse en cours...</div>
+                    <div id="analyseProgressText" style="font-size: 14px; color: #6c757d; margin-top: 8px;"></div>
+                </div>
+
+                <div id="analyseResults" style="display: none; padding: 20px; background: #f8f9fa; border-radius: 12px; margin-top: 24px;">
+                    <h3 style="font-size: 18px; margin-bottom: 16px; color: #28a745;">✅ Analyse terminée !</h3>
+                    <div id="analyseStats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px;"></div>
+                    <button class="btn btn-primary" onclick="app.switchSection('contacts')" style="width: 100%;">
+                        👁️ Voir mes contacts
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- Section Unfollowers -->
         <div id="unfollowersSection" class="section">
             <div class="unfollowers-header">
@@ -208,9 +260,9 @@
             <span class="nav-icon">🏠</span>
             <span>Accueil</span>
         </div>
-        <div class="nav-item" onclick="app.openAddModal()">
-            <span class="nav-icon">➕</span>
-            <span>Ajouter</span>
+        <div class="nav-item" onclick="app.switchSection('analyse')">
+            <span class="nav-icon">🔍</span>
+            <span>Analyse</span>
         </div>
         <div class="nav-item" onclick="app.switchSection('stats')">
             <span class="nav-icon">📊</span>
