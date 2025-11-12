@@ -337,18 +337,26 @@ const unfollowers = {
     },
 
     openInstagram(username) {
-        // Open Instagram profile - Fix pour éviter la page blanche sur iPhone
+        // Open Instagram profile - Fix pour PWA iOS
         const instagramUrl = `https://instagram.com/${username}`;
+        const instagramApp = `instagram://user?username=${username}`;
         
-        // Essayer d'ouvrir l'app Instagram
-        window.location.href = `instagram://user?username=${username}`;
+        // Détecter le mode PWA
+        const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
+                     window.navigator.standalone === true;
         
-        // Fallback vers le navigateur après un court délai
-        setTimeout(() => {
-            // Utiliser window.open avec noopener pour éviter la page blanche
-            const newWindow = window.open(instagramUrl, '_blank', 'noopener,noreferrer');
-            if (newWindow) newWindow.opener = null;
-        }, 500);
+        if (isPWA) {
+            // PWA: Ouvrir directement dans un nouvel onglet
+            console.log('📱 PWA mode - opening in new tab');
+            window.open(instagramUrl, '_blank', 'noopener,noreferrer');
+        } else {
+            // Navigateur: Essayer d'ouvrir l'app Instagram d'abord
+            console.log('🌐 Browser mode - trying app first');
+            window.location.href = instagramApp;
+            setTimeout(() => {
+                window.open(instagramUrl, '_blank', 'noopener,noreferrer');
+            }, 500);
+        }
     },
 
     markAsUnfollowed(username) {
@@ -501,8 +509,8 @@ const unfollowers = {
             else if (filter === 'uncategorized') categoryMatch = !category;
             else categoryMatch = category === filter;
             
-            // Filter by search
-            const searchMatch = username.toLowerCase().includes(searchTerm.toLowerCase());
+            // Filter by search - cherche au DÉBUT uniquement
+            const searchMatch = username.toLowerCase().startsWith(searchTerm.toLowerCase());
             
             return categoryMatch && searchMatch;
         });
@@ -660,7 +668,7 @@ const unfollowers = {
     
     renderDoNotFollowList(list, searchTerm) {
         const filteredList = list.filter(username => 
-            username.toLowerCase().includes(searchTerm.toLowerCase())
+            username.toLowerCase().startsWith(searchTerm.toLowerCase())
         );
         
         if (filteredList.length === 0) {
