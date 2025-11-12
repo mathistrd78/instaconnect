@@ -142,9 +142,9 @@
                     <ol style="margin: 0; padding-left: 20px; line-height: 1.8; color: #495057;">
                         <li>Uploadez votre fichier d'export Instagram (ZIP)</li>
                         <li>Le système analyse vos followers et following</li>
-                        <li>Des fiches contacts sont créées automatiquement pour tous ceux qui vous suivent ET que vous suivez</li>
-                        <li>Les "unfollowers normaux" (marques, influenceurs) sont exclus</li>
-                        <li>Les doublons sont automatiquement évités</li>
+                        <li>Des fiches contacts sont créées dans l'onglet <strong>Accueil</strong></li>
+                        <li>Les unfollowers sont affichés dans l'onglet <strong>Unfollowers</strong></li>
+                        <li>Les statistiques sont mises à jour dans l'onglet <strong>Stats</strong></li>
                     </ol>
                 </div>
 
@@ -161,7 +161,7 @@
                 
                 <div id="analyseButtonContainer" style="display: none; text-align: center; margin-top: 16px;">
                     <button class="btn btn-primary" onclick="unfollowers.analyzeFileForContacts()" style="width: 100%; max-width: 400px;">
-                        ✨ Créer les fiches contacts
+                        🚀 Lancer l'analyse complète
                     </button>
                 </div>
 
@@ -185,25 +185,7 @@
         <div id="unfollowersSection" class="section">
             <div class="unfollowers-header">
                 <div class="unfollowers-title">🔴 Unfollowers</div>
-                <div class="unfollowers-subtitle">Découvrez qui ne vous suit pas en retour</div>
-                
-                <div class="upload-zone" id="uploadZone">
-                    <div class="upload-icon">📤</div>
-                    <div class="upload-text">Sélectionnez votre export Instagram</div>
-                    <div class="upload-subtext">Fichier ZIP uniquement</div>
-                </div>
-                
-                <!-- Input file VISIBLE pour PWA iOS (seule solution qui marche) -->
-                <div style="text-align: center; margin-top: 12px;">
-                    <input type="file" id="zipFileInput" accept=".zip,application/zip,application/x-zip-compressed,application/octet-stream" 
-                           style="display: block; margin: 0 auto; padding: 12px 20px; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; max-width: 280px;">
-                </div>
-                
-                <div id="discoverButtonContainer" style="display: none; text-align: center; margin-top: 16px;">
-                    <button class="btn btn-primary" onclick="unfollowers.analyzeFile()" style="width: 100%;">
-                        🔍 Découvrir les unfollowers
-                    </button>
-                </div>
+                <div class="unfollowers-subtitle">Liste des personnes qui ne vous suivent pas en retour</div>
             </div>
 
             <!-- Boutons toujours visibles -->
@@ -216,12 +198,7 @@
                 </button>
             </div>
 
-            <div id="analyzingState" class="analyzing" style="display: none;">
-                <div class="spinner"></div>
-                <div style="font-size: 16px; color: #495057; font-weight: 600;">Analyse en cours...</div>
-            </div>
-
-            <div id="unfollowersResults" style="display: none;">
+            <div id="unfollowersResults">
                 <div class="unfollowers-stats">
                     <div class="unfollower-stat-card">
                         <div class="unfollower-stat-value" id="followersCount">0</div>
@@ -240,16 +217,15 @@
                 <div class="unfollowers-list">
                     <div class="unfollowers-list-header">
                         <span>Liste des unfollowers</span>
-                        <button class="reset-btn" onclick="unfollowers.reset()" style="padding: 8px 16px; margin: 0;">🔄 Nouvelle analyse</button>
                     </div>
                     <div id="unfollowersList"></div>
                 </div>
             </div>
 
-            <div id="emptyUnfollowers" class="empty-unfollowers" style="display: none;">
-                <div class="empty-unfollowers-icon">🎉</div>
-                <div style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">Aucun unfollower !</div>
-                <div style="font-size: 14px;">Tout le monde que vous suivez vous suit en retour</div>
+            <div id="emptyUnfollowers" class="empty-unfollowers">
+                <div class="empty-unfollowers-icon">📊</div>
+                <div style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">Aucune analyse effectuée</div>
+                <div style="font-size: 14px;">Allez dans l'onglet "Analyse" pour analyser votre export Instagram</div>
             </div>
         </div>
     </div>
