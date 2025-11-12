@@ -1233,3 +1233,97 @@ body.hide-header .container {
         grid-template-columns: repeat(2, 1fr);
     }
 }
+
+/* Analyse Section Styles */
+.analyse-container {
+    padding: 20px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.analyse-header h2 {
+    text-align: center;
+    color: #2d3436;
+}
+
+.analyse-header p {
+    text-align: center;
+    font-size: 14px;
+}
+
+.analyse-instructions {
+    font-size: 14px;
+}
+
+.analyse-instructions h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.analyse-instructions ol {
+    color: #495057;
+}
+
+.upload-zone-analyse {
+    background: white;
+    border: 3px dashed #007bff;
+    border-radius: 16px;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 8px;
+}
+
+.upload-zone-analyse:hover {
+    border-color: #0056b3;
+    background: #f8f9ff;
+}
+
+.upload-zone-analyse.dragover {
+    background: #e3f2fd;
+    border-color: #0056b3;
+}
+
+.upload-zone-analyse .upload-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+}
+
+.upload-zone-analyse .upload-text {
+    font-size: 16px;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 4px;
+}
+
+.upload-zone-analyse .upload-subtext {
+    font-size: 13px;
+    color: #868e96;
+}
+
+#analyseProgress {
+    padding: 40px 20px;
+}
+
+#analyseProgressText {
+    font-size: 14px;
+    color: #6c757d;
+    margin-top: 12px;
+}
+
+#analyseResults {
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
