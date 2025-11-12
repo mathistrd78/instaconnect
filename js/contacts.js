@@ -85,12 +85,18 @@ const contacts = {
         const filterStat = document.getElementById('filterStatut').value;
 
         return app.dataStore.contacts.filter(c => {
-            const matchSearch = c.firstName.toLowerCase().includes(search) || c.instagram.toLowerCase().includes(search);
+            // Recherche : uniquement au début du nom (pas partout)
+            const matchSearch = c.firstName.toLowerCase().startsWith(search) || c.instagram.toLowerCase().startsWith(search);
             const matchRel = !filterRel || c.relationType === filterRel;
             const matchLieu = !filterLieu || c.meetingPlace === filterLieu;
             const matchStat = !filterStat || c.discussionStatus === filterStat;
             return matchSearch && matchRel && matchLieu && matchStat;
-        }).sort((a, b) => a.firstName.localeCompare(b.firstName, 'fr'));
+        }).sort((a, b) => {
+            // Tri alphabétique : ignorer les caractères spéciaux (@, _, etc.)
+            const cleanA = a.firstName.replace(/^[@_\-\.\s]+/, '').toLowerCase();
+            const cleanB = b.firstName.replace(/^[@_\-\.\s]+/, '').toLowerCase();
+            return cleanA.localeCompare(cleanB, 'fr');
+        });
     },
 
     saveContact(e) {
