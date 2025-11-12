@@ -213,6 +213,34 @@ const authManager = {
                     unfollowers.data.normalCategories = data.normalCategories;
                 }
                 
+                // Charger les données des unfollowers (following, followers, unfollowers)
+                if (data.unfollowersData) {
+                    unfollowers.data.following = data.unfollowersData.following || [];
+                    unfollowers.data.followers = data.unfollowersData.followers || [];
+                    unfollowers.data.unfollowers = data.unfollowersData.unfollowers || [];
+                    
+                    // Update display
+                    document.getElementById('followersCount').textContent = unfollowers.data.followers.length;
+                    document.getElementById('followingCount').textContent = unfollowers.data.following.length;
+                    document.getElementById('unfollowersCount').textContent = unfollowers.data.unfollowers.length;
+                    
+                    // Show appropriate section
+                    if (unfollowers.data.unfollowers.length === 0) {
+                        document.getElementById('unfollowersResults').style.display = 'none';
+                        document.getElementById('emptyUnfollowers').style.display = 'block';
+                        const emptyDiv2 = document.getElementById('emptyUnfollowers').querySelector('div:nth-child(2)');
+                        const emptyDiv3 = document.getElementById('emptyUnfollowers').querySelector('div:nth-child(3)');
+                        if (emptyDiv2) emptyDiv2.textContent = 'Aucun unfollower !';
+                        if (emptyDiv3) emptyDiv3.textContent = 'Tout le monde que vous suivez vous suit en retour';
+                    } else {
+                        document.getElementById('unfollowersResults').style.display = 'block';
+                        document.getElementById('emptyUnfollowers').style.display = 'none';
+                        unfollowers.renderList();
+                    }
+                    
+                    console.log('✅ Unfollowers data loaded:', unfollowers.data.unfollowers.length, 'unfollowers');
+                }
+                
                 // Update counts
                 unfollowers.updateCounts();
             }
