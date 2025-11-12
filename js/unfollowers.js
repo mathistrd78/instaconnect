@@ -39,11 +39,6 @@ const unfollowers = {
         // Update counts
         this.updateCounts();
         
-        // Load unfollowers data from Firebase
-        setTimeout(() => {
-            this.loadUnfollowersDataFromFirebase();
-        }, 1000);
-        
         // Setup file input for analyse section
         const fileInputAnalyse = document.getElementById('zipFileInputAnalyse');
         if (fileInputAnalyse) {
