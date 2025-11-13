@@ -7,7 +7,6 @@ const unfollowers = {
         marked: new Set(),
         normalUnfollowers: new Set(), // Influenceurs, marques...
         doNotFollowList: new Set(), // Personnes à ne plus suivre
-        unfollowedList: new Set(), // Personnes déjà unfollowed
         normalCategories: {} // Catégories des unfollowers normaux
     },
     
@@ -24,11 +23,6 @@ const unfollowers = {
         const savedDoNotFollow = localStorage.getItem('doNotFollowList');
         if (savedDoNotFollow) {
             this.data.doNotFollowList = new Set(JSON.parse(savedDoNotFollow));
-        }
-        
-        const savedUnfollowed = localStorage.getItem('unfollowedList');
-        if (savedUnfollowed) {
-            this.data.unfollowedList = new Set(JSON.parse(savedUnfollowed));
         }
         
         const savedCategories = localStorage.getItem('normalCategories');
@@ -97,11 +91,6 @@ const unfollowers = {
         this.saveToFirebase();
     },
     
-    saveUnfollowedList() {
-        localStorage.setItem('unfollowedList', JSON.stringify([...this.data.unfollowedList]));
-        this.saveToFirebase();
-    },
-    
     async saveToFirebase() {
         if (!authManager.currentUser) return;
         
@@ -110,7 +99,6 @@ const unfollowers = {
             await db.collection('users').doc(userId).set({
                 normalUnfollowers: [...this.data.normalUnfollowers],
                 doNotFollowList: [...this.data.doNotFollowList],
-                unfollowedList: [...this.data.unfollowedList],
                 normalCategories: this.data.normalCategories
             }, { merge: true });
             console.log('✅ Unfollowers lists saved to Firebase');
@@ -279,7 +267,12 @@ const unfollowers = {
             // Update unfollowers data (pour affichage dans l'onglet Unfollowers)
             this.data.following = followingList;
             this.data.followers = followersList;
-            this.data.unfollowers = followingList.filter(u => !followersSet.has(u) && !this.data.normalUnfollowers.has(u));
+            // Filtrer : unfollowers normaux et liste "à ne plus suivre"
+            this.data.unfollowers = followingList.filter(u => 
+                !followersSet.has(u) && 
+                !this.data.normalUnfollowers.has(u) && 
+                !this.data.doNotFollowList.has(u)
+            );
             
             // Save unfollowers data to Firebase
             await this.saveUnfollowersDataToFirebase();
@@ -497,7 +490,7 @@ const unfollowers = {
             this.data.unfollowers = followingList
                 .filter(item => !this.data.followers.includes(item.username))
                 .filter(item => !this.data.normalUnfollowers.has(item.username))
-                .filter(item => !this.data.unfollowedList.has(item.username)) // NOUVEAU: Exclure les unfollowed
+                .filter(item => !this.data.doNotFollowList.has(item.username))
                 .map(item => ({
                     username: item.username,
                     timestamp: item.timestamp
@@ -665,10 +658,6 @@ const unfollowers = {
         this.data.doNotFollowList.add(username);
         this.saveDoNotFollowList();
         
-        // Add to unfollowed list (pour ne plus l'afficher dans les prochaines analyses)
-        this.data.unfollowedList.add(username);
-        this.saveUnfollowedList();
-        
         // Remove from unfollowers list (handle both string and object format)
         this.data.unfollowers = this.data.unfollowers.filter(item => {
             const user = typeof item === 'string' ? item : item.username;
@@ -684,6 +673,9 @@ const unfollowers = {
         
         // Update unfollowers counter
         document.getElementById('unfollowersCount').textContent = this.data.unfollowers.length;
+        
+        // Update counts (including doNotFollowCount)
+        this.updateCounts();
         
         // Re-render
         if (this.data.unfollowers.length === 0) {
@@ -998,10 +990,6 @@ const unfollowers = {
         this.data.doNotFollowList.delete(username);
         this.saveDoNotFollowList();
         
-        // Also remove from unfollowed list
-        this.data.unfollowedList.delete(username);
-        this.saveUnfollowedList();
-        
         // Close and refresh the modal
         document.querySelector('body > div[style*="position: fixed"]')?.remove();
         
@@ -1014,7 +1002,7 @@ const unfollowers = {
         this.data.unfollowers = [];
         this.data.marked = new Set();
         this.pendingFile = null;
-        // Keep normalUnfollowers, doNotFollowList, unfollowedList and normalCategories saved
+        // Keep normalUnfollowers, doNotFollowList and normalCategories saved
 
         document.querySelector('.unfollowers-header').style.display = 'block';
         document.getElementById('discoverButtonContainer').style.display = 'none';
