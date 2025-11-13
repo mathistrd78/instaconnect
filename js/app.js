@@ -38,7 +38,7 @@ const app = {
             console.log('📦 Data will be loaded from Firebase');
         },
         
-        async save() {
+        async save(specificContact = null) {
             // Sauvegarder dans Firebase au lieu de localStorage
             if (!authManager.currentUser) {
                 console.warn('⚠️ No user logged in, cannot save to Firebase');
@@ -47,23 +47,30 @@ const app = {
 
             try {
                 const userId = authManager.currentUser.uid;
-                const batch = db.batch();
 
-                // Sauvegarder tous les contacts
-                const contactsRef = db.collection('users').doc(userId).collection('contacts');
-                this.contacts.forEach(contact => {
-                    batch.set(contactsRef.doc(contact.id), contact);
-                });
+                if (specificContact) {
+                    // Sauvegarder un seul contact (plus rapide et évite les conflits)
+                    const contactRef = db.collection('users').doc(userId).collection('contacts').doc(specificContact.id);
+                    await contactRef.set(specificContact);
+                    console.log('✅ Contact saved to Firebase:', specificContact.firstName);
+                } else {
+                    // Sauvegarder tous les contacts (utilisé lors de l'analyse)
+                    const batch = db.batch();
+                    const contactsRef = db.collection('users').doc(userId).collection('contacts');
+                    this.contacts.forEach(contact => {
+                        batch.set(contactsRef.doc(contact.id), contact);
+                    });
 
-                // Sauvegarder les tags personnalisés
-                console.log('📤 Saving customTags to Firebase:', JSON.stringify(app.customTags));
-                const userDoc = db.collection('users').doc(userId);
-                batch.set(userDoc, {
-                    customTags: app.customTags
-                }, { merge: true });
+                    // Sauvegarder les tags personnalisés
+                    console.log('📤 Saving customTags to Firebase:', JSON.stringify(app.customTags));
+                    const userDoc = db.collection('users').doc(userId);
+                    batch.set(userDoc, {
+                        customTags: app.customTags
+                    }, { merge: true });
 
-                await batch.commit();
-                console.log('✅ Data saved to Firebase successfully');
+                    await batch.commit();
+                    console.log('✅ All data saved to Firebase successfully');
+                }
             } catch (error) {
                 console.error('❌ Error saving to Firebase:', error);
             }
