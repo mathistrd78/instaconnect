@@ -113,9 +113,15 @@ const app = {
 
     setupEventListeners() {
         document.getElementById('searchBox').addEventListener('input', () => contacts.render());
-        document.getElementById('filterRelation').addEventListener('change', () => contacts.render());
-        document.getElementById('filterLieu').addEventListener('change', () => contacts.render());
-        document.getElementById('filterStatut').addEventListener('change', () => contacts.render());
+
+        // Close filter dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('filterDropdown');
+            const isFilterChip = e.target.closest('.filter-chip');
+            if (!isFilterChip && dropdown && dropdown.style.display === 'block') {
+                contacts.closeFilterDropdown();
+            }
+        });
 
         // Overlay click handling
         const overlay = document.getElementById('overlay');
@@ -174,13 +180,6 @@ const app = {
             document.querySelectorAll('.nav-item')[3].classList.add('active');
             header.style.display = 'none';
         }
-    },
-
-    toggleFilters() {
-        const panel = document.getElementById('filtersPanel');
-        const icon = document.getElementById('filterIcon');
-        panel.classList.toggle('active');
-        icon.textContent = panel.classList.contains('active') ? '▲' : '▼';
     },
 
     openAddModal() {
