@@ -118,6 +118,8 @@ const contacts = {
     saveContact(e) {
         e.preventDefault();
         
+        console.log('🔵 START saveContact - currentEditId:', this.currentEditId);
+        
         let instagram = document.getElementById('instagram').value.toLowerCase().trim();
         if (!instagram.startsWith('@')) instagram = '@' + instagram;
         
@@ -146,6 +148,8 @@ const contacts = {
             gender = 'Femme';
         }
         
+        console.log('🔵 Gender selected:', gender);
+        
         const contact = {
             id: this.currentEditId || Date.now().toString(),
             firstName: document.getElementById('firstName').value,
@@ -161,21 +165,33 @@ const contacts = {
             interests: document.getElementById('interests').value,
             notes: document.getElementById('notes').value,
             dateAdded: this.currentEditId ? 
-                app.dataStore.contacts.find(c => c.id === this.currentEditId).dateAdded : 
+                app.dataStore.contacts.find(c => c.id === this.currentEditId)?.dateAdded || new Date().toISOString() : 
                 new Date().toISOString()
         };
 
+        console.log('🔵 Contact object created:', JSON.stringify(contact, null, 2));
+
         if (this.currentEditId) {
             const idx = app.dataStore.contacts.findIndex(c => c.id === this.currentEditId);
-            app.dataStore.contacts[idx] = contact;
+            console.log('🔵 Editing existing contact at index:', idx);
+            if (idx !== -1) {
+                app.dataStore.contacts[idx] = contact;
+                console.log('🔵 Contact updated in local array');
+            } else {
+                console.error('❌ Contact not found in local array!');
+            }
         } else {
             app.dataStore.contacts.push(contact);
+            console.log('🔵 New contact added to local array');
         }
 
+        console.log('🔵 Calling save with contact:', contact.id);
         app.dataStore.save(contact); // Passer le contact spécifique
         this.render();
         app.closeAddModal();
         if (this.currentViewId) this.viewProfile(this.currentViewId);
+        
+        console.log('🔵 END saveContact');
     },
 
     openInstagramProfile(username) {
