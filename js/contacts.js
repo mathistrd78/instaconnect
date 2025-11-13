@@ -350,13 +350,8 @@ const contacts = {
     toggleFilterDropdown(filterType, event) {
         event.stopPropagation();
         
-        console.log('toggleFilterDropdown called with:', filterType);
-        
         const dropdown = document.getElementById('filterDropdown');
         const btn = event.currentTarget;
-        
-        console.log('Dropdown element:', dropdown);
-        console.log('Button element:', btn);
         
         // Si on clique sur le même filtre, on ferme
         if (this.currentFilterDropdown === filterType && dropdown.style.display === 'block') {
@@ -393,8 +388,6 @@ const contacts = {
             
             // Convertir en tableau
             options = Array.from(tagMap.values());
-            
-            console.log('Options for', filterType, ':', options);
         }
         
         // Construire le HTML
@@ -420,8 +413,8 @@ const contacts = {
         
         dropdown.style.display = 'block';
         
-        // Update button state
-        btn.classList.add('active');
+        // Ne pas activer visuellement le bouton, juste ouvrir le dropdown
+        // L'état actif dépend uniquement des filtres sélectionnés
     },
     
     toggleFilterValue(filterType, value) {
@@ -479,17 +472,7 @@ const contacts = {
         document.getElementById('filterDropdown').style.display = 'none';
         this.currentFilterDropdown = null;
         
-        // Remove active state from all buttons
-        document.querySelectorAll('.filter-chip').forEach(btn => {
-            if (!btn.classList.contains('filter-reset')) {
-                const hasFilter = 
-                    (btn.id === 'filterGenderBtn' && this.activeFilters.gender.length > 0) ||
-                    (btn.id === 'filterRelationBtn' && this.activeFilters.relationType.length > 0) ||
-                    (btn.id === 'filterLieuBtn' && this.activeFilters.meetingPlace.length > 0) ||
-                    (btn.id === 'filterStatutBtn' && this.activeFilters.discussionStatus.length > 0);
-                
-                btn.classList.toggle('active', hasFilter);
-            }
-        });
+        // Update visual state based on actual filters, not dropdown state
+        this.updateFilterButtons();
     }
 };
