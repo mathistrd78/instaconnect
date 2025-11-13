@@ -447,6 +447,8 @@ body.hide-header .container {
     color: #868e96;
     cursor: pointer;
     transition: all 0.3s ease;
+    min-width: 70px;
+    width: 70px;
 }
 
 .stat-tab.active {
