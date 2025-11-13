@@ -1,20 +1,44 @@
 // stats.js - Graphiques et statistiques
 const stats = {
+    currentType: 'sexe',
+
     render() {
-        this.updateCards();
+        this.updateGlobalStats();
         this.renderChart();
     },
 
-    updateCards() {
-        // Stats cards are now in the chart section only
+    updateGlobalStats() {
+        const contacts = app.dataStore.contacts;
+        const totalContacts = contacts.length;
+        const maleCount = contacts.filter(c => c.gender === 'M').length;
+        const femaleCount = contacts.filter(c => c.gender === 'F').length;
+
+        document.getElementById('totalContactsStat').textContent = totalContacts;
+        document.getElementById('totalMaleStat').textContent = maleCount;
+        document.getElementById('totalFemaleStat').textContent = femaleCount;
+    },
+
+    switchChart(type) {
+        this.currentType = type;
+        
+        // Update active tab
+        document.querySelectorAll('.stat-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        document.querySelector(`[data-type="${type}"]`).classList.add('active');
+        
+        this.renderChart();
     },
 
     renderChart() {
-        const type = document.getElementById('statsType').value;
         let data = [];
         let title = '';
 
-        switch(type) {
+        switch(this.currentType) {
+            case 'sexe':
+                title = 'Répartition par sexe';
+                data = this.groupByGender();
+                break;
             case 'relation':
                 title = 'Répartition par type de relation';
                 data = this.groupBy('relationType');
@@ -27,10 +51,6 @@ const stats = {
                 title = 'Répartition par statut de discussion';
                 data = this.groupBy('discussionStatus');
                 break;
-            case 'age':
-                title = 'Répartition par tranche d\'âge';
-                data = this.groupByAge();
-                break;
             case 'mois':
                 title = 'Répartition par mois d\'ajout';
                 data = this.groupByMonth();
@@ -40,6 +60,26 @@ const stats = {
         document.getElementById('chartTitle').textContent = title;
         this.drawPieChart(data);
         this.renderLegend(data);
+    },
+
+    groupByGender() {
+        const contacts = app.dataStore.contacts;
+        const maleCount = contacts.filter(c => c.gender === 'M').length;
+        const femaleCount = contacts.filter(c => c.gender === 'F').length;
+        const undefinedCount = contacts.filter(c => !c.gender).length;
+
+        const data = [];
+        if (maleCount > 0) {
+            data.push({ label: 'Homme', value: maleCount, color: '#4A90E2' });
+        }
+        if (femaleCount > 0) {
+            data.push({ label: 'Femme', value: femaleCount, color: '#E91E63' });
+        }
+        if (undefinedCount > 0) {
+            data.push({ label: 'Non défini', value: undefinedCount, color: '#868e96' });
+        }
+
+        return data;
     },
 
     groupBy(field) {
@@ -53,20 +93,6 @@ const stats = {
             value,
             color: this.getColorForValue(field, label)
         }));
-    },
-
-    groupByAge() {
-        const ranges = {'18-24': 0, '25-29': 0, '30-34': 0, '35-39': 0, '40+': 0, 'Non défini': 0};
-        app.dataStore.contacts.forEach(c => {
-            if (!c.age) ranges['Non défini']++;
-            else if (c.age < 25) ranges['18-24']++;
-            else if (c.age < 30) ranges['25-29']++;
-            else if (c.age < 35) ranges['30-34']++;
-            else if (c.age < 40) ranges['35-39']++;
-            else ranges['40+']++;
-        });
-        const colors = ['#a29bfe', '#fd79a8', '#74b9ff', '#ff7675', '#55efc4', '#dfe6e9'];
-        return Object.entries(ranges).map(([label, value], i) => ({label, value, color: colors[i]}));
     },
 
     groupByMonth() {
@@ -105,7 +131,7 @@ const stats = {
         const svg = document.getElementById('chartSvg');
         const total = data.reduce((sum, d) => sum + d.value, 0);
         if (total === 0) {
-            svg.innerHTML = '<text x="150" y="150" text-anchor="middle" fill="#868e96">Aucune donnée</text>';
+            svg.innerHTML = '<text x="150" y="150" text-anchor="middle" fill="#868e96" font-size="16">Aucune donnée</text>';
             return;
         }
 
