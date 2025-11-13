@@ -1479,3 +1479,22 @@ body.hide-header .container {
 .filter-option.selected .filter-option-checkbox::after {
     display: block;
 }
+
+/* Fix pour le dropdown des filtres */
+.header {
+    position: relative;
+    z-index: 100;
+}
+
+.filter-dropdown {
+    position: absolute;
+    top: calc(100% - 8px);
+    left: 20px;
+    right: 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    z-index: 1000;
+    max-height: 300px;
+    overflow-y: auto;
+}
