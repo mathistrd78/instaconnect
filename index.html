@@ -105,21 +105,56 @@
 
         <!-- Section Stats -->
         <div id="statsSection" class="section">
-            <div class="stats-header">
-                <select class="stats-select" id="statsType" onchange="stats.renderChart()">
-                    <option value="relation">📊 Par type de relation</option>
-                    <option value="lieu">📍 Par lieu de rencontre</option>
-                    <option value="statut">💬 Par statut de discussion</option>
-                    <option value="age">🎂 Par tranche d'âge</option>
-                    <option value="mois">📅 Par mois d'ajout</option>
-                </select>
-            </div>
+            <div class="stats-page">
+                <!-- Header avec stats globales -->
+                <div class="stats-global">
+                    <h2 class="stats-page-title">📊 Statistiques</h2>
+                    <div class="stats-cards-grid">
+                        <div class="stat-card">
+                            <div class="stat-card-value" id="totalContactsStat">0</div>
+                            <div class="stat-card-label">Total contacts</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-card-value" id="totalMaleStat">0</div>
+                            <div class="stat-card-label">Hommes</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-card-value" id="totalFemaleStat">0</div>
+                            <div class="stat-card-label">Femmes</div>
+                        </div>
+                    </div>
+                </div>
 
+                <!-- Sélecteur de graphique -->
+                <div class="stats-selector">
+                    <button class="stat-tab active" data-type="sexe" onclick="stats.switchChart('sexe')">
+                        <span class="stat-tab-icon">👥</span>
+                        <span>Par sexe</span>
+                    </button>
+                    <button class="stat-tab" data-type="relation" onclick="stats.switchChart('relation')">
+                        <span class="stat-tab-icon">💕</span>
+                        <span>Relation</span>
+                    </button>
+                    <button class="stat-tab" data-type="lieu" onclick="stats.switchChart('lieu')">
+                        <span class="stat-tab-icon">📍</span>
+                        <span>Lieu</span>
+                    </button>
+                    <button class="stat-tab" data-type="statut" onclick="stats.switchChart('statut')">
+                        <span class="stat-tab-icon">💬</span>
+                        <span>Statut</span>
+                    </button>
+                    <button class="stat-tab" data-type="mois" onclick="stats.switchChart('mois')">
+                        <span class="stat-tab-icon">📅</span>
+                        <span>Mois</span>
+                    </button>
+                </div>
 
-            <div class="chart-container">
-                <h3 class="chart-title" id="chartTitle">Répartition par type de relation</h3>
-                <svg id="chartSvg" class="chart-svg" viewBox="0 0 300 300"></svg>
-                <div class="chart-legend" id="chartLegend"></div>
+                <!-- Container du graphique -->
+                <div class="chart-container">
+                    <h3 class="chart-title" id="chartTitle">Répartition par sexe</h3>
+                    <svg id="chartSvg" class="chart-svg" viewBox="0 0 300 300"></svg>
+                    <div class="chart-legend" id="chartLegend"></div>
+                </div>
             </div>
         </div>
 
