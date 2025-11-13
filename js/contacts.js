@@ -3,6 +3,15 @@ const contacts = {
     currentViewId: null,
     currentEditId: null,
     currentFieldType: null,
+    
+    // État des filtres
+    activeFilters: {
+        gender: [],
+        relationType: [],
+        meetingPlace: [],
+        discussionStatus: []
+    },
+    currentFilterDropdown: null,
 
     openTagSelector(fieldType) {
         this.currentFieldType = fieldType;
@@ -31,6 +40,12 @@ const contacts = {
         const filtered = this.getFiltered();
         const grid = document.getElementById('contactsGrid');
         const empty = document.getElementById('emptyState');
+        
+        // Update counter
+        const countElement = document.getElementById('contactsCountNumber');
+        if (countElement) {
+            countElement.textContent = filtered.length;
+        }
 
         if (filtered.length === 0) {
             grid.style.display = 'none';
@@ -80,17 +95,18 @@ const contacts = {
 
     getFiltered() {
         const search = document.getElementById('searchBox').value.toLowerCase();
-        const filterRel = document.getElementById('filterRelation').value;
-        const filterLieu = document.getElementById('filterLieu').value;
-        const filterStat = document.getElementById('filterStatut').value;
 
         return app.dataStore.contacts.filter(c => {
             // Recherche : uniquement au début du nom (pas partout)
             const matchSearch = c.firstName.toLowerCase().startsWith(search) || c.instagram.toLowerCase().startsWith(search);
-            const matchRel = !filterRel || c.relationType === filterRel;
-            const matchLieu = !filterLieu || c.meetingPlace === filterLieu;
-            const matchStat = !filterStat || c.discussionStatus === filterStat;
-            return matchSearch && matchRel && matchLieu && matchStat;
+            
+            // Filtres cumulables
+            const matchGender = this.activeFilters.gender.length === 0 || this.activeFilters.gender.includes(c.gender);
+            const matchRel = this.activeFilters.relationType.length === 0 || this.activeFilters.relationType.includes(c.relationType);
+            const matchLieu = this.activeFilters.meetingPlace.length === 0 || this.activeFilters.meetingPlace.includes(c.meetingPlace);
+            const matchStat = this.activeFilters.discussionStatus.length === 0 || this.activeFilters.discussionStatus.includes(c.discussionStatus);
+            
+            return matchSearch && matchGender && matchRel && matchLieu && matchStat;
         }).sort((a, b) => {
             // Tri alphabétique : ignorer les caractères spéciaux (@, _, etc.)
             const cleanA = a.firstName.replace(/^[@_\-\.\s]+/, '').toLowerCase();
@@ -328,5 +344,122 @@ const contacts = {
         
         // Show confirmation
         alert(`✅ Fiche supprimée et @${cleanUsername} ajouté à la liste "À ne plus suivre"`);
+    },
+    
+    // Gestion des filtres
+    toggleFilterDropdown(filterType, event) {
+        event.stopPropagation();
+        
+        const dropdown = document.getElementById('filterDropdown');
+        const btn = event.currentTarget;
+        
+        // Si on clique sur le même filtre, on ferme
+        if (this.currentFilterDropdown === filterType && dropdown.style.display === 'block') {
+            this.closeFilterDropdown();
+            return;
+        }
+        
+        this.currentFilterDropdown = filterType;
+        
+        // Générer les options
+        let options = [];
+        if (filterType === 'gender') {
+            options = [
+                { value: 'Homme', label: '👨 Homme' },
+                { value: 'Femme', label: '👩 Femme' }
+            ];
+        } else if (filterType === 'relationType') {
+            options = [...app.defaultTags.relationType, ...app.customTags.relationType];
+        } else if (filterType === 'meetingPlace') {
+            options = [...app.defaultTags.meetingPlace, ...app.customTags.meetingPlace];
+        } else if (filterType === 'discussionStatus') {
+            options = [...app.defaultTags.discussionStatus, ...app.customTags.discussionStatus];
+        }
+        
+        // Construire le HTML
+        const html = options.map(opt => {
+            const isSelected = this.activeFilters[filterType].includes(opt.value);
+            return `
+                <div class="filter-option ${isSelected ? 'selected' : ''}" onclick="contacts.toggleFilterValue('${filterType}', '${opt.value}')">
+                    <div class="filter-option-checkbox"></div>
+                    <span>${opt.label}</span>
+                </div>
+            `;
+        }).join('');
+        
+        document.getElementById('filterDropdownContent').innerHTML = html;
+        dropdown.style.display = 'block';
+        
+        // Update button state
+        btn.classList.add('active');
+    },
+    
+    toggleFilterValue(filterType, value) {
+        const index = this.activeFilters[filterType].indexOf(value);
+        if (index > -1) {
+            this.activeFilters[filterType].splice(index, 1);
+        } else {
+            this.activeFilters[filterType].push(value);
+        }
+        
+        // Update button appearance
+        this.updateFilterButtons();
+        
+        // Re-render with new filters
+        this.render();
+        
+        // Rebuild dropdown to show updated selections
+        const btn = document.querySelector(`#filter${filterType === 'gender' ? 'Gender' : filterType === 'relationType' ? 'Relation' : filterType === 'meetingPlace' ? 'Lieu' : 'Statut'}Btn`);
+        if (btn) {
+            this.toggleFilterDropdown(filterType, { currentTarget: btn, stopPropagation: () => {} });
+        }
+    },
+    
+    updateFilterButtons() {
+        // Update each filter button
+        const hasGenderFilter = this.activeFilters.gender.length > 0;
+        const hasRelFilter = this.activeFilters.relationType.length > 0;
+        const hasLieuFilter = this.activeFilters.meetingPlace.length > 0;
+        const hasStatutFilter = this.activeFilters.discussionStatus.length > 0;
+        
+        document.getElementById('filterGenderBtn').classList.toggle('active', hasGenderFilter);
+        document.getElementById('filterRelationBtn').classList.toggle('active', hasRelFilter);
+        document.getElementById('filterLieuBtn').classList.toggle('active', hasLieuFilter);
+        document.getElementById('filterStatutBtn').classList.toggle('active', hasStatutFilter);
+        
+        // Show/hide reset button
+        const hasAnyFilter = hasGenderFilter || hasRelFilter || hasLieuFilter || hasStatutFilter;
+        document.getElementById('filterResetBtn').style.display = hasAnyFilter ? 'flex' : 'none';
+    },
+    
+    resetFilters() {
+        this.activeFilters = {
+            gender: [],
+            relationType: [],
+            meetingPlace: [],
+            discussionStatus: []
+        };
+        
+        this.updateFilterButtons();
+        this.closeFilterDropdown();
+        this.render();
+    },
+    
+    closeFilterDropdown() {
+        document.getElementById('filterDropdown').style.display = 'none';
+        this.currentFilterDropdown = null;
+        
+        // Remove active state from all buttons
+        document.querySelectorAll('.filter-chip').forEach(btn => {
+            if (!btn.classList.contains('filter-reset')) {
+                const hasFilter = 
+                    (btn.id === 'filterGenderBtn' && this.activeFilters.gender.length > 0) ||
+                    (btn.id === 'filterRelationBtn' && this.activeFilters.relationType.length > 0) ||
+                    (btn.id === 'filterLieuBtn' && this.activeFilters.meetingPlace.length > 0) ||
+                    (btn.id === 'filterStatutBtn' && this.activeFilters.discussionStatus.length > 0);
+                
+                btn.classList.toggle('active', hasFilter);
+            }
+        });
     }
 };
