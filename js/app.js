@@ -196,6 +196,10 @@ const app = {
             }
         });
         
+        // Reset gender radio buttons
+        document.getElementById('genderMale').checked = false;
+        document.getElementById('genderFemale').checked = false;
+        
         document.getElementById('modalTitle').textContent = '➕ Nouveau contact';
         document.getElementById('addModal').classList.add('active');
         document.querySelector('#addModal .modal-content').scrollTop = 0;
