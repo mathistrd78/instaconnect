@@ -160,26 +160,44 @@ const app = {
         // Gérer l'affichage du header
         const header = document.querySelector('.header');
         
-        // Activer la nouvelle section
+        // Ordre des onglets : Contacts (0), Stats (1), Analyse (2), Unfollowers (3), Profil (4)
         if (section === 'contacts') {
             document.getElementById('contactsSection').classList.add('active');
             document.querySelectorAll('.nav-item')[0].classList.add('active');
             header.style.display = 'block';
             contacts.render();
-        } else if (section === 'analyse') {
-            document.getElementById('analyseSection').classList.add('active');
-            document.querySelectorAll('.nav-item')[1].classList.add('active');
-            header.style.display = 'none';
         } else if (section === 'stats') {
             document.getElementById('statsSection').classList.add('active');
-            document.querySelectorAll('.nav-item')[2].classList.add('active');
+            document.querySelectorAll('.nav-item')[1].classList.add('active');
             header.style.display = 'none';
             stats.render();
+        } else if (section === 'analyse') {
+            document.getElementById('analyseSection').classList.add('active');
+            document.querySelectorAll('.nav-item')[2].classList.add('active');
+            header.style.display = 'none';
         } else if (section === 'unfollowers') {
             document.getElementById('unfollowersSection').classList.add('active');
             document.querySelectorAll('.nav-item')[3].classList.add('active');
             header.style.display = 'none';
+        } else if (section === 'profil') {
+            document.getElementById('profilSection').classList.add('active');
+            document.querySelectorAll('.nav-item')[4].classList.add('active');
+            header.style.display = 'none';
+            this.updateProfilSection();
         }
+    },
+
+    updateProfilSection() {
+        // Mettre à jour les informations du profil
+        const userEmailEl = document.getElementById('profilUserEmail');
+        if (userEmailEl && authManager.currentUser) {
+            userEmailEl.textContent = authManager.currentUser.email;
+        }
+        
+        // Mettre à jour les statistiques
+        document.getElementById('profilContactsCount').textContent = app.dataStore.contacts.length;
+        document.getElementById('profilFollowersCount').textContent = unfollowers.data.followers.length;
+        document.getElementById('profilUnfollowersCount').textContent = unfollowers.data.unfollowers.length;
     },
 
     openAddModal() {
