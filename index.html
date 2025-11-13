@@ -66,34 +66,37 @@
         
         <input type="text" class="search-box" id="searchBox" placeholder="🔍 Rechercher...">
         
-        <button class="filters-toggle" onclick="app.toggleFilters()">
-            <span>Filtres</span>
-            <span id="filterIcon">▼</span>
-        </button>
+        <!-- Compteur de contacts -->
+        <div class="contacts-count" id="contactsCount">
+            <span id="contactsCountNumber">0</span> contact(s)
+        </div>
         
-        <div class="filters-panel" id="filtersPanel">
-            <select class="filter-select" id="filterRelation">
-                <option value="">Type de relation</option>
-                <option value="Ami">👥 Ami</option>
-                <option value="Famille">👨‍👩‍👧 Famille</option>
-                <option value="Connaissance">🤝 Connaissance</option>
-                <option value="Sexe">❤️ Sexe</option>
-            </select>
-            <select class="filter-select" id="filterLieu">
-                <option value="">Lieu de rencontre</option>
-                <option value="IRL">🌍 IRL</option>
-                <option value="Insta">📸 Insta</option>
-                <option value="Tinder">🔥 Tinder</option>
-                <option value="Hinge">💜 Hinge</option>
-                <option value="Soirée Tech">🎵 Soirée Tech</option>
-            </select>
-            <select class="filter-select" id="filterStatut">
-                <option value="">Statut de discussion</option>
-                <option value="Déjà parlé">💬 Déjà parlé</option>
-                <option value="Jamais parlé">🤐 Jamais parlé</option>
-                <option value="En vu">👀 En vu</option>
-                <option value="En cours">📝 En cours</option>
-            </select>
+        <!-- Nouveaux filtres horizontaux -->
+        <div class="filters-horizontal">
+            <button class="filter-chip" id="filterGenderBtn" onclick="contacts.toggleFilterDropdown('gender', event)">
+                <span>Sexe</span>
+                <span class="filter-arrow">▼</span>
+            </button>
+            <button class="filter-chip" id="filterRelationBtn" onclick="contacts.toggleFilterDropdown('relationType', event)">
+                <span>Type de relation</span>
+                <span class="filter-arrow">▼</span>
+            </button>
+            <button class="filter-chip" id="filterLieuBtn" onclick="contacts.toggleFilterDropdown('meetingPlace', event)">
+                <span>Lieu de rencontre</span>
+                <span class="filter-arrow">▼</span>
+            </button>
+            <button class="filter-chip" id="filterStatutBtn" onclick="contacts.toggleFilterDropdown('discussionStatus', event)">
+                <span>Statut</span>
+                <span class="filter-arrow">▼</span>
+            </button>
+            <button class="filter-chip filter-reset" id="filterResetBtn" onclick="contacts.resetFilters()" style="display: none;">
+                <span>✕ Réinitialiser</span>
+            </button>
+        </div>
+        
+        <!-- Dropdown pour les filtres -->
+        <div class="filter-dropdown" id="filterDropdown" style="display: none;">
+            <div class="filter-dropdown-content" id="filterDropdownContent"></div>
         </div>
     </div>
 
