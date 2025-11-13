@@ -248,39 +248,46 @@ const authManager = {
             // Charger les contacts avec écoute en temps réel
             db.collection('users').doc(userId).collection('contacts')
                 .onSnapshot((snapshot) => {
-                    console.log('🔄 Firebase snapshot received');
+                    console.log('🔄 Firebase snapshot received - docChanges:', snapshot.docChanges().length);
                     
                     // Process changes
                     snapshot.docChanges().forEach(change => {
                         const contact = change.doc.data();
+                        console.log('🔄 Change type:', change.type, 'Contact:', contact.firstName, 'Gender:', contact.gender);
                         
                         if (change.type === 'added') {
                             // Check if contact already exists (avoid duplicates)
                             const exists = app.dataStore.contacts.find(c => c.id === contact.id);
                             if (!exists) {
                                 app.dataStore.contacts.push(contact);
-                                console.log('➕ Contact added:', contact.firstName);
+                                console.log('➕ Contact added to local array:', contact.firstName);
+                            } else {
+                                console.log('⏭️ Contact already exists, skipping add:', contact.firstName);
                             }
                         }
                         
                         if (change.type === 'modified') {
                             const index = app.dataStore.contacts.findIndex(c => c.id === contact.id);
                             if (index !== -1) {
+                                console.log('📝 Before update - Gender:', app.dataStore.contacts[index].gender);
                                 app.dataStore.contacts[index] = contact;
-                                console.log('✏️ Contact modified:', contact.firstName);
+                                console.log('📝 After update - Gender:', app.dataStore.contacts[index].gender);
+                                console.log('✏️ Contact modified in local array:', contact.firstName);
+                            } else {
+                                console.error('❌ Modified contact not found in local array:', contact.id);
                             }
                         }
                         
                         if (change.type === 'removed') {
                             app.dataStore.contacts = app.dataStore.contacts.filter(c => c.id !== contact.id);
-                            console.log('🗑️ Contact removed:', contact.firstName);
+                            console.log('🗑️ Contact removed from local array:', contact.firstName);
                         }
                     });
                     
                     // Re-render UI
                     contacts.render();
                     stats.render();
-                    console.log('✅ Total contacts:', app.dataStore.contacts.length);
+                    console.log('✅ Total contacts in local array:', app.dataStore.contacts.length);
                 });
 
         } catch (error) {
