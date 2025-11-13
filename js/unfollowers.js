@@ -336,6 +336,7 @@ const unfollowers = {
                     relationType: '',
                     meetingPlace: '',
                     discussionStatus: '',
+                    gender: '',
                     profession: '',
                     location: '',
                     age: '',
