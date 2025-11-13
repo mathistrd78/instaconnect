@@ -233,23 +233,58 @@
         </div>
     </div>
 
+    <!-- Section Profil -->
+    <div id="profilSection" class="section">
+        <div class="profil-container">
+            <div class="profil-header">
+                <div class="profil-avatar">👤</div>
+                <div class="profil-email" id="profilUserEmail"></div>
+            </div>
+            
+            <div class="profil-stats">
+                <div class="profil-stat-card">
+                    <div class="profil-stat-number" id="profilContactsCount">0</div>
+                    <div class="profil-stat-label">Contacts</div>
+                </div>
+                <div class="profil-stat-card">
+                    <div class="profil-stat-number" id="profilFollowersCount">0</div>
+                    <div class="profil-stat-label">Followers</div>
+                </div>
+                <div class="profil-stat-card">
+                    <div class="profil-stat-number" id="profilUnfollowersCount">0</div>
+                    <div class="profil-stat-label">Unfollowers</div>
+                </div>
+            </div>
+            
+            <div class="profil-actions">
+                <button class="profil-btn profil-btn-danger" onclick="authManager.logout()">
+                    🚪 Déconnexion
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Bottom Navigation -->
     <div class="bottom-nav">
         <div class="nav-item active" onclick="app.switchSection('contacts')">
-            <span class="nav-icon">🏠</span>
-            <span>Accueil</span>
-        </div>
-        <div class="nav-item" onclick="app.switchSection('analyse')">
-            <span class="nav-icon">🔍</span>
-            <span>Analyse</span>
+            <span class="nav-icon">📱</span>
+            <span>Contacts</span>
         </div>
         <div class="nav-item" onclick="app.switchSection('stats')">
             <span class="nav-icon">📊</span>
             <span>Stats</span>
         </div>
+        <div class="nav-item nav-item-main" onclick="app.switchSection('analyse')">
+            <span class="nav-icon">🔍</span>
+            <span>Analyse</span>
+        </div>
         <div class="nav-item" onclick="app.switchSection('unfollowers')">
             <span class="nav-icon">🔴</span>
             <span>Unfollowers</span>
+        </div>
+        <div class="nav-item" onclick="app.switchSection('profil')">
+            <span class="nav-icon">👤</span>
+            <span>Profil</span>
         </div>
     </div>
 
