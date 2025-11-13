@@ -350,8 +350,13 @@ const contacts = {
     toggleFilterDropdown(filterType, event) {
         event.stopPropagation();
         
+        console.log('toggleFilterDropdown called with:', filterType);
+        
         const dropdown = document.getElementById('filterDropdown');
         const btn = event.currentTarget;
+        
+        console.log('Dropdown element:', dropdown);
+        console.log('Button element:', btn);
         
         // Si on clique sur le même filtre, on ferme
         if (this.currentFilterDropdown === filterType && dropdown.style.display === 'block') {
@@ -369,15 +374,34 @@ const contacts = {
                 { value: 'Femme', label: '👩 Femme' }
             ];
         } else {
-            // Utiliser la même logique que pour l'édition de contacts
-            options = tags.getAllTags(filterType);
+            // Combiner les tags par défaut et personnalisés en évitant les doublons
+            const defaultTags = app.defaultTags[filterType] || [];
+            const customTags = app.customTags[filterType] || [];
+            
+            // Créer un Map pour éviter les doublons (clé = value)
+            const tagMap = new Map();
+            
+            // Ajouter d'abord les tags par défaut
+            defaultTags.forEach(tag => {
+                tagMap.set(tag.value, tag);
+            });
+            
+            // Ajouter les tags personnalisés (écrase les doublons avec la version personnalisée)
+            customTags.forEach(tag => {
+                tagMap.set(tag.value, tag);
+            });
+            
+            // Convertir en tableau
+            options = Array.from(tagMap.values());
+            
+            console.log('Options for', filterType, ':', options);
         }
         
         // Construire le HTML
-        const html = options.map(opt => {
+        const html = options.map((opt, index) => {
             const isSelected = this.activeFilters[filterType].includes(opt.value);
             return `
-                <div class="filter-option ${isSelected ? 'selected' : ''}" onclick="contacts.toggleFilterValue('${filterType}', '${opt.value.replace(/'/g, "\\'")}')">
+                <div class="filter-option ${isSelected ? 'selected' : ''}" data-filter-type="${filterType}" data-option-index="${index}">
                     <div class="filter-option-checkbox"></div>
                     <span>${opt.label}</span>
                 </div>
@@ -385,6 +409,15 @@ const contacts = {
         }).join('');
         
         document.getElementById('filterDropdownContent').innerHTML = html;
+        
+        // Ajouter les event listeners
+        document.querySelectorAll('.filter-option').forEach((el, index) => {
+            el.addEventListener('click', () => {
+                const value = options[index].value;
+                this.toggleFilterValue(filterType, value);
+            });
+        });
+        
         dropdown.style.display = 'block';
         
         // Update button state
