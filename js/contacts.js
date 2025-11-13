@@ -172,7 +172,7 @@ const contacts = {
             app.dataStore.contacts.push(contact);
         }
 
-        app.dataStore.save();
+        app.dataStore.save(contact); // Passer le contact spécifique
         this.render();
         app.closeAddModal();
         if (this.currentViewId) this.viewProfile(this.currentViewId);
