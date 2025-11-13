@@ -122,6 +122,14 @@ const contacts = {
             }
         }
         
+        // Get gender
+        let gender = '';
+        if (document.getElementById('genderMale').checked) {
+            gender = 'Homme';
+        } else if (document.getElementById('genderFemale').checked) {
+            gender = 'Femme';
+        }
+        
         const contact = {
             id: this.currentEditId || Date.now().toString(),
             firstName: document.getElementById('firstName').value,
@@ -129,6 +137,7 @@ const contacts = {
             relationType: document.getElementById('relationType').value,
             meetingPlace: document.getElementById('meetingPlace').value,
             discussionStatus: document.getElementById('discussionStatus').value,
+            gender: gender,
             profession: document.getElementById('profession').value,
             location: document.getElementById('location').value,
             age: document.getElementById('age').value,
@@ -185,6 +194,7 @@ const contacts = {
             {key: 'relationType', label: 'Type de relation'},
             {key: 'meetingPlace', label: 'Lieu de rencontre'},
             {key: 'discussionStatus', label: 'Statut de discussion'},
+            {key: 'gender', label: 'Sexe'},
             {key: 'profession', label: 'Études / Profession'},
             {key: 'location', label: 'Lieu d\'habitation'},
             {key: 'age', label: 'Âge', suffix: ' ans'},
@@ -257,6 +267,17 @@ const contacts = {
         document.getElementById('interests').value = contact.interests || '';
         document.getElementById('notes').value = contact.notes || '';
         
+        // Set gender radio buttons
+        if (contact.gender === 'Homme') {
+            document.getElementById('genderMale').checked = true;
+        } else if (contact.gender === 'Femme') {
+            document.getElementById('genderFemale').checked = true;
+        } else {
+            // Uncheck both if no gender set
+            document.getElementById('genderMale').checked = false;
+            document.getElementById('genderFemale').checked = false;
+        }
+        
         document.getElementById('modalTitle').textContent = '✏️ Modifier le contact';
         app.closeViewModal();
         document.getElementById('addModal').classList.add('active');
@@ -274,5 +295,38 @@ const contacts = {
         this.render();
         stats.render();
         app.closeViewModal();
+    },
+    
+    deleteAndUnfollow() {
+        const contact = app.dataStore.contacts.find(c => c.id === this.currentViewId);
+        if (!contact) return;
+        
+        const cleanUsername = contact.instagram.replace('@', '');
+        
+        if (!confirm(
+            `⚠️ ATTENTION !\n\n` +
+            `Vous allez :\n` +
+            `1️⃣ Supprimer la fiche contact de ${contact.firstName}\n` +
+            `2️⃣ Ajouter @${cleanUsername} à la liste "À ne plus suivre"\n\n` +
+            `Cette personne ne réapparaîtra plus dans les analyses.\n\n` +
+            `Confirmer ?`
+        )) return;
+        
+        // Add to doNotFollowList
+        unfollowers.data.doNotFollowList.add(cleanUsername);
+        unfollowers.saveDoNotFollowList();
+        
+        // Delete from Firebase
+        app.dataStore.deleteContact(this.currentViewId);
+        
+        // Remove from local array
+        app.dataStore.contacts = app.dataStore.contacts.filter(c => c.id !== this.currentViewId);
+        
+        this.render();
+        stats.render();
+        app.closeViewModal();
+        
+        // Show confirmation
+        alert(`✅ Fiche supprimée et @${cleanUsername} ajouté à la liste "À ne plus suivre"`);
     }
 };
