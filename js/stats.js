@@ -10,8 +10,8 @@ const stats = {
     updateGlobalStats() {
         const contacts = app.dataStore.contacts;
         const totalContacts = contacts.length;
-        const maleCount = contacts.filter(c => c.gender === 'M').length;
-        const femaleCount = contacts.filter(c => c.gender === 'F').length;
+        const maleCount = contacts.filter(c => c.gender === 'Homme').length;
+        const femaleCount = contacts.filter(c => c.gender === 'Femme').length;
 
         document.getElementById('totalContactsStat').textContent = totalContacts;
         document.getElementById('totalMaleStat').textContent = maleCount;
@@ -64,9 +64,9 @@ const stats = {
 
     groupByGender() {
         const contacts = app.dataStore.contacts;
-        const maleCount = contacts.filter(c => c.gender === 'M').length;
-        const femaleCount = contacts.filter(c => c.gender === 'F').length;
-        const undefinedCount = contacts.filter(c => !c.gender).length;
+        const maleCount = contacts.filter(c => c.gender === 'Homme').length;
+        const femaleCount = contacts.filter(c => c.gender === 'Femme').length;
+        const undefinedCount = contacts.filter(c => !c.gender || c.gender === '').length;
 
         const data = [];
         if (maleCount > 0) {
