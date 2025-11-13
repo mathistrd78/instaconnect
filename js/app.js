@@ -47,14 +47,17 @@ const app = {
 
             try {
                 const userId = authManager.currentUser.uid;
+                console.log('💾 SAVING to Firebase - User:', userId);
 
                 if (specificContact) {
                     // Sauvegarder un seul contact (plus rapide et évite les conflits)
+                    console.log('💾 Saving specific contact:', specificContact.id, JSON.stringify(specificContact, null, 2));
                     const contactRef = db.collection('users').doc(userId).collection('contacts').doc(specificContact.id);
                     await contactRef.set(specificContact);
-                    console.log('✅ Contact saved to Firebase:', specificContact.firstName);
+                    console.log('✅ Contact saved to Firebase:', specificContact.firstName, 'with gender:', specificContact.gender);
                 } else {
                     // Sauvegarder tous les contacts (utilisé lors de l'analyse)
+                    console.log('💾 Saving ALL contacts in batch:', this.contacts.length);
                     const batch = db.batch();
                     const contactsRef = db.collection('users').doc(userId).collection('contacts');
                     this.contacts.forEach(contact => {
