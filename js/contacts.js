@@ -368,19 +368,16 @@ const contacts = {
                 { value: 'Homme', label: '👨 Homme' },
                 { value: 'Femme', label: '👩 Femme' }
             ];
-        } else if (filterType === 'relationType') {
-            options = [...app.defaultTags.relationType, ...app.customTags.relationType];
-        } else if (filterType === 'meetingPlace') {
-            options = [...app.defaultTags.meetingPlace, ...app.customTags.meetingPlace];
-        } else if (filterType === 'discussionStatus') {
-            options = [...app.defaultTags.discussionStatus, ...app.customTags.discussionStatus];
+        } else {
+            // Utiliser la même logique que pour l'édition de contacts
+            options = tags.getAllTags(filterType);
         }
         
         // Construire le HTML
         const html = options.map(opt => {
             const isSelected = this.activeFilters[filterType].includes(opt.value);
             return `
-                <div class="filter-option ${isSelected ? 'selected' : ''}" onclick="contacts.toggleFilterValue('${filterType}', '${opt.value}')">
+                <div class="filter-option ${isSelected ? 'selected' : ''}" onclick="contacts.toggleFilterValue('${filterType}', '${opt.value.replace(/'/g, "\\'")}')">
                     <div class="filter-option-checkbox"></div>
                     <span>${opt.label}</span>
                 </div>
