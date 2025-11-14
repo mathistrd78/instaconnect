@@ -479,14 +479,16 @@ const contacts = {
         const hasRelFilter = this.activeFilters.relationType.length > 0;
         const hasLieuFilter = this.activeFilters.meetingPlace.length > 0;
         const hasStatutFilter = this.activeFilters.discussionStatus.length > 0;
+        const hasCompleteFilter = this.activeFilters.complete.length > 0;
         
         document.getElementById('filterGenderBtn').classList.toggle('active', hasGenderFilter);
         document.getElementById('filterRelationBtn').classList.toggle('active', hasRelFilter);
         document.getElementById('filterLieuBtn').classList.toggle('active', hasLieuFilter);
         document.getElementById('filterStatutBtn').classList.toggle('active', hasStatutFilter);
+        document.getElementById('filterCompleteBtn').classList.toggle('active', hasCompleteFilter);
         
         // Show/hide reset button
-        const hasAnyFilter = hasGenderFilter || hasRelFilter || hasLieuFilter || hasStatutFilter;
+        const hasAnyFilter = hasGenderFilter || hasRelFilter || hasLieuFilter || hasStatutFilter || hasCompleteFilter;
         document.getElementById('filterResetBtn').style.display = hasAnyFilter ? 'flex' : 'none';
     },
     
