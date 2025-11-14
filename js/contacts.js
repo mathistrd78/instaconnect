@@ -10,7 +10,7 @@ const contacts = {
         relationType: [],
         meetingPlace: [],
         discussionStatus: [],
-        incomplete: false
+        complete: [] // 'oui' ou 'non'
     },
     currentFilterDropdown: null,
 
@@ -107,14 +107,20 @@ const contacts = {
             const matchLieu = this.activeFilters.meetingPlace.length === 0 || this.activeFilters.meetingPlace.includes(c.meetingPlace);
             const matchStat = this.activeFilters.discussionStatus.length === 0 || this.activeFilters.discussionStatus.includes(c.discussionStatus);
             
-            // Filtre profil incomplet : vérifier que tous les champs essentiels sont remplis
-            let matchIncomplete = true;
-            if (this.activeFilters.incomplete) {
+            // Filtre profil complet : vérifier si tous les champs obligatoires sont remplis
+            let matchComplete = true;
+            if (this.activeFilters.complete.length > 0) {
                 const isEmpty = (value) => !value || value === '';
-                matchIncomplete = isEmpty(c.relationType) || isEmpty(c.meetingPlace) || isEmpty(c.discussionStatus) || isEmpty(c.gender);
+                const isComplete = !isEmpty(c.relationType) && !isEmpty(c.meetingPlace) && !isEmpty(c.discussionStatus) && !isEmpty(c.gender);
+                
+                if (this.activeFilters.complete.includes('oui')) {
+                    matchComplete = isComplete; // Profil complet
+                } else if (this.activeFilters.complete.includes('non')) {
+                    matchComplete = !isComplete; // Profil incomplet
+                }
             }
             
-            return matchSearch && matchGender && matchRel && matchLieu && matchStat && matchIncomplete;
+            return matchSearch && matchGender && matchRel && matchLieu && matchStat && matchComplete;
         }).sort((a, b) => {
             // Tri alphabétique : ignorer les caractères spéciaux (@, _, etc.)
             const cleanA = a.firstName.replace(/^[@_\-\.\s]+/, '').toLowerCase();
@@ -392,6 +398,11 @@ const contacts = {
                 { value: 'Homme', label: '👨 Homme' },
                 { value: 'Femme', label: '👩 Femme' }
             ];
+        } else if (filterType === 'complete') {
+            options = [
+                { value: 'oui', label: '✅ Oui' },
+                { value: 'non', label: '❌ Non' }
+            ];
         } else {
             // Combiner les tags par défaut et personnalisés en évitant les doublons
             const defaultTags = app.defaultTags[filterType] || [];
@@ -485,25 +496,11 @@ const contacts = {
             relationType: [],
             meetingPlace: [],
             discussionStatus: [],
-            incomplete: false
+            complete: []
         };
         
         this.updateFilterButtons();
         this.closeFilterDropdown();
-        this.render();
-    },
-    
-    toggleIncompleteFilter() {
-        this.activeFilters.incomplete = !this.activeFilters.incomplete;
-        
-        const btn = document.getElementById('filterIncompleteBtn');
-        if (this.activeFilters.incomplete) {
-            btn.classList.add('active');
-        } else {
-            btn.classList.remove('active');
-        }
-        
-        this.updateFilterButtons();
         this.render();
     },
     
