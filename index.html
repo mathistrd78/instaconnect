@@ -282,6 +282,23 @@
                 </div>
             </div>
             
+            <!-- Section Paramètres -->
+            <div class="profil-settings">
+                <div class="profil-setting-item">
+                    <div class="profil-setting-info">
+                        <div class="profil-setting-icon">🌙</div>
+                        <div>
+                            <div class="profil-setting-title">Mode sombre</div>
+                            <div class="profil-setting-desc">Thème sombre pour l'application</div>
+                        </div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="darkModeToggle" onchange="app.toggleDarkMode()">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+            
             <div class="profil-actions">
                 <button class="profil-btn profil-btn-danger" onclick="authManager.logout()">
                     🚪 Déconnexion
