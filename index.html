@@ -162,21 +162,11 @@
         <div id="analyseSection" class="section">
             <div class="analyse-container">
                 <div class="analyse-header">
-                    <h2 style="font-size: 24px; margin-bottom: 8px;">🔍 Analyse Instagram</h2>
-                    <p style="color: #6c757d; margin-bottom: 24px;">Créez automatiquement des fiches contacts pour vos followers mutuels</p>
+                    <h2 class="analyse-title">🔍 Analyse Instagram</h2>
+                    <p class="analyse-subtitle">Créez automatiquement des fiches contacts pour vos followers mutuels</p>
                 </div>
 
-                <div class="analyse-instructions" style="background: #e3f2fd; padding: 20px; border-radius: 12px; margin-bottom: 24px;">
-                    <h3 style="font-size: 16px; margin-bottom: 12px; color: #1976d2;">📋 Comment ça marche ?</h3>
-                    <ol style="margin: 0; padding-left: 20px; line-height: 1.8; color: #495057;">
-                        <li>Uploadez votre fichier d'export Instagram (ZIP)</li>
-                        <li>Le système analyse vos followers et following</li>
-                        <li>Des fiches contacts sont créées dans l'onglet <strong>Accueil</strong></li>
-                        <li>Les unfollowers sont affichés dans l'onglet <strong>Unfollowers</strong></li>
-                        <li>Les statistiques sont mises à jour dans l'onglet <strong>Stats</strong></li>
-                    </ol>
-                </div>
-
+                <!-- Upload zone en premier -->
                 <div class="upload-zone-analyse" id="uploadZoneAnalyse">
                     <div class="upload-icon">📤</div>
                     <div class="upload-text">Sélectionnez votre export Instagram</div>
@@ -185,13 +175,76 @@
                 
                 <div style="text-align: center; margin-top: 12px;">
                     <input type="file" id="zipFileInputAnalyse" accept=".zip,application/zip,application/x-zip-compressed,application/octet-stream" 
+                           style="display: none;" onchange="unfollowers.handleFileUploadAnalyse(event)">
+                    <button onclick="document.getElementById('zipFileInputAnalyse').click()" class="btn btn-primary" 
                            style="display: block; margin: 0 auto; padding: 12px 20px; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; max-width: 280px;">
+                        📁 Choisir un fichier ZIP
+                    </button>
                 </div>
                 
                 <div id="analyseButtonContainer" style="display: none; text-align: center; margin-top: 16px;">
                     <button class="btn btn-primary" onclick="unfollowers.analyzeFileForContacts()" style="width: 100%; max-width: 400px;">
                         🚀 Lancer l'analyse complète
                     </button>
+                </div>
+
+                <!-- Instructions détaillées -->
+                <div class="analyse-instructions">
+                    <h3 class="instructions-title">📱 Comment exporter vos données Instagram ?</h3>
+                    
+                    <!-- Vidéo tutoriel -->
+                    <div class="instructions-video">
+                        <video controls class="tutorial-video">
+                            <source src="tutorial-instagram-export.mp4" type="video/mp4">
+                            Votre navigateur ne supporte pas la lecture de vidéos.
+                        </video>
+                        <p class="video-caption">📹 Tutoriel vidéo : Comment exporter vos données Instagram</p>
+                    </div>
+
+                    <!-- Instructions Mobile -->
+                    <div class="instructions-section">
+                        <h4 class="instructions-subtitle">📱 Sur mobile</h4>
+                        <ol class="instructions-list">
+                            <li>Allez sur votre application Instagram</li>
+                            <li>Allez sur votre <strong>Profil</strong></li>
+                            <li>Cliquez sur <strong>"Plus"</strong> (icône avec 3 barres horizontales) en haut à droite</li>
+                            <li>Cliquez sur <strong>"Espaces comptes"</strong></li>
+                            <li>Cliquez sur <strong>"Vos informations et autorisations"</strong></li>
+                            <li>Cliquez sur <strong>"Exporter vos informations"</strong></li>
+                            <li>Cliquez sur <strong>"Créer une exportation"</strong>, puis sélectionnez votre profil et cliquez sur <strong>"Exporter sur mon appareil"</strong></li>
+                            <li>Dans <strong>"Personnaliser les informations"</strong> décochez tout sauf <strong>"Followers et suivi(e)s"</strong></li>
+                            <li>Dans <strong>"Période"</strong>, sélectionnez <strong>"Depuis le début"</strong></li>
+                            <li>Dans <strong>"Format"</strong>, sélectionnez <strong>"JSON"</strong></li>
+                            <li>Enfin, appuyez sur <strong>"Commencer l'exportation"</strong> et attendez un instant (le temps d'attente dépend du nombre d'informations à extraire)</li>
+                        </ol>
+                    </div>
+
+                    <!-- Instructions Desktop -->
+                    <div class="instructions-section">
+                        <h4 class="instructions-subtitle">💻 Sur ordinateur</h4>
+                        <ol class="instructions-list">
+                            <li>Allez sur le site web Instagram</li>
+                            <li>Cliquez sur <strong>"Plus"</strong> (icône avec 3 barres horizontales) en bas à gauche</li>
+                            <li>Cliquez sur <strong>"Paramètres"</strong></li>
+                            <li>Cliquez sur <strong>"Espaces comptes"</strong></li>
+                            <li>Cliquez sur <strong>"Vos informations et autorisations"</strong></li>
+                            <li>Cliquez sur <strong>"Exporter vos informations"</strong></li>
+                            <li>Cliquez sur <strong>"Créer une exportation"</strong>, puis sélectionnez votre profil et cliquez sur <strong>"Exporter sur mon appareil"</strong></li>
+                            <li>Dans <strong>"Personnaliser les informations"</strong> décochez tout sauf <strong>"Followers et suivi(e)s"</strong></li>
+                            <li>Dans <strong>"Période"</strong>, sélectionnez <strong>"Depuis le début"</strong></li>
+                            <li>Dans <strong>"Format"</strong>, sélectionnez <strong>"JSON"</strong></li>
+                            <li>Enfin, appuyez sur <strong>"Commencer l'exportation"</strong> et attendez un instant (le temps d'attente dépend du nombre d'informations à extraire)</li>
+                        </ol>
+                    </div>
+
+                    <!-- Note importante -->
+                    <div class="instructions-note">
+                        <div class="note-icon">⚠️</div>
+                        <div>
+                            <div class="note-title">Important</div>
+                            <div class="note-text">Instagram peut prendre de quelques minutes à quelques heures pour préparer votre exportation. Vous recevrez une notification quand ce sera prêt.</div>
+                        </div>
+                    </div>
                 </div>
 
                 <div id="analyseProgress" style="display: none; text-align: center; padding: 40px;">
