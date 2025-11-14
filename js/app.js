@@ -101,6 +101,9 @@ const app = {
             return;
         }
 
+        // Charger la préférence du mode sombre (localStorage, pas Firebase)
+        this.loadDarkModePreference();
+
         // Vérifier l'authentification
         const isLoggedIn = await authManager.checkAuth();
         
@@ -208,6 +211,12 @@ const app = {
         document.getElementById('profilContactsCount').textContent = app.dataStore.contacts.length;
         document.getElementById('profilFollowersCount').textContent = unfollowers.data.followers.length;
         document.getElementById('profilUnfollowersCount').textContent = unfollowers.data.unfollowers.length;
+        
+        // Synchroniser le toggle du mode sombre
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        if (darkModeToggle) {
+            darkModeToggle.checked = localStorage.getItem('darkMode') === 'true';
+        }
     },
 
     openAddModal() {
@@ -240,6 +249,36 @@ const app = {
     closeViewModal() {
         document.getElementById('viewModal').classList.remove('active');
         contacts.currentViewId = null;
+    },
+
+    // Dark Mode Management
+    loadDarkModePreference() {
+        const darkMode = localStorage.getItem('darkMode') === 'true';
+        if (darkMode) {
+            document.body.classList.add('dark-mode');
+        }
+        // Update toggle state when visiting profile
+        setTimeout(() => {
+            const toggle = document.getElementById('darkModeToggle');
+            if (toggle) {
+                toggle.checked = darkMode;
+            }
+        }, 100);
+    },
+
+    toggleDarkMode() {
+        const toggle = document.getElementById('darkModeToggle');
+        const isDarkMode = toggle.checked;
+        
+        if (isDarkMode) {
+            document.body.classList.add('dark-mode');
+            localStorage.setItem('darkMode', 'true');
+        } else {
+            document.body.classList.remove('dark-mode');
+            localStorage.setItem('darkMode', 'false');
+        }
+        
+        console.log('🌙 Dark mode:', isDarkMode ? 'enabled' : 'disabled');
     }
 };
 
