@@ -9,7 +9,8 @@ const contacts = {
         gender: [],
         relationType: [],
         meetingPlace: [],
-        discussionStatus: []
+        discussionStatus: [],
+        incomplete: false
     },
     currentFilterDropdown: null,
 
@@ -106,7 +107,14 @@ const contacts = {
             const matchLieu = this.activeFilters.meetingPlace.length === 0 || this.activeFilters.meetingPlace.includes(c.meetingPlace);
             const matchStat = this.activeFilters.discussionStatus.length === 0 || this.activeFilters.discussionStatus.includes(c.discussionStatus);
             
-            return matchSearch && matchGender && matchRel && matchLieu && matchStat;
+            // Filtre profil incomplet : vérifier que tous les champs essentiels sont remplis
+            let matchIncomplete = true;
+            if (this.activeFilters.incomplete) {
+                const isEmpty = (value) => !value || value === '';
+                matchIncomplete = isEmpty(c.relationType) || isEmpty(c.meetingPlace) || isEmpty(c.discussionStatus) || isEmpty(c.gender);
+            }
+            
+            return matchSearch && matchGender && matchRel && matchLieu && matchStat && matchIncomplete;
         }).sort((a, b) => {
             // Tri alphabétique : ignorer les caractères spéciaux (@, _, etc.)
             const cleanA = a.firstName.replace(/^[@_\-\.\s]+/, '').toLowerCase();
@@ -476,11 +484,26 @@ const contacts = {
             gender: [],
             relationType: [],
             meetingPlace: [],
-            discussionStatus: []
+            discussionStatus: [],
+            incomplete: false
         };
         
         this.updateFilterButtons();
         this.closeFilterDropdown();
+        this.render();
+    },
+    
+    toggleIncompleteFilter() {
+        this.activeFilters.incomplete = !this.activeFilters.incomplete;
+        
+        const btn = document.getElementById('filterIncompleteBtn');
+        if (this.activeFilters.incomplete) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+        
+        this.updateFilterButtons();
         this.render();
     },
     
