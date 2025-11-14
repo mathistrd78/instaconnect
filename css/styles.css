@@ -1001,6 +1001,365 @@ body.hide-header .container {
     transform: scale(0.98);
 }
 
+/* Profil Settings */
+.profil-settings {
+    margin-bottom: 24px;
+}
+
+.profil-setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.profil-setting-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.profil-setting-icon {
+    font-size: 24px;
+}
+
+.profil-setting-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 2px;
+}
+
+.profil-setting-desc {
+    font-size: 12px;
+    color: #868e96;
+}
+
+/* Toggle Switch */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 28px;
+    flex-shrink: 0;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .3s;
+    border-radius: 28px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.toggle-switch input:checked + .toggle-slider:before {
+    transform: translateX(20px);
+}
+
+/* Dark Mode */
+body.dark-mode {
+    background: #1a1a1a;
+    color: #ffffff;
+}
+
+body.dark-mode .header {
+    background: #2d2d2d;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+body.dark-mode h1 {
+    color: #E1306C;
+}
+
+body.dark-mode .search-box {
+    background: #3a3a3a;
+    border-color: #4a4a4a;
+    color: #ffffff;
+}
+
+body.dark-mode .search-box::placeholder {
+    color: #a0a0a0;
+}
+
+body.dark-mode .contacts-count {
+    background: #2d2d2d;
+    color: #1976d2;
+}
+
+body.dark-mode .filter-chip {
+    background: #3a3a3a;
+    border-color: #4a4a4a;
+    color: #ffffff;
+}
+
+body.dark-mode .filter-chip.active {
+    background: #E1306C;
+    border-color: #E1306C;
+    color: white;
+}
+
+body.dark-mode .filter-dropdown {
+    background: #2d2d2d;
+    border-color: #4a4a4a;
+}
+
+body.dark-mode .filter-option {
+    color: #ffffff;
+}
+
+body.dark-mode .filter-option:hover {
+    background: #3a3a3a;
+}
+
+body.dark-mode .contact-card {
+    background: #2d2d2d;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+body.dark-mode .contact-name {
+    color: #ffffff;
+}
+
+body.dark-mode .contact-instagram {
+    color: #a0a0a0;
+}
+
+body.dark-mode .stats-page {
+    background: #1a1a1a;
+}
+
+body.dark-mode .stats-page-title {
+    color: #ffffff;
+}
+
+body.dark-mode .stat-card,
+body.dark-mode .profil-stat-card {
+    background: #2d2d2d;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+body.dark-mode .stat-card-label,
+body.dark-mode .profil-stat-label {
+    color: #a0a0a0;
+}
+
+body.dark-mode .stat-tab {
+    background: #2d2d2d;
+    border-color: #4a4a4a;
+    color: #ffffff;
+}
+
+body.dark-mode .stat-tab.active {
+    background: #E1306C;
+    border-color: #E1306C;
+    color: white;
+}
+
+body.dark-mode .chart-container {
+    background: #2d2d2d;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+body.dark-mode .chart-title {
+    color: #ffffff;
+}
+
+body.dark-mode .legend-item {
+    background: #3a3a3a;
+}
+
+body.dark-mode .legend-label span {
+    color: #ffffff;
+}
+
+body.dark-mode .analyse-container {
+    color: #ffffff;
+}
+
+body.dark-mode .analyse-instructions {
+    background: #2d3e50;
+    color: #ffffff;
+}
+
+body.dark-mode .upload-zone-analyse {
+    background: #2d2d2d;
+    border-color: #4a4a4a;
+}
+
+body.dark-mode .upload-text {
+    color: #ffffff;
+}
+
+body.dark-mode .upload-subtext {
+    color: #a0a0a0;
+}
+
+body.dark-mode .unfollowers-header,
+body.dark-mode .unfollowers-stats {
+    background: #1a1a1a;
+}
+
+body.dark-mode .unfollowers-title {
+    color: #ffffff;
+}
+
+body.dark-mode .unfollower-stat-card {
+    background: #2d2d2d;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+body.dark-mode .unfollower-stat-label {
+    color: #a0a0a0;
+}
+
+body.dark-mode .unfollowers-list {
+    background: #2d2d2d;
+}
+
+body.dark-mode .unfollowers-list-header {
+    background: #3a3a3a;
+    color: #ffffff;
+}
+
+body.dark-mode .unfollower-item {
+    background: #2d2d2d;
+    border-color: #4a4a4a;
+}
+
+body.dark-mode .unfollower-username {
+    color: #ffffff;
+}
+
+body.dark-mode .profil-container {
+    background: #1a1a1a;
+}
+
+body.dark-mode .profil-setting-item {
+    background: #2d2d2d;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+body.dark-mode .profil-setting-title {
+    color: #ffffff;
+}
+
+body.dark-mode .profil-setting-desc {
+    color: #a0a0a0;
+}
+
+body.dark-mode .bottom-nav {
+    background: #2d2d2d;
+    border-top-color: #4a4a4a;
+}
+
+body.dark-mode .modal {
+    background: #2d2d2d;
+}
+
+body.dark-mode .modal-header {
+    background: #2d2d2d;
+    border-bottom-color: #4a4a4a;
+}
+
+body.dark-mode .modal-title {
+    color: #ffffff;
+}
+
+body.dark-mode .form-group label {
+    color: #ffffff;
+}
+
+body.dark-mode .form-input,
+body.dark-mode .form-textarea,
+body.dark-mode .tag-selector {
+    background: #3a3a3a;
+    border-color: #4a4a4a;
+    color: #ffffff;
+}
+
+body.dark-mode .form-input::placeholder,
+body.dark-mode .form-textarea::placeholder {
+    color: #a0a0a0;
+}
+
+body.dark-mode .gender-options {
+    background: #3a3a3a;
+}
+
+body.dark-mode .gender-option {
+    color: #ffffff;
+}
+
+body.dark-mode .gender-option.selected {
+    background: #E1306C;
+    color: white;
+}
+
+body.dark-mode .profile-view {
+    background: #2d2d2d;
+}
+
+body.dark-mode .profile-name {
+    color: #ffffff;
+}
+
+body.dark-mode .profile-info {
+    background: #3a3a3a;
+    color: #ffffff;
+}
+
+body.dark-mode .tag-dropdown-container {
+    background: #2d2d2d;
+    border-color: #4a4a4a;
+}
+
+body.dark-mode .tag-dropdown-header {
+    background: #3a3a3a;
+    border-bottom-color: #4a4a4a;
+    color: #ffffff;
+}
+
+body.dark-mode .tag-item {
+    color: #ffffff;
+}
+
+body.dark-mode .tag-item:hover {
+    background: #3a3a3a;
+}
+
+body.dark-mode .empty-state-text {
+    color: #a0a0a0;
+}
+
 /* Modals */
 .modal {
     display: none;
@@ -1655,7 +2014,7 @@ body.hide-header .container {
 }
 
 .filter-option-checkbox::after {
-    content: 'âœ“';
+    content: '✓';
     display: none;
     font-size: 12px;
     font-weight: bold;
