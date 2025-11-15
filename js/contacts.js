@@ -51,47 +51,113 @@ const contacts = {
         if (filtered.length === 0) {
             grid.style.display = 'none';
             empty.style.display = 'block';
+            this.updateAlphabetNav([]);
             return;
         }
 
         grid.style.display = 'grid';
         empty.style.display = 'none';
         
-        grid.innerHTML = filtered.map(contact => {
-            const relTag = tags.findTag('relationType', contact.relationType);
-            const meetTag = tags.findTag('meetingPlace', contact.meetingPlace);
-            const statTag = tags.findTag('discussionStatus', contact.discussionStatus);
+        // Grouper les contacts par première lettre
+        const groupedContacts = {};
+        const letters = [];
+        
+        filtered.forEach(contact => {
+            const firstLetter = contact.firstName.charAt(0).toUpperCase();
+            if (!groupedContacts[firstLetter]) {
+                groupedContacts[firstLetter] = [];
+                letters.push(firstLetter);
+            }
+            groupedContacts[firstLetter].push(contact);
+        });
+        
+        // Trier les lettres
+        letters.sort();
+        
+        // Générer le HTML avec des séparateurs de lettres
+        let html = '';
+        letters.forEach(letter => {
+            html += `<div class="letter-divider" data-letter="${letter}" id="letter-${letter}">${letter}</div>`;
             
-            return `
-            <div class="contact-card">
-                <div class="contact-header">
-                    <div class="contact-info">
-                        <div class="contact-name">${contact.firstName}</div>
-                        <div class="contact-instagram">${contact.instagram}</div>
+            groupedContacts[letter].forEach(contact => {
+                const relTag = tags.findTag('relationType', contact.relationType);
+                const meetTag = tags.findTag('meetingPlace', contact.meetingPlace);
+                const statTag = tags.findTag('discussionStatus', contact.discussionStatus);
+                
+                html += `
+                <div class="contact-card">
+                    <div class="contact-header">
+                        <div class="contact-info">
+                            <div class="contact-name">${contact.firstName}</div>
+                            <div class="contact-instagram">${contact.instagram}</div>
+                        </div>
+                    </div>
+                    <div class="contact-tags">
+                        <span class="tag-mini ${relTag?.class || ''}" onclick="tags.showDropdown(event, '${contact.id}', 'relationType')">
+                            ${relTag?.label || 'Type'}
+                        </span>
+                        <span class="tag-mini ${meetTag?.class || ''}" onclick="tags.showDropdown(event, '${contact.id}', 'meetingPlace')">
+                            ${meetTag?.label || 'Lieu'}
+                        </span>
+                        <span class="tag-mini ${statTag?.class || ''}" onclick="tags.showDropdown(event, '${contact.id}', 'discussionStatus')">
+                            ${statTag?.label || 'Statut'}
+                        </span>
+                    </div>
+                    <div class="contact-actions">
+                        <button class="btn-action btn-view" onclick="contacts.viewProfile('${contact.id}')">
+                            👁️ Voir profil
+                        </button>
+                        <button class="btn-action btn-insta" onclick="contacts.openInstagramProfile('${contact.instagram}')">
+                            📸 Instagram
+                        </button>
                     </div>
                 </div>
-                <div class="contact-tags">
-                    <span class="tag-mini ${relTag?.class || ''}" onclick="tags.showDropdown(event, '${contact.id}', 'relationType')">
-                        ${relTag?.label || 'Type'}
-                    </span>
-                    <span class="tag-mini ${meetTag?.class || ''}" onclick="tags.showDropdown(event, '${contact.id}', 'meetingPlace')">
-                        ${meetTag?.label || 'Lieu'}
-                    </span>
-                    <span class="tag-mini ${statTag?.class || ''}" onclick="tags.showDropdown(event, '${contact.id}', 'discussionStatus')">
-                        ${statTag?.label || 'Statut'}
-                    </span>
-                </div>
-                <div class="contact-actions">
-                    <button class="btn-action btn-view" onclick="contacts.viewProfile('${contact.id}')">
-                        👁️ Voir profil
-                    </button>
-                    <button class="btn-action btn-insta" onclick="contacts.openInstagramProfile('${contact.instagram}')">
-                        📸 Instagram
-                    </button>
-                </div>
-            </div>
-            `;
-        }).join('');
+                `;
+            });
+        });
+        
+        grid.innerHTML = html;
+        
+        // Mettre à jour la navigation alphabétique
+        this.updateAlphabetNav(letters);
+    },
+
+    // Mettre à jour la barre alphabétique pour montrer quelles lettres ont des contacts
+    updateAlphabetNav(letters) {
+        const alphabetNav = document.getElementById('alphabetNav');
+        if (!alphabetNav) return;
+        
+        const allLetters = alphabetNav.querySelectorAll('.alphabet-letter');
+        allLetters.forEach(letterEl => {
+            const letter = letterEl.getAttribute('data-letter');
+            if (letters.includes(letter)) {
+                letterEl.classList.add('has-contacts');
+            } else {
+                letterEl.classList.remove('has-contacts');
+            }
+        });
+    },
+
+    // Scroller vers une lettre spécifique
+    scrollToLetter(letter) {
+        const letterElement = document.getElementById('letter-' + letter);
+        if (letterElement) {
+            // Scroll avec un offset pour le header
+            const headerHeight = document.querySelector('.header')?.offsetHeight || 0;
+            const elementPosition = letterElement.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerHeight - 10;
+            
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: 'smooth'
+            });
+            
+            // Effet visuel temporaire
+            letterElement.style.transform = 'scale(1.05)';
+            setTimeout(() => {
+                letterElement.style.transform = 'scale(1)';
+            }, 300);
+        }
     },
 
     getFiltered() {
