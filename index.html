@@ -99,6 +99,36 @@
     <div class="container">
         <!-- Section Contacts (Accueil) -->
         <div id="contactsSection" class="section active">
+            <!-- Barre alphabétique -->
+            <div class="alphabet-nav" id="alphabetNav">
+                <div class="alphabet-letter" data-letter="A" onclick="contacts.scrollToLetter('A')">A</div>
+                <div class="alphabet-letter" data-letter="B" onclick="contacts.scrollToLetter('B')">B</div>
+                <div class="alphabet-letter" data-letter="C" onclick="contacts.scrollToLetter('C')">C</div>
+                <div class="alphabet-letter" data-letter="D" onclick="contacts.scrollToLetter('D')">D</div>
+                <div class="alphabet-letter" data-letter="E" onclick="contacts.scrollToLetter('E')">E</div>
+                <div class="alphabet-letter" data-letter="F" onclick="contacts.scrollToLetter('F')">F</div>
+                <div class="alphabet-letter" data-letter="G" onclick="contacts.scrollToLetter('G')">G</div>
+                <div class="alphabet-letter" data-letter="H" onclick="contacts.scrollToLetter('H')">H</div>
+                <div class="alphabet-letter" data-letter="I" onclick="contacts.scrollToLetter('I')">I</div>
+                <div class="alphabet-letter" data-letter="J" onclick="contacts.scrollToLetter('J')">J</div>
+                <div class="alphabet-letter" data-letter="K" onclick="contacts.scrollToLetter('K')">K</div>
+                <div class="alphabet-letter" data-letter="L" onclick="contacts.scrollToLetter('L')">L</div>
+                <div class="alphabet-letter" data-letter="M" onclick="contacts.scrollToLetter('M')">M</div>
+                <div class="alphabet-letter" data-letter="N" onclick="contacts.scrollToLetter('N')">N</div>
+                <div class="alphabet-letter" data-letter="O" onclick="contacts.scrollToLetter('O')">O</div>
+                <div class="alphabet-letter" data-letter="P" onclick="contacts.scrollToLetter('P')">P</div>
+                <div class="alphabet-letter" data-letter="Q" onclick="contacts.scrollToLetter('Q')">Q</div>
+                <div class="alphabet-letter" data-letter="R" onclick="contacts.scrollToLetter('R')">R</div>
+                <div class="alphabet-letter" data-letter="S" onclick="contacts.scrollToLetter('S')">S</div>
+                <div class="alphabet-letter" data-letter="T" onclick="contacts.scrollToLetter('T')">T</div>
+                <div class="alphabet-letter" data-letter="U" onclick="contacts.scrollToLetter('U')">U</div>
+                <div class="alphabet-letter" data-letter="V" onclick="contacts.scrollToLetter('V')">V</div>
+                <div class="alphabet-letter" data-letter="W" onclick="contacts.scrollToLetter('W')">W</div>
+                <div class="alphabet-letter" data-letter="X" onclick="contacts.scrollToLetter('X')">X</div>
+                <div class="alphabet-letter" data-letter="Y" onclick="contacts.scrollToLetter('Y')">Y</div>
+                <div class="alphabet-letter" data-letter="Z" onclick="contacts.scrollToLetter('Z')">Z</div>
+            </div>
+            
             <div id="emptyState" class="empty-state" style="display: none;">
                 <div class="empty-state-icon">📱</div>
                 <div class="empty-state-text">Aucun contact pour le moment</div>
@@ -165,206 +195,201 @@
         <!-- Section Analyse -->
         <div id="analyseSection" class="section">
             <div class="analyse-container">
-                <div class="analyse-header">
-                    <h2 class="analyse-title">🔍 Analyse Instagram</h2>
-                    <p class="analyse-subtitle">Créez automatiquement des fiches contacts pour vos followers mutuels</p>
-                </div>
-
-                <!-- Upload zone en premier -->
+                <h2 class="analyse-title">🔍 Analyser votre réseau Instagram</h2>
+                <p class="analyse-subtitle">Importez les données de vos contacts Instagram pour analyse</p>
+                
                 <div class="upload-zone-analyse" id="uploadZoneAnalyse">
                     <div class="upload-icon">📤</div>
-                    <div class="upload-text">Sélectionnez votre export Instagram</div>
-                    <div class="upload-subtext">Fichier ZIP uniquement</div>
+                    <div class="upload-text">Glissez-déposez votre fichier .csv ici</div>
+                    <div class="upload-subtext">ou cliquez pour sélectionner</div>
+                    <input type="file" id="csvFileInputAnalyse" accept=".csv" style="display: none;">
                 </div>
                 
-                <div style="text-align: center; margin-top: 12px;">
-                    <input type="file" id="zipFileInputAnalyse" accept=".zip,application/zip,application/x-zip-compressed,application/octet-stream" 
-                           style="display: none;" onchange="unfollowers.handleFileUploadAnalyse(event)">
-                    <button onclick="document.getElementById('zipFileInputAnalyse').click()" class="btn btn-primary" 
-                           style="display: block; margin: 0 auto; padding: 12px 20px; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; max-width: 280px;">
-                        📁 Choisir un fichier ZIP
-                    </button>
+                <div id="analyseProgress" style="display: none;">
+                    <div class="loading-spinner"></div>
+                    <div id="analyseProgressText">Analyse en cours...</div>
                 </div>
                 
-                <div id="analyseButtonContainer" style="display: none; text-align: center; margin-top: 16px;">
-                    <button class="btn btn-primary" onclick="unfollowers.analyzeFileForContacts()" style="width: 100%; max-width: 400px;">
-                        🚀 Lancer l'analyse complète
-                    </button>
+                <div id="analyseResults" style="display: none;">
+                    <div class="result-card">
+                        <div class="result-icon">✅</div>
+                        <div class="result-title">Analyse terminée</div>
+                        <div class="result-text" id="analyseResultText"></div>
+                    </div>
                 </div>
 
-                <!-- Instructions détaillées -->
                 <div class="analyse-instructions">
-                    <h3 class="instructions-title">📱 Comment exporter vos données Instagram ?</h3>
+                    <h3 class="instructions-title">📖 Comment récupérer vos données Instagram</h3>
                     
-                    <!-- Vidéo tutoriel -->
                     <div class="instructions-video">
-                        <video controls class="tutorial-video">
-                            <source src="tutorial-instagram-export.mp4" type="video/mp4">
-                            Votre navigateur ne supporte pas la lecture de vidéos.
+                        <video class="tutorial-video" controls>
+                            <source src="tutorial.mp4" type="video/mp4">
+                            Votre navigateur ne supporte pas la vidéo.
                         </video>
-                        <p class="video-caption">📹 Tutoriel vidéo : Comment exporter vos données Instagram</p>
+                        <p class="video-caption">Tutoriel : Comment télécharger vos données Instagram</p>
                     </div>
 
-                    <!-- Instructions Mobile -->
                     <div class="instructions-section">
-                        <h4 class="instructions-subtitle">📱 Sur mobile</h4>
+                        <h4 class="instructions-subtitle">📱 Sur l'application Instagram</h4>
                         <ol class="instructions-list">
-                            <li>Allez sur votre application Instagram</li>
-                            <li>Allez sur votre <strong>Profil</strong></li>
-                            <li>Cliquez sur <strong>"Plus"</strong> (icône avec 3 barres horizontales) en haut à droite</li>
-                            <li>Cliquez sur <strong>"Espaces comptes"</strong></li>
-                            <li>Cliquez sur <strong>"Vos informations et autorisations"</strong></li>
-                            <li>Cliquez sur <strong>"Exporter vos informations"</strong></li>
-                            <li>Cliquez sur <strong>"Créer une exportation"</strong>, puis sélectionnez votre profil et cliquez sur <strong>"Exporter sur mon appareil"</strong></li>
-                            <li>Dans <strong>"Personnaliser les informations"</strong> décochez tout sauf <strong>"Followers et suivi(e)s"</strong></li>
-                            <li>Dans <strong>"Période"</strong>, sélectionnez <strong>"Depuis le début"</strong></li>
-                            <li>Dans <strong>"Format"</strong>, sélectionnez <strong>"JSON"</strong></li>
-                            <li>Enfin, appuyez sur <strong>"Commencer l'exportation"</strong> et attendez un instant (le temps d'attente dépend du nombre d'informations à extraire)</li>
+                            <li>Allez dans votre <strong>Profil</strong> → Menu (☰) → <strong>Paramètres et confidentialité</strong></li>
+                            <li>Sélectionnez <strong>Centre de gestion des comptes</strong></li>
+                            <li>Allez dans <strong>Vos informations et autorisations</strong></li>
+                            <li>Cliquez sur <strong>Télécharger vos informations</strong></li>
+                            <li>Sélectionnez votre compte Instagram</li>
+                            <li>Choisissez <strong>Demander un téléchargement</strong></li>
+                            <li>Sélectionnez <strong>Certaines de vos informations</strong></li>
+                            <li>Cochez uniquement <strong>Abonnés et abonnements</strong></li>
+                            <li>Choisissez le format <strong>JSON</strong></li>
+                            <li>Sélectionnez une période de dates (Toute la période recommandée)</li>
+                            <li>Cliquez sur <strong>Créer des fichiers</strong></li>
                         </ol>
                     </div>
 
-                    <!-- Instructions Desktop -->
                     <div class="instructions-section">
-                        <h4 class="instructions-subtitle">💻 Sur ordinateur</h4>
+                        <h4 class="instructions-subtitle">⏰ Récupération des fichiers</h4>
                         <ol class="instructions-list">
-                            <li>Allez sur le site web Instagram</li>
-                            <li>Cliquez sur <strong>"Plus"</strong> (icône avec 3 barres horizontales) en bas à gauche</li>
-                            <li>Cliquez sur <strong>"Paramètres"</strong></li>
-                            <li>Cliquez sur <strong>"Espaces comptes"</strong></li>
-                            <li>Cliquez sur <strong>"Vos informations et autorisations"</strong></li>
-                            <li>Cliquez sur <strong>"Exporter vos informations"</strong></li>
-                            <li>Cliquez sur <strong>"Créer une exportation"</strong>, puis sélectionnez votre profil et cliquez sur <strong>"Exporter sur mon appareil"</strong></li>
-                            <li>Dans <strong>"Personnaliser les informations"</strong> décochez tout sauf <strong>"Followers et suivi(e)s"</strong></li>
-                            <li>Dans <strong>"Période"</strong>, sélectionnez <strong>"Depuis le début"</strong></li>
-                            <li>Dans <strong>"Format"</strong>, sélectionnez <strong>"JSON"</strong></li>
-                            <li>Enfin, appuyez sur <strong>"Commencer l'exportation"</strong> et attendez un instant (le temps d'attente dépend du nombre d'informations à extraire)</li>
+                            <li>Instagram vous enverra un <strong>email</strong> (peut prendre jusqu'à 48h)</li>
+                            <li>Dans l'email, cliquez sur <strong>Télécharger les informations</strong></li>
+                            <li>Extrayez le fichier ZIP téléchargé</li>
+                            <li>Dans le dossier extrait, cherchez le fichier <strong>followers_1.json</strong> et <strong>following.json</strong></li>
+                            <li>Importez ces fichiers dans l'outil ci-dessus</li>
                         </ol>
                     </div>
 
-                    <!-- Note importante -->
                     <div class="instructions-note">
-                        <div class="note-icon">⚠️</div>
+                        <div class="note-icon">💡</div>
                         <div>
-                            <div class="note-title">Important</div>
-                            <div class="note-text">Instagram peut prendre de quelques minutes à quelques heures pour préparer votre exportation. Vous recevrez une notification quand ce sera prêt.</div>
+                            <div class="note-title">Note importante</div>
+                            <div class="note-text">
+                                Vos données restent 100% privées et ne sont jamais envoyées à un serveur. 
+                                Tout le traitement se fait localement sur votre appareil. Nous ne collectons 
+                                ni ne stockons aucune de vos données Instagram.
+                            </div>
                         </div>
                     </div>
-                </div>
-
-                <div id="analyseProgress" style="display: none; text-align: center; padding: 40px;">
-                    <div class="spinner"></div>
-                    <div style="font-size: 16px; color: #495057; font-weight: 600; margin-top: 16px;">Analyse en cours...</div>
-                    <div id="analyseProgressText" style="font-size: 14px; color: #6c757d; margin-top: 8px;"></div>
-                </div>
-
-                <div id="analyseResults" style="display: none; padding: 20px; background: #f8f9fa; border-radius: 12px; margin-top: 24px;">
-                    <h3 style="font-size: 18px; margin-bottom: 16px; color: #28a745;">✅ Analyse terminée !</h3>
-                    <div id="analyseStats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px;"></div>
-                    <button class="btn btn-primary" onclick="app.switchSection('contacts')" style="width: 100%;">
-                        👁️ Voir mes contacts
-                    </button>
                 </div>
             </div>
         </div>
 
         <!-- Section Unfollowers -->
         <div id="unfollowersSection" class="section">
-            <div class="unfollowers-header">
-                <div class="unfollowers-title">🔴 Unfollowers</div>
-                <div class="unfollowers-subtitle">Liste des personnes qui ne vous suivent pas en retour</div>
-            </div>
-
-            <!-- Boutons toujours visibles -->
-            <div class="unfollowers-permanent-actions">
-                <button class="unfollowers-action-btn" onclick="unfollowers.showNormalUnfollowers()" style="background: #feca57; color: #2d3436;">
-                    ⭐ Voir unfollowers normaux (<span id="normalCount">0</span>)
-                </button>
-                <button class="unfollowers-action-btn" onclick="unfollowers.showDoNotFollowList()" style="background: #ff7675; color: white;">
-                    🚫 Utilisateurs à ne plus suivre (<span id="doNotFollowCount">0</span>)
-                </button>
-            </div>
-
-            <div id="unfollowersResults">
+            <div class="unfollowers-container">
+                <h2 class="unfollowers-title">🔴 Gestion des Unfollowers</h2>
+                <p class="unfollowers-subtitle">Découvrez qui ne vous suit pas en retour</p>
+                
+                <!-- Stats unfollowers -->
                 <div class="unfollowers-stats">
                     <div class="unfollower-stat-card">
+                        <div class="unfollower-stat-icon">👥</div>
                         <div class="unfollower-stat-value" id="followersCount">0</div>
-                        <div class="unfollower-stat-label">Followers</div>
+                        <div class="unfollower-stat-label">Abonnés</div>
                     </div>
                     <div class="unfollower-stat-card">
+                        <div class="unfollower-stat-icon">📤</div>
                         <div class="unfollower-stat-value" id="followingCount">0</div>
-                        <div class="unfollower-stat-label">Following</div>
+                        <div class="unfollower-stat-label">Abonnements</div>
                     </div>
-                    <div class="unfollower-stat-card">
+                    <div class="unfollower-stat-card unfollower-stat-highlight">
+                        <div class="unfollower-stat-icon">🔴</div>
                         <div class="unfollower-stat-value" id="unfollowersCount">0</div>
                         <div class="unfollower-stat-label">Unfollowers</div>
                     </div>
                 </div>
 
-                <div class="unfollowers-list">
-                    <div class="unfollowers-list-header">
-                        <span>Liste des unfollowers</span>
+                <!-- Zone d'import -->
+                <div id="emptyUnfollowers" style="display: block;">
+                    <div class="upload-zone" id="uploadZone">
+                        <div class="upload-icon">📤</div>
+                        <div class="upload-text">Glissez-déposez vos fichiers JSON ici</div>
+                        <div class="upload-subtext">ou cliquez pour sélectionner</div>
+                        <input type="file" id="jsonFileInput" accept=".json" multiple style="display: none;">
                     </div>
-                    <div id="unfollowersList"></div>
-                </div>
-            </div>
-
-            <div id="emptyUnfollowers" class="empty-unfollowers">
-                <div class="empty-unfollowers-icon">📊</div>
-                <div style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">Aucune analyse effectuée</div>
-                <div style="font-size: 14px;">Allez dans l'onglet "Analyse" pour analyser votre export Instagram</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Section Profil -->
-    <div id="profilSection" class="section">
-        <div class="profil-container">
-            <div class="profil-header">
-                <div class="profil-avatar">👤</div>
-                <div class="profil-email" id="profilUserEmail"></div>
-            </div>
-            
-            <div class="profil-stats">
-                <div class="profil-stat-card">
-                    <div class="profil-stat-number" id="profilContactsCount">0</div>
-                    <div class="profil-stat-label">Contacts</div>
-                </div>
-                <div class="profil-stat-card">
-                    <div class="profil-stat-number" id="profilFollowersCount">0</div>
-                    <div class="profil-stat-label">Followers</div>
-                </div>
-                <div class="profil-stat-card">
-                    <div class="profil-stat-number" id="profilUnfollowersCount">0</div>
-                    <div class="profil-stat-label">Unfollowers</div>
-                </div>
-            </div>
-            
-            <!-- Section Paramètres -->
-            <div class="profil-settings">
-                <div class="profil-setting-item">
-                    <div class="profil-setting-info">
-                        <div class="profil-setting-icon">🌙</div>
-                        <div>
-                            <div class="profil-setting-title">Mode sombre</div>
-                            <div class="profil-setting-desc">Thème sombre pour l'application</div>
+                    
+                    <div class="instructions-box">
+                        <div class="instructions-box-title">📋 Instructions</div>
+                        <div class="instructions-box-text">
+                            1. Téléchargez vos données Instagram (voir l'onglet Analyse)<br>
+                            2. Importez les fichiers <strong>followers_1.json</strong> et <strong>following.json</strong><br>
+                            3. L'application calculera automatiquement vos unfollowers
                         </div>
                     </div>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="darkModeToggle" onchange="app.toggleDarkMode()">
-                        <span class="toggle-slider"></span>
-                    </label>
+                </div>
+
+                <!-- Liste des unfollowers -->
+                <div id="unfollowersResults" style="display: none;">
+                    <div class="unfollowers-actions">
+                        <button class="btn btn-secondary" onclick="unfollowers.sortBy('username')">
+                            📝 Trier par nom
+                        </button>
+                        <button class="btn btn-secondary" onclick="unfollowers.sortBy('status')">
+                            🏷️ Trier par statut
+                        </button>
+                    </div>
+                    <div class="unfollowers-list" id="unfollowersList"></div>
                 </div>
             </div>
-            
-            <div class="profil-actions">
-                <button class="profil-btn profil-btn-danger" onclick="authManager.logout()">
+        </div>
+
+        <!-- Section Profil -->
+        <div id="profilSection" class="section">
+            <div class="profil-container">
+                <div class="profil-header">
+                    <div class="profil-avatar">👤</div>
+                    <div class="profil-info">
+                        <div class="profil-email" id="profilUserEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="5e3b333f37321e3b263f332e323b703d3133">[email&#160;protected]</a></div>
+                    </div>
+                </div>
+
+                <div class="profil-stats-grid">
+                    <div class="profil-stat-card">
+                        <div class="profil-stat-value" id="profilContactsCount">0</div>
+                        <div class="profil-stat-label">Contacts</div>
+                    </div>
+                    <div class="profil-stat-card">
+                        <div class="profil-stat-value" id="profilFollowersCount">0</div>
+                        <div class="profil-stat-label">Abonnés</div>
+                    </div>
+                    <div class="profil-stat-card">
+                        <div class="profil-stat-value" id="profilUnfollowersCount">0</div>
+                        <div class="profil-stat-label">Unfollowers</div>
+                    </div>
+                </div>
+
+                <div class="profil-section">
+                    <h3 class="profil-section-title">⚙️ Paramètres</h3>
+                    
+                    <div class="profil-option">
+                        <div class="profil-option-info">
+                            <div class="profil-option-label">🌙 Mode sombre</div>
+                            <div class="profil-option-desc">Activer le thème sombre</div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="darkModeToggle" onchange="app.toggleDarkMode()">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="profil-section">
+                    <h3 class="profil-section-title">ℹ️ À propos</h3>
+                    <div class="profil-info-text">
+                        <strong>InstaConnect</strong> v1.0<br>
+                        Votre CRM personnel pour Instagram<br>
+                        <br>
+                        Toutes vos données sont stockées de manière sécurisée<br>
+                        et synchronisées avec Firebase.
+                    </div>
+                </div>
+
+                <button class="btn btn-logout" onclick="authManager.logout()">
                     🚪 Déconnexion
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Bottom Navigation -->
+    <!-- Bottom Navigation (MODIFIÉE) -->
     <div class="bottom-nav">
         <div class="nav-item active" onclick="app.switchSection('contacts')">
             <span class="nav-icon">📱</span>
@@ -375,6 +400,7 @@
             <span>Stats</span>
         </div>
         <div class="nav-item nav-item-main" onclick="app.switchSection('analyse')">
+            <div class="nav-item-main-bg"></div>
             <span class="nav-icon">🔍</span>
             <span>Analyse</span>
         </div>
@@ -393,14 +419,8 @@
 
     <!-- Tag Dropdown -->
     <div id="tagDropdown" class="tag-dropdown-container">
-        <div class="tag-dropdown-header">
-            <div class="tag-dropdown-title">Sélectionner un tag</div>
-            <button class="tag-dropdown-close" onclick="tags.closeDropdown()">✕</button>
-        </div>
-        <div class="tag-search">
-            <input type="text" id="tagSearchInput" placeholder="Rechercher...">
-        </div>
-        <div class="tag-options" id="tagOptionsList"></div>
+        <div class="tag-dropdown-header">Sélectionner un tag</div>
+        <div class="tag-dropdown-content" id="tagDropdownContent"></div>
     </div>
 
     <!-- Modal Add/Edit Contact -->
@@ -412,61 +432,55 @@
         <div class="modal-content">
             <form id="contactForm" onsubmit="contacts.saveContact(event)">
                 <div class="form-group">
-                    <label>Prénom <span style="color: #ff4757;">*</span></label>
+                    <label>Prénom *</label>
                     <input type="text" id="firstName" required>
                 </div>
                 <div class="form-group">
-                    <label>Pseudo Instagram <span style="color: #ff4757;">*</span></label>
-                    <div style="position: relative;">
-                        <span style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #868e96; font-weight: 600;">@</span>
-                        <input type="text" id="instagram" required style="padding-left: 36px;" oninput="this.value = this.value.toLowerCase().replace('@', '')">
+                    <label>Instagram *</label>
+                    <div class="instagram-input-wrapper">
+                        <span class="instagram-prefix">@</span>
+                        <input type="text" id="instagram" required class="instagram-input">
                     </div>
                 </div>
-                
                 <div class="form-group">
-                    <label>Type de relation <span style="color: #ff4757;">*</span></label>
-                    <div class="tag-selector" id="relationTypeSelector" onclick="contacts.openTagSelector('relationType')">
+                    <label>Sexe</label>
+                    <div class="gender-selector">
+                        <label class="gender-option">
+                            <input type="radio" name="gender" id="genderMale" value="Homme">
+                            <div class="gender-box">
+                                <span class="gender-icon">👨</span>
+                                <span>Homme</span>
+                            </div>
+                        </label>
+                        <label class="gender-option">
+                            <input type="radio" name="gender" id="genderFemale" value="Femme">
+                            <div class="gender-box">
+                                <span class="gender-icon">👩</span>
+                                <span>Femme</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Type de relation</label>
+                    <input type="hidden" id="relationType">
+                    <div class="tag-selector" onclick="contacts.openTagSelector('relationType')">
                         <span id="relationTypeDisplay" class="tag-selector-placeholder">Sélectionner...</span>
-                        <span class="tag-selector-arrow">▼</span>
                     </div>
-                    <input type="hidden" id="relationType" required>
                 </div>
-                
                 <div class="form-group">
-                    <label>Lieu de rencontre <span style="color: #ff4757;">*</span></label>
-                    <div class="tag-selector" id="meetingPlaceSelector" onclick="contacts.openTagSelector('meetingPlace')">
+                    <label>Lieu de rencontre</label>
+                    <input type="hidden" id="meetingPlace">
+                    <div class="tag-selector" onclick="contacts.openTagSelector('meetingPlace')">
                         <span id="meetingPlaceDisplay" class="tag-selector-placeholder">Sélectionner...</span>
-                        <span class="tag-selector-arrow">▼</span>
                     </div>
-                    <input type="hidden" id="meetingPlace" required>
                 </div>
-                
                 <div class="form-group">
-                    <label>Statut de discussion <span style="color: #ff4757;">*</span></label>
-                    <div class="tag-selector" id="discussionStatusSelector" onclick="contacts.openTagSelector('discussionStatus')">
+                    <label>Statut de discussion</label>
+                    <input type="hidden" id="discussionStatus">
+                    <div class="tag-selector" onclick="contacts.openTagSelector('discussionStatus')">
                         <span id="discussionStatusDisplay" class="tag-selector-placeholder">Sélectionner...</span>
-                        <span class="tag-selector-arrow">▼</span>
                     </div>
-                    <input type="hidden" id="discussionStatus" required>
-                </div>
-                
-                <div class="form-group">
-                    <label>Sexe <span style="color: #ff4757;">*</span></label>
-                    <div style="display: flex; gap: 20px; margin-top: 8px;">
-                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                            <input type="radio" name="gender" id="genderMale" value="Homme" style="width: 18px; height: 18px; cursor: pointer;">
-                            <span>👨 Homme</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                            <input type="radio" name="gender" id="genderFemale" value="Femme" style="width: 18px; height: 18px; cursor: pointer;">
-                            <span>👩 Femme</span>
-                        </label>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label>Études / Profession</label>
-                    <input type="text" id="profession">
                 </div>
                 <div class="form-group">
                     <label>Lieu d'habitation</label>
@@ -543,7 +557,7 @@
 
     <!-- Scripts -->
     <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     
@@ -655,11 +669,3 @@
         document.addEventListener('click', (e) => {
             const icon = document.querySelector('.user-menu-icon');
             const dropdown = document.getElementById('userMenuDropdown');
-            if (icon && dropdown && !icon.contains(e.target) && !dropdown.contains(e.target)) {
-                dropdown.classList.remove('active');
-            }
-        });
-    </script>
-</div> <!-- End of appPage -->
-</body>
-</html>
