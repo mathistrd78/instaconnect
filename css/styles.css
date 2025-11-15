@@ -877,13 +877,13 @@ body.hide-header .container {
 .nav-item.active::after {
     content: '';
     position: absolute;
-    top: 0;
+    bottom: 0;
     left: 50%;
     transform: translateX(-50%);
     width: 40px;
     height: 3px;
     background: #E1306C;
-    border-radius: 0 0 3px 3px;
+    border-radius: 3px 3px 0 0;
 }
 
 /* Main nav item (Analyse) - bigger avec background arrondi */
@@ -2236,56 +2236,6 @@ body.dark-mode .empty-state-text {
     overflow-y: auto;
 }
 
-/* Barre alphabétique - positionnée entre les filtres et la bottom nav */
-.alphabet-nav {
-    position: fixed;
-    right: 4px;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 500;
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-    padding: 4px 2px;
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(10px);
-    max-height: calc(100vh - 300px);
-}
-
-.alphabet-letter {
-    width: 20px;
-    height: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    font-weight: 700;
-    color: #868e96;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border-radius: 4px;
-    user-select: none;
-}
-
-.alphabet-letter:active {
-    background: #E1306C;
-    color: white;
-    transform: scale(1.2);
-}
-
-.alphabet-letter.has-contacts {
-    color: #E1306C;
-    font-weight: 800;
-}
-
-/* Cacher la barre alphabétique sur les autres sections */
-#contactsSection:not(.active) ~ .alphabet-nav,
-.section:not(#contactsSection).active ~ .alphabet-nav {
-    display: none;
-}
-
 /* Marqueur de lettre dans la grille */
 .letter-divider {
     grid-column: 1 / -1;
@@ -2301,24 +2251,7 @@ body.dark-mode .empty-state-text {
     z-index: 10;
 }
 
-/* Dark mode pour la barre alphabétique */
-body.dark-mode .alphabet-nav {
-    background: rgba(33, 37, 41, 0.95);
-}
-
-body.dark-mode .alphabet-letter {
-    color: #adb5bd;
-}
-
-body.dark-mode .alphabet-letter:active {
-    background: #E1306C;
-    color: white;
-}
-
-body.dark-mode .alphabet-letter.has-contacts {
-    color: #E1306C;
-}
-
+/* Dark mode pour les séparateurs de lettres */
 body.dark-mode .letter-divider {
     background: #212529;
     color: #E1306C;
