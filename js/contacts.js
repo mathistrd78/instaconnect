@@ -51,19 +51,24 @@ const contacts = {
         if (filtered.length === 0) {
             grid.style.display = 'none';
             empty.style.display = 'block';
-            this.updateAlphabetNav([]);
             return;
         }
 
         grid.style.display = 'grid';
         empty.style.display = 'none';
         
-        // Grouper les contacts par première lettre
+        // Grouper les contacts par première lettre (en ignorant les @)
         const groupedContacts = {};
         const letters = [];
         
         filtered.forEach(contact => {
-            const firstLetter = contact.firstName.charAt(0).toUpperCase();
+            // Enlever les @ au début du prénom si présents
+            let name = contact.firstName;
+            while (name.charAt(0) === '@') {
+                name = name.substring(1);
+            }
+            
+            const firstLetter = name.charAt(0).toUpperCase();
             if (!groupedContacts[firstLetter]) {
                 groupedContacts[firstLetter] = [];
                 letters.push(firstLetter);
@@ -117,47 +122,6 @@ const contacts = {
         });
         
         grid.innerHTML = html;
-        
-        // Mettre à jour la navigation alphabétique
-        this.updateAlphabetNav(letters);
-    },
-
-    // Mettre à jour la barre alphabétique pour montrer quelles lettres ont des contacts
-    updateAlphabetNav(letters) {
-        const alphabetNav = document.getElementById('alphabetNav');
-        if (!alphabetNav) return;
-        
-        const allLetters = alphabetNav.querySelectorAll('.alphabet-letter');
-        allLetters.forEach(letterEl => {
-            const letter = letterEl.getAttribute('data-letter');
-            if (letters.includes(letter)) {
-                letterEl.classList.add('has-contacts');
-            } else {
-                letterEl.classList.remove('has-contacts');
-            }
-        });
-    },
-
-    // Scroller vers une lettre spécifique
-    scrollToLetter(letter) {
-        const letterElement = document.getElementById('letter-' + letter);
-        if (letterElement) {
-            // Scroll avec un offset pour le header
-            const headerHeight = document.querySelector('.header')?.offsetHeight || 0;
-            const elementPosition = letterElement.getBoundingClientRect().top;
-            const offsetPosition = elementPosition + window.pageYOffset - headerHeight - 10;
-            
-            window.scrollTo({
-                top: offsetPosition,
-                behavior: 'smooth'
-            });
-            
-            // Effet visuel temporaire
-            letterElement.style.transform = 'scale(1.05)';
-            setTimeout(() => {
-                letterElement.style.transform = 'scale(1)';
-            }, 300);
-        }
     },
 
     getFiltered() {
