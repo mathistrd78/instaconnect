@@ -357,6 +357,9 @@ const contacts = {
         document.getElementById('modalTitle').textContent = '✏️ Modifier le contact';
         app.closeViewModal();
         document.getElementById('addModal').classList.add('active');
+        
+        // Reset scroll position
+        document.querySelector('#addModal .modal-content').scrollTop = 0;
     },
 
     deleteContact() {
