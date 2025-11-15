@@ -223,12 +223,18 @@ const app = {
         contacts.currentEditId = null;
         document.getElementById('contactForm').reset();
         
-        // Reset tag selectors
+        // Reset tag selectors - TEXTE ET VALEURS
         ['relationType', 'meetingPlace', 'discussionStatus'].forEach(fieldId => {
+            // Reset du texte affiché
             const displayEl = document.getElementById(fieldId + 'Display');
             if (displayEl) {
                 displayEl.textContent = 'Sélectionner...';
                 displayEl.className = 'tag-selector-placeholder';
+            }
+            // Reset de la valeur cachée
+            const hiddenInput = document.getElementById(fieldId);
+            if (hiddenInput) {
+                hiddenInput.value = '';
             }
         });
         
@@ -238,6 +244,8 @@ const app = {
         
         document.getElementById('modalTitle').textContent = '➕ Nouveau contact';
         document.getElementById('addModal').classList.add('active');
+        
+        // Reset scroll position
         document.querySelector('#addModal .modal-content').scrollTop = 0;
     },
 
