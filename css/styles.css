@@ -275,6 +275,14 @@ h1 {
     margin-top: 160px; /* Espace pour le header fixe */
 }
 
+/* Quand le header n'est pas affiché (Stats, Analyse, Unfollowers, Profil) */
+#statsSection.active ~ * .container,
+#analyseSection.active ~ * .container,
+#unfollowersSection.active ~ * .container,
+#profilSection.active ~ * .container {
+    margin-top: 0;
+}
+
 .section {
     display: none;
 }
@@ -722,7 +730,7 @@ body.hide-header .container {
     letter-spacing: 2px;
     text-transform: uppercase;
     position: sticky;
-    top: 0;
+    top: 165px; /* Position sous le header (hauteur du header + petit espace) */
     z-index: 1;
 }
 
