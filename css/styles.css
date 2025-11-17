@@ -295,6 +295,7 @@ body.hide-header .header {
 
 body.hide-header .container {
     padding-top: 12px;
+    margin-top: 0;
 }
 
 /* Contacts Grid */
@@ -2258,7 +2259,7 @@ body.dark-mode .empty-state-text {
     border-bottom: 2px solid #E1306C;
     margin-bottom: 8px;
     position: sticky;
-    top: 160px;
+    top: 165px;
     background: #f8f9fa;
     z-index: 10;
 }
