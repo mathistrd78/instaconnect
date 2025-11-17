@@ -94,7 +94,7 @@ const contacts = {
                     <div class="contact-header">
                         <div class="contact-info">
                             <div class="contact-name">${contact.firstName}</div>
-                            <div class="contact-instagram" onclick="contacts.openInstagramProfile('${contact.instagram}')">${contact.instagram}</div>
+                            <div class="contact-instagram" data-username="${contact.instagram.replace('@', '')}">${contact.instagram}</div>
                         </div>
                         <button class="btn-view-eye" onclick="contacts.viewProfile('${contact.id}')" title="Voir le profil">
                             👁️
@@ -117,6 +117,15 @@ const contacts = {
         });
         
         grid.innerHTML = html;
+        
+        // Ajouter les event listeners pour les pseudos Instagram
+        document.querySelectorAll('.contact-instagram').forEach(el => {
+            el.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const username = el.getAttribute('data-username');
+                this.openInstagramProfile(username);
+            });
+        });
     },
 
     getFiltered() {
@@ -234,7 +243,10 @@ const contacts = {
     },
 
     openInstagramProfile(username) {
+        // Nettoyer le username (enlever @)
         const clean = username.replace('@', '');
+        
+        // Open Instagram profile - même logique que unfollowers
         const instagramUrl = `https://instagram.com/${clean}`;
         const instagramApp = `instagram://user?username=${clean}`;
         
@@ -243,12 +255,16 @@ const contacts = {
                      window.navigator.standalone === true;
         
         if (isPWA) {
-            // PWA: Ouvrir directement dans un nouvel onglet (pas de page blanche)
+            // PWA: Ouvrir directement dans un nouvel onglet
+            console.log('📱 PWA mode - opening in new tab');
             window.open(instagramUrl, '_blank', 'noopener,noreferrer');
         } else {
             // Navigateur: Essayer d'ouvrir l'app Instagram d'abord
+            console.log('🌐 Browser mode - trying app first');
             window.location.href = instagramApp;
-            setTimeout(() => window.open(instagramUrl, '_blank'), 500);
+            setTimeout(() => {
+                window.open(instagramUrl, '_blank', 'noopener,noreferrer');
+            }, 500);
         }
     },
 
