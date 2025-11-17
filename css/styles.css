@@ -730,7 +730,7 @@ body.hide-header .container {
     letter-spacing: 2px;
     text-transform: uppercase;
     position: sticky;
-    top: 170px; /* Position sous le header (hauteur du header + petit espace) */
+    top: 180px; /* Position sous le header (hauteur du header + petit espace) */
     z-index: 1;
 }
 
