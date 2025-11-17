@@ -245,8 +245,13 @@ const app = {
         document.getElementById('modalTitle').textContent = '➕ Nouveau contact';
         document.getElementById('addModal').classList.add('active');
         
-        // Reset scroll position
-        document.querySelector('#addModal .modal-content').scrollTop = 0;
+        // Reset scroll position APRÈS l'ouverture du modal
+        setTimeout(() => {
+            const modalContent = document.querySelector('#addModal .modal-content');
+            if (modalContent) {
+                modalContent.scrollTop = 0;
+            }
+        }, 50);
     },
 
     closeAddModal() {
