@@ -243,15 +243,21 @@ const app = {
         document.getElementById('genderFemale').checked = false;
         
         document.getElementById('modalTitle').textContent = '➕ Nouveau contact';
+        
+        // Reset scroll AVANT d'ouvrir le modal
+        const modalContent = document.querySelector('#addModal .modal-content');
+        if (modalContent) {
+            modalContent.scrollTop = 0;
+        }
+        
         document.getElementById('addModal').classList.add('active');
         
-        // Reset scroll position APRÈS l'ouverture du modal
+        // Reset scroll APRÈS l'ouverture du modal aussi
         setTimeout(() => {
-            const modalContent = document.querySelector('#addModal .modal-content');
             if (modalContent) {
                 modalContent.scrollTop = 0;
             }
-        }, 50);
+        }, 100);
     },
 
     closeAddModal() {
