@@ -319,7 +319,7 @@ const contacts = {
         document.getElementById('firstName').value = contact.firstName;
         document.getElementById('instagram').value = contact.instagram.replace('@', '');
         
-        // Set tag selectors
+        // Set tag selectors - AVEC RESET si vide
         const fields = [
             {id: 'relationType', value: contact.relationType},
             {id: 'meetingPlace', value: contact.meetingPlace},
@@ -327,12 +327,26 @@ const contacts = {
         ];
         
         fields.forEach(field => {
-            document.getElementById(field.id).value = field.value;
-            const tag = tags.findTag(field.id, field.value);
-            if (tag) {
-                const displayEl = document.getElementById(field.id + 'Display');
-                displayEl.textContent = tag.label;
-                displayEl.className = 'tag-selector-value';
+            const displayEl = document.getElementById(field.id + 'Display');
+            const hiddenInput = document.getElementById(field.id);
+            
+            if (field.value) {
+                // Le contact a une valeur
+                hiddenInput.value = field.value;
+                const tag = tags.findTag(field.id, field.value);
+                if (tag) {
+                    displayEl.textContent = tag.label;
+                    displayEl.className = 'tag-selector-value';
+                } else {
+                    // Tag non trouvé, réinitialiser
+                    displayEl.textContent = 'Sélectionner...';
+                    displayEl.className = 'tag-selector-placeholder';
+                }
+            } else {
+                // Le contact n'a pas de valeur, réinitialiser
+                hiddenInput.value = '';
+                displayEl.textContent = 'Sélectionner...';
+                displayEl.className = 'tag-selector-placeholder';
             }
         });
         
@@ -346,7 +360,9 @@ const contacts = {
         // Set gender radio buttons
         if (contact.gender === 'Homme') {
             document.getElementById('genderMale').checked = true;
+            document.getElementById('genderFemale').checked = false;
         } else if (contact.gender === 'Femme') {
+            document.getElementById('genderMale').checked = false;
             document.getElementById('genderFemale').checked = true;
         } else {
             // Uncheck both if no gender set
@@ -358,8 +374,13 @@ const contacts = {
         app.closeViewModal();
         document.getElementById('addModal').classList.add('active');
         
-        // Reset scroll position
-        document.querySelector('#addModal .modal-content').scrollTop = 0;
+        // Reset scroll position - avec un petit délai pour être sûr
+        setTimeout(() => {
+            const modalContent = document.querySelector('#addModal .modal-content');
+            if (modalContent) {
+                modalContent.scrollTop = 0;
+            }
+        }, 10);
     },
 
     deleteContact() {
