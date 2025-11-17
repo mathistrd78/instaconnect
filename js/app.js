@@ -243,26 +243,18 @@ const app = {
         document.getElementById('genderFemale').checked = false;
         
         document.getElementById('modalTitle').textContent = '➕ Nouveau contact';
-        
-        // Reset scroll AVANT d'ouvrir le modal
-        const modalContent = document.querySelector('#addModal .modal-content');
-        if (modalContent) {
-            modalContent.scrollTop = 0;
-        }
-        
         document.getElementById('addModal').classList.add('active');
-        
-        // Reset scroll APRÈS l'ouverture du modal aussi
-        setTimeout(() => {
-            if (modalContent) {
-                modalContent.scrollTop = 0;
-            }
-        }, 100);
     },
 
     closeAddModal() {
         document.getElementById('addModal').classList.remove('active');
         contacts.currentEditId = null;
+        
+        // Reset scroll lors de la fermeture pour qu'il soit à 0 à la prochaine ouverture
+        const modalContent = document.querySelector('#addModal .modal-content');
+        if (modalContent) {
+            modalContent.scrollTop = 0;
+        }
     },
 
     closeViewModal() {
