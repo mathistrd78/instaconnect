@@ -94,8 +94,11 @@ const contacts = {
                     <div class="contact-header">
                         <div class="contact-info">
                             <div class="contact-name">${contact.firstName}</div>
-                            <div class="contact-instagram">${contact.instagram}</div>
+                            <div class="contact-instagram" onclick="contacts.openInstagramProfile('${contact.instagram}')">${contact.instagram}</div>
                         </div>
+                        <button class="btn-view-eye" onclick="contacts.viewProfile('${contact.id}')" title="Voir le profil">
+                            👁️
+                        </button>
                     </div>
                     <div class="contact-tags">
                         <span class="tag-mini ${relTag?.class || ''}" onclick="tags.showDropdown(event, '${contact.id}', 'relationType')">
@@ -107,14 +110,6 @@ const contacts = {
                         <span class="tag-mini ${statTag?.class || ''}" onclick="tags.showDropdown(event, '${contact.id}', 'discussionStatus')">
                             ${statTag?.label || 'Statut'}
                         </span>
-                    </div>
-                    <div class="contact-actions">
-                        <button class="btn-action btn-view" onclick="contacts.viewProfile('${contact.id}')">
-                            👁️ Voir profil
-                        </button>
-                        <button class="btn-action btn-insta" onclick="contacts.openInstagramProfile('${contact.instagram}')">
-                            📸 Instagram
-                        </button>
                     </div>
                 </div>
                 `;
