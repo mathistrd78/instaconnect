@@ -16,7 +16,7 @@ body {
     overflow-x: hidden;
 }
 
-/* Pour garder la bottom nav ancrÃ©e sur iPhone */
+/* Pour garder la bottom nav ancrée sur iPhone */
 html {
     height: 100%;
     overflow: hidden;
@@ -211,9 +211,11 @@ body {
     background: white;
     padding: 8px 16px 10px 16px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    position: sticky;
+    position: fixed;
     top: 0;
-    z-index: 100;
+    left: 0;
+    right: 0;
+    z-index: 1000;
 }
 
 .header-top {
@@ -239,7 +241,7 @@ h1 {
 }
 
 .search-box {
-    margin: 0 20px 6px 20px;
+    margin: 0 20px 2px 20px;
     width: calc(100% - 40px);
 }
 
@@ -270,6 +272,7 @@ h1 {
 /* Container */
 .container {
     padding: 8px 12px 12px 12px;
+    margin-top: 160px; /* Espace pour le header fixe */
 }
 
 .section {
@@ -936,7 +939,7 @@ body.hide-header .container {
     z-index: 3;
 }
 
-/* CrÃ©er une sÃ©paration arrondie autour de l'onglet Analyse */
+/* Créer une séparation arrondie autour de l'onglet Analyse */
 .nav-item-main::before,
 .nav-item-main::after {
     content: '';
@@ -2081,17 +2084,17 @@ body.dark-mode .empty-state-text {
 /* Nouveaux styles pour les filtres horizontaux */
 .contacts-count {
     background: #e3f2fd;
-    padding: 6px 16px;
+    padding: 4px 16px;
     border-radius: 8px;
     text-align: center;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
     color: #1976d2;
-    margin: 0 20px 6px 20px;
+    margin: 0 20px 4px 20px;
 }
 
 #contactsCountNumber {
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 700;
     color: #0d47a1;
 }
@@ -2220,7 +2223,7 @@ body.dark-mode .empty-state-text {
 }
 
 .filter-option-checkbox::after {
-    content: 'âœ“';
+    content: '✓';
     display: none;
     font-size: 12px;
     font-weight: bold;
@@ -2264,7 +2267,7 @@ body.dark-mode .empty-state-text {
     z-index: 10;
 }
 
-/* Dark mode pour les sÃ©parateurs de lettres */
+/* Dark mode pour les séparateurs de lettres */
 body.dark-mode .letter-divider {
     background: #212529;
     color: #E1306C;
