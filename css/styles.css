@@ -322,7 +322,12 @@ body.hide-header .container {
 .contact-header {
     display: flex;
     justify-content: space-between;
+    align-items: flex-start;
     margin-bottom: 12px;
+}
+
+.contact-info {
+    flex: 1;
 }
 
 .contact-name {
@@ -335,6 +340,36 @@ body.hide-header .container {
     font-size: 15px;
     color: #E1306C;
     font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+.contact-instagram:active {
+    opacity: 0.7;
+}
+
+.btn-view-eye {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    min-height: 36px;
+    border: none;
+    border-radius: 8px;
+    background: #E1306C;
+    color: white;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    padding: 0;
+}
+
+.btn-view-eye:active {
+    transform: scale(0.95);
+    opacity: 0.8;
 }
 
 .contact-tags {
@@ -730,7 +765,7 @@ body.hide-header .container {
     letter-spacing: 2px;
     text-transform: uppercase;
     position: sticky;
-    top: 180px; /* Position sous le header (hauteur du header + petit espace) */
+    top: 165px; /* Position sous le header (hauteur du header + petit espace) */
     z-index: 1;
 }
 
@@ -879,7 +914,7 @@ body.hide-header .container {
     gap: 3px;
     padding: 4px 4px 8px 4px;
     color: #2d3436;
-    font-size: 9px;
+    font-size: 10px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -943,7 +978,7 @@ body.hide-header .container {
 
 .nav-item-main span:not(.nav-icon) {
     font-size: 10px;
-    font-weight: 700;
+    font-weight: 600;
     position: relative;
     z-index: 3;
 }
@@ -1229,7 +1264,12 @@ body.dark-mode .contact-name {
 }
 
 body.dark-mode .contact-instagram {
-    color: #a0a0a0;
+    color: #E1306C;
+}
+
+body.dark-mode .btn-view-eye {
+    background: #E1306C;
+    color: white;
 }
 
 body.dark-mode .stats-page {
