@@ -372,21 +372,7 @@ const contacts = {
         
         document.getElementById('modalTitle').textContent = '✏️ Modifier le contact';
         app.closeViewModal();
-        
-        // Reset scroll AVANT d'ouvrir le modal
-        const modalContent = document.querySelector('#addModal .modal-content');
-        if (modalContent) {
-            modalContent.scrollTop = 0;
-        }
-        
         document.getElementById('addModal').classList.add('active');
-        
-        // Reset scroll APRÈS l'ouverture du modal aussi
-        setTimeout(() => {
-            if (modalContent) {
-                modalContent.scrollTop = 0;
-            }
-        }, 100);
     },
 
     deleteContact() {
