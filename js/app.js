@@ -172,30 +172,36 @@ const app = {
 
         // Gérer l'affichage du header
         const header = document.querySelector('.header');
+        const container = document.querySelector('.container');
         
         // Ordre des onglets : Contacts (0), Stats (1), Analyse (2), Unfollowers (3), Profil (4)
         if (section === 'contacts') {
             document.getElementById('contactsSection').classList.add('active');
             document.querySelectorAll('.nav-item')[0].classList.add('active');
             header.style.display = 'block';
+            container.style.marginTop = '160px'; // Remettre la marge pour le header
             contacts.render();
         } else if (section === 'stats') {
             document.getElementById('statsSection').classList.add('active');
             document.querySelectorAll('.nav-item')[1].classList.add('active');
             header.style.display = 'none';
+            container.style.marginTop = '0'; // Supprimer la marge
             stats.render();
         } else if (section === 'analyse') {
             document.getElementById('analyseSection').classList.add('active');
             document.querySelectorAll('.nav-item')[2].classList.add('active');
             header.style.display = 'none';
+            container.style.marginTop = '0'; // Supprimer la marge
         } else if (section === 'unfollowers') {
             document.getElementById('unfollowersSection').classList.add('active');
             document.querySelectorAll('.nav-item')[3].classList.add('active');
             header.style.display = 'none';
+            container.style.marginTop = '0'; // Supprimer la marge
         } else if (section === 'profil') {
             document.getElementById('profilSection').classList.add('active');
             document.querySelectorAll('.nav-item')[4].classList.add('active');
             header.style.display = 'none';
+            container.style.marginTop = '0'; // Supprimer la marge
             this.updateProfilSection();
         }
     },
