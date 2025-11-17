@@ -16,7 +16,7 @@ body {
     overflow-x: hidden;
 }
 
-/* Pour garder la bottom nav ancrée sur iPhone */
+/* Pour garder la bottom nav ancrÃ©e sur iPhone */
 html {
     height: 100%;
     overflow: hidden;
@@ -211,7 +211,7 @@ body {
     background: white;
     padding: 8px 16px 10px 16px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    position: fixed;
+    position: sticky;
     top: 0;
     z-index: 100;
 }
@@ -865,9 +865,9 @@ body.hide-header .container {
     flex-direction: column;
     align-items: center;
     gap: 3px;
-    padding: 2px 4px 0px 4px;
+    padding: 10px 4px 8px 4px;
     color: #2d3436;
-    font-size: 12px;
+    font-size: 9px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -936,7 +936,7 @@ body.hide-header .container {
     z-index: 3;
 }
 
-/* Créer une séparation arrondie autour de l'onglet Analyse */
+/* CrÃ©er une sÃ©paration arrondie autour de l'onglet Analyse */
 .nav-item-main::before,
 .nav-item-main::after {
     content: '';
@@ -2220,7 +2220,7 @@ body.dark-mode .empty-state-text {
 }
 
 .filter-option-checkbox::after {
-    content: '✓';
+    content: 'âœ“';
     display: none;
     font-size: 12px;
     font-weight: bold;
@@ -2264,7 +2264,7 @@ body.dark-mode .empty-state-text {
     z-index: 10;
 }
 
-/* Dark mode pour les séparateurs de lettres */
+/* Dark mode pour les sÃ©parateurs de lettres */
 body.dark-mode .letter-divider {
     background: #212529;
     color: #E1306C;
