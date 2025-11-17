@@ -865,7 +865,7 @@ body.hide-header .container {
     flex-direction: column;
     align-items: center;
     gap: 3px;
-    padding: 10px 4px 8px 4px;
+    padding: 6px 4px 2px 4px;
     color: #2d3436;
     font-size: 9px;
     font-weight: 600;
