@@ -13,28 +13,19 @@ body {
     background: #f8f9fa;
     min-height: 100vh;
     padding-bottom: calc(75px + env(safe-area-inset-bottom));
-    position: relative;
     overflow-x: hidden;
 }
 
-/* Approche pour ancrer la bottom nav sur iPhone sans casser le sticky */
-html, body {
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0;
-}
-
+/* Pour garder la bottom nav ancrée sur iPhone */
 html {
+    height: 100%;
     overflow: hidden;
-    position: fixed;
 }
 
 body {
+    height: 100%;
     overflow-y: auto;
-    overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
-    position: relative;
 }
 
 /* Auth Page */
@@ -220,10 +211,8 @@ body {
     background: white;
     padding: 8px 16px 10px 16px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    position: fixed;
+    position: sticky;
     top: 0;
-    left: 0;
-    right: 0;
     z-index: 100;
 }
 
@@ -281,15 +270,6 @@ h1 {
 /* Container */
 .container {
     padding: 8px 12px 12px 12px;
-    padding-top: 190px; /* Espace pour le header fixe */
-}
-
-/* Pas de padding-top sur les sections sans header */
-#statsSection .stats-page,
-#analyseSection .analyse-container,
-#unfollowersSection .unfollowers-container,
-#profilSection .profil-container {
-    padding-top: 20px;
 }
 
 .section {
