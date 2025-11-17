@@ -374,13 +374,13 @@ const contacts = {
         app.closeViewModal();
         document.getElementById('addModal').classList.add('active');
         
-        // Reset scroll position - avec un petit délai pour être sûr
+        // Reset scroll position APRÈS l'ouverture du modal
         setTimeout(() => {
             const modalContent = document.querySelector('#addModal .modal-content');
             if (modalContent) {
                 modalContent.scrollTop = 0;
             }
-        }, 10);
+        }, 50);
     },
 
     deleteContact() {
