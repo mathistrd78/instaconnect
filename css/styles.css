@@ -2233,11 +2233,7 @@ body.dark-mode .empty-state-text {
     display: block;
 }
 
-/* Fix pour le dropdown des filtres */
-.header {
-    position: relative;
-    z-index: 100;
-}
+/* Fix pour le dropdown des filtres - z-index déjà défini dans .header principal */
 
 .filter-dropdown {
     position: absolute;
