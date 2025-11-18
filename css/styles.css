@@ -601,8 +601,8 @@ body.hide-header .container {
 /* Unfollowers Section */
 .unfollowers-header {
     background: white;
-    padding: 16px;
-    margin-bottom: 8px;
+    padding: 12px 16px;
+    margin-bottom: 6px;
     border-radius: 16px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     text-align: center;
@@ -612,7 +612,7 @@ body.hide-header .container {
     font-size: 24px;
     font-weight: 700;
     color: #ff4757;
-    margin-bottom: 4px;
+    margin-bottom: 0;
 }
 
 .unfollowers-subtitle {
@@ -624,16 +624,16 @@ body.hide-header .container {
 .unfollowers-permanent-actions {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    padding: 0 16px 12px 16px;
-    margin-bottom: 12px;
+    gap: 8px;
+    padding: 0 16px 8px 16px;
+    margin-bottom: 8px;
 }
 
 .unfollowers-action-btn {
-    padding: 14px 16px;
+    padding: 10px 12px;
     border: none;
     border-radius: 12px;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     cursor: pointer;
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
@@ -711,26 +711,26 @@ body.hide-header .container {
 .unfollowers-stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-bottom: 12px;
+    gap: 8px;
+    margin-bottom: 8px;
 }
 
 .unfollower-stat-card {
     background: white;
-    padding: 12px;
+    padding: 10px 8px;
     border-radius: 16px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     text-align: center;
 }
 
 .unfollower-stat-value {
-    font-size: 28px;
+    font-size: 24px;
     font-weight: 700;
     color: #ff4757;
 }
 
 .unfollower-stat-label {
-    font-size: 12px;
+    font-size: 11px;
     color: #868e96;
     font-weight: 600;
     margin-top: 4px;
@@ -924,6 +924,49 @@ body.hide-header .container {
 .btn-mark-normal:active {
     background: #f0b849;
     transform: scale(0.98);
+}
+
+/* Nouveaux boutons emoji uniquement */
+.btn-emoji-normal {
+    padding: 8px 12px;
+    background: #fdcb6e;
+    color: #2d3436;
+    border: none;
+    border-radius: 8px;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-emoji-normal:active {
+    background: #f0b849;
+    transform: scale(0.95);
+}
+
+.btn-emoji-unfollow {
+    padding: 8px 12px;
+    background: #ff7675;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-emoji-unfollow:active {
+    background: #d63031;
+    transform: scale(0.95);
 }
 
 /* Styles pour les modales unfollowers */
