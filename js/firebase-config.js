@@ -23,10 +23,11 @@ function initFirebase() {
         firebaseApp = firebase.initializeApp(firebaseConfig);
         auth = firebase.auth();
         
-        // Configurer la persistence locale : l'utilisateur reste connecté même après fermeture
-        auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+        // Configurer la persistence SESSION : déconnexion automatique à la fermeture de l'app
+        // Mais on garde la session active si l'app passe en arrière-plan
+        auth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
             .then(() => {
-                console.log('✅ Firebase persistence set to LOCAL (stay logged in)');
+                console.log('✅ Firebase persistence set to SESSION');
             })
             .catch((error) => {
                 console.error('❌ Error setting persistence:', error);
