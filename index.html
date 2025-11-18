@@ -703,17 +703,31 @@
         window.addEventListener('load', () => {
             console.log('✅ All scripts loaded, authManager:', typeof authManager);
             
-            // Gérer la transition de la landing page
-            setTimeout(() => {
+            // Vérifier si l'utilisateur est déjà connecté
+            firebase.auth().onAuthStateChanged((user) => {
                 const landingPage = document.getElementById('landingPage');
                 const authPage = document.getElementById('authPage');
-                if (landingPage) {
-                    landingPage.remove();
+                
+                if (user) {
+                    // Utilisateur déjà connecté, masquer landing et auth page immédiatement
+                    console.log('👤 User already logged in, skipping landing page');
+                    if (landingPage) {
+                        landingPage.remove();
+                    }
+                    // L'authPage reste masquée car l'app est déjà affichée
+                } else {
+                    // Pas d'utilisateur connecté, afficher la landing page puis l'auth
+                    console.log('🔓 No user logged in, showing landing page');
+                    setTimeout(() => {
+                        if (landingPage) {
+                            landingPage.remove();
+                        }
+                        if (authPage) {
+                            authPage.style.display = 'flex';
+                        }
+                    }, 3000);
                 }
-                if (authPage) {
-                    authPage.style.display = 'flex';
-                }
-            }, 3000);
+            });
         });
     </script>
 </div> <!-- End of appPage -->
