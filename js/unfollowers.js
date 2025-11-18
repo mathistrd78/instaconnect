@@ -604,13 +604,15 @@ const unfollowers = {
                             ${dateStr}
                         </div>
                         <div class="unfollower-actions">
-                            <button class="btn-unfollow" onclick="unfollowers.openInstagram('${username}')" ${isMarked ? 'disabled' : ''}>
-                                ${isMarked ? '✓ Fait' : '🔗 Profil'}
-                            </button>
                             ${!isMarked ? `
+                                <a href="https://instagram.com/${username}" target="_blank" rel="noopener noreferrer" class="btn-unfollow">
+                                    🔗 Profil
+                                </a>
                                 <button class="btn-mark" onclick="unfollowers.markAsUnfollowed('${username}')" title="Marquer comme unfollowed">✓</button>
                                 <button class="btn-normal" onclick="unfollowers.markAsNormal('${username}')" title="C'est normal">⭐</button>
-                            ` : ''}
+                            ` : `
+                                <button class="btn-unfollow" disabled>✓ Fait</button>
+                            `}
                         </div>
                     </div>
                 `;
@@ -625,29 +627,6 @@ const unfollowers = {
         }).join('');
 
         list.innerHTML = html;
-    },
-
-    openInstagram(username) {
-        // Open Instagram profile - Fix pour PWA iOS
-        const instagramUrl = `https://instagram.com/${username}`;
-        const instagramApp = `instagram://user?username=${username}`;
-        
-        // Détecter le mode PWA
-        const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
-                     window.navigator.standalone === true;
-        
-        if (isPWA) {
-            // PWA: Ouvrir directement dans un nouvel onglet
-            console.log('📱 PWA mode - opening in new tab');
-            window.open(instagramUrl, '_blank', 'noopener,noreferrer');
-        } else {
-            // Navigateur: Essayer d'ouvrir l'app Instagram d'abord
-            console.log('🌐 Browser mode - trying app first');
-            window.location.href = instagramApp;
-            setTimeout(() => {
-                window.open(instagramUrl, '_blank', 'noopener,noreferrer');
-            }, 500);
-        }
     },
 
     markAsUnfollowed(username) {
