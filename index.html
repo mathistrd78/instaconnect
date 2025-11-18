@@ -12,8 +12,29 @@
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+    <!-- Landing Page avec animation -->
+    <div id="landingPage" class="landing-page">
+        <div class="landing-content">
+            <div class="landing-logo">
+                <span class="landing-letter">I</span>
+                <span class="landing-letter">n</span>
+                <span class="landing-letter">s</span>
+                <span class="landing-letter">t</span>
+                <span class="landing-letter">a</span>
+                <span class="landing-letter">C</span>
+                <span class="landing-letter">o</span>
+                <span class="landing-letter">n</span>
+                <span class="landing-letter">n</span>
+                <span class="landing-letter">e</span>
+                <span class="landing-letter">c</span>
+                <span class="landing-letter">t</span>
+            </div>
+            <div class="landing-subtitle">Votre CRM Instagram</div>
+        </div>
+    </div>
+
     <!-- Auth Page (Login/Signup) -->
-    <div id="authPage" class="auth-page">
+    <div id="authPage" class="auth-page" style="display: none;">
         <div class="auth-container">
             <div class="auth-logo">📱 InstaConnect</div>
             <div class="auth-subtitle">Votre CRM Instagram</div>
@@ -658,6 +679,18 @@
             if (icon && dropdown && !icon.contains(e.target) && !dropdown.contains(e.target)) {
                 dropdown.classList.remove('active');
             }
+        });
+        
+        // Landing page animation
+        window.addEventListener('DOMContentLoaded', () => {
+            const landingPage = document.getElementById('landingPage');
+            const authPage = document.getElementById('authPage');
+            
+            // Après 3 secondes, afficher la page d'authentification
+            setTimeout(() => {
+                landingPage.remove(); // Supprimer la landing page
+                authPage.style.display = 'flex'; // Afficher l'auth page
+            }, 3000);
         });
     </script>
 </div> <!-- End of appPage -->
