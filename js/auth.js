@@ -316,10 +316,24 @@ const authManager = {
     }
 };
 
-// Déconnexion automatique lors de la fermeture de l'onglet/fenêtre
+// Déconnexion automatique lors de la fermeture de l'onglet/fenêtre (desktop et mobile)
+// beforeunload pour desktop
 window.addEventListener('beforeunload', () => {
     if (authManager.currentUser) {
-        // Utiliser signOut de manière synchrone avant la fermeture
+        auth.signOut();
+    }
+});
+
+// pagehide pour mobile (iOS Safari notamment)
+window.addEventListener('pagehide', () => {
+    if (authManager.currentUser) {
+        auth.signOut();
+    }
+});
+
+// visibilitychange comme backup
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden' && authManager.currentUser) {
         auth.signOut();
     }
 });
