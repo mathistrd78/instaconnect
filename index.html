@@ -699,36 +699,51 @@
     
     <!-- Landing page animation -->
     <script>
-        // Attendre que tous les scripts soient chargés
-        window.addEventListener('load', () => {
-            console.log('✅ All scripts loaded, authManager:', typeof authManager);
-            
-            // Vérifier si l'utilisateur est déjà connecté
-            firebase.auth().onAuthStateChanged((user) => {
-                const landingPage = document.getElementById('landingPage');
-                const authPage = document.getElementById('authPage');
-                
-                if (user) {
-                    // Utilisateur déjà connecté, masquer landing et auth page immédiatement
-                    console.log('👤 User already logged in, skipping landing page');
-                    if (landingPage) {
-                        landingPage.remove();
-                    }
-                    // L'authPage reste masquée car l'app est déjà affichée
-                } else {
-                    // Pas d'utilisateur connecté, afficher la landing page puis l'auth
-                    console.log('🔓 No user logged in, showing landing page');
-                    setTimeout(() => {
+        // Vérifier IMMÉDIATEMENT si l'utilisateur est connecté pour éviter le flash
+        (function() {
+            const checkAuthState = () => {
+                firebase.auth().onAuthStateChanged((user) => {
+                    const landingPage = document.getElementById('landingPage');
+                    const authPage = document.getElementById('authPage');
+                    const appPage = document.getElementById('appPage');
+                    
+                    if (user) {
+                        // Utilisateur déjà connecté, masquer landing et auth page IMMÉDIATEMENT
+                        console.log('👤 User already logged in, skipping landing page');
                         if (landingPage) {
-                            landingPage.remove();
+                            landingPage.style.display = 'none';
                         }
                         if (authPage) {
-                            authPage.style.display = 'flex';
+                            authPage.style.display = 'none';
                         }
-                    }, 3000);
-                }
-            });
-        });
+                        if (appPage) {
+                            appPage.style.display = 'block';
+                        }
+                    } else {
+                        // Pas d'utilisateur connecté, afficher la landing page puis l'auth
+                        console.log('🔓 No user logged in, showing landing page');
+                        if (landingPage) {
+                            landingPage.style.display = 'flex';
+                        }
+                        setTimeout(() => {
+                            if (landingPage) {
+                                landingPage.remove();
+                            }
+                            if (authPage) {
+                                authPage.style.display = 'flex';
+                            }
+                        }, 3000);
+                    }
+                });
+            };
+            
+            // Vérifier dès que Firebase est prêt
+            if (typeof firebase !== 'undefined' && firebase.auth) {
+                checkAuthState();
+            } else {
+                window.addEventListener('load', checkAuthState);
+            }
+        })();
     </script>
 </div> <!-- End of appPage -->
 </body>
