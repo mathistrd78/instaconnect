@@ -342,6 +342,8 @@ body.hide-header .container {
     font-weight: 500;
     cursor: pointer;
     transition: opacity 0.2s ease;
+    text-decoration: none;
+    display: block;
 }
 
 .contact-instagram:active {
@@ -839,6 +841,9 @@ body.hide-header .container {
     font-weight: 600;
     cursor: pointer;
     white-space: nowrap;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
 }
 
 .btn-unfollow:disabled {
