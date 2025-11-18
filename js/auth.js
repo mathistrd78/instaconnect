@@ -133,6 +133,9 @@ const authManager = {
 
             // Nettoyer le localStorage de l'activité
             localStorage.removeItem('lastActivity');
+            
+            // Marquer qu'on vient de se déconnecter manuellement (pour éviter la landing page)
+            localStorage.setItem('justLoggedOut', 'true');
 
             await auth.signOut();
             console.log('✅ Logout successful');
@@ -338,16 +341,3 @@ const authManager = {
         return messages[code] || 'Une erreur est survenue';
     }
 };
-
-// Déconnexion automatique uniquement lors de la fermeture définitive de l'onglet (desktop)
-// Sur mobile, l'app reste connectée sauf si 10 minutes d'inactivité
-window.addEventListener('beforeunload', () => {
-    if (authManager.currentUser) {
-        // Sur desktop, déconnecter à la fermeture de l'onglet
-        // Sur mobile, cet événement ne se déclenche généralement pas, ce qui est voulu
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-        if (!isMobile) {
-            auth.signOut();
-        }
-    }
-});
