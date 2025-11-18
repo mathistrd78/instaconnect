@@ -771,6 +771,11 @@ body.hide-header .container {
     z-index: 1;
 }
 
+/* Sur la page unfollowers, pas de header donc top: 0 */
+#unfollowersSection .letter-header {
+    top: 0;
+}
+
 .unfollower-item {
     display: flex;
     justify-content: space-between;
@@ -1526,7 +1531,7 @@ body.dark-mode .modal-header-unfollowers h3 {
 }
 
 body.dark-mode .modal-close-btn {
-    background: #3a3a3a;
+    background: #4a4a4a;
     color: #ffffff;
 }
 
