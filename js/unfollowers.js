@@ -600,16 +600,17 @@ const unfollowers = {
                 return `
                     <div class="unfollower-item ${isMarked ? 'unfollowed' : ''}" id="user-${username.replace(/[^a-zA-Z0-9]/g, '_')}">
                         <div class="unfollower-info">
-                            <div class="unfollower-username">@${username}</div>
+                            <a href="https://instagram.com/${username}" target="_blank" rel="noopener noreferrer" class="unfollower-username-link">@${username}</a>
                             ${dateStr}
                         </div>
                         <div class="unfollower-actions">
                             ${!isMarked ? `
-                                <a href="https://instagram.com/${username}" target="_blank" rel="noopener noreferrer" class="btn-unfollow">
-                                    🔗 Profil
-                                </a>
-                                <button class="btn-mark" onclick="unfollowers.markAsUnfollowed('${username}')" title="Marquer comme unfollowed">✓</button>
-                                <button class="btn-normal" onclick="unfollowers.markAsNormal('${username}')" title="C'est normal">⭐</button>
+                                <button class="btn-mark-unfollow" onclick="unfollowers.markAsUnfollowed('${username}')" title="Marquer comme unfollowed">
+                                    Marquer comme unfollowed
+                                </button>
+                                <button class="btn-mark-normal" onclick="unfollowers.markAsNormal('${username}')" title="C'est normal">
+                                    Marquer comme normal
+                                </button>
                             ` : `
                                 <button class="btn-unfollow" disabled>✓ Fait</button>
                             `}
@@ -728,34 +729,34 @@ const unfollowers = {
         overlay.id = 'normalUnfollowersModal';
         overlay.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px;';
         overlay.innerHTML = `
-            <div style="background: white; border-radius: 16px; max-width: 600px; width: 100%; max-height: 80vh; overflow: hidden; display: flex; flex-direction: column;">
-                <div style="padding: 20px; border-bottom: 1px solid #e9ecef;">
+            <div class="modal-content-unfollowers" style="background: white; border-radius: 16px; max-width: 600px; width: 100%; max-height: 80vh; overflow: hidden; display: flex; flex-direction: column;">
+                <div class="modal-header-unfollowers" style="padding: 20px; border-bottom: 1px solid #e9ecef;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                        <h3 style="margin: 0; font-size: 18px;">⭐ Unfollowers normaux (${this.data.normalUnfollowers.size})</h3>
-                        <button onclick="document.getElementById('normalUnfollowersModal').remove()" style="background: #f8f9fa; border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 20px;">✕</button>
+                        <h3 style="margin: 0; font-size: 18px;">Unfollowers normaux (${this.data.normalUnfollowers.size})</h3>
+                        <button onclick="document.getElementById('normalUnfollowersModal').remove()" class="modal-close-btn" style="background: #f8f9fa; border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 20px;">✕</button>
                     </div>
-                    <input type="text" id="searchNormal" placeholder="🔍 Rechercher..." 
+                    <input type="text" id="searchNormal" placeholder="🔍 Rechercher..." class="modal-search-input"
                            style="width: 100%; padding: 10px; border: 1px solid #e9ecef; border-radius: 8px; font-size: 14px; box-sizing: border-box; margin-bottom: 12px;"
                            oninput="unfollowers.filterNormalBySearch(this.value)">
-                    <div style="display: flex; gap: 8px; overflow-x: auto; white-space: nowrap; padding-bottom: 8px; -webkit-overflow-scrolling: touch;">
-                        <button onclick="unfollowers.filterNormalByCategory('all')" id="filterAll" style="background: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; flex-shrink: 0;">
+                    <div class="modal-filters" style="display: flex; gap: 8px; overflow-x: auto; white-space: nowrap; padding-bottom: 8px; -webkit-overflow-scrolling: touch;">
+                        <button onclick="unfollowers.filterNormalByCategory('all')" id="filterAll" class="modal-filter-btn" style="background: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; flex-shrink: 0;">
                             Tous
                         </button>
-                        <button onclick="unfollowers.filterNormalByCategory('disabled')" id="filterDisabled" style="background: #f8f9fa; color: #495057; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; flex-shrink: 0;">
+                        <button onclick="unfollowers.filterNormalByCategory('disabled')" id="filterDisabled" class="modal-filter-btn" style="background: #f8f9fa; color: #495057; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; flex-shrink: 0;">
                             🚫 Désactivés
                         </button>
-                        <button onclick="unfollowers.filterNormalByCategory('celebrity')" id="filterCelebrity" style="background: #f8f9fa; color: #495057; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; flex-shrink: 0;">
+                        <button onclick="unfollowers.filterNormalByCategory('celebrity')" id="filterCelebrity" class="modal-filter-btn" style="background: #f8f9fa; color: #495057; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; flex-shrink: 0;">
                             ⭐ Personnalités
                         </button>
-                        <button onclick="unfollowers.filterNormalByCategory('business')" id="filterBusiness" style="background: #f8f9fa; color: #495057; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; flex-shrink: 0;">
+                        <button onclick="unfollowers.filterNormalByCategory('business')" id="filterBusiness" class="modal-filter-btn" style="background: #f8f9fa; color: #495057; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; flex-shrink: 0;">
                             💼 Marques/Pro
                         </button>
-                        <button onclick="unfollowers.filterNormalByCategory('uncategorized')" id="filterUncategorized" style="background: #f8f9fa; color: #495057; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; flex-shrink: 0;">
+                        <button onclick="unfollowers.filterNormalByCategory('uncategorized')" id="filterUncategorized" class="modal-filter-btn" style="background: #f8f9fa; color: #495057; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; flex-shrink: 0;">
                             Sans catégorie
                         </button>
                     </div>
                 </div>
-                <div id="normalUnfollowersList" style="padding: 16px; overflow-y: auto; flex: 1;">
+                <div id="normalUnfollowersList" class="modal-list-content" style="padding: 16px; overflow-y: auto; flex: 1;">
                     ${this.renderNormalList(list, 'all', '')}
                 </div>
             </div>
@@ -912,17 +913,17 @@ const unfollowers = {
         overlay.id = 'doNotFollowModal';
         overlay.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px;';
         overlay.innerHTML = `
-            <div style="background: white; border-radius: 16px; max-width: 500px; width: 100%; max-height: 80vh; overflow: hidden; display: flex; flex-direction: column;">
-                <div style="padding: 20px; border-bottom: 1px solid #e9ecef;">
+            <div class="modal-content-unfollowers" style="background: white; border-radius: 16px; max-width: 500px; width: 100%; max-height: 80vh; overflow: hidden; display: flex; flex-direction: column;">
+                <div class="modal-header-unfollowers" style="padding: 20px; border-bottom: 1px solid #e9ecef;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                        <h3 style="margin: 0; font-size: 18px;">🚫 À ne plus suivre (${this.data.doNotFollowList.size})</h3>
-                        <button onclick="document.getElementById('doNotFollowModal').remove()" style="background: #f8f9fa; border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 20px;">✕</button>
+                        <h3 style="margin: 0; font-size: 18px;">Utilisateurs à ne plus suivre (${this.data.doNotFollowList.size})</h3>
+                        <button onclick="document.getElementById('doNotFollowModal').remove()" class="modal-close-btn" style="background: #f8f9fa; border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 20px;">✕</button>
                     </div>
-                    <input type="text" id="searchDoNotFollow" placeholder="🔍 Rechercher..." 
+                    <input type="text" id="searchDoNotFollow" placeholder="🔍 Rechercher..." class="modal-search-input"
                            style="width: 100%; padding: 10px; border: 1px solid #e9ecef; border-radius: 8px; font-size: 14px; box-sizing: border-box;"
                            oninput="unfollowers.filterDoNotFollowList(this.value)">
                 </div>
-                <div id="doNotFollowList" style="padding: 16px; overflow-y: auto; flex: 1;">
+                <div id="doNotFollowList" class="modal-list-content" style="padding: 16px; overflow-y: auto; flex: 1;">
                     ${this.renderDoNotFollowList(list, '')}
                 </div>
             </div>
