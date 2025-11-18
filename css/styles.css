@@ -1531,8 +1531,8 @@ body.dark-mode .modal-header-unfollowers h3 {
 }
 
 body.dark-mode .modal-close-btn {
-    background: #4a4a4a;
-    color: #ffffff;
+    background: #ffffff;
+    color: #212529;
 }
 
 body.dark-mode .modal-search-input {
