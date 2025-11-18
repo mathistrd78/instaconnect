@@ -706,6 +706,7 @@
                     const landingPage = document.getElementById('landingPage');
                     const authPage = document.getElementById('authPage');
                     const appPage = document.getElementById('appPage');
+                    const justLoggedOut = localStorage.getItem('justLoggedOut') === 'true';
                     
                     if (user) {
                         // Utilisateur déjà connecté, masquer landing et auth page IMMÉDIATEMENT
@@ -720,19 +721,32 @@
                             appPage.style.display = 'block';
                         }
                     } else {
-                        // Pas d'utilisateur connecté, afficher la landing page puis l'auth
-                        console.log('🔓 No user logged in, showing landing page');
-                        if (landingPage) {
-                            landingPage.style.display = 'flex';
-                        }
-                        setTimeout(() => {
+                        // Pas d'utilisateur connecté
+                        if (justLoggedOut) {
+                            // Déconnexion manuelle : pas de landing page, juste auth
+                            console.log('🔓 Manual logout, showing auth page directly');
+                            localStorage.removeItem('justLoggedOut');
                             if (landingPage) {
-                                landingPage.remove();
+                                landingPage.style.display = 'none';
                             }
                             if (authPage) {
                                 authPage.style.display = 'flex';
                             }
-                        }, 3000);
+                        } else {
+                            // Fermeture de l'app : afficher la landing page puis l'auth
+                            console.log('🔓 App closed, showing landing page');
+                            if (landingPage) {
+                                landingPage.style.display = 'flex';
+                            }
+                            setTimeout(() => {
+                                if (landingPage) {
+                                    landingPage.remove();
+                                }
+                                if (authPage) {
+                                    authPage.style.display = 'flex';
+                                }
+                            }, 3000);
+                        }
                     }
                 });
             };
