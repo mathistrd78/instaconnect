@@ -1,6 +1,8 @@
 // auth.js - Gestion de l'authentification
 const authManager = {
     currentUser: null,
+    inactivityTimer: null,
+    inactivityTimeout: 10 * 60 * 1000, // 10 minutes en millisecondes
 
     // Vérifier si un utilisateur est connecté
     checkAuth() {
@@ -11,6 +13,8 @@ const authManager = {
                     console.log('✅ User logged in:', user.email);
                     this.showApp();
                     this.loadUserData();
+                    this.startInactivityTimer();
+                    this.setupActivityListeners();
                     resolve(true);
                 } else {
                     console.log('❌ No user logged in');
@@ -18,6 +22,37 @@ const authManager = {
                     resolve(false);
                 }
             });
+        });
+    },
+
+    // Gérer le timer d'inactivité
+    startInactivityTimer() {
+        this.resetInactivityTimer();
+    },
+
+    resetInactivityTimer() {
+        // Effacer le timer existant
+        if (this.inactivityTimer) {
+            clearTimeout(this.inactivityTimer);
+        }
+
+        // Créer un nouveau timer
+        this.inactivityTimer = setTimeout(() => {
+            console.log('⏱️ Inactivity timeout - logging out');
+            this.logout();
+        }, this.inactivityTimeout);
+    },
+
+    setupActivityListeners() {
+        // Réinitialiser le timer à chaque activité utilisateur
+        const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+        
+        events.forEach(event => {
+            document.addEventListener(event, () => {
+                if (this.currentUser) {
+                    this.resetInactivityTimer();
+                }
+            }, true);
         });
     },
 
@@ -70,6 +105,12 @@ const authManager = {
     // Déconnexion
     async logout() {
         try {
+            // Effacer le timer d'inactivité
+            if (this.inactivityTimer) {
+                clearTimeout(this.inactivityTimer);
+                this.inactivityTimer = null;
+            }
+
             await auth.signOut();
             console.log('✅ Logout successful');
             this.showAuth();
@@ -274,3 +315,11 @@ const authManager = {
         return messages[code] || 'Une erreur est survenue';
     }
 };
+
+// Déconnexion automatique lors de la fermeture de l'onglet/fenêtre
+window.addEventListener('beforeunload', () => {
+    if (authManager.currentUser) {
+        // Utiliser signOut de manière synchrone avant la fermeture
+        auth.signOut();
+    }
+});
