@@ -1087,18 +1087,18 @@ body.hide-header .container {
 .nav-item-main {
     flex: 1.3;
     padding: 0px 4px 8px 4px;
-    margin-top: -20px;
+    margin-top: -25px;
     position: relative;
     z-index: 2;
 }
 
 .nav-item-main-bg {
     position: absolute;
-    top: -10px;
+    top: -15px;
     left: 50%;
     transform: translateX(-50%);
-    width: 70px;
-    height: 70px;
+    width: 80px;
+    height: 80px;
     background: radial-gradient(circle, #E1306C 0%, #C13584 100%);
     border-radius: 50%;
     box-shadow: 0 -2px 15px rgba(225, 48, 108, 0.3), 0 4px 15px rgba(225, 48, 108, 0.2);
