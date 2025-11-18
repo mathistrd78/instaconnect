@@ -605,11 +605,11 @@ const unfollowers = {
                         </div>
                         <div class="unfollower-actions">
                             ${!isMarked ? `
-                                <button class="btn-mark-normal" onclick="unfollowers.markAsNormal('${username}')" title="C'est normal">
-                                    ⭐ Marquer comme normal
+                                <button class="btn-emoji-normal" onclick="unfollowers.markAsNormal('${username}')" title="Marquer comme normal">
+                                    ⭐
                                 </button>
-                                <button class="btn-mark-unfollow" onclick="unfollowers.markAsUnfollowed('${username}')" title="Marquer comme unfollowed">
-                                    ❌ Marquer comme unfollowed
+                                <button class="btn-emoji-unfollow" onclick="unfollowers.markAsUnfollowed('${username}')" title="Marquer comme unfollowed">
+                                    ❌
                                 </button>
                             ` : `
                                 <button class="btn-unfollow" disabled>✓ Fait</button>
