@@ -34,7 +34,7 @@
     </div>
 
     <!-- Auth Page (Login/Signup) -->
-    <div id="authPage" class="auth-page" style="display: none;">
+    <div id="authPage" class="auth-page" style="display: none; visibility: hidden;">
         <div class="auth-container">
             <div class="auth-logo">📱 InstaConnect</div>
             <div class="auth-subtitle">Votre CRM Instagram</div>
@@ -716,7 +716,6 @@
                         }
                         if (authPage) {
                             authPage.style.display = 'none';
-                            authPage.style.visibility = 'visible';
                         }
                         if (appPage) {
                             appPage.style.display = 'block';
@@ -740,17 +739,15 @@
                             if (landingPage) {
                                 landingPage.style.display = 'flex';
                             }
-                            // Masquer complètement authPage pendant la landing (évite l'auto-complétion)
-                            if (authPage) {
-                                authPage.style.visibility = 'hidden';
-                            }
+                            // Garder authPage complètement invisible pendant la landing
                             setTimeout(() => {
                                 if (landingPage) {
                                     landingPage.remove();
                                 }
+                                // Activer authPage seulement maintenant (après la landing)
                                 if (authPage) {
-                                    authPage.style.display = 'flex';
                                     authPage.style.visibility = 'visible';
+                                    authPage.style.display = 'flex';
                                 }
                             }, 3000);
                         }
