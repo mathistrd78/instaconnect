@@ -680,18 +680,21 @@
                 dropdown.classList.remove('active');
             }
         });
-        
-        // Landing page animation
-        window.addEventListener('DOMContentLoaded', () => {
+    </script>
+    
+    <!-- Landing page animation -->
+    <script>
+        // Gérer la transition de la landing page
+        setTimeout(() => {
             const landingPage = document.getElementById('landingPage');
             const authPage = document.getElementById('authPage');
-            
-            // Après 3 secondes, afficher la page d'authentification
-            setTimeout(() => {
-                landingPage.remove(); // Supprimer la landing page
-                authPage.style.display = 'flex'; // Afficher l'auth page
-            }, 3000);
-        });
+            if (landingPage) {
+                landingPage.remove();
+            }
+            if (authPage) {
+                authPage.style.display = 'flex';
+            }
+        }, 3000);
     </script>
 </div> <!-- End of appPage -->
 </body>
