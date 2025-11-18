@@ -34,15 +34,15 @@
     </div>
 
     <!-- Auth Page (Login/Signup) -->
-    <div id="authPage" class="auth-page" style="display: none; visibility: hidden;">
+    <div id="authPage" class="auth-page" style="display: none;">
         <div class="auth-container">
             <div class="auth-logo">📱 InstaConnect</div>
             <div class="auth-subtitle">Votre CRM Instagram</div>
             
             <div id="loginForm" class="auth-form">
                 <h2>Connexion</h2>
-                <input type="email" id="loginEmail" placeholder="Email" class="auth-input" autocomplete="email">
-                <input type="password" id="loginPassword" placeholder="Mot de passe" class="auth-input" autocomplete="current-password">
+                <input type="email" id="loginEmail" placeholder="Email" class="auth-input" autocomplete="email" disabled>
+                <input type="password" id="loginPassword" placeholder="Mot de passe" class="auth-input" autocomplete="current-password" disabled>
                 <button onclick="handleLogin()" class="auth-btn auth-btn-primary">Se connecter</button>
                 <div class="auth-link" onclick="showSignup()">Pas de compte ? S'inscrire</div>
                 <div class="auth-link" onclick="showResetPassword()">Mot de passe oublié ?</div>
@@ -50,16 +50,16 @@
 
             <div id="signupForm" class="auth-form" style="display: none;">
                 <h2>Inscription</h2>
-                <input type="email" id="signupEmail" placeholder="Email" class="auth-input" autocomplete="email">
-                <input type="password" id="signupPassword" placeholder="Mot de passe (min. 6 caractères)" class="auth-input" autocomplete="new-password">
-                <input type="password" id="signupPasswordConfirm" placeholder="Confirmer le mot de passe" class="auth-input" autocomplete="new-password">
+                <input type="email" id="signupEmail" placeholder="Email" class="auth-input" autocomplete="email" disabled>
+                <input type="password" id="signupPassword" placeholder="Mot de passe (min. 6 caractères)" class="auth-input" autocomplete="new-password" disabled>
+                <input type="password" id="signupPasswordConfirm" placeholder="Confirmer le mot de passe" class="auth-input" autocomplete="new-password" disabled>
                 <button onclick="handleSignup()" class="auth-btn auth-btn-primary">S'inscrire</button>
                 <div class="auth-link" onclick="showLogin()">Déjà un compte ? Se connecter</div>
             </div>
 
             <div id="resetForm" class="auth-form" style="display: none;">
                 <h2>Réinitialiser</h2>
-                <input type="email" id="resetEmail" placeholder="Email" class="auth-input" autocomplete="email">
+                <input type="email" id="resetEmail" placeholder="Email" class="auth-input" autocomplete="email" disabled>
                 <button onclick="handleResetPassword()" class="auth-btn auth-btn-primary">Envoyer le lien</button>
                 <div class="auth-link" onclick="showLogin()">Retour à la connexion</div>
             </div>
@@ -699,6 +699,18 @@
     
     <!-- Landing page animation -->
     <script>
+        // Fonction pour activer/désactiver les inputs
+        function enableAuthInputs(enable) {
+            const inputs = document.querySelectorAll('#authPage input');
+            inputs.forEach(input => {
+                if (enable) {
+                    input.removeAttribute('disabled');
+                } else {
+                    input.setAttribute('disabled', 'disabled');
+                }
+            });
+        }
+        
         // Vérifier IMMÉDIATEMENT si l'utilisateur est connecté pour éviter le flash
         (function() {
             const checkAuthState = () => {
@@ -731,7 +743,7 @@
                             }
                             if (authPage) {
                                 authPage.style.display = 'flex';
-                                authPage.style.visibility = 'visible';
+                                enableAuthInputs(true);
                             }
                         } else {
                             // Fermeture de l'app : afficher la landing page puis l'auth
@@ -739,15 +751,14 @@
                             if (landingPage) {
                                 landingPage.style.display = 'flex';
                             }
-                            // Garder authPage complètement invisible pendant la landing
+                            // Activer authPage après la landing
                             setTimeout(() => {
                                 if (landingPage) {
                                     landingPage.remove();
                                 }
-                                // Activer authPage seulement maintenant (après la landing)
                                 if (authPage) {
-                                    authPage.style.visibility = 'visible';
                                     authPage.style.display = 'flex';
+                                    enableAuthInputs(true);
                                 }
                             }, 3000);
                         }
