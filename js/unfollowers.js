@@ -605,11 +605,11 @@ const unfollowers = {
                         </div>
                         <div class="unfollower-actions">
                             ${!isMarked ? `
-                                <button class="btn-mark-unfollow" onclick="unfollowers.markAsUnfollowed('${username}')" title="Marquer comme unfollowed">
-                                    Marquer comme unfollowed
-                                </button>
                                 <button class="btn-mark-normal" onclick="unfollowers.markAsNormal('${username}')" title="C'est normal">
-                                    Marquer comme normal
+                                    ⭐ Marquer comme normal
+                                </button>
+                                <button class="btn-mark-unfollow" onclick="unfollowers.markAsUnfollowed('${username}')" title="Marquer comme unfollowed">
+                                    ❌ Marquer comme unfollowed
                                 </button>
                             ` : `
                                 <button class="btn-unfollow" disabled>✓ Fait</button>
@@ -739,7 +739,7 @@ const unfollowers = {
                            style="width: 100%; padding: 10px; border: 1px solid #e9ecef; border-radius: 8px; font-size: 14px; box-sizing: border-box; margin-bottom: 12px;"
                            oninput="unfollowers.filterNormalBySearch(this.value)">
                     <div class="modal-filters" style="display: flex; gap: 8px; overflow-x: auto; white-space: nowrap; padding-bottom: 8px; -webkit-overflow-scrolling: touch;">
-                        <button onclick="unfollowers.filterNormalByCategory('all')" id="filterAll" class="modal-filter-btn" style="background: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; flex-shrink: 0;">
+                        <button onclick="unfollowers.filterNormalByCategory('all')" id="filterAll" class="modal-filter-btn" style="background: #E1306C; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; flex-shrink: 0;">
                             Tous
                         </button>
                         <button onclick="unfollowers.filterNormalByCategory('disabled')" id="filterDisabled" class="modal-filter-btn" style="background: #f8f9fa; color: #495057; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; flex-shrink: 0;">
@@ -829,7 +829,7 @@ const unfollowers = {
             const btn = document.getElementById(`filter${cat}`);
             if (btn) {
                 if (cat.toLowerCase() === category || (cat === 'All' && category === 'all')) {
-                    btn.style.background = '#007bff';
+                    btn.style.background = '#E1306C';
                     btn.style.color = 'white';
                 } else {
                     btn.style.background = '#f8f9fa';
@@ -857,7 +857,7 @@ const unfollowers = {
         
         buttons.forEach(btnId => {
             const btn = document.getElementById(btnId);
-            if (btn && btn.style.background === 'rgb(0, 123, 255)') {
+            if (btn && btn.style.background === 'rgb(225, 48, 108)') { // #E1306C en RGB
                 currentFilter = btnId.replace('filter', '').toLowerCase();
             }
         });
@@ -877,7 +877,7 @@ const unfollowers = {
         
         buttons.forEach(btnId => {
             const btn = document.getElementById(btnId);
-            if (btn && btn.style.background === 'rgb(0, 123, 255)') {
+            if (btn && btn.style.background === 'rgb(225, 48, 108)') { // #E1306C en RGB
                 currentFilter = btnId.replace('filter', '').toLowerCase();
             }
         });
