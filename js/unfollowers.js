@@ -795,7 +795,7 @@ const unfollowers = {
                 <div class="unfollower-item" style="padding: 12px;">
                     <div class="unfollower-info">
                         <div class="unfollower-username">
-                            <a href="https://instagram.com/${username}" target="_blank" rel="noopener noreferrer" style="color: #007bff; text-decoration: none;">@${username}</a>
+                            <a href="https://instagram.com/${username}" target="_blank" rel="noopener noreferrer" class="unfollower-username-link" style="color: #E1306C; text-decoration: none;">@${username}</a>
                         </div>
                     </div>
                     <div style="display: flex; gap: 6px; align-items: center;">
@@ -949,7 +949,7 @@ const unfollowers = {
             <div class="unfollower-item">
                 <div class="unfollower-info">
                     <div class="unfollower-username">
-                        <a href="https://instagram.com/${username}" target="_blank" rel="noopener noreferrer" style="color: #007bff; text-decoration: none;">@${username}</a>
+                        <a href="https://instagram.com/${username}" target="_blank" rel="noopener noreferrer" class="unfollower-username-link" style="color: #E1306C; text-decoration: none;">@${username}</a>
                     </div>
                 </div>
                 <button class="btn-mark" onclick="unfollowers.removeFromDoNotFollow('${username}')" style="background: #ff4757; color: white;">
