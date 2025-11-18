@@ -27,6 +27,23 @@ const authManager = {
 
     // Gérer le timer d'inactivité
     startInactivityTimer() {
+        // Récupérer la dernière activité depuis localStorage
+        const lastActivity = localStorage.getItem('lastActivity');
+        const now = Date.now();
+        
+        if (lastActivity) {
+            const timeSinceLastActivity = now - parseInt(lastActivity);
+            
+            // Si plus de 10 minutes d'inactivité, déconnecter
+            if (timeSinceLastActivity > this.inactivityTimeout) {
+                console.log('⏱️ Inactivity timeout detected - logging out');
+                this.logout();
+                return;
+            }
+        }
+        
+        // Mettre à jour la dernière activité
+        localStorage.setItem('lastActivity', now.toString());
         this.resetInactivityTimer();
     },
 
@@ -35,6 +52,9 @@ const authManager = {
         if (this.inactivityTimer) {
             clearTimeout(this.inactivityTimer);
         }
+
+        // Mettre à jour la dernière activité dans localStorage
+        localStorage.setItem('lastActivity', Date.now().toString());
 
         // Créer un nouveau timer
         this.inactivityTimer = setTimeout(() => {
@@ -110,6 +130,9 @@ const authManager = {
                 clearTimeout(this.inactivityTimer);
                 this.inactivityTimer = null;
             }
+
+            // Nettoyer le localStorage de l'activité
+            localStorage.removeItem('lastActivity');
 
             await auth.signOut();
             console.log('✅ Logout successful');
@@ -316,24 +339,15 @@ const authManager = {
     }
 };
 
-// Déconnexion automatique lors de la fermeture de l'onglet/fenêtre (desktop et mobile)
-// beforeunload pour desktop
+// Déconnexion automatique uniquement lors de la fermeture définitive de l'onglet (desktop)
+// Sur mobile, l'app reste connectée sauf si 10 minutes d'inactivité
 window.addEventListener('beforeunload', () => {
     if (authManager.currentUser) {
-        auth.signOut();
-    }
-});
-
-// pagehide pour mobile (iOS Safari notamment)
-window.addEventListener('pagehide', () => {
-    if (authManager.currentUser) {
-        auth.signOut();
-    }
-});
-
-// visibilitychange comme backup
-document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden' && authManager.currentUser) {
-        auth.signOut();
+        // Sur desktop, déconnecter à la fermeture de l'onglet
+        // Sur mobile, cet événement ne se déclenche généralement pas, ce qui est voulu
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        if (!isMobile) {
+            auth.signOut();
+        }
     }
 });
