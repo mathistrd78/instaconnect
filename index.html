@@ -601,9 +601,13 @@
         }
         
         async function handleLogin() {
+            console.log('🔵 handleLogin called');
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
             const message = document.getElementById('authMessage');
+            
+            console.log('📧 Email:', email);
+            console.log('🔑 Password:', password ? 'présent' : 'vide');
             
             if (!email || !password) {
                 message.textContent = '⚠️ Veuillez remplir tous les champs';
@@ -611,7 +615,18 @@
                 return;
             }
             
+            // Vérifier que authManager existe
+            if (typeof authManager === 'undefined') {
+                console.error('❌ authManager is not defined!');
+                message.textContent = '❌ Erreur: authManager non chargé';
+                message.className = 'auth-message auth-message-error';
+                return;
+            }
+            
+            console.log('🔄 Calling authManager.login...');
             const result = await authManager.login(email, password);
+            console.log('📦 Result:', result);
+            
             if (!result.success) {
                 message.textContent = '❌ ' + result.error;
                 message.className = 'auth-message auth-message-error';
@@ -684,17 +699,22 @@
     
     <!-- Landing page animation -->
     <script>
-        // Gérer la transition de la landing page
-        setTimeout(() => {
-            const landingPage = document.getElementById('landingPage');
-            const authPage = document.getElementById('authPage');
-            if (landingPage) {
-                landingPage.remove();
-            }
-            if (authPage) {
-                authPage.style.display = 'flex';
-            }
-        }, 3000);
+        // Attendre que tous les scripts soient chargés
+        window.addEventListener('load', () => {
+            console.log('✅ All scripts loaded, authManager:', typeof authManager);
+            
+            // Gérer la transition de la landing page
+            setTimeout(() => {
+                const landingPage = document.getElementById('landingPage');
+                const authPage = document.getElementById('authPage');
+                if (landingPage) {
+                    landingPage.remove();
+                }
+                if (authPage) {
+                    authPage.style.display = 'flex';
+                }
+            }, 3000);
+        });
     </script>
 </div> <!-- End of appPage -->
 </body>
