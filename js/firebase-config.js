@@ -22,6 +22,16 @@ function initFirebase() {
     try {
         firebaseApp = firebase.initializeApp(firebaseConfig);
         auth = firebase.auth();
+        
+        // Configurer la persistence de session : l'utilisateur sera déconnecté à la fermeture de l'app
+        auth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
+            .then(() => {
+                console.log('✅ Firebase persistence set to SESSION (logout on close)');
+            })
+            .catch((error) => {
+                console.error('❌ Error setting persistence:', error);
+            });
+        
         db = firebase.firestore();
         console.log('✅ Firebase initialized');
         return true;
