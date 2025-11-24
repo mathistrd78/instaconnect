@@ -2621,3 +2621,165 @@ body.dark-mode .auth-message-success {
     background: #1a3d1a;
     color: #51cf66;
 }
+/* ========================================
+   CUSTOM FIELDS - Styles additionnels
+   ======================================== */
+
+/* Modal de gestion des champs */
+.field-item {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: move;
+    transition: all 0.2s;
+}
+
+.field-item:hover {
+    border-color: #E1306C;
+    box-shadow: 0 2px 8px rgba(225, 48, 108, 0.1);
+}
+
+.field-item.field-default {
+    background: #f8f9fa;
+}
+
+.field-item.field-custom {
+    background: white;
+}
+
+.field-item-handle {
+    font-size: 18px;
+    color: #868e96;
+    cursor: grab;
+}
+
+.field-item-handle:active {
+    cursor: grabbing;
+}
+
+.field-item-info {
+    flex: 1;
+}
+
+.field-item-label {
+    font-weight: 600;
+    font-size: 14px;
+    color: #212529;
+    margin-bottom: 2px;
+}
+
+.field-item-meta {
+    font-size: 12px;
+    color: #868e96;
+}
+
+.field-item-delete {
+    background: transparent;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.field-item-delete:hover {
+    background: #fff5f5;
+    transform: scale(1.1);
+}
+
+.field-item-delete:active {
+    transform: scale(0.95);
+}
+
+/* Style pour le select de type de champ */
+#newFieldType {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 15px;
+    background: white;
+    cursor: pointer;
+}
+
+#newFieldType:focus {
+    outline: none;
+    border-color: #E1306C;
+}
+
+/* Style pour textarea dans la modal */
+#newFieldOptions {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    resize: vertical;
+}
+
+#newFieldOptions:focus {
+    outline: none;
+    border-color: #E1306C;
+}
+
+/* Animation drag */
+.field-item.dragging {
+    opacity: 0.5;
+    transform: scale(0.98);
+}
+
+.field-item.drag-over {
+    border-top: 3px solid #E1306C !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .field-item {
+        padding: 10px;
+    }
+    
+    .field-item-label {
+        font-size: 13px;
+    }
+    
+    .field-item-meta {
+        font-size: 11px;
+    }
+}
+
+/* Dark mode support */
+.dark-mode .field-item {
+    background: #2c3e50;
+    border-color: #34495e;
+}
+
+.dark-mode .field-item.field-default {
+    background: #34495e;
+}
+
+.dark-mode .field-item:hover {
+    border-color: #E1306C;
+    box-shadow: 0 2px 8px rgba(225, 48, 108, 0.2);
+}
+
+.dark-mode .field-item-label {
+    color: #ecf0f1;
+}
+
+.dark-mode .field-item-meta {
+    color: #95a5a6;
+}
+
+.dark-mode #newFieldType,
+.dark-mode #newFieldOptions {
+    background: #34495e;
+    border-color: #2c3e50;
+    color: #ecf0f1;
+}
