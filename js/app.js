@@ -199,13 +199,17 @@ const app = {
             
             // Attendre un peu que les données Firebase soient chargées
             setTimeout(() => {
+                console.log('📋 Rendering dynamic form with fields:', app.getAllFields().length);
+                console.log('   - Default fields:', app.defaultFields.length);
+                console.log('   - Custom fields:', app.customFields.length);
+                
                 // Générer le formulaire dynamiquement avec les champs personnalisés
                 contacts.renderDynamicForm();
                 
                 contacts.render();
                 stats.render();
                 this.switchSection(savedSection);
-            }, 500);
+            }, 1000); // Augmenté à 1 seconde pour laisser le temps à Firebase
         }
     },
 
