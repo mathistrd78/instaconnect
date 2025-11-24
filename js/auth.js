@@ -100,8 +100,9 @@ const authManager = {
             const userCredential = await auth.createUserWithEmailAndPassword(email, password);
             console.log('✅ Signup successful:', userCredential.user.email);
             
-            // Migrer les données localStorage vers Firebase
-            await this.migrateLocalData();
+            // NE PLUS migrer automatiquement - tous les nouveaux users partent de zéro
+            // (La migration est maintenant désactivée car tout est sur Firebase)
+            console.log('✨ New user created - starting fresh with empty data');
             
             return { success: true };
         } catch (error) {
@@ -137,7 +138,15 @@ const authManager = {
             // Marquer qu'on vient de se déconnecter manuellement (pour éviter la landing page)
             localStorage.setItem('justLoggedOut', 'true');
             
-            // NETTOYAGE COMPLET DES DONNÉES
+            // VIDER LE LOCALSTORAGE pour éviter la contamination entre comptes
+            console.log('🧹 Cleaning localStorage...');
+            localStorage.removeItem('instaConnectContacts');
+            localStorage.removeItem('instaConnectCustomTags');
+            localStorage.removeItem('normalUnfollowers');
+            localStorage.removeItem('doNotFollowList');
+            console.log('✅ LocalStorage cleaned');
+            
+            // NETTOYAGE COMPLET DES DONNÉES EN MÉMOIRE
             console.log('🧹 Cleaning up user data...');
             
             // Vider les contacts
