@@ -500,3 +500,6 @@ const fields = {
         document.getElementById('manageFieldsModal').classList.remove('active');
     }
 };
+
+// Exposer fields globalement
+window.fields = fields;
