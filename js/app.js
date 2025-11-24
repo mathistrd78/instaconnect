@@ -206,6 +206,9 @@ const app = {
                 // Générer le formulaire dynamiquement avec les champs personnalisés
                 contacts.renderDynamicForm();
                 
+                // Générer les filtres dynamiquement
+                contacts.renderFilters();
+                
                 contacts.render();
                 stats.render();
                 this.switchSection(savedSection);
