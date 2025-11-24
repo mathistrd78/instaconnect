@@ -196,11 +196,12 @@ const tags = {
         const allFields = [...app.defaultFields, ...app.customFields];
         const field = allFields.find(f => f.id === type);
         
-        if (field && field.type === 'select' && field.tags) {
+        // Si le champ existe et a des tags définis (nouveau système), les retourner
+        if (field && field.type === 'select' && field.tags && field.tags.length > 0) {
             return field.tags;
         }
         
-        // ANCIEN SYSTÈME (rétrocompatibilité)
+        // ANCIEN SYSTÈME (rétrocompatibilité) - utilisé seulement si field.tags est vide
         const defaults = app.defaultTags[type] || [];
         const customs = app.customTags[type] || [];
         
@@ -301,11 +302,27 @@ const tags = {
         const newTag = {
             value: value,
             label: '🏷️ ' + value,
-            class: className
+            class: className,
+            color: color
         };
-        app.customTags[type].push(newTag);
+        
+        // NOUVEAU SYSTÈME : Ajouter dans field.tags
+        const allFields = [...app.defaultFields, ...app.customFields];
+        const field = allFields.find(f => f.id === type);
+        
+        if (field && field.type === 'select') {
+            if (!field.tags) field.tags = [];
+            field.tags.push(newTag);
+            console.log('✅ Tag added to field.tags');
+        }
+        
+        // ANCIEN SYSTÈME : Pour rétrocompatibilité
+        if (app.customTags[type]) {
+            app.customTags[type].push(newTag);
+        }
         
         const style = document.createElement('style');
+        style.id = 'style-' + className;
         style.textContent = `.${className} { background: ${color}; color: white; }`;
         document.head.appendChild(style);
         
@@ -443,49 +460,77 @@ const tags = {
             currentEdit: this.currentEdit 
         });
         
-        // Find existing custom tag
-        const existingIndex = app.customTags[fieldType].findIndex(t => t.value === value);
+        // NOUVEAU SYSTÈME : Mettre à jour dans field.tags
+        const allFields = [...app.defaultFields, ...app.customFields];
+        const field = allFields.find(f => f.id === fieldType);
+        
+        if (field && field.type === 'select') {
+            // Trouver le tag dans field.tags
+            const fieldTagIndex = field.tags.findIndex(t => t.value === value);
+            
+            if (fieldTagIndex >= 0) {
+                // Tag existe déjà, le mettre à jour
+                console.log('✏️ Updating tag in field.tags');
+                field.tags[fieldTagIndex].label = tag.label;
+                field.tags[fieldTagIndex].color = newColor;
+            } else {
+                // Nouveau tag, l'ajouter
+                console.log('➕ Adding new tag to field.tags');
+                const className = 'tag-custom-' + Date.now();
+                field.tags.push({
+                    value: value,
+                    label: tag.label,
+                    class: className,
+                    color: newColor
+                });
+                
+                // Créer le style
+                const styleElement = document.createElement('style');
+                styleElement.id = 'style-' + className;
+                document.head.appendChild(styleElement);
+                styleElement.textContent = `.${className} { background: ${newColor}; color: white; }`;
+            }
+        }
+        
+        // ANCIEN SYSTÈME : Pour rétrocompatibilité (au cas où)
+        const existingIndex = app.customTags[fieldType] ? app.customTags[fieldType].findIndex(t => t.value === value) : -1;
         
         let className;
         
         if (existingIndex >= 0) {
             // Custom tag already exists → update it (KEEP THE SAME CLASS!)
             console.log('✏️ Updating existing custom tag at index:', existingIndex);
-            console.log('   Before:', JSON.stringify(app.customTags[fieldType][existingIndex]));
             
             className = app.customTags[fieldType][existingIndex].class;
             app.customTags[fieldType][existingIndex].label = tag.label;
-            app.customTags[fieldType][existingIndex].color = newColor; // 🔑 Save color!
-            
-            console.log('   After:', JSON.stringify(app.customTags[fieldType][existingIndex]));
-            console.log('   📝 Color saved:', newColor);
-        } else {
+            app.customTags[fieldType][existingIndex].color = newColor;
+        } else if (app.customTags[fieldType]) {
             // New custom tag (first time editing)
-            console.log('➕ Creating new custom tag');
+            console.log('➕ Creating new custom tag in old system');
             
             className = 'tag-custom-' + Date.now();
             const newTag = {
                 value: value,
                 label: tag.label,
                 class: className,
-                color: newColor  // 🔑 Save color!
+                color: newColor
             };
             
             app.customTags[fieldType].push(newTag);
-            console.log('   🆕 New tag:', JSON.stringify(newTag));
         }
         
-        // Update or create style for this class
-        const styleId = 'style-' + className;
-        let styleElement = document.getElementById(styleId);
-        if (!styleElement) {
-            styleElement = document.createElement('style');
-            styleElement.id = styleId;
-            document.head.appendChild(styleElement);
+        // Update or create style for this class (if exists)
+        if (className) {
+            const styleId = 'style-' + className;
+            let styleElement = document.getElementById(styleId);
+            if (!styleElement) {
+                styleElement = document.createElement('style');
+                styleElement.id = styleId;
+                document.head.appendChild(styleElement);
+            }
+            styleElement.textContent = `.${className} { background: ${newColor}; color: white; }`;
         }
-        styleElement.textContent = `.${className} { background: ${newColor}; color: white; }`;
         
-        console.log('💾 Full customTags object:', JSON.stringify(app.customTags[fieldType]));
         console.log('📤 Calling save to Firebase...');
         
         app.dataStore.save();
