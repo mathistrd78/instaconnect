@@ -280,7 +280,16 @@ const authManager = {
                 if (data.unfollowersData) {
                     unfollowers.data.following = data.unfollowersData.following || [];
                     unfollowers.data.followers = data.unfollowersData.followers || [];
-                    unfollowers.data.unfollowers = data.unfollowersData.unfollowers || [];
+                    
+                    // ⚠️ IMPORTANT: Refiltrer les unfollowers pour exclure ceux marqués comme normaux ou à ne plus suivre
+                    const rawUnfollowers = data.unfollowersData.unfollowers || [];
+                    unfollowers.data.unfollowers = rawUnfollowers.filter(item => {
+                        const username = typeof item === 'string' ? item : item.username;
+                        return !unfollowers.data.normalUnfollowers.has(username) && 
+                               !unfollowers.data.doNotFollowList.has(username);
+                    });
+                    
+                    console.log(`🔍 Filtered unfollowers: ${rawUnfollowers.length} -> ${unfollowers.data.unfollowers.length}`);
                     
                     // Update display
                     document.getElementById('followersCount').textContent = unfollowers.data.followers.length;
