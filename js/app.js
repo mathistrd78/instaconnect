@@ -1,6 +1,84 @@
 // app.js - Coordinateur principal
 const app = {
-    // Configuration des tags par défaut
+    // Configuration des champs par défaut (non supprimables)
+    defaultFields: [
+        { 
+            id: 'relationType', 
+            type: 'select', 
+            label: 'Type de relation', 
+            required: true,
+            order: 0,
+            tags: [] // Tags définis par l'utilisateur
+        },
+        { 
+            id: 'meetingPlace', 
+            type: 'select', 
+            label: 'Lieu de rencontre', 
+            required: true,
+            order: 1,
+            tags: []
+        },
+        { 
+            id: 'discussionStatus', 
+            type: 'select', 
+            label: 'Statut de discussion', 
+            required: true,
+            order: 2,
+            tags: []
+        },
+        { 
+            id: 'gender', 
+            type: 'radio', 
+            label: 'Sexe', 
+            required: true,
+            order: 3,
+            options: ['Homme', 'Femme']
+        },
+        { 
+            id: 'profession', 
+            type: 'text', 
+            label: 'Etudes/Profession', 
+            required: false,
+            order: 4
+        },
+        { 
+            id: 'location', 
+            type: 'text', 
+            label: 'Lieu d\'habitat', 
+            required: false,
+            order: 5
+        },
+        { 
+            id: 'birthYear', 
+            type: 'number', 
+            label: 'Année de naissance', 
+            required: false,
+            order: 6,
+            placeholder: 'Ex: 1995'
+        },
+        { 
+            id: 'interests', 
+            type: 'textarea', 
+            label: 'Centres d\'intérêt', 
+            required: false,
+            order: 7,
+            placeholder: 'Sports, musique, voyages...'
+        },
+        { 
+            id: 'notes', 
+            type: 'textarea', 
+            label: 'Notes personnelles', 
+            required: false,
+            order: 8,
+            placeholder: 'Informations supplémentaires...'
+        }
+    ],
+
+    // Champs personnalisés créés par l'utilisateur
+    customFields: [],
+
+    // ANCIEN SYSTÈME - Conservé pour compatibilité avec les anciens users
+    // Configuration des tags par défaut (sera migré vers defaultFields[].tags)
     defaultTags: {
         relationType: [
             { value: 'Ami', label: '👥 Ami', class: 'tag-ami' },
@@ -64,11 +142,14 @@ const app = {
                         batch.set(contactsRef.doc(contact.id), contact);
                     });
 
-                    // Sauvegarder les tags personnalisés
+                    // Sauvegarder les tags personnalisés ET les champs personnalisés
                     console.log('📤 Saving customTags to Firebase:', JSON.stringify(app.customTags));
+                    console.log('📤 Saving customFields to Firebase:', JSON.stringify(app.customFields));
                     const userDoc = db.collection('users').doc(userId);
                     batch.set(userDoc, {
-                        customTags: app.customTags
+                        customTags: app.customTags,
+                        customFields: app.customFields,
+                        defaultFields: app.defaultFields // Sauvegarder aussi les champs par défaut avec leurs tags
                     }, { merge: true });
 
                     await batch.commit();
@@ -161,12 +242,101 @@ const app = {
         });
     },
 
-    switchSection(section) {
-        // Reset scroll to top when switching sections
-        // Le body est le conteneur qui scroll, pas window
-        document.body.scrollTop = 0;
-        document.documentElement.scrollTop = 0; // Pour compatibilité
+    // ==========================================
+    // GESTION DES CHAMPS PERSONNALISÉS
+    // ==========================================
+    
+    // Récupérer tous les champs (défaut + custom) triés par ordre
+    getAllFields() {
+        return [...this.defaultFields, ...this.customFields].sort((a, b) => a.order - b.order);
+    },
+
+    // Ajouter un nouveau champ personnalisé
+    addCustomField(fieldData) {
+        const newField = {
+            id: 'custom_' + Date.now(),
+            type: fieldData.type,
+            label: fieldData.label,
+            required: false,
+            order: this.getAllFields().length,
+            placeholder: fieldData.placeholder || '',
+            options: fieldData.options || [], // Pour select/radio
+            tags: fieldData.type === 'select' ? [] : undefined // Pour les champs avec tags
+        };
         
+        this.customFields.push(newField);
+        this.dataStore.save();
+        return newField;
+    },
+
+    // Supprimer un champ personnalisé
+    deleteCustomField(fieldId) {
+        const index = this.customFields.findIndex(f => f.id === fieldId);
+        if (index === -1) return false;
+        
+        // Supprimer le champ
+        this.customFields.splice(index, 1);
+        
+        // Supprimer les valeurs de ce champ dans tous les contacts
+        this.dataStore.contacts.forEach(contact => {
+            if (contact[fieldId]) {
+                delete contact[fieldId];
+            }
+        });
+        
+        this.dataStore.save();
+        return true;
+    },
+
+    // Réordonner les champs
+    reorderFields(fieldId, newOrder) {
+        const allFields = this.getAllFields();
+        const field = allFields.find(f => f.id === fieldId);
+        if (!field) return false;
+        
+        field.order = newOrder;
+        
+        // Réajuster les ordres des autres champs
+        allFields.forEach((f, index) => {
+            if (f.id !== fieldId) {
+                f.order = index >= newOrder ? index + 1 : index;
+            }
+        });
+        
+        this.dataStore.save();
+        return true;
+    },
+
+    // Migrer les anciens tags vers le nouveau système
+    migrateToNewFieldSystem() {
+        console.log('🔄 Migration vers le nouveau système de champs...');
+        
+        // Pour les utilisateurs existants, copier leurs tags dans les champs
+        if (this.customTags.relationType && this.customTags.relationType.length > 0) {
+            const relationField = this.defaultFields.find(f => f.id === 'relationType');
+            if (relationField) {
+                relationField.tags = [...this.defaultTags.relationType, ...this.customTags.relationType];
+            }
+        }
+        
+        if (this.customTags.meetingPlace && this.customTags.meetingPlace.length > 0) {
+            const meetingField = this.defaultFields.find(f => f.id === 'meetingPlace');
+            if (meetingField) {
+                meetingField.tags = [...this.defaultTags.meetingPlace, ...this.customTags.meetingPlace];
+            }
+        }
+        
+        if (this.customTags.discussionStatus && this.customTags.discussionStatus.length > 0) {
+            const statusField = this.defaultFields.find(f => f.id === 'discussionStatus');
+            if (statusField) {
+                statusField.tags = [...this.defaultTags.discussionStatus, ...this.customTags.discussionStatus];
+            }
+        }
+        
+        console.log('✅ Migration terminée');
+    },
+
+    switchSection(section) {
         // Save current section
         this.currentSection = section;
         localStorage.setItem('currentSection', section);
