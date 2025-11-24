@@ -154,8 +154,68 @@ const fields = {
         // Fermer la modal
         this.closeAddFieldModal();
         
+        // Sauvegarder l'ID du contact en cours d'édition
+        const currentEditId = contacts.currentEditId;
+        
         // Re-render le formulaire de contact
         contacts.renderDynamicForm();
+        
+        // Si on était en train d'éditer un contact, recharger ses données
+        if (currentEditId) {
+            const contact = app.dataStore.contacts.find(c => c.id === currentEditId);
+            if (contact) {
+                console.log('🔄 Restoring contact edit context...');
+                
+                // Remplir tous les champs avec les données du contact
+                document.getElementById('firstName').value = contact.firstName || '';
+                document.getElementById('instagram').value = (contact.instagram || '').replace('@', '');
+                
+                // Remplir dynamiquement tous les autres champs
+                const allFields = app.getAllFields();
+                allFields.forEach(field => {
+                    const element = document.getElementById(field.id);
+                    if (!element) return;
+                    
+                    const value = contact[field.id];
+                    
+                    switch (field.type) {
+                        case 'select':
+                            const displayEl = document.getElementById(field.id + 'Display');
+                            const hiddenInput = document.getElementById(field.id);
+                            
+                            if (value) {
+                                hiddenInput.value = value;
+                                const tag = tags.findTag(field.id, value);
+                                if (tag) {
+                                    displayEl.textContent = tag.label;
+                                    displayEl.className = 'tag-selector-value';
+                                } else {
+                                    displayEl.textContent = 'Sélectionner...';
+                                    displayEl.className = 'tag-selector-placeholder';
+                                }
+                            }
+                            break;
+                            
+                        case 'radio':
+                            if (value) {
+                                const radio = document.querySelector(`input[name="${field.id}"][value="${value}"]`);
+                                if (radio) radio.checked = true;
+                            }
+                            break;
+                            
+                        case 'checkbox':
+                            element.checked = !!value;
+                            break;
+                            
+                        default:
+                            element.value = value || '';
+                    }
+                });
+                
+                // Maintenir le titre de la modale
+                document.getElementById('modalTitle').textContent = '✏️ Modifier le contact';
+            }
+        }
         
         alert(`✅ Champ "${label}" créé avec succès !`);
     },
