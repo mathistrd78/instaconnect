@@ -2804,3 +2804,22 @@ body.dark-mode .auth-message-success {
 .profil-btn-icon:active {
     transform: translateX(3px) scale(0.95);
 }
+
+/* Drag & Drop mobile-friendly */
+.field-item-dragging {
+    opacity: 0.9;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    transform: scale(1.05);
+    transition: none;
+}
+
+.field-item-placeholder {
+    border: 2px dashed #E1306C;
+    background: rgba(225, 48, 108, 0.05);
+}
+
+.field-item-handle {
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
