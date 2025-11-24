@@ -2839,10 +2839,23 @@ body.dark-mode .tag-search input::placeholder {
     color: #a0a0a0;
 }
 
+
+/* Dark mode - Tag dropdown close button (croix noire sur fond blanc) */
 body.dark-mode .tag-dropdown-close {
-    color: #ffffff;
+    background: #ffffff;
+    color: #000000;
 }
 
 body.dark-mode .tag-dropdown-close:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: #e9ecef;
+}
+
+/* Dark mode - Tag dropdown title (blanc pur) */
+body.dark-mode .tag-dropdown-title {
+    color: #ffffff;
+}
+
+/* Dark mode - Modal content (pour éviter le fond blanc) */
+body.dark-mode .modal-content {
+    background: #2d2d2d;
 }
