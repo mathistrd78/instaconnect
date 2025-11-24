@@ -2823,3 +2823,26 @@ body.dark-mode .auth-message-success {
     user-select: none;
     -webkit-user-select: none;
 }
+
+/* Dark mode - Tag search input */
+body.dark-mode .tag-search {
+    border-bottom-color: #4a4a4a;
+}
+
+body.dark-mode .tag-search input {
+    background: #3a3a3a;
+    border-color: #4a4a4a;
+    color: #ffffff;
+}
+
+body.dark-mode .tag-search input::placeholder {
+    color: #a0a0a0;
+}
+
+body.dark-mode .tag-dropdown-close {
+    color: #ffffff;
+}
+
+body.dark-mode .tag-dropdown-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
