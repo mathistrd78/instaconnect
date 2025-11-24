@@ -163,6 +163,13 @@ const authManager = {
                 normalCategories: {}
             };
             
+            // Réinitialiser les tags par défaut (pour éviter contamination)
+            app.defaultTags = {
+                relationType: [],
+                meetingPlace: [],
+                discussionStatus: []
+            };
+            
             // Réinitialiser les tags personnalisés
             app.customTags = {
                 relationType: [],
@@ -343,9 +350,27 @@ const authManager = {
                         }
                     });
                 } else {
-                    // Nouvel utilisateur OU ancien utilisateur : migrer les tags
-                    console.log('🔄 Migrating old tag system to new field system...');
-                    app.migrateToNewFieldSystem();
+                    // Pas de defaultFields dans Firebase
+                    // Si l'utilisateur a des customTags, c'est un ancien user → migrer
+                    // Sinon c'est un nouveau user → laisser vide
+                    const hasCustomTags = data.customTags && (
+                        (data.customTags.relationType && data.customTags.relationType.length > 0) ||
+                        (data.customTags.meetingPlace && data.customTags.meetingPlace.length > 0) ||
+                        (data.customTags.discussionStatus && data.customTags.discussionStatus.length > 0)
+                    );
+                    
+                    if (hasCustomTags) {
+                        console.log('🔄 Old user detected - migrating tags to new field system...');
+                        app.migrateToNewFieldSystem();
+                    } else {
+                        console.log('✨ New user detected - starting with empty tags');
+                        // S'assurer que les defaultFields ont bien des tags vides
+                        app.defaultFields.forEach(field => {
+                            if (field.type === 'select') {
+                                field.tags = [];
+                            }
+                        });
+                    }
                 }
                 
                 if (data.normalUnfollowers) {
