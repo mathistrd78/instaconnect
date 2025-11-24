@@ -190,11 +190,19 @@ const tags = {
     currentEdit: null,
     currentContext: null,
 
-    // Récupérer tous les tags pour un type donné
+    // Récupérer tous les tags pour un type donné (supporte l'ancien ET le nouveau système)
     getAllOptions(type) {
-        // Merge defaults and customs, with customs overriding defaults with same value
-        const defaults = app.defaultTags[type];
-        const customs = app.customTags[type];
+        // NOUVEAU SYSTÈME : Chercher dans defaultFields et customFields
+        const allFields = [...app.defaultFields, ...app.customFields];
+        const field = allFields.find(f => f.id === type);
+        
+        if (field && field.type === 'select' && field.tags) {
+            return field.tags;
+        }
+        
+        // ANCIEN SYSTÈME (rétrocompatibilité)
+        const defaults = app.defaultTags[type] || [];
+        const customs = app.customTags[type] || [];
         
         // Get values that have custom overrides
         const customValues = new Set(customs.map(t => t.value));
