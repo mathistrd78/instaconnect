@@ -2157,7 +2157,7 @@ body.dark-mode .empty-state-text {
 
 .emoji-picker {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 8px;
     max-height: 300px;
     overflow-y: auto;
