@@ -359,7 +359,16 @@ const authManager = {
             
             app.dataStore.contacts = [];
             contactsSnapshot.forEach(doc => {
-                app.dataStore.contacts.push(doc.data());
+                const contact = doc.data();
+                
+                // Migration : convertir les anciennes valeurs de gender
+                if (contact.gender === 'Homme') {
+                    contact.gender = '👨 Homme';
+                } else if (contact.gender === 'Femme') {
+                    contact.gender = '👩 Femme';
+                }
+                
+                app.dataStore.contacts.push(contact);
             });
             
             console.log('✅ Contacts loaded from Firebase:', app.dataStore.contacts.length);
