@@ -196,12 +196,18 @@ const tags = {
         const allFields = [...app.defaultFields, ...app.customFields];
         const field = allFields.find(f => f.id === type);
         
-        // Si le champ existe et a des tags définis (nouveau système), les retourner
-        if (field && field.type === 'select' && field.tags && field.tags.length > 0) {
-            return field.tags;
+        // Si le champ existe et est de type select
+        if (field && field.type === 'select') {
+            // Retourner field.tags (même s'il est vide [])
+            // IMPORTANT : Ne PAS vérifier field.tags.length > 0
+            // Car un tableau vide signifie "nouveau user sans tags"
+            if (field.tags !== undefined) {
+                return field.tags;
+            }
         }
         
-        // ANCIEN SYSTÈME (rétrocompatibilité) - utilisé seulement si field.tags est vide
+        // ANCIEN SYSTÈME (rétrocompatibilité) - utilisé SEULEMENT si field.tags n'existe pas du tout
+        // Cela arrive uniquement pour les très anciens users qui n'ont pas encore été migrés
         const defaults = app.defaultTags[type] || [];
         const customs = app.customTags[type] || [];
         
