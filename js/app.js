@@ -162,6 +162,9 @@ const app = {
     },
 
     switchSection(section) {
+        // Reset scroll to top when switching sections
+        window.scrollTo(0, 0);
+        
         // Save current section
         this.currentSection = section;
         localStorage.setItem('currentSection', section);
