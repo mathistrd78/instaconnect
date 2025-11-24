@@ -32,7 +32,7 @@ const app = {
             label: 'Sexe', 
             required: true,
             order: 3,
-            options: ['Homme', 'Femme']
+            options: ['👨 Homme', '👩 Femme']
         },
         { 
             id: 'profession', 
@@ -314,26 +314,49 @@ const app = {
     migrateToNewFieldSystem() {
         console.log('🔄 Migration vers le nouveau système de champs...');
         
+        // Fonction helper pour fusionner les tags sans doublons
+        const mergeTags = (defaults, customs) => {
+            const tagMap = new Map();
+            
+            // D'abord ajouter les defaults
+            defaults.forEach(tag => {
+                tagMap.set(tag.value, tag);
+            });
+            
+            // Ensuite ajouter/remplacer avec les customs (priorité aux customs)
+            customs.forEach(tag => {
+                tagMap.set(tag.value, tag);
+            });
+            
+            return Array.from(tagMap.values());
+        };
+        
         // Pour les utilisateurs existants, copier leurs tags dans les champs
-        if (this.customTags.relationType && this.customTags.relationType.length > 0) {
-            const relationField = this.defaultFields.find(f => f.id === 'relationType');
-            if (relationField) {
-                relationField.tags = [...this.defaultTags.relationType, ...this.customTags.relationType];
-            }
+        const relationField = this.defaultFields.find(f => f.id === 'relationType');
+        if (relationField && this.customTags.relationType) {
+            relationField.tags = mergeTags(
+                this.defaultTags.relationType || [], 
+                this.customTags.relationType || []
+            );
+            console.log('✅ Migrated relationType tags:', relationField.tags.length);
         }
         
-        if (this.customTags.meetingPlace && this.customTags.meetingPlace.length > 0) {
-            const meetingField = this.defaultFields.find(f => f.id === 'meetingPlace');
-            if (meetingField) {
-                meetingField.tags = [...this.defaultTags.meetingPlace, ...this.customTags.meetingPlace];
-            }
+        const meetingField = this.defaultFields.find(f => f.id === 'meetingPlace');
+        if (meetingField && this.customTags.meetingPlace) {
+            meetingField.tags = mergeTags(
+                this.defaultTags.meetingPlace || [], 
+                this.customTags.meetingPlace || []
+            );
+            console.log('✅ Migrated meetingPlace tags:', meetingField.tags.length);
         }
         
-        if (this.customTags.discussionStatus && this.customTags.discussionStatus.length > 0) {
-            const statusField = this.defaultFields.find(f => f.id === 'discussionStatus');
-            if (statusField) {
-                statusField.tags = [...this.defaultTags.discussionStatus, ...this.customTags.discussionStatus];
-            }
+        const statusField = this.defaultFields.find(f => f.id === 'discussionStatus');
+        if (statusField && this.customTags.discussionStatus) {
+            statusField.tags = mergeTags(
+                this.defaultTags.discussionStatus || [], 
+                this.customTags.discussionStatus || []
+            );
+            console.log('✅ Migrated discussionStatus tags:', statusField.tags.length);
         }
         
         console.log('✅ Migration terminée');
