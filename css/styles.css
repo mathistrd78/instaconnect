@@ -2783,3 +2783,24 @@ body.dark-mode .auth-message-success {
     border-color: #2c3e50;
     color: #ecf0f1;
 }
+
+/* Bouton icône pour les settings */
+.profil-btn-icon {
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    color: #E1306C;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.profil-btn-icon:hover {
+    background: rgba(225, 48, 108, 0.1);
+    transform: translateX(3px);
+}
+
+.profil-btn-icon:active {
+    transform: translateX(3px) scale(0.95);
+}
