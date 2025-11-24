@@ -217,6 +217,12 @@ const fields = {
             }
         }
         
+        // Régénérer les filtres si le nouveau champ est filtrable
+        const fieldData = app.customFields[app.customFields.length - 1];
+        if (fieldData && (fieldData.type === 'select' || fieldData.type === 'radio' || fieldData.type === 'checkbox')) {
+            contacts.renderFilters();
+        }
+        
         alert(`✅ Champ "${label}" créé avec succès !`);
     },
 
