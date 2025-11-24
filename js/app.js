@@ -198,6 +198,9 @@ const app = {
             
             // Attendre un peu que les données Firebase soient chargées
             setTimeout(() => {
+                // Générer le formulaire dynamiquement avec les champs personnalisés
+                contacts.renderDynamicForm();
+                
                 contacts.render();
                 stats.render();
                 this.switchSection(savedSection);
@@ -402,6 +405,10 @@ const app = {
 
     openAddModal() {
         contacts.currentEditId = null;
+        
+        // Générer le formulaire dynamiquement avec les champs personnalisés
+        contacts.renderDynamicForm();
+        
         document.getElementById('contactForm').reset();
         
         // Reset tag selectors - TEXTE ET VALEURS
