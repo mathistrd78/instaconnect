@@ -152,26 +152,7 @@
 
                 <!-- Sélecteur de graphique -->
                 <div class="stats-selector">
-                    <button class="stat-tab active" data-type="sexe" onclick="stats.switchChart('sexe')">
-                        <span class="stat-tab-icon">👥</span>
-                        <span>Par sexe</span>
-                    </button>
-                    <button class="stat-tab" data-type="relation" onclick="stats.switchChart('relation')">
-                        <span class="stat-tab-icon">💕</span>
-                        <span>Relation</span>
-                    </button>
-                    <button class="stat-tab" data-type="lieu" onclick="stats.switchChart('lieu')">
-                        <span class="stat-tab-icon">📍</span>
-                        <span>Lieu</span>
-                    </button>
-                    <button class="stat-tab" data-type="statut" onclick="stats.switchChart('statut')">
-                        <span class="stat-tab-icon">💬</span>
-                        <span>Statut</span>
-                    </button>
-                    <button class="stat-tab" data-type="mois" onclick="stats.switchChart('mois')">
-                        <span class="stat-tab-icon">📅</span>
-                        <span>Mois</span>
-                    </button>
+                    <!-- Les onglets seront générés dynamiquement par stats.renderTabs() -->
                 </div>
 
                 <!-- Container du graphique -->
