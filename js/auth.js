@@ -266,6 +266,23 @@ const authManager = {
                     
                     console.log('✅ Custom tags loaded and styles created');
                 }
+                
+                // Charger les champs personnalisés
+                if (data.customFields) {
+                    app.customFields = data.customFields;
+                    console.log('✅ Custom fields loaded:', app.customFields.length);
+                }
+                
+                // Charger les champs par défaut (avec leurs tags personnalisés)
+                if (data.defaultFields) {
+                    app.defaultFields = data.defaultFields;
+                    console.log('✅ Default fields loaded with user tags');
+                } else {
+                    // Nouvel utilisateur OU ancien utilisateur : migrer les tags
+                    console.log('🔄 Migrating old tag system to new field system...');
+                    app.migrateToNewFieldSystem();
+                }
+                
                 if (data.normalUnfollowers) {
                     unfollowers.data.normalUnfollowers = new Set(data.normalUnfollowers);
                 }
