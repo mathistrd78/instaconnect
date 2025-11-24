@@ -432,8 +432,8 @@ const contacts = {
         let options = [];
         if (filterType === 'gender') {
             options = [
-                { value: 'Homme', label: '👨 Homme' },
-                { value: 'Femme', label: '👩 Femme' }
+                { value: '👨 Homme', label: '👨 Homme' },
+                { value: '👩 Femme', label: '👩 Femme' }
             ];
         } else if (filterType === 'complete') {
             options = [
