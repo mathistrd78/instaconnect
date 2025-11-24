@@ -217,10 +217,11 @@ const fields = {
             }
         }
         
-        // Régénérer les filtres si le nouveau champ est filtrable
+        // Régénérer les filtres et onglets stats si le nouveau champ est filtrable
         const lastAddedField = app.customFields[app.customFields.length - 1];
         if (lastAddedField && (lastAddedField.type === 'select' || lastAddedField.type === 'radio' || lastAddedField.type === 'checkbox')) {
             contacts.renderFilters();
+            stats.renderTabs();
         }
         
         alert(`✅ Champ "${label}" créé avec succès !`);
