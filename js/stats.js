@@ -2,6 +2,71 @@
 const stats = {
     currentType: 'sexe',
 
+    // Générer dynamiquement les onglets en fonction des champs
+    renderTabs() {
+        console.log('🎯 stats.renderTabs called');
+        const tabsContainer = document.querySelector('.stats-selector');
+        if (!tabsContainer) {
+            console.error('❌ stats-selector container not found!');
+            return;
+        }
+        
+        // Récupérer tous les champs filtrables (select, radio, checkbox)
+        const allFields = app.getAllFields();
+        const filterableFields = allFields.filter(field => 
+            field.type === 'select' || field.type === 'radio' || field.type === 'checkbox'
+        );
+        
+        console.log('📋 Filterable fields for stats:', filterableFields.length, filterableFields.map(f => f.label));
+        
+        // Créer un mapping pour les icônes par défaut
+        const defaultIcons = {
+            'gender': '👥',
+            'relationType': '💕',
+            'meetingPlace': '📍',
+            'discussionStatus': '💬'
+        };
+        
+        // Générer les onglets pour les champs filtrables
+        const tabsHTML = filterableFields.map(field => {
+            const icon = defaultIcons[field.id] || '📊'; // Icône par défaut si non défini
+            return `
+                <button class="stat-tab" data-type="${field.id}" data-field-id="${field.id}">
+                    <span class="stat-tab-icon">${icon}</span>
+                    <span>${field.label}</span>
+                </button>
+            `;
+        }).join('');
+        
+        // Ajouter l'onglet "Par mois" (toujours présent)
+        const monthTab = `
+            <button class="stat-tab" data-type="mois" data-field-id="mois">
+                <span class="stat-tab-icon">📅</span>
+                <span>Mois</span>
+            </button>
+        `;
+        
+        tabsContainer.innerHTML = tabsHTML + monthTab;
+        
+        // Ajouter les event listeners
+        document.querySelectorAll('.stat-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const type = tab.getAttribute('data-type');
+                console.log('🔘 Stat tab clicked:', type);
+                this.switchChart(type);
+            });
+        });
+        
+        // Activer le premier onglet par défaut
+        const firstTab = tabsContainer.querySelector('.stat-tab');
+        if (firstTab) {
+            firstTab.classList.add('active');
+            this.currentType = firstTab.getAttribute('data-type');
+        }
+        
+        console.log('✅ stats.renderTabs completed');
+    },
+
     render() {
         this.updateGlobalStats();
         this.renderChart();
@@ -34,27 +99,33 @@ const stats = {
         let data = [];
         let title = '';
 
-        switch(this.currentType) {
-            case 'sexe':
-                title = 'Répartition par sexe';
-                data = this.groupByGender();
-                break;
-            case 'relation':
-                title = 'Répartition par type de relation';
-                data = this.groupBy('relationType');
-                break;
-            case 'lieu':
-                title = 'Répartition par lieu de rencontre';
-                data = this.groupBy('meetingPlace');
-                break;
-            case 'statut':
-                title = 'Répartition par statut de discussion';
-                data = this.groupBy('discussionStatus');
-                break;
-            case 'mois':
-                title = 'Répartition par mois d\'ajout';
-                data = this.groupByMonth();
-                break;
+        if (this.currentType === 'mois') {
+            // Cas spécial : par mois
+            title = 'Répartition par mois d\'ajout';
+            data = this.groupByMonth();
+        } else {
+            // Trouver le champ correspondant
+            const allFields = [...app.defaultFields, ...app.customFields];
+            const field = allFields.find(f => f.id === this.currentType);
+            
+            if (field) {
+                title = `Répartition par ${field.label.toLowerCase()}`;
+                
+                if (field.type === 'select' || field.type === 'radio') {
+                    // Champs avec options/tags
+                    data = this.groupBy(field.id, field);
+                } else if (field.type === 'checkbox') {
+                    // Champs checkbox : Oui/Non
+                    data = this.groupByCheckbox(field.id, field);
+                } else if (field.id === 'gender') {
+                    // Cas spécial pour le sexe (ancien système)
+                    data = this.groupByGender();
+                }
+            } else {
+                console.error('Field not found:', this.currentType);
+                title = 'Champ introuvable';
+                data = [];
+            }
         }
 
         document.getElementById('chartTitle').textContent = title;
@@ -106,6 +177,22 @@ const stats = {
         return Object.entries(months).slice(-6).map(([label, value], i) => ({
             label, value, color: colors[i % colors.length]
         }));
+    },
+
+    groupByCheckbox(field, fieldObj) {
+        const counts = { 'Oui': 0, 'Non': 0 };
+        app.dataStore.contacts.forEach(c => {
+            const val = c[field];
+            if (val === true || val === 'true') {
+                counts['Oui']++;
+            } else {
+                counts['Non']++;
+            }
+        });
+        return [
+            { label: '✅ Oui', value: counts['Oui'], color: '#00b894' },
+            { label: '❌ Non', value: counts['Non'], color: '#d63031' }
+        ];
     },
 
     getColorForValue(field, value) {
@@ -191,3 +278,6 @@ const stats = {
         document.getElementById('chartLegend').innerHTML = html;
     }
 };
+
+// Exposer stats globalement
+window.stats = stats;
