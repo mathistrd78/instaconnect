@@ -671,7 +671,7 @@ const contacts = {
         // Boutons d'action
         const actionsHTML = `
             <div class="form-group" style="border-top: 1px solid #e9ecef; padding-top: 20px; margin-top: 20px;">
-                <button type="button" class="btn" id="addCustomFieldBtn" style="background: #6c5ce7; color: white; width: 100%;">
+                <button type="button" class="btn" style="background: #6c5ce7; color: white; width: 100%;" onclick="window.fields.openAddFieldModal()">
                     ➕ Ajouter un champ personnalisé
                 </button>
             </div>
@@ -681,14 +681,6 @@ const contacts = {
         `;
 
         form.innerHTML = fixedFieldsHTML + dynamicFieldsHTML + actionsHTML;
-        
-        // Ajouter l'event listener pour le bouton "Ajouter un champ"
-        const addFieldBtn = document.getElementById('addCustomFieldBtn');
-        if (addFieldBtn) {
-            addFieldBtn.addEventListener('click', () => {
-                fields.openAddFieldModal();
-            });
-        }
     },
 
     renderField(field) {
