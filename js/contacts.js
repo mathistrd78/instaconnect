@@ -537,5 +537,149 @@ const contacts = {
         
         // Update visual state based on actual filters, not dropdown state
         this.updateFilterButtons();
+    },
+
+    // ==========================================
+    // RENDU DYNAMIQUE DU FORMULAIRE
+    // ==========================================
+
+    renderDynamicForm() {
+        const form = document.getElementById('contactForm');
+        if (!form) return;
+
+        // Garder les champs fixes (Prénom et Instagram)
+        const fixedFieldsHTML = `
+            <div class="form-group">
+                <label>Prénom <span style="color: #ff4757;">*</span></label>
+                <input type="text" id="firstName" required>
+            </div>
+            <div class="form-group">
+                <label>Pseudo Instagram <span style="color: #ff4757;">*</span></label>
+                <div style="position: relative;">
+                    <span style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #868e96; font-weight: 600;">@</span>
+                    <input type="text" id="instagram" required style="padding-left: 36px;" oninput="this.value = this.value.toLowerCase().replace('@', '')">
+                </div>
+            </div>
+        `;
+
+        // Générer les champs dynamiques
+        const allFields = app.getAllFields();
+        const dynamicFieldsHTML = allFields.map(field => this.renderField(field)).join('');
+
+        // Boutons d'action
+        const actionsHTML = `
+            <div class="form-group" style="border-top: 1px solid #e9ecef; padding-top: 20px; margin-top: 20px;">
+                <button type="button" class="btn" style="background: #6c5ce7; color: white; width: 100%;" onclick="fields.openAddFieldModal()">
+                    ➕ Ajouter un champ personnalisé
+                </button>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">💾 Enregistrer</button>
+            </div>
+        `;
+
+        form.innerHTML = fixedFieldsHTML + dynamicFieldsHTML + actionsHTML;
+    },
+
+    renderField(field) {
+        const requiredMark = field.required ? '<span style="color: #ff4757;">*</span>' : '';
+        const placeholder = field.placeholder ? `placeholder="${field.placeholder}"` : '';
+        
+        switch (field.type) {
+            case 'select':
+                return `
+                    <div class="form-group">
+                        <label>${field.label} ${requiredMark}</label>
+                        <div class="tag-selector" onclick="contacts.openTagSelector('${field.id}')">
+                            <span id="${field.id}Display" class="tag-selector-placeholder">Sélectionner...</span>
+                            <span class="tag-selector-arrow">▼</span>
+                        </div>
+                        <input type="hidden" id="${field.id}" ${field.required ? 'required' : ''}>
+                    </div>
+                `;
+            
+            case 'radio':
+                const options = field.options || [];
+                return `
+                    <div class="form-group">
+                        <label>${field.label} ${requiredMark}</label>
+                        <div style="display: flex; gap: 20px; margin-top: 8px; flex-wrap: wrap;">
+                            ${options.map((opt, index) => `
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="radio" name="${field.id}" id="${field.id}_${index}" value="${opt}" style="width: 18px; height: 18px; cursor: pointer;" ${field.required ? 'required' : ''}>
+                                    <span>${opt}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            
+            case 'checkbox':
+                return `
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" id="${field.id}" style="width: 18px; height: 18px; cursor: pointer;">
+                            <span>${field.label}</span>
+                        </label>
+                    </div>
+                `;
+            
+            case 'textarea':
+                return `
+                    <div class="form-group">
+                        <label>${field.label} ${requiredMark}</label>
+                        <textarea id="${field.id}" ${placeholder} ${field.required ? 'required' : ''}></textarea>
+                    </div>
+                `;
+            
+            case 'number':
+                return `
+                    <div class="form-group">
+                        <label>${field.label} ${requiredMark}</label>
+                        <input type="number" id="${field.id}" ${placeholder} ${field.required ? 'required' : ''}>
+                    </div>
+                `;
+            
+            case 'date':
+                return `
+                    <div class="form-group">
+                        <label>${field.label} ${requiredMark}</label>
+                        <input type="date" id="${field.id}" ${field.required ? 'required' : ''}>
+                    </div>
+                `;
+            
+            case 'tel':
+                return `
+                    <div class="form-group">
+                        <label>${field.label} ${requiredMark}</label>
+                        <input type="tel" id="${field.id}" ${placeholder} ${field.required ? 'required' : ''}>
+                    </div>
+                `;
+            
+            case 'email':
+                return `
+                    <div class="form-group">
+                        <label>${field.label} ${requiredMark}</label>
+                        <input type="email" id="${field.id}" ${placeholder} ${field.required ? 'required' : ''}>
+                    </div>
+                `;
+            
+            case 'url':
+                return `
+                    <div class="form-group">
+                        <label>${field.label} ${requiredMark}</label>
+                        <input type="url" id="${field.id}" ${placeholder} ${field.required ? 'required' : ''}>
+                    </div>
+                `;
+            
+            case 'text':
+            default:
+                return `
+                    <div class="form-group">
+                        <label>${field.label} ${requiredMark}</label>
+                        <input type="text" id="${field.id}" ${placeholder} ${field.required ? 'required' : ''}>
+                    </div>
+                `;
+        }
     }
 };
