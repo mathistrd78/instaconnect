@@ -136,6 +136,42 @@ const authManager = {
             
             // Marquer qu'on vient de se déconnecter manuellement (pour éviter la landing page)
             localStorage.setItem('justLoggedOut', 'true');
+            
+            // NETTOYAGE COMPLET DES DONNÉES
+            console.log('🧹 Cleaning up user data...');
+            
+            // Vider les contacts
+            app.dataStore.contacts = [];
+            
+            // Vider les unfollowers
+            unfollowers.data = {
+                followers: [],
+                following: [],
+                unfollowers: [],
+                normalUnfollowers: new Set(),
+                doNotFollowList: new Set(),
+                marked: new Set(),
+                normalCategories: {}
+            };
+            
+            // Réinitialiser les tags personnalisés
+            app.customTags = {
+                relationType: [],
+                meetingPlace: [],
+                discussionStatus: []
+            };
+            
+            // Réinitialiser les champs personnalisés
+            app.customFields = [];
+            
+            // Réinitialiser les champs par défaut (vider leurs tags)
+            app.defaultFields.forEach(field => {
+                if (field.type === 'select') {
+                    field.tags = [];
+                }
+            });
+            
+            console.log('✅ User data cleaned');
 
             await auth.signOut();
             console.log('✅ Logout successful');
