@@ -277,6 +277,26 @@ const authManager = {
                 if (data.defaultFields) {
                     app.defaultFields = data.defaultFields;
                     console.log('✅ Default fields loaded with user tags');
+                    
+                    // Recréer les styles CSS pour tous les tags dans field.tags
+                    console.log('🎨 Recreating CSS styles for field tags...');
+                    app.defaultFields.forEach(field => {
+                        if (field.type === 'select' && field.tags) {
+                            field.tags.forEach(tag => {
+                                if (tag.class && tag.color) {
+                                    const styleId = 'style-' + tag.class;
+                                    let styleElement = document.getElementById(styleId);
+                                    if (!styleElement) {
+                                        styleElement = document.createElement('style');
+                                        styleElement.id = styleId;
+                                        document.head.appendChild(styleElement);
+                                    }
+                                    styleElement.textContent = `.${tag.class} { background: ${tag.color}; color: white; }`;
+                                    console.log('✅ Style created for', tag.label, ':', tag.color);
+                                }
+                            });
+                        }
+                    });
                 } else {
                     // Nouvel utilisateur OU ancien utilisateur : migrer les tags
                     console.log('🔄 Migrating old tag system to new field system...');
