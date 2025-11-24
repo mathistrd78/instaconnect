@@ -163,7 +163,9 @@ const app = {
 
     switchSection(section) {
         // Reset scroll to top when switching sections
-        window.scrollTo(0, 0);
+        // Le body est le conteneur qui scroll, pas window
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0; // Pour compatibilité
         
         // Save current section
         this.currentSection = section;
