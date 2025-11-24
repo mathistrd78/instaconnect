@@ -209,6 +209,9 @@ const app = {
                 // Générer les filtres dynamiquement
                 contacts.renderFilters();
                 
+                // Générer les onglets de stats dynamiquement
+                stats.renderTabs();
+                
                 contacts.render();
                 stats.render();
                 this.switchSection(savedSection);
