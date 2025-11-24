@@ -218,8 +218,8 @@ const fields = {
         }
         
         // Régénérer les filtres si le nouveau champ est filtrable
-        const fieldData = app.customFields[app.customFields.length - 1];
-        if (fieldData && (fieldData.type === 'select' || fieldData.type === 'radio' || fieldData.type === 'checkbox')) {
+        const lastAddedField = app.customFields[app.customFields.length - 1];
+        if (lastAddedField && (lastAddedField.type === 'select' || lastAddedField.type === 'radio' || lastAddedField.type === 'checkbox')) {
             contacts.renderFilters();
         }
         
