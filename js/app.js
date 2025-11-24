@@ -127,34 +127,35 @@ const app = {
                 const userId = authManager.currentUser.uid;
                 console.log('💾 SAVING to Firebase - User:', userId);
 
+                const batch = db.batch();
+                
                 if (specificContact) {
-                    // Sauvegarder un seul contact (plus rapide et évite les conflits)
-                    console.log('💾 Saving specific contact:', specificContact.id, JSON.stringify(specificContact, null, 2));
+                    // Sauvegarder un seul contact
+                    console.log('💾 Saving specific contact:', specificContact.id);
                     const contactRef = db.collection('users').doc(userId).collection('contacts').doc(specificContact.id);
-                    await contactRef.set(specificContact);
-                    console.log('✅ Contact saved to Firebase:', specificContact.firstName, 'with gender:', specificContact.gender);
-                } else {
-                    // Sauvegarder tous les contacts (utilisé lors de l'analyse)
+                    batch.set(contactRef, specificContact);
+                } else if (this.contacts.length > 0) {
+                    // Sauvegarder tous les contacts seulement s'il y en a
                     console.log('💾 Saving ALL contacts in batch:', this.contacts.length);
-                    const batch = db.batch();
                     const contactsRef = db.collection('users').doc(userId).collection('contacts');
                     this.contacts.forEach(contact => {
                         batch.set(contactsRef.doc(contact.id), contact);
                     });
-
-                    // Sauvegarder les tags personnalisés ET les champs personnalisés
-                    console.log('📤 Saving customTags to Firebase:', JSON.stringify(app.customTags));
-                    console.log('📤 Saving customFields to Firebase:', JSON.stringify(app.customFields));
-                    const userDoc = db.collection('users').doc(userId);
-                    batch.set(userDoc, {
-                        customTags: app.customTags,
-                        customFields: app.customFields,
-                        defaultFields: app.defaultFields // Sauvegarder aussi les champs par défaut avec leurs tags
-                    }, { merge: true });
-
-                    await batch.commit();
-                    console.log('✅ All data saved to Firebase successfully');
                 }
+
+                // TOUJOURS sauvegarder les tags et champs personnalisés
+                console.log('📤 Saving customTags to Firebase:', JSON.stringify(app.customTags));
+                console.log('📤 Saving customFields to Firebase:', JSON.stringify(app.customFields));
+                console.log('📤 Saving defaultFields to Firebase');
+                const userDoc = db.collection('users').doc(userId);
+                batch.set(userDoc, {
+                    customTags: app.customTags,
+                    customFields: app.customFields,
+                    defaultFields: app.defaultFields // Sauvegarder aussi les champs par défaut avec leurs tags
+                }, { merge: true });
+
+                await batch.commit();
+                console.log('✅ All data saved to Firebase successfully');
             } catch (error) {
                 console.error('❌ Error saving to Firebase:', error);
             }
