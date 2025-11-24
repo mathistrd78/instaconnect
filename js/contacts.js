@@ -39,14 +39,20 @@ const contacts = {
 
     // Générer dynamiquement les filtres en fonction des champs
     renderFilters() {
+        console.log('🎯 renderFilters called');
         const filtersContainer = document.querySelector('.filters-horizontal');
-        if (!filtersContainer) return;
+        if (!filtersContainer) {
+            console.error('❌ filters-horizontal container not found!');
+            return;
+        }
         
         // Récupérer tous les champs filtrables (select, radio, checkbox)
         const allFields = app.getAllFields();
+        console.log('📋 All fields:', allFields.length);
         const filterableFields = allFields.filter(field => 
             field.type === 'select' || field.type === 'radio' || field.type === 'checkbox'
         );
+        console.log('🔍 Filterable fields:', filterableFields.length, filterableFields.map(f => f.label));
         
         // Ajouter "Profil complet" comme filtre spécial
         const specialFilters = [
@@ -55,26 +61,55 @@ const contacts = {
         
         // Générer les boutons de filtres
         const filtersHTML = filterableFields.map(field => `
-            <button class="filter-chip" id="filter_${field.id}_Btn" onclick="contacts.toggleFilterDropdown('${field.id}', event)">
+            <button class="filter-chip" id="filter_${field.id}_Btn" data-filter-type="${field.id}">
                 <span>${field.label}</span>
                 <span class="filter-arrow">▼</span>
             </button>
         `).join('');
         
         const specialFiltersHTML = specialFilters.map(filter => `
-            <button class="filter-chip" id="filter_${filter.id}_Btn" onclick="contacts.toggleFilterDropdown('${filter.id}', event)">
+            <button class="filter-chip" id="filter_${filter.id}_Btn" data-filter-type="${filter.id}">
                 <span>${filter.label}</span>
                 <span class="filter-arrow">▼</span>
             </button>
         `).join('');
         
         const resetButton = `
-            <button class="filter-chip filter-reset" id="filterResetBtn" onclick="contacts.resetFilters()" style="display: none;">
+            <button class="filter-chip filter-reset" id="filterResetBtn" style="display: none;">
                 <span>✕ Réinitialiser</span>
             </button>
         `;
         
         filtersContainer.innerHTML = filtersHTML + specialFiltersHTML + resetButton;
+        
+        // Ajouter les event listeners APRÈS avoir créé les boutons
+        filterableFields.forEach(field => {
+            const btn = document.getElementById(`filter_${field.id}_Btn`);
+            if (btn) {
+                btn.addEventListener('click', (e) => {
+                    console.log('🔘 Filter clicked:', field.id);
+                    this.toggleFilterDropdown(field.id, e);
+                });
+            }
+        });
+        
+        specialFilters.forEach(filter => {
+            const btn = document.getElementById(`filter_${filter.id}_Btn`);
+            if (btn) {
+                btn.addEventListener('click', (e) => {
+                    console.log('🔘 Special filter clicked:', filter.id);
+                    this.toggleFilterDropdown(filter.id, e);
+                });
+            }
+        });
+        
+        const resetBtn = document.getElementById('filterResetBtn');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => {
+                console.log('🔄 Reset filters clicked');
+                this.resetFilters();
+            });
+        }
         
         // Initialiser activeFilters pour tous les champs
         filterableFields.forEach(field => {
@@ -82,6 +117,8 @@ const contacts = {
                 this.activeFilters[field.id] = [];
             }
         });
+        
+        console.log('✅ renderFilters completed');
     },
 
     render() {
