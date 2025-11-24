@@ -101,8 +101,39 @@ const authManager = {
             console.log('✅ Signup successful:', userCredential.user.email);
             
             // NE PLUS migrer automatiquement - tous les nouveaux users partent de zéro
-            // (La migration est maintenant désactivée car tout est sur Firebase)
             console.log('✨ New user created - starting fresh with empty data');
+            
+            // Initialiser Firebase avec des données vides pour ce nouveau user
+            const userId = userCredential.user.uid;
+            const cleanDefaultFields = app.defaultFields.map(f => {
+                const cleanField = {
+                    id: f.id,
+                    type: f.type,
+                    label: f.label,
+                    required: f.required,
+                    order: f.order
+                };
+                
+                if (f.placeholder) cleanField.placeholder = f.placeholder;
+                if (f.options) cleanField.options = f.options;
+                if (f.type === 'select') cleanField.tags = [];
+                
+                return cleanField;
+            });
+            
+            await db.collection('users').doc(userId).set({
+                customTags: {
+                    relationType: [],
+                    meetingPlace: [],
+                    discussionStatus: []
+                },
+                customFields: [],
+                defaultFields: cleanDefaultFields,
+                normalUnfollowers: [],
+                doNotFollowList: []
+            });
+            
+            console.log('✅ New user initialized in Firebase with empty data');
             
             return { success: true };
         } catch (error) {
