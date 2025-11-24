@@ -179,34 +179,44 @@ const contacts = {
             }
         }
         
-        // Get gender
-        let gender = '';
-        if (document.getElementById('genderMale').checked) {
-            gender = 'Homme';
-        } else if (document.getElementById('genderFemale').checked) {
-            gender = 'Femme';
-        }
-        
-        console.log('🔵 Gender selected:', gender);
-        
+        // Base contact object
         const contact = {
             id: this.currentEditId || Date.now().toString(),
             firstName: document.getElementById('firstName').value,
             instagram,
-            relationType: document.getElementById('relationType').value,
-            meetingPlace: document.getElementById('meetingPlace').value,
-            discussionStatus: document.getElementById('discussionStatus').value,
-            gender: gender,
-            profession: document.getElementById('profession').value,
-            location: document.getElementById('location').value,
-            age: document.getElementById('age').value,
-            phone: document.getElementById('phone').value,
-            interests: document.getElementById('interests').value,
-            notes: document.getElementById('notes').value,
             dateAdded: this.currentEditId ? 
                 app.dataStore.contacts.find(c => c.id === this.currentEditId)?.dateAdded || new Date().toISOString() : 
                 new Date().toISOString()
         };
+        
+        // Récupérer dynamiquement les valeurs de tous les champs
+        const allFields = app.getAllFields();
+        allFields.forEach(field => {
+            const element = document.getElementById(field.id);
+            
+            if (!element) return;
+            
+            switch (field.type) {
+                case 'radio':
+                    // Pour les radio buttons, chercher celui qui est checked
+                    const radioChecked = document.querySelector(`input[name="${field.id}"]:checked`);
+                    contact[field.id] = radioChecked ? radioChecked.value : '';
+                    break;
+                    
+                case 'checkbox':
+                    contact[field.id] = element.checked;
+                    break;
+                    
+                case 'select':
+                    // Pour les selects avec tags, prendre la valeur du hidden input
+                    contact[field.id] = element.value || '';
+                    break;
+                    
+                default:
+                    // text, textarea, number, date, tel, email, url
+                    contact[field.id] = element.value || '';
+            }
+        });
 
         console.log('🔵 Contact object created:', JSON.stringify(contact, null, 2));
 
@@ -295,59 +305,61 @@ const contacts = {
 
         this.currentEditId = this.currentViewId;
         
+        // Re-générer le formulaire pour s'assurer qu'il est à jour
+        this.renderDynamicForm();
+        
+        // Remplir les champs fixes
         document.getElementById('firstName').value = contact.firstName;
         document.getElementById('instagram').value = contact.instagram.replace('@', '');
         
-        // Set tag selectors - AVEC RESET si vide
-        const fields = [
-            {id: 'relationType', value: contact.relationType},
-            {id: 'meetingPlace', value: contact.meetingPlace},
-            {id: 'discussionStatus', value: contact.discussionStatus}
-        ];
-        
-        fields.forEach(field => {
-            const displayEl = document.getElementById(field.id + 'Display');
-            const hiddenInput = document.getElementById(field.id);
+        // Remplir dynamiquement tous les champs
+        const allFields = app.getAllFields();
+        allFields.forEach(field => {
+            const element = document.getElementById(field.id);
+            if (!element) return;
             
-            if (field.value) {
-                // Le contact a une valeur
-                hiddenInput.value = field.value;
-                const tag = tags.findTag(field.id, field.value);
-                if (tag) {
-                    displayEl.textContent = tag.label;
-                    displayEl.className = 'tag-selector-value';
-                } else {
-                    // Tag non trouvé, réinitialiser
-                    displayEl.textContent = 'Sélectionner...';
-                    displayEl.className = 'tag-selector-placeholder';
-                }
-            } else {
-                // Le contact n'a pas de valeur, réinitialiser
-                hiddenInput.value = '';
-                displayEl.textContent = 'Sélectionner...';
-                displayEl.className = 'tag-selector-placeholder';
+            const value = contact[field.id];
+            
+            switch (field.type) {
+                case 'select':
+                    // Champs avec tags
+                    const displayEl = document.getElementById(field.id + 'Display');
+                    const hiddenInput = document.getElementById(field.id);
+                    
+                    if (value) {
+                        hiddenInput.value = value;
+                        const tag = tags.findTag(field.id, value);
+                        if (tag) {
+                            displayEl.textContent = tag.label;
+                            displayEl.className = 'tag-selector-value';
+                        } else {
+                            displayEl.textContent = 'Sélectionner...';
+                            displayEl.className = 'tag-selector-placeholder';
+                        }
+                    } else {
+                        hiddenInput.value = '';
+                        displayEl.textContent = 'Sélectionner...';
+                        displayEl.className = 'tag-selector-placeholder';
+                    }
+                    break;
+                    
+                case 'radio':
+                    // Radio buttons
+                    if (value) {
+                        const radio = document.querySelector(`input[name="${field.id}"][value="${value}"]`);
+                        if (radio) radio.checked = true;
+                    }
+                    break;
+                    
+                case 'checkbox':
+                    element.checked = !!value;
+                    break;
+                    
+                default:
+                    // text, textarea, number, date, tel, email, url
+                    element.value = value || '';
             }
         });
-        
-        document.getElementById('profession').value = contact.profession || '';
-        document.getElementById('location').value = contact.location || '';
-        document.getElementById('age').value = contact.age || '';
-        document.getElementById('phone').value = contact.phone || '';
-        document.getElementById('interests').value = contact.interests || '';
-        document.getElementById('notes').value = contact.notes || '';
-        
-        // Set gender radio buttons
-        if (contact.gender === 'Homme') {
-            document.getElementById('genderMale').checked = true;
-            document.getElementById('genderFemale').checked = false;
-        } else if (contact.gender === 'Femme') {
-            document.getElementById('genderMale').checked = false;
-            document.getElementById('genderFemale').checked = true;
-        } else {
-            // Uncheck both if no gender set
-            document.getElementById('genderMale').checked = false;
-            document.getElementById('genderFemale').checked = false;
-        }
         
         document.getElementById('modalTitle').textContent = '✏️ Modifier le contact';
         app.closeViewModal();
