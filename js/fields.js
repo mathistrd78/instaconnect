@@ -207,12 +207,8 @@ const fields = {
             return `
                 <div class="field-item ${isDefault ? 'field-default' : 'field-custom'}" 
                      data-field-id="${field.id}" 
-                     draggable="true"
-                     ondragstart="fields.onDragStart(event, '${field.id}')"
-                     ondragover="fields.onDragOver(event)"
-                     ondrop="fields.onDrop(event, '${field.id}')"
-                     ondragend="fields.onDragEnd(event)">
-                    <div class="field-item-handle">☰</div>
+                     data-index="${index}">
+                    <div class="field-item-handle" data-field-id="${field.id}">☰</div>
                     <div class="field-item-info">
                         <div class="field-item-label">
                             ${icon} ${field.label} ${field.required ? '<span style="color: #ff4757;">*</span>' : ''}
@@ -233,65 +229,189 @@ const fields = {
         }).join('');
         
         list.innerHTML = html;
+        
+        // Attacher les événements tactiles
+        this.attachDragEvents();
     },
 
-    // Drag & Drop handlers
-    onDragStart(event, fieldId) {
-        this.draggedFieldId = fieldId;
-        event.currentTarget.style.opacity = '0.5';
+    // Variables pour le drag tactile
+    dragState: {
+        isDragging: false,
+        draggedElement: null,
+        draggedId: null,
+        placeholder: null,
+        startY: 0,
+        currentY: 0,
+        offsetY: 0
     },
 
-    onDragOver(event) {
-        event.preventDefault();
-        event.currentTarget.style.borderTop = '2px solid #E1306C';
-    },
-
-    onDrop(event, targetFieldId) {
-        event.preventDefault();
-        event.currentTarget.style.borderTop = '';
+    // Attacher les événements de drag (desktop ET mobile)
+    attachDragEvents() {
+        const handles = document.querySelectorAll('.field-item-handle');
         
-        if (this.draggedFieldId === targetFieldId) return;
-        
-        // Réordonner les champs
-        const allFields = app.getAllFields();
-        const draggedIndex = allFields.findIndex(f => f.id === this.draggedFieldId);
-        const targetIndex = allFields.findIndex(f => f.id === targetFieldId);
-        
-        if (draggedIndex === -1 || targetIndex === -1) return;
-        
-        // Mettre à jour les ordres
-        const draggedField = allFields[draggedIndex];
-        draggedField.order = targetIndex;
-        
-        // Réajuster tous les ordres
-        allFields.forEach((field, index) => {
-            if (field.id === this.draggedFieldId) return;
+        handles.forEach(handle => {
+            // Desktop - Mouse events
+            handle.addEventListener('mousedown', (e) => this.startDrag(e, false));
             
-            if (draggedIndex < targetIndex) {
-                // Déplacé vers le bas
-                if (index > draggedIndex && index <= targetIndex) {
-                    field.order = index - 1;
-                }
+            // Mobile - Touch events
+            handle.addEventListener('touchstart', (e) => this.startDrag(e, true), { passive: false });
+        });
+        
+        // Global listeners
+        document.addEventListener('mousemove', (e) => this.onDragMove(e, false));
+        document.addEventListener('touchmove', (e) => this.onDragMove(e, true), { passive: false });
+        
+        document.addEventListener('mouseup', (e) => this.endDrag(e, false));
+        document.addEventListener('touchend', (e) => this.endDrag(e, true));
+    },
+
+    startDrag(e, isTouch) {
+        e.preventDefault();
+        
+        const fieldId = e.target.dataset.fieldId;
+        if (!fieldId) return;
+        
+        const fieldItem = e.target.closest('.field-item');
+        if (!fieldItem) return;
+        
+        this.dragState.isDragging = true;
+        this.dragState.draggedElement = fieldItem;
+        this.dragState.draggedId = fieldId;
+        
+        // Position initiale
+        const clientY = isTouch ? e.touches[0].clientY : e.clientY;
+        this.dragState.startY = clientY;
+        this.dragState.currentY = clientY;
+        
+        const rect = fieldItem.getBoundingClientRect();
+        this.dragState.offsetY = clientY - rect.top;
+        
+        // Créer le placeholder
+        const placeholder = fieldItem.cloneNode(true);
+        placeholder.classList.add('field-item-placeholder');
+        placeholder.style.opacity = '0.4';
+        this.dragState.placeholder = placeholder;
+        
+        // Style de l'élément draggé
+        fieldItem.classList.add('field-item-dragging');
+        fieldItem.style.position = 'fixed';
+        fieldItem.style.zIndex = '9999';
+        fieldItem.style.width = rect.width + 'px';
+        fieldItem.style.left = rect.left + 'px';
+        fieldItem.style.top = rect.top + 'px';
+        fieldItem.style.pointerEvents = 'none';
+        
+        // Insérer le placeholder
+        fieldItem.parentNode.insertBefore(placeholder, fieldItem.nextSibling);
+    },
+
+    onDragMove(e, isTouch) {
+        if (!this.dragState.isDragging) return;
+        
+        e.preventDefault();
+        
+        const clientY = isTouch ? e.touches[0].clientY : e.clientY;
+        this.dragState.currentY = clientY;
+        
+        // Déplacer l'élément
+        const newTop = clientY - this.dragState.offsetY;
+        this.dragState.draggedElement.style.top = newTop + 'px';
+        
+        // Trouver l'élément sous le curseur
+        const list = document.getElementById('fieldsList');
+        const items = Array.from(list.querySelectorAll('.field-item:not(.field-item-dragging):not(.field-item-placeholder)'));
+        
+        let targetItem = null;
+        let insertBefore = false;
+        
+        for (const item of items) {
+            const rect = item.getBoundingClientRect();
+            const middle = rect.top + rect.height / 2;
+            
+            if (clientY < middle) {
+                targetItem = item;
+                insertBefore = true;
+                break;
+            } else if (clientY < rect.bottom) {
+                targetItem = item;
+                insertBefore = false;
+                break;
+            }
+        }
+        
+        // Déplacer le placeholder
+        if (targetItem) {
+            if (insertBefore) {
+                list.insertBefore(this.dragState.placeholder, targetItem);
             } else {
-                // Déplacé vers le haut
-                if (index >= targetIndex && index < draggedIndex) {
-                    field.order = index + 1;
-                }
+                list.insertBefore(this.dragState.placeholder, targetItem.nextSibling);
+            }
+        }
+    },
+
+    endDrag(e, isTouch) {
+        if (!this.dragState.isDragging) return;
+        
+        e.preventDefault();
+        
+        const draggedElement = this.dragState.draggedElement;
+        const placeholder = this.dragState.placeholder;
+        
+        // Calculer le nouvel ordre
+        const list = document.getElementById('fieldsList');
+        const allItems = Array.from(list.querySelectorAll('.field-item'));
+        const newIndex = allItems.indexOf(placeholder);
+        
+        // Réinitialiser les styles
+        draggedElement.classList.remove('field-item-dragging');
+        draggedElement.style.position = '';
+        draggedElement.style.zIndex = '';
+        draggedElement.style.width = '';
+        draggedElement.style.left = '';
+        draggedElement.style.top = '';
+        draggedElement.style.pointerEvents = '';
+        
+        // Remplacer le placeholder par l'élément original
+        if (placeholder && placeholder.parentNode) {
+            placeholder.parentNode.replaceChild(draggedElement, placeholder);
+        }
+        
+        // Sauvegarder le nouvel ordre
+        this.saveFieldOrder();
+        
+        // Reset state
+        this.dragState.isDragging = false;
+        this.dragState.draggedElement = null;
+        this.dragState.draggedId = null;
+        this.dragState.placeholder = null;
+    },
+
+    // Sauvegarder l'ordre des champs
+    saveFieldOrder() {
+        const list = document.getElementById('fieldsList');
+        const items = Array.from(list.querySelectorAll('.field-item'));
+        
+        // Mettre à jour l'ordre de tous les champs
+        items.forEach((item, index) => {
+            const fieldId = item.dataset.fieldId;
+            const allFields = [...app.defaultFields, ...app.customFields];
+            const field = allFields.find(f => f.id === fieldId);
+            if (field) {
+                field.order = index;
             }
         });
         
-        // Sauvegarder
+        // Sauvegarder dans Firebase
         app.dataStore.save();
         
-        // Re-render
-        this.renderFieldsList();
+        console.log('✅ Ordre des champs sauvegardé');
     },
 
-    onDragEnd(event) {
-        event.currentTarget.style.opacity = '1';
-        event.currentTarget.style.borderTop = '';
-        this.draggedFieldId = null;
-    },
+    // Anciennes fonctions drag & drop (gardées pour compatibilité mais non utilisées)
+    onDragStart(event, fieldId) {},
+    onDragOver(event) {},
+    onDrop(event, targetFieldId) {},
+    onDragEnd(event) {},
 
     // Supprimer un champ personnalisé
     deleteField(fieldId) {
