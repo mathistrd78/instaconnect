@@ -2859,3 +2859,17 @@ body.dark-mode .tag-dropdown-title {
 body.dark-mode .modal-content {
     background: #2d2d2d;
 }
+
+/* Profile view - base */
+.profile-view {
+    background: white;
+}
+
+.profile-info {
+    background: white;
+}
+
+body.dark-mode .form-actions {
+    background: #2d2d2d;
+    border-top-color: #4a4a4a;
+}
