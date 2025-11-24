@@ -180,10 +180,20 @@ const tags = {
     ],
 
     availableColors: [
-        '#a29bfe', '#fd79a8', '#74b9ff', '#ff7675', '#55efc4', '#E1306C',
-        '#ff6348', '#a55eea', '#feca57', '#00b894', '#dfe6e9', '#fdcb6e',
-        '#0984e3', '#6c5ce7', '#00cec9', '#e17055', '#d63031', '#00b894',
-        '#00cec9', '#0984e3', '#6c5ce7', '#b2bec3', '#636e72', '#2d3436'
+        // Roses
+        '#fd79a8', '#E1306C', '#d63031',
+        // Rouges/Oranges
+        '#ff7675', '#ff6348', '#e17055',
+        // Jaunes
+        '#feca57', '#fdcb6e',
+        // Verts
+        '#55efc4', '#00cec9', '#00b894',
+        // Bleus
+        '#74b9ff', '#0984e3',
+        // Violets
+        '#a29bfe', '#6c5ce7', '#a55eea',
+        // Gris
+        '#dfe6e9', '#b2bec3', '#636e72', '#2d3436'
     ],
 
     // État actuel de l'édition
