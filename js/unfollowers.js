@@ -304,6 +304,44 @@ const unfollowers = {
                 !this.data.normalUnfollowers.has(username)
             );
 
+            // ========== SUPPRESSION DES CONTACTS UNFOLLOWERS ==========
+            document.getElementById('analyseProgressText').textContent = 'Vérification des contacts à supprimer...';
+            
+            let deleted = 0;
+            const unfollowerUsernames = this.data.unfollowers.map(u => 
+                typeof u === 'string' ? u : u.username
+            );
+            
+            // Créer un Set pour une recherche plus rapide
+            const unfollowersSet = new Set(unfollowerUsernames.map(u => u.toLowerCase()));
+            
+            // Parcourir tous les contacts existants
+            const contactsToDelete = [];
+            app.dataStore.contacts.forEach(contact => {
+                if (contact.instagram) {
+                    const username = contact.instagram.toLowerCase().replace('@', '');
+                    // Si le contact est maintenant un unfollower, le marquer pour suppression
+                    if (unfollowersSet.has(username)) {
+                        contactsToDelete.push(contact);
+                    }
+                }
+            });
+            
+            // Supprimer les contacts
+            for (const contact of contactsToDelete) {
+                const index = app.dataStore.contacts.indexOf(contact);
+                if (index > -1) {
+                    app.dataStore.contacts.splice(index, 1);
+                    deleted++;
+                    
+                    // Supprimer de Firebase
+                    await app.dataStore.deleteContact(contact.id);
+                }
+            }
+            
+            console.log(`🗑️ Deleted ${deleted} contacts who became unfollowers`);
+            // =========================================================
+
             document.getElementById('analyseProgressText').textContent = 'Création des fiches contacts...';
 
             // Create contact cards
@@ -375,6 +413,10 @@ const unfollowers = {
                 <div style="background: white; padding: 16px; border-radius: 8px; text-align: center;">
                     <div style="font-size: 24px; font-weight: 700; color: #ffc107; margin-bottom: 4px;">${alreadyExists}</div>
                     <div style="font-size: 13px; color: #6c757d;">Déjà existants</div>
+                </div>
+                <div style="background: white; padding: 16px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 24px; font-weight: 700; color: #dc3545; margin-bottom: 4px;">${deleted}</div>
+                    <div style="font-size: 13px; color: #6c757d;">Contacts supprimés</div>
                 </div>
                 <div style="background: white; padding: 16px; border-radius: 8px; text-align: center;">
                     <div style="font-size: 24px; font-weight: 700; color: #ff7675; margin-bottom: 4px;">${this.data.unfollowers.length}</div>
