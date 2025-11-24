@@ -37,6 +37,53 @@ const contacts = {
         this.currentFieldType = null;
     },
 
+    // Générer dynamiquement les filtres en fonction des champs
+    renderFilters() {
+        const filtersContainer = document.querySelector('.filters-horizontal');
+        if (!filtersContainer) return;
+        
+        // Récupérer tous les champs filtrables (select, radio, checkbox)
+        const allFields = app.getAllFields();
+        const filterableFields = allFields.filter(field => 
+            field.type === 'select' || field.type === 'radio' || field.type === 'checkbox'
+        );
+        
+        // Ajouter "Profil complet" comme filtre spécial
+        const specialFilters = [
+            { id: 'complete', label: 'Profil complet' }
+        ];
+        
+        // Générer les boutons de filtres
+        const filtersHTML = filterableFields.map(field => `
+            <button class="filter-chip" id="filter_${field.id}_Btn" onclick="contacts.toggleFilterDropdown('${field.id}', event)">
+                <span>${field.label}</span>
+                <span class="filter-arrow">▼</span>
+            </button>
+        `).join('');
+        
+        const specialFiltersHTML = specialFilters.map(filter => `
+            <button class="filter-chip" id="filter_${filter.id}_Btn" onclick="contacts.toggleFilterDropdown('${filter.id}', event)">
+                <span>${filter.label}</span>
+                <span class="filter-arrow">▼</span>
+            </button>
+        `).join('');
+        
+        const resetButton = `
+            <button class="filter-chip filter-reset" id="filterResetBtn" onclick="contacts.resetFilters()" style="display: none;">
+                <span>✕ Réinitialiser</span>
+            </button>
+        `;
+        
+        filtersContainer.innerHTML = filtersHTML + specialFiltersHTML + resetButton;
+        
+        // Initialiser activeFilters pour tous les champs
+        filterableFields.forEach(field => {
+            if (!this.activeFilters[field.id]) {
+                this.activeFilters[field.id] = [];
+            }
+        });
+    },
+
     render() {
         const filtered = this.getFiltered();
         const grid = document.getElementById('contactsGrid');
@@ -430,41 +477,48 @@ const contacts = {
         
         // Générer les options
         let options = [];
-        if (filterType === 'gender') {
-            options = [
-                { value: '👨 Homme', label: '👨 Homme' },
-                { value: '👩 Femme', label: '👩 Femme' }
-            ];
-        } else if (filterType === 'complete') {
+        
+        if (filterType === 'complete') {
+            // Filtre spécial "Profil complet"
             options = [
                 { value: 'oui', label: '✅ Oui' },
                 { value: 'non', label: '❌ Non' }
             ];
         } else {
-            // Combiner les tags par défaut et personnalisés en évitant les doublons
-            const defaultTags = app.defaultTags[filterType] || [];
-            const customTags = app.customTags[filterType] || [];
+            // Trouver le champ correspondant
+            const allFields = [...app.defaultFields, ...app.customFields];
+            const field = allFields.find(f => f.id === filterType);
             
-            // Créer un Map pour éviter les doublons (clé = value)
-            const tagMap = new Map();
+            if (!field) {
+                console.error('Field not found:', filterType);
+                return;
+            }
             
-            // Ajouter d'abord les tags par défaut
-            defaultTags.forEach(tag => {
-                tagMap.set(tag.value, tag);
-            });
-            
-            // Ajouter les tags personnalisés (écrase les doublons avec la version personnalisée)
-            customTags.forEach(tag => {
-                tagMap.set(tag.value, tag);
-            });
-            
-            // Convertir en tableau
-            options = Array.from(tagMap.values());
+            if (field.type === 'select') {
+                // Champs select : utiliser tags
+                const fieldTags = window.tags.getAllOptions(filterType);
+                options = fieldTags.map(tag => ({
+                    value: tag.value,
+                    label: tag.label
+                }));
+            } else if (field.type === 'radio') {
+                // Champs radio : utiliser options
+                options = (field.options || []).map(opt => ({
+                    value: opt,
+                    label: opt
+                }));
+            } else if (field.type === 'checkbox') {
+                // Champs checkbox : Oui/Non
+                options = [
+                    { value: true, label: '✅ Oui' },
+                    { value: false, label: '❌ Non' }
+                ];
+            }
         }
         
         // Construire le HTML
         const html = options.map((opt, index) => {
-            const isSelected = this.activeFilters[filterType].includes(opt.value);
+            const isSelected = this.activeFilters[filterType] && this.activeFilters[filterType].includes(opt.value);
             return `
                 <div class="filter-option ${isSelected ? 'selected' : ''}" data-filter-type="${filterType}" data-option-index="${index}">
                     <div class="filter-option-checkbox"></div>
@@ -490,7 +544,6 @@ const contacts = {
     },
     
     toggleFilterValue(filterType, value) {
-        const index = this.activeFilters[filterType].indexOf(value);
         if (index > -1) {
             this.activeFilters[filterType].splice(index, 1);
         } else {
