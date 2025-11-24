@@ -1,6 +1,6 @@
 // stats.js - Graphiques et statistiques
 const stats = {
-    currentType: 'sexe',
+    currentType: null, // Sera initialisé par renderTabs()
 
     // Générer dynamiquement les onglets en fonction des champs
     renderTabs() {
@@ -62,6 +62,7 @@ const stats = {
         if (firstTab) {
             firstTab.classList.add('active');
             this.currentType = firstTab.getAttribute('data-type');
+            console.log('✅ First tab activated:', this.currentType);
         }
         
         console.log('✅ stats.renderTabs completed');
@@ -69,7 +70,10 @@ const stats = {
 
     render() {
         this.updateGlobalStats();
-        this.renderChart();
+        // Rendre le chart seulement si currentType est valide
+        if (this.currentType) {
+            this.renderChart();
+        }
     },
 
     updateGlobalStats() {
