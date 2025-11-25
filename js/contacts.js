@@ -406,10 +406,27 @@ const contacts = {
         // Remplir dynamiquement tous les champs
         const allFields = app.getAllFields();
         allFields.forEach(field => {
+            const value = contact[field.id];
+            
+            // Traiter les radios EN PREMIER (pas d'élément avec id="field.id")
+            if (field.type === 'radio') {
+                console.log(`📻 Loading radio field ${field.id}, value from contact:`, value);
+                if (value) {
+                    const radio = document.querySelector(`input[name="${field.id}"][value="${value}"]`);
+                    console.log(`📻 Found radio element for "${value}":`, radio);
+                    if (radio) {
+                        radio.checked = true;
+                        console.log(`📻 Radio checked:`, radio.checked);
+                    } else {
+                        console.error(`❌ Radio not found for name="${field.id}" value="${value}"`);
+                    }
+                }
+                return; // Pas besoin de chercher d'élément par ID
+            }
+            
+            // Pour les autres types, chercher l'élément par ID
             const element = document.getElementById(field.id);
             if (!element) return;
-            
-            const value = contact[field.id];
             
             switch (field.type) {
                 case 'select':
@@ -431,21 +448,6 @@ const contacts = {
                         hiddenInput.value = '';
                         displayEl.textContent = 'Sélectionner...';
                         displayEl.className = 'tag-selector-placeholder';
-                    }
-                    break;
-                    
-                case 'radio':
-                    // Radio buttons
-                    console.log(`📻 Loading radio field ${field.id}, value from contact:`, value);
-                    if (value) {
-                        const radio = document.querySelector(`input[name="${field.id}"][value="${value}"]`);
-                        console.log(`📻 Found radio element for "${value}":`, radio);
-                        if (radio) {
-                            radio.checked = true;
-                            console.log(`📻 Radio checked:`, radio.checked);
-                        } else {
-                            console.error(`❌ Radio not found for name="${field.id}" value="${value}"`);
-                        }
                     }
                     break;
                     
