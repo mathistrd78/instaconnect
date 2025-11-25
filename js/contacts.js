@@ -275,10 +275,14 @@ const contacts = {
         
         // Récupérer dynamiquement les valeurs de tous les champs
         const allFields = app.getAllFields();
+        console.log('📋 All fields being saved:', allFields.length, allFields.map(f => `${f.id} (${f.type})`));
         allFields.forEach(field => {
             const element = document.getElementById(field.id);
             
-            if (!element) return;
+            if (!element) {
+                console.warn(`⚠️ Element not found for field: ${field.id}`);
+                return;
+            }
             
             switch (field.type) {
                 case 'radio':
