@@ -267,6 +267,7 @@ const app = {
 
     // Ajouter un nouveau champ personnalisé
     addCustomField(fieldData) {
+        console.log('➕ addCustomField called with:', fieldData);
         const newField = {
             id: 'custom_' + Date.now(),
             type: fieldData.type,
@@ -278,8 +279,11 @@ const app = {
             tags: fieldData.type === 'select' ? [] : undefined // Pour les champs avec tags
         };
         
+        console.log('➕ New field created:', newField);
         this.customFields.push(newField);
+        console.log('➕ customFields after push:', this.customFields.length, this.customFields);
         this.dataStore.save();
+        console.log('➕ save() called');
         return newField;
     },
 
