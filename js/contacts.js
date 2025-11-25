@@ -277,6 +277,15 @@ const contacts = {
         const allFields = app.getAllFields();
         console.log('📋 All fields being saved:', allFields.length, allFields.map(f => `${f.id} (${f.type})`));
         allFields.forEach(field => {
+            // Pour les radios, pas besoin de chercher un élément par ID
+            if (field.type === 'radio') {
+                const radioChecked = document.querySelector(`input[name="${field.id}"]:checked`);
+                contact[field.id] = radioChecked ? radioChecked.value : '';
+                console.log(`📻 Radio field ${field.id}:`, contact[field.id], '(checked element:', radioChecked, ')');
+                return;
+            }
+            
+            // Pour les autres types, chercher l'élément
             const element = document.getElementById(field.id);
             
             if (!element) {
@@ -285,13 +294,6 @@ const contacts = {
             }
             
             switch (field.type) {
-                case 'radio':
-                    // Pour les radio buttons, chercher celui qui est checked
-                    const radioChecked = document.querySelector(`input[name="${field.id}"]:checked`);
-                    contact[field.id] = radioChecked ? radioChecked.value : '';
-                    console.log(`📻 Radio field ${field.id}:`, contact[field.id], '(checked element:', radioChecked, ')');
-                    break;
-                    
                 case 'checkbox':
                     contact[field.id] = element.checked;
                     break;
