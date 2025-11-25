@@ -147,11 +147,31 @@ const app = {
                 console.log('📤 Saving customTags to Firebase:', JSON.stringify(app.customTags));
                 console.log('📤 Saving customFields to Firebase:', JSON.stringify(app.customFields));
                 console.log('📤 Saving defaultFields to Firebase');
+                
+                // Nettoyer les undefined pour Firebase (Firebase n'accepte pas undefined)
+                const cleanDefaultFields = app.defaultFields.map(f => {
+                    const clean = { ...f };
+                    // Supprimer les propriétés undefined
+                    Object.keys(clean).forEach(key => {
+                        if (clean[key] === undefined) delete clean[key];
+                    });
+                    return clean;
+                });
+                
+                const cleanCustomFields = app.customFields.map(f => {
+                    const clean = { ...f };
+                    // Supprimer les propriétés undefined
+                    Object.keys(clean).forEach(key => {
+                        if (clean[key] === undefined) delete clean[key];
+                    });
+                    return clean;
+                });
+                
                 const userDoc = db.collection('users').doc(userId);
                 batch.set(userDoc, {
                     customTags: app.customTags,
-                    customFields: app.customFields,
-                    defaultFields: app.defaultFields // Sauvegarder aussi les champs par défaut avec leurs tags
+                    customFields: cleanCustomFields,
+                    defaultFields: cleanDefaultFields
                 }, { merge: true });
 
                 await batch.commit();
@@ -275,9 +295,13 @@ const app = {
             required: false,
             order: this.getAllFields().length,
             placeholder: fieldData.placeholder || '',
-            options: fieldData.options || [], // Pour select/radio
-            tags: fieldData.type === 'select' ? [] : undefined // Pour les champs avec tags
+            options: fieldData.options || [] // Pour select/radio
         };
+        
+        // Ajouter tags SEULEMENT pour les champs select (pas undefined pour Firebase)
+        if (fieldData.type === 'select') {
+            newField.tags = [];
+        }
         
         console.log('➕ New field created:', newField);
         this.customFields.push(newField);
