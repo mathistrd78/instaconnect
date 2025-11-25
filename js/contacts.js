@@ -285,6 +285,7 @@ const contacts = {
                     // Pour les radio buttons, chercher celui qui est checked
                     const radioChecked = document.querySelector(`input[name="${field.id}"]:checked`);
                     contact[field.id] = radioChecked ? radioChecked.value : '';
+                    console.log(`📻 Radio field ${field.id}:`, contact[field.id], '(checked element:', radioChecked, ')');
                     break;
                     
                 case 'checkbox':
@@ -429,9 +430,16 @@ const contacts = {
                     
                 case 'radio':
                     // Radio buttons
+                    console.log(`📻 Loading radio field ${field.id}, value from contact:`, value);
                     if (value) {
                         const radio = document.querySelector(`input[name="${field.id}"][value="${value}"]`);
-                        if (radio) radio.checked = true;
+                        console.log(`📻 Found radio element for "${value}":`, radio);
+                        if (radio) {
+                            radio.checked = true;
+                            console.log(`📻 Radio checked:`, radio.checked);
+                        } else {
+                            console.error(`❌ Radio not found for name="${field.id}" value="${value}"`);
+                        }
                     }
                     break;
                     
