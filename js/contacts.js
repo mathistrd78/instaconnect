@@ -597,6 +597,13 @@ const contacts = {
     },
     
     toggleFilterValue(filterType, value) {
+        // S'assurer que activeFilters[filterType] existe
+        if (!this.activeFilters[filterType]) {
+            this.activeFilters[filterType] = [];
+        }
+        
+        const index = this.activeFilters[filterType].indexOf(value);
+        
         if (index > -1) {
             this.activeFilters[filterType].splice(index, 1);
         } else {
@@ -610,29 +617,40 @@ const contacts = {
         this.render();
         
         // Rebuild dropdown to show updated selections
-        const btn = document.querySelector(`#filter${filterType === 'gender' ? 'Gender' : filterType === 'relationType' ? 'Relation' : filterType === 'meetingPlace' ? 'Lieu' : 'Statut'}Btn`);
-        if (btn) {
-            this.toggleFilterDropdown(filterType, { currentTarget: btn, stopPropagation: () => {} });
-        }
+        this.toggleFilterDropdown(filterType, { currentTarget: event.currentTarget, stopPropagation: () => {} });
     },
     
     updateFilterButtons() {
-        // Update each filter button
-        const hasGenderFilter = this.activeFilters.gender.length > 0;
-        const hasRelFilter = this.activeFilters.relationType.length > 0;
-        const hasLieuFilter = this.activeFilters.meetingPlace.length > 0;
-        const hasStatutFilter = this.activeFilters.discussionStatus.length > 0;
-        const hasCompleteFilter = this.activeFilters.complete.length > 0;
+        // Update each filter button dynamically
+        const allFields = app.getAllFields();
+        const filterableFields = allFields.filter(f => 
+            f.type === 'select' || f.type === 'radio' || f.type === 'checkbox'
+        );
         
-        document.getElementById('filterGenderBtn').classList.toggle('active', hasGenderFilter);
-        document.getElementById('filterRelationBtn').classList.toggle('active', hasRelFilter);
-        document.getElementById('filterLieuBtn').classList.toggle('active', hasLieuFilter);
-        document.getElementById('filterStatutBtn').classList.toggle('active', hasStatutFilter);
-        document.getElementById('filterCompleteBtn').classList.toggle('active', hasCompleteFilter);
+        let hasAnyFilter = false;
+        
+        filterableFields.forEach(field => {
+            const hasFilter = this.activeFilters[field.id] && this.activeFilters[field.id].length > 0;
+            const btn = document.getElementById(`filter_${field.id}_Btn`);
+            if (btn) {
+                btn.classList.toggle('active', hasFilter);
+            }
+            if (hasFilter) hasAnyFilter = true;
+        });
+        
+        // Profil complet
+        const hasCompleteFilter = this.activeFilters.complete && this.activeFilters.complete.length > 0;
+        const completeBtn = document.getElementById('filter_complete_Btn');
+        if (completeBtn) {
+            completeBtn.classList.toggle('active', hasCompleteFilter);
+        }
+        if (hasCompleteFilter) hasAnyFilter = true;
         
         // Show/hide reset button
-        const hasAnyFilter = hasGenderFilter || hasRelFilter || hasLieuFilter || hasStatutFilter || hasCompleteFilter;
-        document.getElementById('filterResetBtn').style.display = hasAnyFilter ? 'flex' : 'none';
+        const resetBtn = document.getElementById('filterResetBtn');
+        if (resetBtn) {
+            resetBtn.style.display = hasAnyFilter ? 'flex' : 'none';
+        }
     },
     
     resetFilters() {
