@@ -210,26 +210,47 @@ const contacts = {
             // Recherche : uniquement au début du nom (pas partout)
             const matchSearch = c.firstName.toLowerCase().startsWith(search) || c.instagram.toLowerCase().startsWith(search);
             
-            // Filtres cumulables
-            const matchGender = this.activeFilters.gender.length === 0 || this.activeFilters.gender.includes(c.gender);
-            const matchRel = this.activeFilters.relationType.length === 0 || this.activeFilters.relationType.includes(c.relationType);
-            const matchLieu = this.activeFilters.meetingPlace.length === 0 || this.activeFilters.meetingPlace.includes(c.meetingPlace);
-            const matchStat = this.activeFilters.discussionStatus.length === 0 || this.activeFilters.discussionStatus.includes(c.discussionStatus);
+            // Vérifier TOUS les filtres actifs dynamiquement
+            let matchAllFilters = true;
             
-            // Filtre profil complet : vérifier si tous les champs obligatoires sont remplis
-            let matchComplete = true;
-            if (this.activeFilters.complete.length > 0) {
-                const isEmpty = (value) => !value || value === '';
-                const isComplete = !isEmpty(c.relationType) && !isEmpty(c.meetingPlace) && !isEmpty(c.discussionStatus) && !isEmpty(c.gender);
+            for (const filterType in this.activeFilters) {
+                const filterValues = this.activeFilters[filterType];
                 
-                if (this.activeFilters.complete.includes('oui')) {
-                    matchComplete = isComplete; // Profil complet
-                } else if (this.activeFilters.complete.includes('non')) {
-                    matchComplete = !isComplete; // Profil incomplet
+                if (filterValues.length === 0) continue; // Pas de filtre actif pour ce champ
+                
+                if (filterType === 'complete') {
+                    // Filtre spécial "Profil complet"
+                    const isEmpty = (value) => !value || value === '';
+                    const isComplete = !isEmpty(c.relationType) && !isEmpty(c.meetingPlace) && !isEmpty(c.discussionStatus) && !isEmpty(c.gender);
+                    
+                    if (filterValues.includes('oui')) {
+                        matchAllFilters = matchAllFilters && isComplete;
+                    } else if (filterValues.includes('non')) {
+                        matchAllFilters = matchAllFilters && !isComplete;
+                    }
+                } else {
+                    // Filtres normaux (champs par défaut + personnalisés)
+                    const contactValue = c[filterType];
+                    
+                    // Pour les checkbox, la valeur peut être true/false ou "true"/"false"
+                    const normalizedContactValue = contactValue === true || contactValue === 'true' ? true : 
+                                                   contactValue === false || contactValue === 'false' ? false : 
+                                                   contactValue;
+                    
+                    const match = filterValues.some(filterValue => {
+                        // Normaliser aussi la valeur du filtre
+                        const normalizedFilterValue = filterValue === true || filterValue === 'true' ? true : 
+                                                      filterValue === false || filterValue === 'false' ? false : 
+                                                      filterValue;
+                        
+                        return normalizedContactValue === normalizedFilterValue;
+                    });
+                    
+                    matchAllFilters = matchAllFilters && match;
                 }
             }
             
-            return matchSearch && matchGender && matchRel && matchLieu && matchStat && matchComplete;
+            return matchSearch && matchAllFilters;
         }).sort((a, b) => {
             // Tri alphabétique : ignorer les caractères spéciaux (@, _, etc.)
             const cleanA = a.firstName.replace(/^[@_\-\.\s]+/, '').toLowerCase();
