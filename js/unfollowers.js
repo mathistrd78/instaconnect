@@ -630,7 +630,7 @@ const unfollowers = {
         list.innerHTML = html;
     },
 
-    markAsUnfollowed(username) {
+    async markAsUnfollowed(username) {
         if (!confirm(`Ajouter @${username} à la liste "À ne plus suivre" ?\n\nCette personne sera retirée des unfollowers et vous serez alerté si vous tentez de la re-suivre.`)) {
             return;
         }
@@ -644,6 +644,30 @@ const unfollowers = {
             const user = typeof item === 'string' ? item : item.username;
             return user !== username;
         });
+        
+        // NOUVEAU: Vérifier si un contact existe avec ce pseudo Instagram et le supprimer
+        const contactToDelete = app.dataStore.contacts.find(c => 
+            c.instagram.toLowerCase().replace('@', '') === username.toLowerCase()
+        );
+        
+        if (contactToDelete) {
+            console.log(`🗑️ Deleting contact for @${username} from contacts list`);
+            const index = app.dataStore.contacts.findIndex(c => c.id === contactToDelete.id);
+            if (index !== -1) {
+                app.dataStore.contacts.splice(index, 1);
+                await app.dataStore.deleteContact(contactToDelete.id);
+            }
+            
+            // Rafraîchir l'affichage des contacts si on est sur cette page
+            if (app.currentSection === 'contacts' && typeof contacts !== 'undefined' && contacts.render) {
+                contacts.render();
+            }
+            
+            // Rafraîchir les stats
+            if (typeof stats !== 'undefined' && stats.render) {
+                stats.render();
+            }
+        }
         
         // NOUVEAU: Diminuer le compteur de following
         const followingCountEl = document.getElementById('followingCount');
