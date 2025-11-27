@@ -307,13 +307,13 @@ const contacts = {
         this.currentViewId = contactId;
 
         // Prénom et Instagram
-        document.getElementById('viewFirstName').textContent = contact.firstName;
-        document.getElementById('viewInstagram').href = `https://instagram.com/${contact.instagram.replace('@', '')}`;
-        document.getElementById('viewInstagram').textContent = contact.instagram;
+        document.getElementById('profileName').textContent = contact.firstName;
+        document.getElementById('profileInsta').href = `https://instagram.com/${contact.instagram.replace('@', '')}`;
+        document.getElementById('profileInsta').textContent = contact.instagram;
 
         // Générer dynamiquement les détails
         const allFields = app.getAllFields();
-        const detailsContainer = document.getElementById('viewContactDetails');
+        const detailsContainer = document.getElementById('profileInfo');
         
         let detailsHTML = '';
         allFields.forEach(field => {
