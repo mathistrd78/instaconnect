@@ -215,15 +215,23 @@ const contacts = {
     getFiltered() {
         let result = [...app.dataStore.contacts];
         
+        // Filtrer les contacts qui sont dans la liste "À ne plus suivre"
+        if (typeof unfollowers !== 'undefined' && unfollowers.data.doNotFollowList) {
+            result = result.filter(contact => {
+                const instagramUsername = contact.instagram.toLowerCase().replace('@', '');
+                return !unfollowers.data.doNotFollowList.has(instagramUsername);
+            });
+        }
+        
         // Appliquer la recherche textuelle
         const searchBox = document.getElementById('searchBox');
         const searchTerm = searchBox ? searchBox.value.toLowerCase().trim() : '';
         
         if (searchTerm) {
             result = result.filter(contact => {
-                const firstName = contact.firstName.toLowerCase();
+                const firstName = contact.firstName.toLowerCase().replace(/^@+/, ''); // Enlever les @ au début
                 const instagram = contact.instagram.toLowerCase().replace('@', '');
-                return firstName.includes(searchTerm) || instagram.includes(searchTerm);
+                return firstName.startsWith(searchTerm) || instagram.startsWith(searchTerm);
             });
         }
         
