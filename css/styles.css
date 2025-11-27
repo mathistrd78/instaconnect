@@ -1770,12 +1770,31 @@ body.dark-mode .profile-view {
 }
 
 body.dark-mode .profile-name {
-    color: #ffffff;
+    color: #f8f9fa;
 }
 
 body.dark-mode .profile-info {
-    background: #3a3a3a;
-    color: #ffffff;
+    background: #2d2d2d;
+}
+
+body.dark-mode .view-detail-item {
+    border-bottom-color: #4a4a4a;
+}
+
+body.dark-mode .view-detail-label {
+    color: #adb5bd;
+}
+
+body.dark-mode .view-detail-value {
+    color: #f8f9fa;
+}
+
+body.dark-mode .profile-info-item {
+    border-bottom-color: #4a4a4a;
+}
+
+body.dark-mode .profile-info-item strong {
+    color: #adb5bd;
 }
 
 body.dark-mode .tag-dropdown-container {
@@ -1979,14 +1998,21 @@ body.dark-mode .empty-state-text {
 
 .profile-info-item {
     padding: 16px 0;
-    border-bottom: 1px solid #f1f3f5;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.profile-info-item:last-child {
+    border-bottom: none;
 }
 
 .profile-info-item strong {
     display: block;
+    font-size: 12px;
+    font-weight: 600;
     color: #868e96;
-    font-size: 13px;
-    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
 }
 
 /* Tag Dropdown */
@@ -2863,10 +2889,65 @@ body.dark-mode .modal-content {
 /* Profile view - base */
 .profile-view {
     background: white;
+    padding: 24px;
+}
+
+.profile-name {
+    font-size: 28px;
+    font-weight: 700;
+    text-align: center;
+    margin: 0 0 8px 0;
+    color: #212529;
+}
+
+.profile-instagram {
+    color: #E1306C;
+    font-size: 16px;
+    text-align: center;
+    margin: 0 0 32px 0;
+    cursor: pointer;
+    text-decoration: none;
+    display: block;
+    font-weight: 500;
+}
+
+.profile-instagram:hover {
+    text-decoration: underline;
 }
 
 .profile-info {
     background: white;
+    margin-bottom: 24px;
+}
+
+.view-detail-item {
+    padding: 16px 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.view-detail-item:last-child {
+    border-bottom: none;
+}
+
+.view-detail-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #868e96;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.view-detail-value {
+    font-size: 15px;
+    color: #212529;
+    line-height: 1.6;
+    word-wrap: break-word;
+}
+
+.view-detail-value .tag-mini {
+    display: inline-block;
+    margin: 2px 0;
 }
 
 body.dark-mode .form-actions {
