@@ -459,6 +459,8 @@ const authManager = {
             const contactsSnapshot = await db.collection('users').doc(userId).collection('contacts').get();
             
             app.dataStore.contacts = [];
+            const contactsToDelete = []; // Pour stocker les contacts à supprimer de Firebase
+            
             contactsSnapshot.forEach(doc => {
                 const contact = doc.data();
                 
@@ -469,8 +471,27 @@ const authManager = {
                     contact.gender = '👩 Femme';
                 }
                 
-                app.dataStore.contacts.push(contact);
+                // Vérifier si ce contact est dans la liste "À ne plus suivre"
+                const instagramUsername = contact.instagram.toLowerCase().replace('@', '');
+                if (unfollowers.data.doNotFollowList.has(instagramUsername)) {
+                    console.log(`🗑️ Contact @${instagramUsername} is in doNotFollow list - marking for deletion`);
+                    contactsToDelete.push(contact.id);
+                } else {
+                    app.dataStore.contacts.push(contact);
+                }
             });
+            
+            // Supprimer les contacts qui sont dans la liste "doNotFollow" de Firebase
+            if (contactsToDelete.length > 0) {
+                console.log(`🗑️ Deleting ${contactsToDelete.length} contacts from Firebase...`);
+                const batch = db.batch();
+                contactsToDelete.forEach(contactId => {
+                    const contactRef = db.collection('users').doc(userId).collection('contacts').doc(contactId);
+                    batch.delete(contactRef);
+                });
+                await batch.commit();
+                console.log('✅ Contacts deleted from Firebase');
+            }
             
             console.log('✅ Contacts loaded from Firebase:', app.dataStore.contacts.length);
             
