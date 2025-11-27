@@ -118,6 +118,15 @@ const contacts = {
             }
         });
         
+        // Ajouter le listener pour la barre de recherche
+        const searchBox = document.getElementById('searchBox');
+        if (searchBox) {
+            searchBox.addEventListener('input', () => {
+                console.log('🔍 Search input changed:', searchBox.value);
+                this.render();
+            });
+        }
+        
         console.log('✅ renderFilters completed');
     },
 
@@ -204,344 +213,285 @@ const contacts = {
     },
 
     getFiltered() {
-        const search = document.getElementById('searchBox').value.toLowerCase();
-
-        return app.dataStore.contacts.filter(c => {
-            // Recherche : uniquement au début du nom (pas partout)
-            const matchSearch = c.firstName.toLowerCase().startsWith(search) || c.instagram.toLowerCase().startsWith(search);
-            
-            // Vérifier TOUS les filtres actifs dynamiquement
-            let matchAllFilters = true;
-            
-            for (const filterType in this.activeFilters) {
-                const filterValues = this.activeFilters[filterType];
-                
-                if (filterValues.length === 0) continue; // Pas de filtre actif pour ce champ
-                
-                if (filterType === 'complete') {
-                    // Filtre spécial "Profil complet"
-                    const isEmpty = (value) => !value || value === '';
-                    const isComplete = !isEmpty(c.relationType) && !isEmpty(c.meetingPlace) && !isEmpty(c.discussionStatus) && !isEmpty(c.gender);
-                    
-                    if (filterValues.includes('oui')) {
-                        matchAllFilters = matchAllFilters && isComplete;
-                    } else if (filterValues.includes('non')) {
-                        matchAllFilters = matchAllFilters && !isComplete;
-                    }
-                } else {
-                    // Filtres normaux (champs par défaut + personnalisés)
-                    const contactValue = c[filterType];
-                    
-                    // Pour les checkbox, la valeur peut être true/false ou "true"/"false"
-                    const normalizedContactValue = contactValue === true || contactValue === 'true' ? true : 
-                                                   contactValue === false || contactValue === 'false' ? false : 
-                                                   contactValue;
-                    
-                    const match = filterValues.some(filterValue => {
-                        // Normaliser aussi la valeur du filtre
-                        const normalizedFilterValue = filterValue === true || filterValue === 'true' ? true : 
-                                                      filterValue === false || filterValue === 'false' ? false : 
-                                                      filterValue;
-                        
-                        return normalizedContactValue === normalizedFilterValue;
-                    });
-                    
-                    matchAllFilters = matchAllFilters && match;
-                }
-            }
-            
-            return matchSearch && matchAllFilters;
-        }).sort((a, b) => {
-            // Tri alphabétique : ignorer les caractères spéciaux (@, _, etc.)
-            const cleanA = a.firstName.replace(/^[@_\-\.\s]+/, '').toLowerCase();
-            const cleanB = b.firstName.replace(/^[@_\-\.\s]+/, '').toLowerCase();
-            return cleanA.localeCompare(cleanB, 'fr');
-        });
-    },
-
-    saveContact(e) {
-        e.preventDefault();
+        let result = [...app.dataStore.contacts];
         
-        console.log('🔵 START saveContact - currentEditId:', this.currentEditId);
+        // Appliquer la recherche textuelle
+        const searchBox = document.getElementById('searchBox');
+        const searchTerm = searchBox ? searchBox.value.toLowerCase().trim() : '';
         
-        let instagram = document.getElementById('instagram').value.toLowerCase().trim();
-        if (!instagram.startsWith('@')) instagram = '@' + instagram;
-        
-        // Remove @ for checking
-        const cleanUsername = instagram.replace('@', '');
-        
-        // Check if in "do not follow" list
-        if (unfollowers.data.doNotFollowList.has(cleanUsername) && !this.currentEditId) {
-            const proceed = confirm(
-                `⚠️ ATTENTION !\n\n` +
-                `@${cleanUsername} est dans votre liste "À ne plus suivre".\n\n` +
-                `Vous avez marqué ce profil comme quelqu'un à ne plus suivre.\n\n` +
-                `Voulez-vous quand même l'ajouter à vos contacts ?`
-            );
-            
-            if (!proceed) {
-                return; // Cancel adding
-            }
+        if (searchTerm) {
+            result = result.filter(contact => {
+                const firstName = contact.firstName.toLowerCase();
+                const instagram = contact.instagram.toLowerCase().replace('@', '');
+                return firstName.includes(searchTerm) || instagram.includes(searchTerm);
+            });
         }
         
-        // Base contact object
-        const contact = {
-            id: this.currentEditId || Date.now().toString(),
-            firstName: document.getElementById('firstName').value,
-            instagram,
-            dateAdded: this.currentEditId ? 
-                app.dataStore.contacts.find(c => c.id === this.currentEditId)?.dateAdded || new Date().toISOString() : 
-                new Date().toISOString()
-        };
-        
-        // Récupérer dynamiquement les valeurs de tous les champs
+        // Appliquer les filtres par champs
         const allFields = app.getAllFields();
-        console.log('📋 All fields being saved:', allFields.length, allFields.map(f => `${f.id} (${f.type})`));
-        allFields.forEach(field => {
-            // Pour les radios, pas besoin de chercher un élément par ID
-            if (field.type === 'radio') {
-                const radioChecked = document.querySelector(`input[name="${field.id}"]:checked`);
-                contact[field.id] = radioChecked ? radioChecked.value : '';
-                console.log(`📻 Radio field ${field.id}:`, contact[field.id], '(checked element:', radioChecked, ')');
-                return;
-            }
-            
-            // Pour les autres types, chercher l'élément
-            const element = document.getElementById(field.id);
-            
-            if (!element) {
-                console.warn(`⚠️ Element not found for field: ${field.id}`);
-                return;
-            }
-            
-            switch (field.type) {
-                case 'checkbox':
-                    contact[field.id] = element.checked;
-                    break;
+        const filterableFields = allFields.filter(field => 
+            field.type === 'select' || field.type === 'radio' || field.type === 'checkbox'
+        );
+        
+        filterableFields.forEach(field => {
+            const filters = this.activeFilters[field.id];
+            if (filters && filters.length > 0) {
+                result = result.filter(contact => {
+                    const value = contact[field.id];
                     
-                case 'select':
-                    // Pour les selects avec tags, prendre la valeur du hidden input
-                    contact[field.id] = element.value || '';
-                    break;
-                    
-                default:
-                    // text, textarea, number, date, tel, email, url
-                    contact[field.id] = element.value || '';
+                    if (field.type === 'checkbox') {
+                        // Pour checkbox: vérifier oui/non
+                        if (filters.includes('oui')) {
+                            return value === true || value === 'true';
+                        }
+                        if (filters.includes('non')) {
+                            return value === false || value === 'false' || !value;
+                        }
+                    } else {
+                        // Pour select/radio: vérifier la valeur exacte
+                        return filters.includes(value);
+                    }
+                    return false;
+                });
             }
         });
+        
+        // Filtre profil complet
+        if (this.activeFilters.complete && this.activeFilters.complete.length > 0) {
+            result = result.filter(contact => {
+                const isComplete = this.isProfileComplete(contact);
+                if (this.activeFilters.complete.includes('oui')) return isComplete;
+                if (this.activeFilters.complete.includes('non')) return !isComplete;
+                return false;
+            });
+        }
+        
+        // Sort by firstName
+        result.sort((a, b) => {
+            const aName = a.firstName.replace(/^@+/, '');
+            const bName = b.firstName.replace(/^@+/, '');
+            return aName.localeCompare(bName);
+        });
+        
+        return result;
+    },
 
-        console.log('🔵 Contact object created:', JSON.stringify(contact, null, 2));
-
-        if (this.currentEditId) {
-            const idx = app.dataStore.contacts.findIndex(c => c.id === this.currentEditId);
-            console.log('🔵 Editing existing contact at index:', idx);
-            if (idx !== -1) {
-                app.dataStore.contacts[idx] = contact;
-                console.log('🔵 Contact updated in local array');
-            } else {
-                console.error('❌ Contact not found in local array!');
+    isProfileComplete(contact) {
+        // Récupérer tous les champs obligatoires
+        const allFields = app.getAllFields();
+        const requiredFields = allFields.filter(field => field.required);
+        
+        // Vérifier que tous les champs obligatoires sont remplis
+        for (const field of requiredFields) {
+            const value = contact[field.id];
+            if (!value || value === '' || value === null || value === undefined) {
+                return false;
             }
-        } else {
-            app.dataStore.contacts.push(contact);
-            console.log('🔵 New contact added to local array');
         }
-
-        console.log('🔵 Calling save with contact:', contact.id);
-        app.dataStore.save(contact); // Passer le contact spécifique
-        this.render();
-        app.closeAddModal();
-        if (this.currentViewId) this.viewProfile(this.currentViewId);
         
-        console.log('🔵 END saveContact');
+        return true;
     },
 
-    viewProfile(id) {
-        const contact = app.dataStore.contacts.find(c => c.id === id);
+    viewProfile(contactId) {
+        const contact = app.dataStore.contacts.find(c => c.id === contactId);
         if (!contact) return;
 
-        this.currentViewId = id;
+        this.currentViewId = contactId;
+
+        // Prénom et Instagram
+        document.getElementById('viewFirstName').textContent = contact.firstName;
+        document.getElementById('viewInstagram').href = `https://instagram.com/${contact.instagram.replace('@', '')}`;
+        document.getElementById('viewInstagram').textContent = contact.instagram;
+
+        // Générer dynamiquement les détails
+        const allFields = app.getAllFields();
+        const detailsContainer = document.getElementById('viewContactDetails');
         
-        document.getElementById('profileName').textContent = contact.firstName;
-        document.getElementById('profileInsta').textContent = contact.instagram;
+        let detailsHTML = '';
+        allFields.forEach(field => {
+            const value = contact[field.id];
+            
+            if (value !== undefined && value !== null && value !== '') {
+                let displayValue = value;
+                
+                if (field.type === 'select' || field.type === 'radio') {
+                    // Pour les champs avec tags, afficher le tag formaté
+                    const tag = tags.findTag(field.id, value);
+                    if (tag) {
+                        displayValue = `<span class="tag-mini ${tag.class}">${tag.label}</span>`;
+                    } else if (field.type === 'radio' && field.options) {
+                        // Pour les radio, chercher dans les options
+                        displayValue = value;
+                    }
+                } else if (field.type === 'checkbox') {
+                    displayValue = (value === true || value === 'true') ? '✅ Oui' : '❌ Non';
+                } else if (field.type === 'textarea') {
+                    displayValue = value.replace(/\n/g, '<br>');
+                }
+                
+                detailsHTML += `
+                    <div class="view-detail-item">
+                        <div class="view-detail-label">${field.label}</div>
+                        <div class="view-detail-value">${displayValue}</div>
+                    </div>
+                `;
+            }
+        });
         
-        const fields = [
-            {key: 'relationType', label: 'Type de relation'},
-            {key: 'meetingPlace', label: 'Lieu de rencontre'},
-            {key: 'discussionStatus', label: 'Statut de discussion'},
-            {key: 'gender', label: 'Sexe'},
-            {key: 'profession', label: 'Études / Profession'},
-            {key: 'location', label: 'Lieu d\'habitation'},
-            {key: 'age', label: 'Âge', suffix: ' ans'},
-            {key: 'phone', label: 'Téléphone', link: true},
-            {key: 'interests', label: 'Centres d\'intérêt'},
-            {key: 'notes', label: 'Notes'}
-        ];
-
-        let html = fields.filter(f => contact[f.key]).map(f => {
-            let value = contact[f.key];
-            if (f.suffix) value += f.suffix;
-            if (f.link) value = `<a href="tel:${value}" style="color: #E1306C;">${value}</a>`;
-            return `
-                <div class="profile-info-item">
-                    <strong>${f.label}</strong>
-                    <span>${value}</span>
-                </div>
-            `;
-        }).join('');
-
-        html += `
-            <div class="profile-info-item">
-                <strong>Ajouté le</strong>
-                <span>${new Date(contact.dateAdded).toLocaleDateString('fr-FR', {
-                    year: 'numeric', month: 'long', day: 'numeric'
-                })}</span>
-            </div>
-        `;
-
-        document.getElementById('profileInfo').innerHTML = html;
+        detailsContainer.innerHTML = detailsHTML;
         document.getElementById('viewModal').classList.add('active');
-        document.querySelector('#viewModal .modal-content').scrollTop = 0;
     },
 
-    openInstagram() {
-        const contact = app.dataStore.contacts.find(c => c.id === this.currentViewId);
-        if (contact) {
-            const clean = contact.instagram.replace('@', '');
-            window.location.href = `https://instagram.com/${clean}`;
-        }
-    },
-
-    editProfile() {
-        const contact = app.dataStore.contacts.find(c => c.id === this.currentViewId);
+    editProfile(contactId) {
+        const contact = app.dataStore.contacts.find(c => c.id === contactId);
         if (!contact) return;
 
-        this.currentEditId = this.currentViewId;
+        app.closeViewModal();
         
-        // Re-générer le formulaire pour s'assurer qu'il est à jour
+        this.currentEditId = contactId;
+        
+        // Générer le formulaire dynamiquement
         this.renderDynamicForm();
-        
-        // Remplir les champs fixes
+
+        // Remplir le formulaire
         document.getElementById('firstName').value = contact.firstName;
         document.getElementById('instagram').value = contact.instagram.replace('@', '');
-        
-        // Remplir dynamiquement tous les champs
+
+        // Remplir les champs dynamiques
         const allFields = app.getAllFields();
         allFields.forEach(field => {
             const value = contact[field.id];
             
-            // Traiter les radios EN PREMIER (pas d'élément avec id="field.id")
-            if (field.type === 'radio') {
-                console.log(`📻 Loading radio field ${field.id}, value from contact:`, value);
-                if (value) {
-                    const radio = document.querySelector(`input[name="${field.id}"][value="${value}"]`);
-                    console.log(`📻 Found radio element for "${value}":`, radio);
-                    if (radio) {
-                        radio.checked = true;
-                        console.log(`📻 Radio checked:`, radio.checked);
-                    } else {
-                        console.error(`❌ Radio not found for name="${field.id}" value="${value}"`);
+            if (field.type === 'select') {
+                // Tag selector
+                const hiddenInput = document.getElementById(field.id);
+                const displayEl = document.getElementById(field.id + 'Display');
+                if (hiddenInput && displayEl && value) {
+                    hiddenInput.value = value;
+                    const tag = tags.findTag(field.id, value);
+                    if (tag) {
+                        displayEl.textContent = tag.label;
+                        displayEl.className = 'tag-selector-value';
                     }
                 }
-                return; // Pas besoin de chercher d'élément par ID
-            }
-            
-            // Pour les autres types, chercher l'élément par ID
-            const element = document.getElementById(field.id);
-            if (!element) return;
-            
-            switch (field.type) {
-                case 'select':
-                    // Champs avec tags
-                    const displayEl = document.getElementById(field.id + 'Display');
-                    const hiddenInput = document.getElementById(field.id);
-                    
-                    if (value) {
-                        hiddenInput.value = value;
-                        const tag = tags.findTag(field.id, value);
-                        if (tag) {
-                            displayEl.textContent = tag.label;
-                            displayEl.className = 'tag-selector-value';
-                        } else {
-                            displayEl.textContent = 'Sélectionner...';
-                            displayEl.className = 'tag-selector-placeholder';
+            } else if (field.type === 'radio') {
+                // Radio buttons
+                if (field.options) {
+                    field.options.forEach((opt, index) => {
+                        const radio = document.getElementById(`${field.id}_${index}`);
+                        if (radio && value === opt) {
+                            radio.checked = true;
                         }
-                    } else {
-                        hiddenInput.value = '';
-                        displayEl.textContent = 'Sélectionner...';
-                        displayEl.className = 'tag-selector-placeholder';
-                    }
-                    break;
-                    
-                case 'checkbox':
-                    element.checked = !!value;
-                    break;
-                    
-                default:
-                    // text, textarea, number, date, tel, email, url
-                    element.value = value || '';
+                    });
+                }
+            } else if (field.type === 'checkbox') {
+                const checkbox = document.getElementById(field.id);
+                if (checkbox) {
+                    checkbox.checked = (value === true || value === 'true');
+                }
+            } else {
+                // Text, textarea, number, date, etc.
+                const input = document.getElementById(field.id);
+                if (input && value !== undefined && value !== null) {
+                    input.value = value;
+                }
             }
         });
-        
+
         document.getElementById('modalTitle').textContent = '✏️ Modifier le contact';
-        app.closeViewModal();
         document.getElementById('addModal').classList.add('active');
     },
 
-    deleteContact() {
-        if (!confirm('Supprimer ce contact ?')) return;
-        
-        // Delete from Firebase
-        app.dataStore.deleteContact(this.currentViewId);
-        
-        // Remove from local array (will be synced by Firebase listener)
-        app.dataStore.contacts = app.dataStore.contacts.filter(c => c.id !== this.currentViewId);
-        
+    async saveContact(event) {
+        event.preventDefault();
+
+        const firstName = document.getElementById('firstName').value;
+        const instagram = '@' + document.getElementById('instagram').value.replace('@', '');
+
+        // Collecter tous les champs dynamiques
+        const allFields = app.getAllFields();
+        const contactData = {
+            firstName,
+            instagram
+        };
+
+        allFields.forEach(field => {
+            if (field.type === 'select') {
+                const value = document.getElementById(field.id)?.value || '';
+                contactData[field.id] = value;
+            } else if (field.type === 'radio') {
+                const radios = document.getElementsByName(field.id);
+                let selectedValue = '';
+                radios.forEach(radio => {
+                    if (radio.checked) {
+                        selectedValue = radio.value;
+                    }
+                });
+                contactData[field.id] = selectedValue;
+            } else if (field.type === 'checkbox') {
+                const checkbox = document.getElementById(field.id);
+                contactData[field.id] = checkbox ? checkbox.checked : false;
+            } else {
+                const input = document.getElementById(field.id);
+                contactData[field.id] = input ? input.value : '';
+            }
+        });
+
+        // Ancienne logique de compatibilité pour le genre (si pas de valeur dans le nouveau système)
+        if (!contactData.gender || contactData.gender === '') {
+            const genderMale = document.getElementById('genderMale');
+            const genderFemale = document.getElementById('genderFemale');
+            if (genderMale && genderMale.checked) {
+                contactData.gender = '👨 Homme';
+            } else if (genderFemale && genderFemale.checked) {
+                contactData.gender = '👩 Femme';
+            }
+        }
+
+        if (this.currentEditId) {
+            const contact = app.dataStore.contacts.find(c => c.id === this.currentEditId);
+            Object.assign(contact, contactData);
+            await app.dataStore.save(contact);
+        } else {
+            const newContact = {
+                id: Date.now().toString(),
+                ...contactData,
+                dateAdded: new Date().toISOString()
+            };
+            app.dataStore.contacts.push(newContact);
+            await app.dataStore.save(newContact);
+        }
+
+        app.closeAddModal();
         this.render();
         stats.render();
-        app.closeViewModal();
     },
-    
-    deleteAndUnfollow() {
-        const contact = app.dataStore.contacts.find(c => c.id === this.currentViewId);
-        if (!contact) return;
-        
-        const cleanUsername = contact.instagram.replace('@', '');
-        
-        if (!confirm(
-            `⚠️ ATTENTION !\n\n` +
-            `Vous allez :\n` +
-            `1️⃣ Supprimer la fiche contact de ${contact.firstName}\n` +
-            `2️⃣ Ajouter @${cleanUsername} à la liste "À ne plus suivre"\n\n` +
-            `Cette personne ne réapparaîtra plus dans les analyses.\n\n` +
-            `Confirmer ?`
-        )) return;
-        
-        // Add to doNotFollowList
-        unfollowers.data.doNotFollowList.add(cleanUsername);
-        unfollowers.saveDoNotFollowList();
-        
-        // Delete from Firebase
-        app.dataStore.deleteContact(this.currentViewId);
-        
-        // Remove from local array
-        app.dataStore.contacts = app.dataStore.contacts.filter(c => c.id !== this.currentViewId);
-        
+
+    async deleteContact(contactId) {
+        if (!confirm('Voulez-vous vraiment supprimer ce contact ?')) return;
+
+        const index = app.dataStore.contacts.findIndex(c => c.id === contactId);
+        if (index !== -1) {
+            app.dataStore.contacts.splice(index, 1);
+            await app.dataStore.deleteContact(contactId);
+        }
+
+        app.closeViewModal();
         this.render();
         stats.render();
-        app.closeViewModal();
-        
-        // Show confirmation
-        alert(`✅ Fiche supprimée et @${cleanUsername} ajouté à la liste "À ne plus suivre"`);
     },
-    
-    // Gestion des filtres
+
+    // ==========================================
+    // GESTION DES FILTRES
+    // ==========================================
+
     toggleFilterDropdown(filterType, event) {
-        event.stopPropagation();
+        event?.stopPropagation();
         
         const dropdown = document.getElementById('filterDropdown');
-        const btn = event.currentTarget;
+        const content = document.getElementById('filterDropdownContent');
         
-        // Si on clique sur le même filtre, on ferme
+        // Si on clique sur le même filtre, fermer
         if (this.currentFilterDropdown === filterType && dropdown.style.display === 'block') {
             this.closeFilterDropdown();
             return;
@@ -549,103 +499,92 @@ const contacts = {
         
         this.currentFilterDropdown = filterType;
         
-        // Générer les options
-        let options = [];
+        // Positionner le dropdown sous le bouton cliqué
+        const btn = event?.target.closest('.filter-chip');
+        if (btn) {
+            const rect = btn.getBoundingClientRect();
+            dropdown.style.top = (rect.bottom + window.scrollY) + 'px';
+            dropdown.style.left = rect.left + 'px';
+        }
         
+        // Générer le contenu selon le type de filtre
         if (filterType === 'complete') {
-            // Filtre spécial "Profil complet"
-            options = [
-                { value: 'oui', label: '✅ Oui' },
-                { value: 'non', label: '❌ Non' }
-            ];
+            content.innerHTML = `
+                <label class="filter-option">
+                    <input type="checkbox" value="oui" ${this.activeFilters.complete.includes('oui') ? 'checked' : ''} 
+                           onchange="contacts.toggleFilter('complete', 'oui')">
+                    <span>✅ Oui</span>
+                </label>
+                <label class="filter-option">
+                    <input type="checkbox" value="non" ${this.activeFilters.complete.includes('non') ? 'checked' : ''} 
+                           onchange="contacts.toggleFilter('complete', 'non')">
+                    <span>❌ Non</span>
+                </label>
+            `;
         } else {
             // Trouver le champ correspondant
-            const allFields = [...app.defaultFields, ...app.customFields];
+            const allFields = app.getAllFields();
             const field = allFields.find(f => f.id === filterType);
             
-            if (!field) {
-                console.error('Field not found:', filterType);
-                return;
-            }
-            
-            if (field.type === 'select') {
-                // Champs select : utiliser tags (objet global)
-                const fieldTags = tags.getAllOptions(filterType);
-                options = fieldTags.map(tag => ({
-                    value: tag.value,
-                    label: tag.label
-                }));
-            } else if (field.type === 'radio') {
-                // Champs radio : utiliser options
-                options = (field.options || []).map(opt => ({
-                    value: opt,
-                    label: opt
-                }));
-            } else if (field.type === 'checkbox') {
-                // Champs checkbox : Oui/Non
-                options = [
-                    { value: true, label: '✅ Oui' },
-                    { value: false, label: '❌ Non' }
-                ];
+            if (field) {
+                if (field.type === 'select' || field.type === 'radio') {
+                    // Récupérer les options/tags
+                    let options = [];
+                    if (field.type === 'select' && field.tags) {
+                        options = field.tags.map(tag => ({ value: tag.value, label: tag.label }));
+                    } else if (field.type === 'radio' && field.options) {
+                        options = field.options.map(opt => ({ value: opt, label: opt }));
+                    }
+                    
+                    content.innerHTML = options.map(opt => `
+                        <label class="filter-option">
+                            <input type="checkbox" value="${opt.value}" 
+                                   ${this.activeFilters[filterType].includes(opt.value) ? 'checked' : ''} 
+                                   onchange="contacts.toggleFilter('${filterType}', '${opt.value}')">
+                            <span>${opt.label}</span>
+                        </label>
+                    `).join('');
+                } else if (field.type === 'checkbox') {
+                    content.innerHTML = `
+                        <label class="filter-option">
+                            <input type="checkbox" value="oui" ${this.activeFilters[filterType].includes('oui') ? 'checked' : ''} 
+                                   onchange="contacts.toggleFilter('${filterType}', 'oui')">
+                            <span>✅ Oui</span>
+                        </label>
+                        <label class="filter-option">
+                            <input type="checkbox" value="non" ${this.activeFilters[filterType].includes('non') ? 'checked' : ''} 
+                                   onchange="contacts.toggleFilter('${filterType}', 'non')">
+                            <span>❌ Non</span>
+                        </label>
+                    `;
+                }
             }
         }
         
-        // Construire le HTML
-        const html = options.map((opt, index) => {
-            const isSelected = this.activeFilters[filterType] && this.activeFilters[filterType].includes(opt.value);
-            return `
-                <div class="filter-option ${isSelected ? 'selected' : ''}" data-filter-type="${filterType}" data-option-index="${index}">
-                    <div class="filter-option-checkbox"></div>
-                    <span>${opt.label}</span>
-                </div>
-            `;
-        }).join('');
-        
-        document.getElementById('filterDropdownContent').innerHTML = html;
-        
-        // Ajouter les event listeners
-        document.querySelectorAll('.filter-option').forEach((el, index) => {
-            el.addEventListener('click', () => {
-                const value = options[index].value;
-                this.toggleFilterValue(filterType, value);
-            });
-        });
-        
         dropdown.style.display = 'block';
-        
-        // Ne pas activer visuellement le bouton, juste ouvrir le dropdown
-        // L'état actif dépend uniquement des filtres sélectionnés
     },
     
-    toggleFilterValue(filterType, value) {
-        // S'assurer que activeFilters[filterType] existe
+    toggleFilter(filterType, value) {
         if (!this.activeFilters[filterType]) {
             this.activeFilters[filterType] = [];
         }
         
         const index = this.activeFilters[filterType].indexOf(value);
-        
         if (index > -1) {
             this.activeFilters[filterType].splice(index, 1);
         } else {
             this.activeFilters[filterType].push(value);
         }
         
-        // Update button appearance
-        this.updateFilterButtons();
-        
-        // Re-render with new filters
         this.render();
-        
-        // Rebuild dropdown to show updated selections
-        this.toggleFilterDropdown(filterType, { currentTarget: event.currentTarget, stopPropagation: () => {} });
+        this.updateFilterButtons();
     },
     
     updateFilterButtons() {
-        // Update each filter button dynamically
+        // Récupérer tous les champs filtrables
         const allFields = app.getAllFields();
-        const filterableFields = allFields.filter(f => 
-            f.type === 'select' || f.type === 'radio' || f.type === 'checkbox'
+        const filterableFields = allFields.filter(field => 
+            field.type === 'select' || field.type === 'radio' || field.type === 'checkbox'
         );
         
         let hasAnyFilter = false;
@@ -682,6 +621,12 @@ const contacts = {
             discussionStatus: [],
             complete: []
         };
+        
+        // Réinitialiser aussi la barre de recherche
+        const searchBox = document.getElementById('searchBox');
+        if (searchBox) {
+            searchBox.value = '';
+        }
         
         this.updateFilterButtons();
         this.closeFilterDropdown();
