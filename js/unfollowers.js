@@ -306,7 +306,9 @@ const unfollowers = {
 
             // NOUVEAU: Vérifier et supprimer les contacts qui ne sont plus followers
             document.getElementById('analyseProgressText').textContent = 'Vérification des contacts existants...';
-            const deletedCount = await this.cleanupContactsNotFollowingDuringAnalyse(followersList);
+            const deletedResult = await this.cleanupContactsNotFollowingDuringAnalyse(followersList);
+            const deletedCount = deletedResult.count;
+            const deletedNames = deletedResult.names;
 
             document.getElementById('analyseProgressText').textContent = 'Création des fiches contacts...';
 
@@ -401,6 +403,13 @@ const unfollowers = {
             // Render contacts and stats
             contacts.render();
             stats.render();
+
+            // Afficher l'alerte si des contacts ont été supprimés
+            if (deletedCount > 0) {
+                setTimeout(() => {
+                    alert(`⚠️ ${deletedCount} contact(s) supprimé(s) automatiquement car ils ne vous suivent plus :\n\n${deletedNames.join('\n')}\n\nCes personnes vous ont unfollow ou supprimé de leurs abonnés.`);
+                }, 500); // Petit délai pour laisser l'UI se mettre à jour
+            }
 
             // Reset file
             this.pendingFileAnalyse = null;
@@ -589,7 +598,7 @@ const unfollowers = {
     async cleanupContactsNotFollowingDuringAnalyse(followersList) {
         if (typeof app === 'undefined' || !app.dataStore || !app.dataStore.contacts) {
             console.log('⚠️ No contacts to cleanup');
-            return 0;
+            return { count: 0, names: [] };
         }
 
         const contactsToDelete = [];
@@ -612,6 +621,8 @@ const unfollowers = {
         if (contactsToDelete.length > 0) {
             console.log(`🗑️ Deleting ${contactsToDelete.length} contact(s) who no longer follow you...`);
             
+            const deletedNames = contactsToDelete.map(c => c.firstName);
+            
             for (const contact of contactsToDelete) {
                 const index = app.dataStore.contacts.findIndex(c => c.id === contact.id);
                 if (index !== -1) {
@@ -621,11 +632,11 @@ const unfollowers = {
             }
 
             console.log(`✅ ${contactsToDelete.length} contact(s) deleted`);
+            return { count: contactsToDelete.length, names: deletedNames };
         } else {
             console.log('✅ All contacts are still following you');
+            return { count: 0, names: [] };
         }
-
-        return contactsToDelete.length;
     },
 
     displayResults() {
