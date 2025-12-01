@@ -582,8 +582,30 @@ const tags = {
         
         if (!confirm('Supprimer ce tag ?')) return;
         
-        app.customTags[fieldType] = app.customTags[fieldType].filter(t => t.value !== value);
+        // ANCIEN SYSTÈME : Supprimer de customTags
+        if (app.customTags[fieldType]) {
+            app.customTags[fieldType] = app.customTags[fieldType].filter(t => t.value !== value);
+        }
         
+        // NOUVEAU SYSTÈME : Supprimer de field.tags
+        const allFields = [...app.defaultFields, ...app.customFields];
+        const field = allFields.find(f => f.id === fieldType);
+        if (field && field.tags) {
+            field.tags = field.tags.filter(t => t.value !== value);
+            console.log(`✅ Tag "${value}" removed from field.tags`);
+        }
+        
+        // Supprimer le style CSS associé
+        const tag = this.currentEdit.tag;
+        if (tag && tag.class) {
+            const styleElement = document.getElementById('style-' + tag.class);
+            if (styleElement) {
+                styleElement.remove();
+                console.log(`✅ CSS style removed for tag "${value}"`);
+            }
+        }
+        
+        // Réinitialiser la valeur du tag sur tous les contacts qui l'utilisent
         app.dataStore.contacts.forEach(contact => {
             if (contact[fieldType] === value) {
                 contact[fieldType] = '';
