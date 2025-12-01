@@ -265,10 +265,10 @@ const tags = {
         
         let html = options.map(opt => `
             <div class="tag-option">
-                <div onclick="tags.selectTag('${opt.value.replace(/'/g, "\\'")}')">
+                <div class="tag-option-preview-container" onclick="tags.selectTag('${opt.value.replace(/'/g, "\\'")}')">
                     <span class="tag-option-preview ${opt.class}">${opt.label}</span>
                 </div>
-                <span class="tag-edit-btn" onclick="event.stopPropagation(); tags.openEditModal('${this.currentContext.fieldType}', '${opt.value.replace(/'/g, "\\'")}')">✏️</span>
+                <span class="tag-edit-btn" onclick="tags.openEditModal('${this.currentContext.fieldType}', '${opt.value.replace(/'/g, "\\'")}')">✏️</span>
             </div>
         `).join('');
         
@@ -357,15 +357,30 @@ const tags = {
     openEditModal(fieldType, value) {
         this.closeDropdown();
         
-        let tag = app.customTags[fieldType].find(t => t.value === value);
+        // NOUVEAU SYSTÈME : chercher dans field.tags
+        const allFields = [...app.defaultFields, ...app.customFields];
+        const field = allFields.find(f => f.id === fieldType);
+        let tag = null;
         let isDefault = false;
         
-        if (!tag) {
+        if (field && field.tags) {
+            tag = field.tags.find(t => t.value === value);
+        }
+        
+        // Fallback sur l'ancien système si pas trouvé
+        if (!tag && app.customTags[fieldType]) {
+            tag = app.customTags[fieldType].find(t => t.value === value);
+        }
+        
+        if (!tag && app.defaultTags[fieldType]) {
             tag = app.defaultTags[fieldType].find(t => t.value === value);
             isDefault = true;
         }
         
-        if (!tag) return;
+        if (!tag) {
+            console.error('Tag not found:', fieldType, value);
+            return;
+        }
         
         // Get current color - prefer tag.color if available, otherwise read from CSS
         let currentColor = tag.color || '#868e96'; // Use saved color if exists
