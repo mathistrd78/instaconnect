@@ -304,6 +304,10 @@ const unfollowers = {
                 !this.data.normalUnfollowers.has(username)
             );
 
+            // NOUVEAU: Vérifier et supprimer les contacts qui ne sont plus followers
+            document.getElementById('analyseProgressText').textContent = 'Vérification des contacts existants...';
+            const deletedCount = await this.cleanupContactsNotFollowingDuringAnalyse(followersList);
+
             document.getElementById('analyseProgressText').textContent = 'Création des fiches contacts...';
 
             // Create contact cards
@@ -376,6 +380,12 @@ const unfollowers = {
                     <div style="font-size: 24px; font-weight: 700; color: #ffc107; margin-bottom: 4px;">${alreadyExists}</div>
                     <div style="font-size: 13px; color: #6c757d;">Déjà existants</div>
                 </div>
+                ${deletedCount > 0 ? `
+                <div style="background: white; padding: 16px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 24px; font-weight: 700; color: #dc3545; margin-bottom: 4px;">${deletedCount}</div>
+                    <div style="font-size: 13px; color: #6c757d;">Contacts supprimés</div>
+                </div>
+                ` : ''}
                 <div style="background: white; padding: 16px; border-radius: 8px; text-align: center;">
                     <div style="font-size: 24px; font-weight: 700; color: #ff7675; margin-bottom: 4px;">${this.data.unfollowers.length}</div>
                     <div style="font-size: 13px; color: #6c757d;">Unfollowers</div>
@@ -503,6 +513,9 @@ const unfollowers = {
             // Reset marked for new analysis
             this.data.marked = new Set();
 
+            // NOUVEAU: Vérifier et supprimer les contacts qui ne sont plus followers
+            await this.cleanupContactsNotFollowing();
+
             // Display results
             this.displayResults();
 
@@ -521,6 +534,98 @@ const unfollowers = {
             script.onerror = reject;
             document.head.appendChild(script);
         });
+    },
+
+    async cleanupContactsNotFollowing() {
+        if (typeof app === 'undefined' || !app.dataStore || !app.dataStore.contacts) {
+            console.log('⚠️ No contacts to cleanup');
+            return;
+        }
+
+        const contactsToDelete = [];
+        const followerUsernames = this.data.followers.map(f => f.toLowerCase());
+
+        console.log('🔍 Checking contacts against followers list...');
+
+        // Parcourir tous les contacts
+        for (const contact of app.dataStore.contacts) {
+            const instagramUsername = contact.instagram.toLowerCase().replace('@', '');
+            
+            // Vérifier si ce contact est toujours dans les followers
+            if (!followerUsernames.includes(instagramUsername)) {
+                console.log(`❌ Contact @${instagramUsername} is no longer following you - marking for deletion`);
+                contactsToDelete.push(contact);
+            }
+        }
+
+        // Supprimer les contacts qui ne sont plus followers
+        if (contactsToDelete.length > 0) {
+            console.log(`🗑️ Deleting ${contactsToDelete.length} contact(s) who no longer follow you...`);
+            
+            for (const contact of contactsToDelete) {
+                const index = app.dataStore.contacts.findIndex(c => c.id === contact.id);
+                if (index !== -1) {
+                    app.dataStore.contacts.splice(index, 1);
+                    await app.dataStore.deleteContact(contact.id);
+                }
+            }
+
+            // Rafraîchir l'affichage
+            if (typeof contacts !== 'undefined' && contacts.render) {
+                contacts.render();
+            }
+            if (typeof stats !== 'undefined' && stats.render) {
+                stats.render();
+            }
+
+            // Notifier l'utilisateur
+            const names = contactsToDelete.map(c => c.firstName).join(', ');
+            alert(`⚠️ ${contactsToDelete.length} contact(s) supprimé(s) automatiquement car ils ne vous suivent plus :\n\n${names}\n\nCes personnes vous ont unfollow ou supprimé de leurs abonnés.`);
+        } else {
+            console.log('✅ All contacts are still following you');
+        }
+    },
+
+    async cleanupContactsNotFollowingDuringAnalyse(followersList) {
+        if (typeof app === 'undefined' || !app.dataStore || !app.dataStore.contacts) {
+            console.log('⚠️ No contacts to cleanup');
+            return 0;
+        }
+
+        const contactsToDelete = [];
+        const followerUsernames = followersList.map(f => f.toLowerCase());
+
+        console.log('🔍 Checking contacts against followers list...');
+
+        // Parcourir tous les contacts
+        for (const contact of app.dataStore.contacts) {
+            const instagramUsername = contact.instagram.toLowerCase().replace('@', '');
+            
+            // Vérifier si ce contact est toujours dans les followers
+            if (!followerUsernames.includes(instagramUsername)) {
+                console.log(`❌ Contact @${instagramUsername} is no longer following you - marking for deletion`);
+                contactsToDelete.push(contact);
+            }
+        }
+
+        // Supprimer les contacts qui ne sont plus followers
+        if (contactsToDelete.length > 0) {
+            console.log(`🗑️ Deleting ${contactsToDelete.length} contact(s) who no longer follow you...`);
+            
+            for (const contact of contactsToDelete) {
+                const index = app.dataStore.contacts.findIndex(c => c.id === contact.id);
+                if (index !== -1) {
+                    app.dataStore.contacts.splice(index, 1);
+                    await app.dataStore.deleteContact(contact.id);
+                }
+            }
+
+            console.log(`✅ ${contactsToDelete.length} contact(s) deleted`);
+        } else {
+            console.log('✅ All contacts are still following you');
+        }
+
+        return contactsToDelete.length;
     },
 
     displayResults() {
