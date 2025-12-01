@@ -351,6 +351,11 @@ const contacts = {
     },
 
     editProfile(contactId) {
+        // Si aucun ID n'est passé, utiliser currentViewId
+        if (!contactId) {
+            contactId = this.currentViewId;
+        }
+        
         const contact = app.dataStore.contacts.find(c => c.id === contactId);
         if (!contact) return;
 
@@ -476,6 +481,11 @@ const contacts = {
     },
 
     async deleteContact(contactId) {
+        // Si aucun ID n'est passé, utiliser currentViewId
+        if (!contactId) {
+            contactId = this.currentViewId;
+        }
+        
         if (!confirm('Voulez-vous vraiment supprimer ce contact ?')) return;
 
         const index = app.dataStore.contacts.findIndex(c => c.id === contactId);
@@ -487,6 +497,45 @@ const contacts = {
         app.closeViewModal();
         this.render();
         stats.render();
+    },
+
+    async deleteAndUnfollow(contactId) {
+        // Si aucun ID n'est passé, utiliser currentViewId
+        if (!contactId) {
+            contactId = this.currentViewId;
+        }
+        
+        const contact = app.dataStore.contacts.find(c => c.id === contactId);
+        if (!contact) return;
+        
+        const username = contact.instagram.toLowerCase().replace('@', '');
+        
+        if (!confirm(`Supprimer ce contact ET l'ajouter à la liste "À ne plus suivre" ?\n\n@${username} sera définitivement supprimé et vous serez alerté si vous tentez de le re-suivre.`)) {
+            return;
+        }
+
+        // Ajouter à la liste "À ne plus suivre"
+        if (typeof unfollowers !== 'undefined') {
+            unfollowers.data.doNotFollowList.add(username);
+            unfollowers.saveDoNotFollowList();
+        }
+
+        // Supprimer le contact
+        const index = app.dataStore.contacts.findIndex(c => c.id === contactId);
+        if (index !== -1) {
+            app.dataStore.contacts.splice(index, 1);
+            await app.dataStore.deleteContact(contactId);
+        }
+
+        app.closeViewModal();
+        this.render();
+        stats.render();
+    },
+
+    openInstagram() {
+        // Cette fonction est appelée quand on clique sur le pseudo Instagram
+        // Le lien est déjà géré par le href dans le HTML, donc cette fonction peut être vide
+        // ou on peut l'utiliser pour des analytics si besoin
     },
 
     // ==========================================
