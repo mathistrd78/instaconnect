@@ -182,11 +182,15 @@ const contacts = {
                 const meetTag = tags.findTag('meetingPlace', contact.meetingPlace);
                 const statTag = tags.findTag('discussionStatus', contact.discussionStatus);
                 
+                // Extraire le drapeau du pays si disponible
+                const locationData = typeof city !== 'undefined' ? city.parseLocation(contact.location) : null;
+                const flag = locationData && locationData.flag ? `<span class="contact-flag">${locationData.flag}</span>` : '';
+                
                 html += `
                 <div class="contact-card">
                     <div class="contact-header">
                         <div class="contact-info">
-                            <div class="contact-name">${contact.firstName}</div>
+                            <div class="contact-name">${contact.firstName}${flag}</div>
                             <a href="https://instagram.com/${contact.instagram.replace('@', '')}" target="_blank" rel="noopener noreferrer" class="contact-instagram">${contact.instagram}</a>
                         </div>
                         <button class="btn-view-eye" onclick="contacts.viewProfile('${contact.id}')" title="Voir le profil">
@@ -365,6 +369,9 @@ const contacts = {
         
         // Générer le formulaire dynamiquement
         this.renderDynamicForm();
+        
+        // Initialiser les champs city
+        this.initCityFields();
 
         // Remplir le formulaire
         document.getElementById('firstName').value = contact.firstName;
@@ -444,6 +451,13 @@ const contacts = {
             } else if (field.type === 'checkbox') {
                 const checkbox = document.getElementById(field.id);
                 contactData[field.id] = checkbox ? checkbox.checked : false;
+            } else if (field.type === 'city') {
+                // Pour les champs city, récupérer les données JSON ou le texte
+                const input = document.getElementById(field.id);
+                if (input) {
+                    const cityJson = input.getAttribute('data-city-json');
+                    contactData[field.id] = cityJson || input.value;
+                }
             } else {
                 const input = document.getElementById(field.id);
                 contactData[field.id] = input ? input.value : '';
@@ -807,6 +821,14 @@ const contacts = {
                     </div>
                 `;
             
+            case 'city':
+                return `
+                    <div class="form-group" style="position: relative;">
+                        <label>${field.label} ${requiredMark}</label>
+                        <input type="text" id="${field.id}" ${placeholder} ${field.required ? 'required' : ''} autocomplete="off">
+                    </div>
+                `;
+            
             case 'tel':
                 return `
                     <div class="form-group">
@@ -840,5 +862,24 @@ const contacts = {
                     </div>
                 `;
         }
+    },
+
+    // Initialiser les champs de type city avec autocomplétion
+    initCityFields() {
+        if (typeof city === 'undefined') return;
+        
+        const allFields = app.getAllFields();
+        const cityFields = allFields.filter(f => f.type === 'city');
+        
+        cityFields.forEach(field => {
+            const inputId = field.id;
+            city.initCityField(inputId, (cityData) => {
+                // Stocker les données de la ville en JSON
+                const input = document.getElementById(inputId);
+                if (input) {
+                    input.setAttribute('data-city-json', JSON.stringify(cityData));
+                }
+            });
+        });
     }
 };
