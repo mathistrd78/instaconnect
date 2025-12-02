@@ -778,7 +778,6 @@ const contacts = {
 
     renderField(field) {
         const requiredMark = field.required ? '<span style="color: #ff4757;">*</span>' : '';
-        const placeholder = field.placeholder ? `placeholder="${field.placeholder}"` : '';
         
         switch (field.type) {
             case 'select':
@@ -823,7 +822,7 @@ const contacts = {
                 return `
                     <div class="form-group">
                         <label>${field.label} ${requiredMark}</label>
-                        <textarea id="${field.id}" ${placeholder} ${field.required ? 'required' : ''}></textarea>
+                        <textarea id="${field.id}" ${field.required ? 'required' : ''}></textarea>
                     </div>
                 `;
             
@@ -831,7 +830,7 @@ const contacts = {
                 return `
                     <div class="form-group">
                         <label>${field.label} ${requiredMark}</label>
-                        <input type="number" id="${field.id}" ${placeholder} ${field.required ? 'required' : ''}>
+                        <input type="number" id="${field.id}" ${field.required ? 'required' : ''}>
                     </div>
                 `;
             
@@ -847,7 +846,7 @@ const contacts = {
                 return `
                     <div class="form-group" style="position: relative;">
                         <label>${field.label} ${requiredMark}</label>
-                        <input type="text" id="${field.id}" ${placeholder} ${field.required ? 'required' : ''} autocomplete="off">
+                        <input type="text" id="${field.id}" ${field.required ? 'required' : ''} autocomplete="off">
                     </div>
                 `;
             
@@ -855,7 +854,7 @@ const contacts = {
                 return `
                     <div class="form-group">
                         <label>${field.label} ${requiredMark}</label>
-                        <input type="tel" id="${field.id}" ${placeholder} ${field.required ? 'required' : ''}>
+                        <input type="tel" id="${field.id}" ${field.required ? 'required' : ''}>
                     </div>
                 `;
             
@@ -863,7 +862,7 @@ const contacts = {
                 return `
                     <div class="form-group">
                         <label>${field.label} ${requiredMark}</label>
-                        <input type="email" id="${field.id}" ${placeholder} ${field.required ? 'required' : ''}>
+                        <input type="email" id="${field.id}" ${field.required ? 'required' : ''}>
                     </div>
                 `;
             
@@ -871,7 +870,7 @@ const contacts = {
                 return `
                     <div class="form-group">
                         <label>${field.label} ${requiredMark}</label>
-                        <input type="url" id="${field.id}" ${placeholder} ${field.required ? 'required' : ''}>
+                        <input type="url" id="${field.id}" ${field.required ? 'required' : ''}>
                     </div>
                 `;
             
@@ -880,7 +879,7 @@ const contacts = {
                 return `
                     <div class="form-group">
                         <label>${field.label} ${requiredMark}</label>
-                        <input type="text" id="${field.id}" ${placeholder} ${field.required ? 'required' : ''}>
+                        <input type="text" id="${field.id}" ${field.required ? 'required' : ''}>
                     </div>
                 `;
         }
