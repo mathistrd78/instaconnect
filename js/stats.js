@@ -46,7 +46,15 @@ const stats = {
             </button>
         `;
         
-        tabsContainer.innerHTML = tabsHTML + monthTab;
+        // Ajouter l'onglet "Par pays" (toujours présent)
+        const countryTab = `
+            <button class="stat-tab" data-type="pays" data-field-id="pays">
+                <span class="stat-tab-icon">🌍</span>
+                <span>Pays</span>
+            </button>
+        `;
+        
+        tabsContainer.innerHTML = tabsHTML + monthTab + countryTab;
         
         // Ajouter les event listeners
         document.querySelectorAll('.stat-tab').forEach(tab => {
@@ -107,6 +115,10 @@ const stats = {
             // Cas spécial : par mois
             title = 'Répartition par mois d\'ajout';
             data = this.groupByMonth();
+        } else if (this.currentType === 'pays') {
+            // Cas spécial : par pays
+            title = 'Répartition par pays';
+            data = this.groupByCountry();
         } else {
             // Trouver le champ correspondant
             const allFields = [...app.defaultFields, ...app.customFields];
@@ -180,6 +192,19 @@ const stats = {
         const colors = ['#a29bfe', '#fd79a8', '#74b9ff', '#ff7675', '#55efc4', '#E1306C'];
         return Object.entries(months).slice(-6).map(([label, value], i) => ({
             label, value, color: colors[i % colors.length]
+        }));
+    },
+
+    groupByCountry() {
+        if (typeof city === 'undefined') return [];
+        
+        const countryStats = city.getCountryStats(app.dataStore.contacts);
+        const colors = ['#a29bfe', '#fd79a8', '#74b9ff', '#ff7675', '#55efc4', '#E1306C', '#feca57', '#00b894', '#0984e3', '#6c5ce7'];
+        
+        return countryStats.map((stat, i) => ({
+            label: `${stat.flag} ${stat.country}`,
+            value: stat.count,
+            color: colors[i % colors.length]
         }));
     },
 
