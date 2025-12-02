@@ -3171,6 +3171,8 @@ body.dark-mode .city-name {
     margin: 0;
     font-size: 20px;
     font-weight: 600;
+    flex: 1;
+    text-align: center;
 }
 
 .calendar-nav-btn {
@@ -3638,5 +3640,41 @@ body.dark-mode .btn-calendar-separate:hover {
 @media (max-width: 480px) {
     .contacts-count {
         margin: 0 12px 6px 12px;
+    }
+}
+
+/* Message "Pas de rendez-vous" */
+.calendar-no-meeting {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.no-meeting-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.6;
+}
+
+.no-meeting-text {
+    font-size: 16px;
+    color: #868e96;
+    font-weight: 500;
+}
+
+body.dark-mode .no-meeting-text {
+    color: #adb5bd;
+}
+
+@media (max-width: 480px) {
+    .calendar-no-meeting {
+        padding: 30px 20px;
+    }
+    
+    .no-meeting-icon {
+        font-size: 40px;
+    }
+    
+    .no-meeting-text {
+        font-size: 15px;
     }
 }
