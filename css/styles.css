@@ -325,9 +325,19 @@ h1 {
     min-height: 44px;
 }
 
+/* Conteneur pour search + bouton calendrier */
+.search-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 20px;
+    margin-bottom: 2px;
+}
+
 .search-box {
-    margin: 0 20px 2px 20px;
-    width: calc(100% - 40px);
+    flex: 1;
+    margin: 0;
+    width: auto;
 }
 
 .search-box:focus {
@@ -2462,15 +2472,6 @@ body.dark-mode .emoji-search-input:focus {
 }
 
 /* Nouveaux styles pour les filtres horizontaux */
-/* Conteneur pour bouton calendrier + compteur */
-.header-count-container {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 0 20px;
-    margin-bottom: 6px;
-}
-
 /* Bouton calendrier séparé (rose) */
 .btn-calendar-separate {
     background: linear-gradient(135deg, #E1306C 0%, #fd79a8 100%);
@@ -2478,10 +2479,11 @@ body.dark-mode .emoji-search-input:focus {
     border: none;
     font-size: 20px;
     cursor: pointer;
-    padding: 8px 16px;
+    padding: 10px 16px;
     border-radius: 8px;
     transition: all 0.2s;
     box-shadow: 0 2px 8px rgba(225, 48, 108, 0.2);
+    flex-shrink: 0;
 }
 
 .btn-calendar-separate:hover {
@@ -2497,7 +2499,7 @@ body.dark-mode .emoji-search-input:focus {
     font-size: 14px;
     font-weight: 600;
     color: #1976d2;
-    flex: 1;
+    margin: 0 20px 6px 20px;
 }
 
 #contactsCountNumber {
@@ -3122,8 +3124,33 @@ body.dark-mode .city-name {
    ============================================ */
 
 .calendar-modal .modal-content {
-    max-width: 900px;
+    max-width: 90vw;
+    width: 900px;
     padding: 0 !important;
+}
+
+/* Desktop large */
+@media (min-width: 1200px) {
+    .calendar-modal .modal-content {
+        width: 1000px;
+        max-width: 90vw;
+    }
+}
+
+/* Desktop standard */
+@media (min-width: 992px) and (max-width: 1199px) {
+    .calendar-modal .modal-content {
+        width: 900px;
+        max-width: 90vw;
+    }
+}
+
+/* Tablette */
+@media (min-width: 769px) and (max-width: 991px) {
+    .calendar-modal .modal-content {
+        width: 750px;
+        max-width: 90vw;
+    }
 }
 
 .calendar-controls {
@@ -3508,10 +3535,6 @@ body.dark-mode .btn-calendar-separate:hover {
 
 /* Responsive pour le bouton calendrier et compteur */
 @media (max-width: 768px) {
-    .header-count-container {
-        padding: 0 16px;
-        gap: 8px;
-    }
     
     .btn-calendar-separate {
         padding: 6px 12px;
@@ -3529,10 +3552,6 @@ body.dark-mode .btn-calendar-separate:hover {
 }
 
 @media (max-width: 480px) {
-    .header-count-container {
-        padding: 0 12px;
-        gap: 6px;
-    }
     
     .btn-calendar-separate {
         padding: 5px 10px;
@@ -3542,5 +3561,69 @@ body.dark-mode .btn-calendar-separate:hover {
     .contacts-count {
         font-size: 12px;
         padding: 5px 10px;
+    }
+}
+
+/* Ajuster les tailles des jours pour grands écrans */
+@media (min-width: 1200px) {
+    .calendar-day {
+        min-height: 100px;
+    }
+    
+    .day-number {
+        font-size: 20px;
+    }
+    
+    .meeting-dot {
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
+        margin-top: 6px;
+    }
+    
+    .calendar-day-name {
+        font-size: 16px;
+    }
+}
+
+@media (min-width: 992px) and (max-width: 1199px) {
+    .calendar-day {
+        min-height: 90px;
+    }
+    
+    .day-number {
+        font-size: 19px;
+    }
+    
+    .meeting-dot {
+        width: 26px;
+        height: 26px;
+        font-size: 13px;
+        margin-top: 5px;
+    }
+}
+
+/* Responsive pour search-container */
+@media (max-width: 768px) {
+    .search-container {
+        padding: 0 16px;
+        gap: 8px;
+    }
+    
+    .btn-calendar-separate {
+        padding: 8px 12px;
+        font-size: 18px;
+    }
+}
+
+@media (max-width: 480px) {
+    .search-container {
+        padding: 0 12px;
+        gap: 6px;
+    }
+    
+    .btn-calendar-separate {
+        padding: 6px 10px;
+        font-size: 16px;
     }
 }
