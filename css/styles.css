@@ -2480,10 +2480,14 @@ body.dark-mode .emoji-search-input:focus {
     font-size: 20px;
     cursor: pointer;
     padding: 10px 16px;
-    border-radius: 8px;
+    border-radius: 12px;
     transition: all 0.2s;
     box-shadow: 0 2px 8px rgba(225, 48, 108, 0.2);
     flex-shrink: 0;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .btn-calendar-separate:hover {
@@ -3127,6 +3131,7 @@ body.dark-mode .city-name {
     max-width: 90vw;
     width: 900px;
     padding: 0 !important;
+    margin: 0 auto;
 }
 
 /* Desktop large */
@@ -3369,11 +3374,6 @@ body.dark-mode .meeting-item-instagram {
     gap: 12px;
 }
 
-.contacts-count {
-    display: inline-block;
-    width: auto;
-    margin-right: 12px;
-}
 
 /* Conteneur pour compteur + bouton calendrier */
 
@@ -3625,5 +3625,18 @@ body.dark-mode .btn-calendar-separate:hover {
     .btn-calendar-separate {
         padding: 6px 10px;
         font-size: 16px;
+    }
+}
+
+/* Responsive pour contacts-count */
+@media (max-width: 768px) {
+    .contacts-count {
+        margin: 0 16px 6px 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .contacts-count {
+        margin: 0 12px 6px 12px;
     }
 }
