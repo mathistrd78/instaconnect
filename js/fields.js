@@ -27,7 +27,6 @@ const fields = {
         // Reset form
         document.getElementById('newFieldType').value = 'text';
         document.getElementById('newFieldLabel').value = '';
-        document.getElementById('newFieldPlaceholder').value = '';
         document.getElementById('newFieldRequired').checked = false;
         
         // Hide options for non-select/radio fields
@@ -57,12 +56,7 @@ const fields = {
                         
                         <div class="form-group">
                             <label>Nom du champ <span style="color: #ff4757;">*</span></label>
-                            <input type="text" id="newFieldLabel" required placeholder="Ex: Ville de naissance">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Placeholder (optionnel)</label>
-                            <input type="text" id="newFieldPlaceholder" placeholder="Ex: Paris">
+                            <input type="text" id="newFieldLabel" required>
                         </div>
                         
                         <div class="form-group" id="fieldOptionsSection" style="display: none;">
@@ -116,7 +110,6 @@ const fields = {
         
         const type = document.getElementById('newFieldType').value;
         const label = document.getElementById('newFieldLabel').value.trim();
-        const placeholder = document.getElementById('newFieldPlaceholder').value.trim();
         const required = document.getElementById('newFieldRequired').checked;
         
         if (!label) {
@@ -127,7 +120,6 @@ const fields = {
         const fieldData = {
             type,
             label,
-            placeholder,
             required
         };
         
