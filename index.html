@@ -78,13 +78,11 @@
         
         <input type="text" class="search-box" id="searchBox" placeholder="🔍 Rechercher...">
         
-        <!-- Compteur de contacts + Bouton Calendrier -->
-        <div class="header-actions">
-            <div class="contacts-count" id="contactsCount">
-                <span id="contactsCountNumber">0</span> contact(s)
-            </div>
-            <button class="btn-calendar" onclick="calendar.open()">
-                📅 Calendrier
+        <!-- Compteur de contacts avec bouton calendrier intégré -->
+        <div class="contacts-count" id="contactsCount">
+            <span id="contactsCountNumber">0</span> contact(s)
+            <button class="btn-calendar-inline" onclick="calendar.open()" title="Voir le calendrier des rendez-vous">
+                📅
             </button>
         </div>
         
