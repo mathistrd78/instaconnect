@@ -161,29 +161,70 @@ const city = {
         try {
             const parsed = JSON.parse(locationString);
             if (parsed.city && parsed.country) {
+                // S'assurer que le drapeau est présent
+                if (!parsed.flag && parsed.countryCode) {
+                    parsed.flag = this.getFlag(parsed.countryCode);
+                }
                 return parsed;
             }
         } catch (e) {
             // Pas un JSON, continuer
         }
 
-        // Essayer de parser une chaîne "Ville, Pays"
+        // Essayer de parser une chaîne "Ville, Pays" ou "Ville, État, Pays"
         const parts = locationString.split(',').map(p => p.trim());
         if (parts.length >= 2) {
             const city = parts[0];
             const country = parts[parts.length - 1];
+            const state = parts.length > 2 ? parts[1] : '';
             
             // Trouver le code pays et le drapeau
-            const countryCode = Object.entries(this.countryFlags).find(
-                ([code, flag]) => country.toLowerCase().includes(code.toLowerCase())
-            )?.[0] || '';
+            // Amélioration : chercher dans les noms complets de pays
+            let countryCode = '';
+            
+            // Mapping des noms de pays vers codes
+            const countryNames = {
+                'france': 'FR', 'états-unis': 'US', 'usa': 'US', 'etats-unis': 'US',
+                'royaume-uni': 'GB', 'uk': 'GB', 'angleterre': 'GB',
+                'allemagne': 'DE', 'espagne': 'ES', 'italie': 'IT',
+                'portugal': 'PT', 'belgique': 'BE', 'suisse': 'CH',
+                'pays-bas': 'NL', 'hollande': 'NL', 'canada': 'CA',
+                'brésil': 'BR', 'bresil': 'BR', 'argentine': 'AR',
+                'mexique': 'MX', 'japon': 'JP', 'chine': 'CN',
+                'inde': 'IN', 'australie': 'AU', 'russie': 'RU',
+                'afrique du sud': 'ZA', 'maroc': 'MA', 'algérie': 'DZ',
+                'tunisie': 'TN', 'egypte': 'EG', 'grèce': 'GR',
+                'turquie': 'TR', 'pologne': 'PL', 'suède': 'SE'
+            };
+            
+            const countryLower = country.toLowerCase();
+            countryCode = countryNames[countryLower] || '';
+            
+            // Si pas trouvé, essayer avec les codes pays directs
+            if (!countryCode) {
+                countryCode = Object.keys(this.countryFlags).find(
+                    code => countryLower.includes(code.toLowerCase())
+                ) || '';
+            }
 
             return {
                 city: city,
                 country: country,
                 countryCode: countryCode,
+                state: state,
                 displayName: locationString,
                 flag: this.getFlag(countryCode)
+            };
+        }
+
+        // Si c'est juste un nom de ville sans pays, retourner quand même quelque chose
+        if (locationString.trim()) {
+            return {
+                city: locationString.trim(),
+                country: '',
+                countryCode: '',
+                displayName: locationString.trim(),
+                flag: '🌍' // Globe par défaut
             };
         }
 
