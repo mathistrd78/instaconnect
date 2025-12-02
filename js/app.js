@@ -43,7 +43,7 @@ const app = {
         },
         { 
             id: 'location', 
-            type: 'text', 
+            type: 'city', 
             label: 'Lieu d\'habitat', 
             required: false,
             order: 5
@@ -470,6 +470,9 @@ const app = {
         
         // Générer le formulaire dynamiquement avec les champs personnalisés
         contacts.renderDynamicForm();
+        
+        // Initialiser les champs city
+        contacts.initCityFields();
         
         document.getElementById('contactForm').reset();
         
