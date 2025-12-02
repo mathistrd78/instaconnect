@@ -337,6 +337,14 @@ const contacts = {
                     }
                 } else if (field.type === 'checkbox') {
                     displayValue = (value === true || value === 'true') ? '✅ Oui' : '❌ Non';
+                } else if (field.type === 'city') {
+                    // Pour les champs city, parser et afficher le displayName avec le drapeau
+                    const locationData = typeof city !== 'undefined' ? city.parseLocation(value) : null;
+                    if (locationData) {
+                        displayValue = `${locationData.flag} ${locationData.displayName}`;
+                    } else {
+                        displayValue = value;
+                    }
                 } else if (field.type === 'textarea') {
                     displayValue = value.replace(/\n/g, '<br>');
                 }
