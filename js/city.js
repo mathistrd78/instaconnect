@@ -31,16 +31,90 @@ const city = {
         'HT': '🇭🇹', 'JM': '🇯🇲', 'TT': '🇹🇹', 'BS': '🇧🇸', 'BB': '🇧🇧'
     },
 
+    // Liste de villes populaires pour recherche rapide (sans API)
+    popularCities: [
+        { city: 'Paris', country: 'France', countryCode: 'FR', displayName: 'Paris, France' },
+        { city: 'Lyon', country: 'France', countryCode: 'FR', displayName: 'Lyon, France' },
+        { city: 'Marseille', country: 'France', countryCode: 'FR', displayName: 'Marseille, France' },
+        { city: 'Toulouse', country: 'France', countryCode: 'FR', displayName: 'Toulouse, France' },
+        { city: 'Nice', country: 'France', countryCode: 'FR', displayName: 'Nice, France' },
+        { city: 'Nantes', country: 'France', countryCode: 'FR', displayName: 'Nantes, France' },
+        { city: 'Strasbourg', country: 'France', countryCode: 'FR', displayName: 'Strasbourg, France' },
+        { city: 'Montpellier', country: 'France', countryCode: 'FR', displayName: 'Montpellier, France' },
+        { city: 'Bordeaux', country: 'France', countryCode: 'FR', displayName: 'Bordeaux, France' },
+        { city: 'Lille', country: 'France', countryCode: 'FR', displayName: 'Lille, France' },
+        { city: 'Rennes', country: 'France', countryCode: 'FR', displayName: 'Rennes, France' },
+        { city: 'Reims', country: 'France', countryCode: 'FR', displayName: 'Reims, France' },
+        { city: 'Le Havre', country: 'France', countryCode: 'FR', displayName: 'Le Havre, France' },
+        { city: 'Saint-Étienne', country: 'France', countryCode: 'FR', displayName: 'Saint-Étienne, France' },
+        { city: 'Toulon', country: 'France', countryCode: 'FR', displayName: 'Toulon, France' },
+        { city: 'Grenoble', country: 'France', countryCode: 'FR', displayName: 'Grenoble, France' },
+        { city: 'Dijon', country: 'France', countryCode: 'FR', displayName: 'Dijon, France' },
+        { city: 'Angers', country: 'France', countryCode: 'FR', displayName: 'Angers, France' },
+        { city: 'Nîmes', country: 'France', countryCode: 'FR', displayName: 'Nîmes, France' },
+        { city: 'Villeurbanne', country: 'France', countryCode: 'FR', displayName: 'Villeurbanne, France' },
+        { city: 'New York', country: 'United States', countryCode: 'US', displayName: 'New York, United States' },
+        { city: 'Los Angeles', country: 'United States', countryCode: 'US', displayName: 'Los Angeles, United States' },
+        { city: 'Chicago', country: 'United States', countryCode: 'US', displayName: 'Chicago, United States' },
+        { city: 'Houston', country: 'United States', countryCode: 'US', displayName: 'Houston, United States' },
+        { city: 'Miami', country: 'United States', countryCode: 'US', displayName: 'Miami, United States' },
+        { city: 'San Francisco', country: 'United States', countryCode: 'US', displayName: 'San Francisco, United States' },
+        { city: 'London', country: 'United Kingdom', countryCode: 'GB', displayName: 'London, United Kingdom' },
+        { city: 'Manchester', country: 'United Kingdom', countryCode: 'GB', displayName: 'Manchester, United Kingdom' },
+        { city: 'Birmingham', country: 'United Kingdom', countryCode: 'GB', displayName: 'Birmingham, United Kingdom' },
+        { city: 'Berlin', country: 'Germany', countryCode: 'DE', displayName: 'Berlin, Germany' },
+        { city: 'Munich', country: 'Germany', countryCode: 'DE', displayName: 'Munich, Germany' },
+        { city: 'Hamburg', country: 'Germany', countryCode: 'DE', displayName: 'Hamburg, Germany' },
+        { city: 'Madrid', country: 'Spain', countryCode: 'ES', displayName: 'Madrid, Spain' },
+        { city: 'Barcelona', country: 'Spain', countryCode: 'ES', displayName: 'Barcelona, Spain' },
+        { city: 'Rome', country: 'Italy', countryCode: 'IT', displayName: 'Rome, Italy' },
+        { city: 'Milan', country: 'Italy', countryCode: 'IT', displayName: 'Milan, Italy' },
+        { city: 'Brussels', country: 'Belgium', countryCode: 'BE', displayName: 'Brussels, Belgium' },
+        { city: 'Amsterdam', country: 'Netherlands', countryCode: 'NL', displayName: 'Amsterdam, Netherlands' },
+        { city: 'Lisbon', country: 'Portugal', countryCode: 'PT', displayName: 'Lisbon, Portugal' },
+        { city: 'Toronto', country: 'Canada', countryCode: 'CA', displayName: 'Toronto, Canada' },
+        { city: 'Montreal', country: 'Canada', countryCode: 'CA', displayName: 'Montreal, Canada' },
+        { city: 'Tokyo', country: 'Japan', countryCode: 'JP', displayName: 'Tokyo, Japan' },
+        { city: 'Sydney', country: 'Australia', countryCode: 'AU', displayName: 'Sydney, Australia' },
+        { city: 'Dubai', country: 'United Arab Emirates', countryCode: 'AE', displayName: 'Dubai, United Arab Emirates' }
+    ],
+
+    // Rechercher dans les villes populaires
+    searchPopularCities(query) {
+        const searchLower = query.toLowerCase();
+        return this.popularCities
+            .filter(city => city.city.toLowerCase().startsWith(searchLower))
+            .map(city => ({
+                ...city,
+                flag: this.getFlag(city.countryCode)
+            }))
+            .slice(0, 6);
+    },
+
     // Obtenir le drapeau d'un pays
     getFlag(countryCode) {
         return this.countryFlags[countryCode] || '🌍';
     },
 
-    // Rechercher des villes via l'API geocoding
+    // Rechercher des villes via l'API geocoding + cache local
     async searchCities(query) {
-        if (!query || query.length < 2) return [];
+        if (!query || query.length < 1) return [];
+
+        // Pour 1 caractère, chercher seulement dans les villes populaires
+        if (query.length === 1) {
+            return this.searchPopularCities(query);
+        }
 
         try {
+            // Chercher d'abord dans les villes populaires
+            const popularResults = this.searchPopularCities(query);
+            
+            // Si on a déjà 6 résultats populaires qui commencent par la recherche, les retourner directement
+            if (popularResults.length >= 6) {
+                return popularResults;
+            }
+
+            // Sinon, faire aussi une recherche API
             // Utiliser l'API Nominatim d'OpenStreetMap (gratuite, pas de clé API requise)
             const response = await fetch(
                 `https://nominatim.openstreetmap.org/search?` +
@@ -56,12 +130,12 @@ const city = {
                 }
             );
 
-            if (!response.ok) return [];
+            if (!response.ok) return popularResults; // Retourner les résultats populaires si l'API échoue
 
             const results = await response.json();
 
             // Filtrer et formater les résultats pour ne garder que les villes
-            return results
+            const apiResults = results
                 .filter(r => r.type === 'city' || r.type === 'town' || r.type === 'village' || 
                            r.type === 'municipality' || r.address?.city || r.address?.town || r.address?.village)
                 .map(r => {
@@ -82,11 +156,24 @@ const city = {
                 .filter((item, index, self) => 
                     // Dédupliquer par city + country
                     index === self.findIndex(t => t.city === item.city && t.country === item.country)
-                )
-                .slice(0, 6); // Limiter à 6 résultats
+                );
+            
+            // Combiner les résultats : populaires d'abord, puis API
+            const combined = [...popularResults];
+            const popularCityNames = new Set(popularResults.map(c => `${c.city}|${c.country}`));
+            
+            // Ajouter les résultats API qui ne sont pas déjà dans les populaires
+            apiResults.forEach(city => {
+                const key = `${city.city}|${city.country}`;
+                if (!popularCityNames.has(key) && combined.length < 8) {
+                    combined.push(city);
+                }
+            });
+            
+            return combined.slice(0, 6); // Limiter à 6 résultats finaux
         } catch (error) {
             console.error('Erreur recherche ville:', error);
-            return [];
+            return this.searchPopularCities(query); // Retourner les résultats populaires en cas d'erreur
         }
     },
 
@@ -117,7 +204,7 @@ const city = {
             clearTimeout(this.debounceTimer);
             const query = e.target.value.trim();
 
-            if (query.length < 2) {
+            if (query.length < 1) {
                 dropdown.style.display = 'none';
                 return;
             }
@@ -126,7 +213,8 @@ const city = {
             dropdown.innerHTML = '<div class="city-dropdown-item loading">🔍 Recherche...</div>';
             dropdown.style.display = 'block';
 
-            // Debounce pour éviter trop de requêtes
+            // Debounce pour éviter trop de requêtes (plus court pour 1 caractère)
+            const debounceDelay = query.length === 1 ? 100 : 300;
             this.debounceTimer = setTimeout(async () => {
                 const cities = await this.searchCities(query);
 
