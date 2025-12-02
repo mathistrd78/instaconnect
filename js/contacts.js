@@ -409,6 +409,20 @@ const contacts = {
                 if (checkbox) {
                     checkbox.checked = (value === true || value === 'true');
                 }
+            } else if (field.type === 'city') {
+                // Champ city : parser la valeur et remplir
+                const input = document.getElementById(field.id);
+                if (input && value) {
+                    // Essayer de parser la valeur
+                    const cityData = typeof city !== 'undefined' ? city.parseLocation(value) : null;
+                    if (cityData) {
+                        input.value = cityData.displayName;
+                        input.setAttribute('data-city-json', JSON.stringify(cityData));
+                    } else {
+                        // Si on ne peut pas parser, juste afficher la valeur texte
+                        input.value = value;
+                    }
+                }
             } else {
                 // Text, textarea, number, date, etc.
                 const input = document.getElementById(field.id);
