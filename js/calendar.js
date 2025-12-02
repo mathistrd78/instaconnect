@@ -127,7 +127,8 @@ const calendar = {
         for (let day = 1; day <= daysInMonth; day++) {
             const currentDate = new Date(year, month, day);
             currentDate.setHours(0, 0, 0, 0);
-            const dateString = currentDate.toISOString().split('T')[0];
+            // Utiliser une fonction locale sans conversion UTC
+            const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
             
             const hasMeeting = meetings[dateString] && meetings[dateString].length > 0;
             const isToday = currentDate.getTime() === today.getTime();
