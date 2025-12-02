@@ -92,8 +92,15 @@ const city = {
 
     // Initialiser un champ de recherche de ville
     initCityField(inputId, onSelect) {
+        console.log('🔍 initCityField called for:', inputId);
+        
         const input = document.getElementById(inputId);
-        if (!input) return;
+        if (!input) {
+            console.error('❌ Input not found:', inputId);
+            return;
+        }
+        
+        console.log('✅ Input found, creating dropdown for:', inputId);
 
         // Créer le dropdown s'il n'existe pas
         let dropdown = document.getElementById(inputId + 'Dropdown');
@@ -102,6 +109,7 @@ const city = {
             dropdown.id = inputId + 'Dropdown';
             dropdown.className = 'city-dropdown';
             input.parentElement.appendChild(dropdown);
+            console.log('✅ Dropdown created for:', inputId);
         }
 
         // Événement sur l'input
