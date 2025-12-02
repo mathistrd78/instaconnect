@@ -880,20 +880,39 @@ const contacts = {
 
     // Initialiser les champs de type city avec autocomplétion
     initCityFields() {
-        if (typeof city === 'undefined') return;
+        console.log('🌍 initCityFields called');
+        
+        if (typeof city === 'undefined') {
+            console.error('❌ city module not loaded');
+            return;
+        }
         
         const allFields = app.getAllFields();
         const cityFields = allFields.filter(f => f.type === 'city');
         
-        cityFields.forEach(field => {
-            const inputId = field.id;
-            city.initCityField(inputId, (cityData) => {
-                // Stocker les données de la ville en JSON
+        console.log('📍 Found city fields:', cityFields.length, cityFields.map(f => f.id));
+        
+        // Attendre que le DOM soit prêt
+        setTimeout(() => {
+            cityFields.forEach(field => {
+                const inputId = field.id;
                 const input = document.getElementById(inputId);
-                if (input) {
-                    input.setAttribute('data-city-json', JSON.stringify(cityData));
+                
+                if (!input) {
+                    console.error(`❌ Input not found for city field: ${inputId}`);
+                    return;
                 }
+                
+                console.log(`✅ Initializing city field: ${inputId}`);
+                
+                city.initCityField(inputId, (cityData) => {
+                    // Stocker les données de la ville en JSON
+                    const input = document.getElementById(inputId);
+                    if (input) {
+                        input.setAttribute('data-city-json', JSON.stringify(cityData));
+                    }
+                });
             });
-        });
+        }, 100); // Petit délai pour s'assurer que le DOM est rendu
     }
 };
