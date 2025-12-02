@@ -2462,6 +2462,33 @@ body.dark-mode .emoji-search-input:focus {
 }
 
 /* Nouveaux styles pour les filtres horizontaux */
+/* Conteneur pour bouton calendrier + compteur */
+.header-count-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 20px;
+    margin-bottom: 6px;
+}
+
+/* Bouton calendrier séparé (rose) */
+.btn-calendar-separate {
+    background: linear-gradient(135deg, #E1306C 0%, #fd79a8 100%);
+    color: white;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(225, 48, 108, 0.2);
+}
+
+.btn-calendar-separate:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(225, 48, 108, 0.3);
+}
+
 .contacts-count {
     background: #e3f2fd;
     padding: 6px 16px;
@@ -2470,10 +2497,7 @@ body.dark-mode .emoji-search-input:focus {
     font-size: 14px;
     font-weight: 600;
     color: #1976d2;
-    margin: 0 20px 6px 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    flex: 1;
 }
 
 #contactsCountNumber {
@@ -2482,21 +2506,9 @@ body.dark-mode .emoji-search-input:focus {
     color: #0d47a1;
 }
 
-/* Bouton calendrier inline dans le bandeau bleu */
+/* Supprimer l'ancien style btn-calendar-inline */
 .btn-calendar-inline {
-    background: transparent;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-    padding: 4px 8px;
-    border-radius: 6px;
-    transition: all 0.2s;
-    margin-left: 12px;
-}
-
-.btn-calendar-inline:hover {
-    background: rgba(25, 118, 210, 0.1);
-    transform: scale(1.1);
+    display: none;
 }
 
 .filters-horizontal {
@@ -3341,4 +3353,194 @@ body.dark-mode .meeting-item-instagram {
 /* Dark mode pour le bouton calendrier inline */
 body.dark-mode .btn-calendar-inline:hover {
     background: rgba(255, 255, 255, 0.1);
+}
+
+/* Améliorer le champ date pour forcer l'affichage du picker */
+input[type="date"] {
+    position: relative;
+    cursor: pointer;
+    min-width: 150px;
+}
+
+/* Forcer l'affichage de l'icône calendrier */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    font-size: 18px;
+    opacity: 0.8;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+}
+
+/* Firefox */
+input[type="date"]::-moz-calendar-picker-indicator {
+    cursor: pointer;
+}
+
+/* Dark mode pour le bouton calendrier séparé */
+body.dark-mode .btn-calendar-separate {
+    background: linear-gradient(135deg, #E1306C 0%, #c7275e 100%);
+}
+
+body.dark-mode .btn-calendar-separate:hover {
+    box-shadow: 0 4px 12px rgba(225, 48, 108, 0.4);
+}
+
+/* ============================================
+   RESPONSIVE CALENDAR - MOBILE
+   ============================================ */
+
+@media (max-width: 768px) {
+    .calendar-modal .modal-content {
+        max-width: 100%;
+        margin: 0;
+        border-radius: 0;
+        max-height: 100vh;
+        overflow-y: auto;
+    }
+    
+    .calendar-controls {
+        padding: 16px 20px;
+    }
+    
+    .calendar-controls h3 {
+        font-size: 18px;
+    }
+    
+    .calendar-nav-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 18px;
+    }
+    
+    .calendar-grid {
+        padding: 12px;
+    }
+    
+    .calendar-day-name {
+        font-size: 12px;
+        padding: 8px 0;
+    }
+    
+    .calendar-days {
+        gap: 6px;
+    }
+    
+    .calendar-day {
+        min-height: 50px;
+        border-radius: 8px;
+    }
+    
+    .day-number {
+        font-size: 14px;
+    }
+    
+    .meeting-dot {
+        width: 20px;
+        height: 20px;
+        font-size: 10px;
+        margin-top: 2px;
+    }
+    
+    .calendar-details {
+        padding: 20px 12px;
+    }
+    
+    .calendar-details h4 {
+        font-size: 16px;
+        margin-bottom: 16px;
+    }
+    
+    .calendar-meeting-item {
+        padding: 12px;
+        margin-bottom: 10px;
+    }
+    
+    .meeting-item-name {
+        font-size: 15px;
+    }
+    
+    .meeting-item-instagram {
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .calendar-controls h3 {
+        font-size: 16px;
+    }
+    
+    .calendar-nav-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+    }
+    
+    .calendar-grid {
+        padding: 8px;
+    }
+    
+    .calendar-day-name {
+        font-size: 11px;
+        padding: 6px 0;
+    }
+    
+    .calendar-days {
+        gap: 4px;
+    }
+    
+    .calendar-day {
+        min-height: 45px;
+        border-radius: 6px;
+    }
+    
+    .day-number {
+        font-size: 13px;
+    }
+    
+    .meeting-dot {
+        width: 18px;
+        height: 18px;
+        font-size: 9px;
+    }
+}
+
+/* Responsive pour le bouton calendrier et compteur */
+@media (max-width: 768px) {
+    .header-count-container {
+        padding: 0 16px;
+        gap: 8px;
+    }
+    
+    .btn-calendar-separate {
+        padding: 6px 12px;
+        font-size: 18px;
+    }
+    
+    .contacts-count {
+        font-size: 13px;
+        padding: 6px 12px;
+    }
+    
+    #contactsCountNumber {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-count-container {
+        padding: 0 12px;
+        gap: 6px;
+    }
+    
+    .btn-calendar-separate {
+        padding: 5px 10px;
+        font-size: 16px;
+    }
+    
+    .contacts-count {
+        font-size: 12px;
+        padding: 5px 10px;
+    }
 }
