@@ -404,6 +404,33 @@ const authManager = {
                     }
                 }
                 
+                // MIGRATION: Mettre à jour le champ location en type city
+                const locationField = app.defaultFields.find(f => f.id === 'location');
+                if (locationField && locationField.type !== 'city') {
+                    console.log('🔄 Migrating location field to type city...');
+                    locationField.type = 'city';
+                    locationField.label = 'Ville';
+                    locationField.placeholder = 'Ex: Paris, New York...';
+                    
+                    // Sauvegarder immédiatement
+                    try {
+                        const userDoc = db.collection('users').doc(userId);
+                        const cleanDefaultFields = app.defaultFields.map(f => {
+                            const clean = { ...f };
+                            Object.keys(clean).forEach(key => {
+                                if (clean[key] === undefined) delete clean[key];
+                            });
+                            return clean;
+                        });
+                        await userDoc.set({
+                            defaultFields: cleanDefaultFields
+                        }, { merge: true });
+                        console.log('✅ Location field migrated successfully');
+                    } catch (error) {
+                        console.error('❌ Error migrating location field:', error);
+                    }
+                }
+                
                 if (data.normalUnfollowers) {
                     unfollowers.data.normalUnfollowers = new Set(data.normalUnfollowers);
                 }
