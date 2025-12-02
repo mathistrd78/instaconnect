@@ -68,6 +68,14 @@ const app = {
             label: 'Notes personnelles', 
             required: false,
             order: 8
+        },
+        { 
+            id: 'meetingDate', 
+            type: 'date', 
+            label: 'RDV', 
+            required: false,
+            order: 9,
+            futureOnly: true
         }
     ],
 
