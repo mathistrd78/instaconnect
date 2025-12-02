@@ -44,7 +44,8 @@ const app = {
         { 
             id: 'location', 
             type: 'city', 
-            label: 'Lieu d\'habitat', 
+            label: 'Ville', 
+            placeholder: 'Ex: Paris, New York...',
             required: false,
             order: 5
         },
