@@ -835,10 +835,11 @@ const contacts = {
                 `;
             
             case 'date':
+                const minDate = field.futureOnly ? `min="${new Date().toISOString().split('T')[0]}"` : '';
                 return `
                     <div class="form-group">
                         <label>${field.label} ${requiredMark}</label>
-                        <input type="date" id="${field.id}" ${field.required ? 'required' : ''}>
+                        <input type="date" id="${field.id}" ${minDate} ${field.required ? 'required' : ''}>
                     </div>
                 `;
             
