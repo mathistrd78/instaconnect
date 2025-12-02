@@ -161,16 +161,25 @@ const calendar = {
         const meetings = this.getMeetings();
         const dayMeetings = meetings[dateString] || [];
         
-        if (dayMeetings.length === 0) {
-            return; // Pas de RDV ce jour-là
-        }
-        
         // Formater la date
         const date = new Date(dateString + 'T00:00:00');
         const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
         const formattedDate = date.toLocaleDateString('fr-FR', options);
         
         document.getElementById('calendarDetailsDate').textContent = formattedDate;
+        
+        // Si pas de RDV, afficher un message
+        if (dayMeetings.length === 0) {
+            document.getElementById('calendarDetailsList').innerHTML = `
+                <div class="calendar-no-meeting">
+                    <div class="no-meeting-icon">📭</div>
+                    <div class="no-meeting-text">Pas de rendez-vous ce jour-là</div>
+                </div>
+            `;
+            document.getElementById('calendarDetails').style.display = 'block';
+            document.getElementById('calendarDetails').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            return;
+        }
         
         // Générer la liste des contacts
         let listHTML = '';
