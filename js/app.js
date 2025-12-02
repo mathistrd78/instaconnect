@@ -45,7 +45,6 @@ const app = {
             id: 'location', 
             type: 'city', 
             label: 'Ville', 
-            placeholder: 'Ex: Paris, New York...',
             required: false,
             order: 5
         },
@@ -54,24 +53,21 @@ const app = {
             type: 'number', 
             label: 'Année de naissance', 
             required: false,
-            order: 6,
-            placeholder: 'Ex: 1995'
+            order: 6
         },
         { 
             id: 'interests', 
             type: 'textarea', 
             label: 'Centres d\'intérêt', 
             required: false,
-            order: 7,
-            placeholder: 'Sports, musique, voyages...'
+            order: 7
         },
         { 
             id: 'notes', 
             type: 'textarea', 
             label: 'Notes personnelles', 
             required: false,
-            order: 8,
-            placeholder: 'Informations supplémentaires...'
+            order: 8
         }
     ],
 
