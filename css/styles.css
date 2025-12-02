@@ -2471,12 +2471,32 @@ body.dark-mode .emoji-search-input:focus {
     font-weight: 600;
     color: #1976d2;
     margin: 0 20px 6px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 #contactsCountNumber {
     font-size: 15px;
     font-weight: 700;
     color: #0d47a1;
+}
+
+/* Bouton calendrier inline dans le bandeau bleu */
+.btn-calendar-inline {
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: all 0.2s;
+    margin-left: 12px;
+}
+
+.btn-calendar-inline:hover {
+    background: rgba(25, 118, 210, 0.1);
+    transform: scale(1.1);
 }
 
 .filters-horizontal {
@@ -3300,29 +3320,8 @@ body.dark-mode .meeting-item-instagram {
 }
 
 /* Bouton calendrier dans la navbar */
-.btn-calendar {
-    background: linear-gradient(135deg, #E1306C 0%, #fd79a8 100%);
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 15px;
-}
 
-.btn-calendar:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(225, 48, 108, 0.3);
-}
 
-body.dark-mode .btn-calendar {
-    background: linear-gradient(135deg, #E1306C 0%, #c7275e 100%);
-}
 
 /* Alignement compteur + bouton calendrier */
 .header {
@@ -3338,8 +3337,8 @@ body.dark-mode .btn-calendar {
 }
 
 /* Conteneur pour compteur + bouton calendrier */
-.header-actions {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+
+/* Dark mode pour le bouton calendrier inline */
+body.dark-mode .btn-calendar-inline:hover {
+    background: rgba(255, 255, 255, 0.1);
 }
