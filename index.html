@@ -76,16 +76,17 @@
             <h1>InstaConnect</h1>
         </div>
         
-        <input type="text" class="search-box" id="searchBox" placeholder="🔍 Rechercher...">
-        
-        <!-- Conteneur pour bouton calendrier + compteur de contacts -->
-        <div class="header-count-container">
+        <!-- Conteneur pour barre de recherche + bouton calendrier -->
+        <div class="search-container">
+            <input type="text" class="search-box" id="searchBox" placeholder="🔍 Rechercher...">
             <button class="btn-calendar-separate" onclick="calendar.open()" title="Voir le calendrier des rendez-vous">
                 📅
             </button>
-            <div class="contacts-count" id="contactsCount">
-                <span id="contactsCountNumber">0</span> contact(s)
-            </div>
+        </div>
+        
+        <!-- Compteur de contacts -->
+        <div class="contacts-count" id="contactsCount">
+            <span id="contactsCountNumber">0</span> contact(s)
         </div>
         
         <!-- Nouveaux filtres horizontaux -->
