@@ -361,6 +361,56 @@ const authManager = {
                     app.defaultFields = data.defaultFields;
                     console.log('✅ Default fields loaded with user tags');
                     
+                    // MIGRATION FORCÉE : Mettre à jour la structure des champs
+                    console.log('🔄 Checking for field structure updates...');
+                    
+                    // Supprimer les champs profession et interests s'ils existent
+                    app.defaultFields = app.defaultFields.filter(f => f.id !== 'profession' && f.id !== 'interests');
+                    
+                    // Renommer Ville en Localisation
+                    const locationField = app.defaultFields.find(f => f.id === 'location');
+                    if (locationField) {
+                        locationField.label = 'Localisation';
+                        locationField.type = 'city';
+                    }
+                    
+                    // Changer birthYear en type year
+                    const birthYearField = app.defaultFields.find(f => f.id === 'birthYear');
+                    if (birthYearField) {
+                        birthYearField.type = 'year';
+                        birthYearField.order = 5;
+                    }
+                    
+                    // Ajouter le champ birthday s'il n'existe pas
+                    if (!app.defaultFields.find(f => f.id === 'birthday')) {
+                        console.log('➕ Adding birthday field...');
+                        app.defaultFields.push({
+                            id: 'birthday',
+                            type: 'date',
+                            label: 'Date d\'anniversaire',
+                            required: false,
+                            order: 6,
+                            futureOnly: false
+                        });
+                    }
+                    
+                    // Réajuster les ordres
+                    const notesField = app.defaultFields.find(f => f.id === 'notes');
+                    if (notesField) notesField.order = 7;
+                    
+                    const meetingField = app.defaultFields.find(f => f.id === 'meetingDate');
+                    if (meetingField) meetingField.order = 8;
+                    
+                    // Sauvegarder les modifications
+                    console.log('💾 Saving updated defaultFields to Firebase...');
+                    db.collection('users').doc(userId).update({
+                        defaultFields: app.defaultFields
+                    }).then(() => {
+                        console.log('✅ DefaultFields structure updated in Firebase');
+                    }).catch(err => {
+                        console.error('❌ Error updating defaultFields:', err);
+                    });
+                    
                     // Recréer les styles CSS pour tous les tags dans field.tags
                     console.log('🎨 Recreating CSS styles for field tags...');
                     app.defaultFields.forEach(field => {
