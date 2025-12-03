@@ -258,78 +258,6 @@ const tags = {
             'micro': ['🎤'],
             'guitare': ['🎸'],
             'piano': ['🎹'],
-            'terre': ['🌍', '🌎', '🌏', '🌐'],
-            'planete': ['🌍', '🌎', '🌏', '🪐'],
-            'monde': ['🌍', '🌎', '🌏', '🌐'],
-            'globe': ['🌍', '🌎', '🌏', '🌐']
-        };
-        
-        // Rechercher dans les mots-clés
-        const matchingEmojis = new Set();
-        
-        for (const [keyword, emojis] of Object.entries(keywords)) {
-            if (keyword.includes(search)) {
-                emojis.forEach(e => matchingEmojis.add(e));
-            }
-        }
-        
-        // Si des résultats trouvés, les retourner
-        if (matchingEmojis.size > 0) {
-            return Array.from(matchingEmojis);
-        }
-        
-        // Sinon retourner tous les emojis
-        return this.availableEmojis;
-    },
-
-    // Nouvelle fonction qui utilise emoji-keywords.js si disponible
-    searchEmojis(query) {
-        query = query.toLowerCase().trim();
-        
-        const currentEmoji = this.currentEdit ? this.currentEdit.tag.label.split(' ')[0] : '';
-        
-        // Si pas de recherche, afficher tous les emojis
-        if (!query) {
-            this.renderEmojis(this.availableEmojis, currentEmoji);
-            return;
-        }
-        
-        // Utiliser la nouvelle base de données si disponible
-        if (typeof window.emojiKeywords !== 'undefined') {
-            const results = [];
-            this.availableEmojis.forEach(emoji => {
-                const keywords = window.emojiKeywords[emoji];
-                if (keywords) {
-                    const matches = keywords.some(keyword => keyword.toLowerCase().includes(query));
-                    if (matches) {
-                        results.push(emoji);
-                    }
-                }
-            });
-            this.renderEmojis(results, currentEmoji);
-        } else {
-            // Fallback sur l'ancienne méthode
-            const results = this.searchEmoji(query, currentEmoji);
-            this.renderEmojis(results, currentEmoji);
-        }
-    },
-
-    // Rendre les emojis
-    renderEmojis(emojis, selectedEmoji = '') {
-        const emojiPicker = document.getElementById('emojiPicker');
-        if (!emojiPicker) return;
-        
-        if (emojis.length === 0) {
-            emojiPicker.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 20px; color: #868e96;">Aucun emoji trouvé</div>';
-            return;
-        }
-        
-        emojiPicker.innerHTML = emojis.map(emoji => `
-            <div class="emoji-option ${selectedEmoji === emoji ? 'selected' : ''}" 
-                 onclick="tags.selectEmoji('${emoji}')">${emoji}</div>
-        `).join('');
-    },
-
             'maison': ['🏠', '🏡', '🏘', '🏚', '🏢', '🏬', '🏣', '🏤', '🏥', '🏦', '🏨', '🏪', '🏫', '🏩', '💒', '🏛', '⛪', '🕌'],
             'ecole': ['🏫', '🎓'],
             'hopital': ['🏥'],
@@ -788,3 +716,6 @@ const tags = {
         this.currentEdit = null;
     }
 };
+
+// Exposer tags globalement
+window.tags = tags;
