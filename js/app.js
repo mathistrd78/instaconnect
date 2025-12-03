@@ -35,46 +35,40 @@ const app = {
             options: ['👨 Homme', '👩 Femme']
         },
         { 
-            id: 'profession', 
-            type: 'text', 
-            label: 'Etudes/Profession', 
+            id: 'location', 
+            type: 'city', 
+            label: 'Localisation', 
             required: false,
             order: 4
         },
         { 
-            id: 'location', 
-            type: 'city', 
-            label: 'Ville', 
+            id: 'birthYear', 
+            type: 'year', 
+            label: 'Année de naissance', 
             required: false,
             order: 5
         },
         { 
-            id: 'birthYear', 
-            type: 'number', 
-            label: 'Année de naissance', 
+            id: 'birthday', 
+            type: 'date', 
+            label: 'Date d\'anniversaire', 
             required: false,
-            order: 6
-        },
-        { 
-            id: 'interests', 
-            type: 'textarea', 
-            label: 'Centres d\'intérêt', 
-            required: false,
-            order: 7
+            order: 6,
+            futureOnly: false
         },
         { 
             id: 'notes', 
             type: 'textarea', 
             label: 'Notes personnelles', 
             required: false,
-            order: 8
+            order: 7
         },
         { 
             id: 'meetingDate', 
             type: 'date', 
             label: 'RDV', 
             required: false,
-            order: 9,
+            order: 8,
             futureOnly: true
         }
     ],
