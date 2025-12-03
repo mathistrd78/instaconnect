@@ -860,7 +860,6 @@ const contacts = {
         const dayOptions = Array.from({length: 31}, (_, i) => i + 1)
             .map(d => `<option value="${d}">${d}</option>`).join('');
         
-        const yearRequired = yearField.required ? '<span style="color: #ff4757;">*</span>' : '';
         const dateRequired = dateField.required ? '<span style="color: #ff4757;">*</span>' : '';
         
         return `
