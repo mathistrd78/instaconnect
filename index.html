@@ -76,13 +76,7 @@
             <h1>InstaConnect</h1>
         </div>
         
-        <!-- Conteneur pour barre de recherche + bouton calendrier -->
-        <div class="search-container">
-            <input type="text" class="search-box" id="searchBox" placeholder="🔍 Rechercher...">
-            <button class="btn-calendar-separate" onclick="calendar.open()" title="Voir le calendrier des rendez-vous">
-                📅
-            </button>
-        </div>
+        <input type="text" class="search-box" id="searchBox" placeholder="🔍 Rechercher...">
         
         <!-- Compteur de contacts -->
         <div class="contacts-count" id="contactsCount">
@@ -549,7 +543,7 @@
             </div>
             <div class="tag-edit-section">
                 <label>Choisir un emoji</label>
-                <input type="text" id="emojiSearch" class="emoji-search-input" placeholder="🔍 Rechercher un emoji...">
+                <input type="text" class="emoji-search" id="emojiSearch" placeholder="🔍 Rechercher un emoji..." oninput="tags.searchEmojis(this.value)">
                 <div class="emoji-picker" id="emojiPicker"></div>
             </div>
             <div class="tag-edit-section">
@@ -572,9 +566,8 @@
     <!-- App Scripts -->
     <script src="js/firebase-config.js"></script>
     <script src="js/auth.js"></script>
+    <script src="js/emoji-keywords.js"></script>
     <script src="js/tags.js"></script>
-    <script src="js/city.js"></script>
-    <script src="js/calendar.js"></script>
     <script src="js/fields.js"></script>
     <script src="js/contacts.js"></script>
     <script src="js/stats.js"></script>
