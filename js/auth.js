@@ -421,8 +421,6 @@ const authManager = {
                     } else {
                         console.log('✅ Field structure already up-to-date, no migration needed');
                     }
-                        console.error('❌ Error updating defaultFields:', err);
-                    });
                     
                     // Recréer les styles CSS pour tous les tags dans field.tags
                     console.log('🎨 Recreating CSS styles for field tags...');
