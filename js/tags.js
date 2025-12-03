@@ -196,116 +196,6 @@ const tags = {
         '#dfe6e9', '#b2bec3', '#636e72', '#2d3436'
     ],
 
-    // Fonction pour chercher des emojis par mots-clés
-    searchEmoji(searchTerm, currentEmoji) {
-        if (!searchTerm) return this.availableEmojis;
-        
-        const search = searchTerm.toLowerCase().trim();
-        const keywords = {
-            'amour': ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '🥰', '😍', '😘', '💏', '💑'],
-            'coeur': ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '💕', '💞', '💓', '💗', '💖', '💘', '💝'],
-            'sourire': ['😀', '😃', '😄', '😁', '😊', '🙂', '😉', '😌'],
-            'rire': ['😆', '😅', '🤣', '😂', '😹'],
-            'triste': ['😔', '😞', '😢', '😭', '😿', '💔', '🙁', '☹️', '😥'],
-            'pleure': ['😢', '😭', '😿', '😥'],
-            'colere': ['😡', '😠', '🤬', '😤', '💢'],
-            'bisou': ['😗', '😙', '😚', '😘', '💋', '💏'],
-            'clin': ['😉', '😜'],
-            'main': ['👋', '🤚', '🖐', '✋', '👌', '✌️', '🤞', '🤟', '🤘', '🤙', '👈', '👉', '👆', '👇', '☝️', '👍', '👎', '✊', '👊', '👏', '🙌', '👐', '🤝', '🙏'],
-            'pouce': ['👍', '👎'],
-            'ok': ['👌', '👍', '✅'],
-            'animal': ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵', '🐔', '🐧', '🐦', '🐤', '🐥'],
-            'chien': ['🐶', '🐕', '🐩', '🦮'],
-            'chat': ['🐱', '🐈', '😺', '😸', '😹', '😻', '😼', '😽', '🙀', '😿', '😾'],
-            'nourriture': ['🍎', '🍊', '🍋', '🍌', '🍉', '🍇', '🍓', '🍑', '🍒', '🍍', '🥝', '🍅', '🥑', '🍆', '🌽', '🥕', '🌶', '🥒', '🥦', '🍞', '🥐', '🥖', '🧀', '🍗', '🍔', '🍟', '🍕', '🌭', '🥪', '🌮', '🍝', '🍜', '🍲', '🍛', '🍱', '🍣', '🍤', '🍙', '🍚', '🍘', '🍥', '🍡', '🥟', '🍦', '🍧', '🍨', '🍩', '🍪', '🎂', '🍰', '🧁', '🍫', '🍬', '🍭', '🍮', '🍯'],
-            'fruit': ['🍎', '🍊', '🍋', '🍌', '🍉', '🍇', '🍓', '🍑', '🍒', '🍍', '🥝', '🍐'],
-            'pizza': ['🍕'],
-            'burger': ['🍔'],
-            'frites': ['🍟'],
-            'gateau': ['🎂', '🍰', '🧁'],
-            'boisson': ['☕', '🍵', '🧃', '🥤', '🍶', '🍺', '🍻', '🥂', '🍷', '🍸', '🍹', '🍾', '🧉'],
-            'cafe': ['☕'],
-            'biere': ['🍺', '🍻'],
-            'vin': ['🍷', '🥂', '🍾'],
-            'sport': ['⚽', '🏀', '🏈', '⚾', '🎾', '🏐', '🏉', '🎱', '🏓', '🏸', '🏒', '🏑', '🥍', '🏏', '⛳', '🏹', '🎣', '🥊', '🥋', '🎽', '🛹', '🛷', '⛸', '🥌', '🎿', '🏂', '🏋️', '🤼', '🤸', '⛹️', '🤺', '🤾', '🏌️', '🏇', '🧘', '🏄', '🏊', '🤽', '🚣', '🧗', '🚵', '🚴', '🏆', '🥇', '🥈', '🥉', '🏅'],
-            'foot': ['⚽'],
-            'basket': ['🏀'],
-            'tennis': ['🎾'],
-            'trophee': ['🏆'],
-            'medaille': ['🥇', '🥈', '🥉', '🏅'],
-            'voiture': ['🚗', '🚕', '🚙', '🚌', '🚎', '🏎', '🚓', '🚑', '🚒'],
-            'transport': ['🚗', '🚕', '🚙', '🚌', '🚎', '🏎', '🚓', '🚑', '🚒', '🚐', '🚚', '🚛', '🚜', '🚲', '🛵', '🏍', '✈️', '🚁', '🚂', '🚆', '🚇', '🚊', '🚝', '🚄', '🚅', '⛵', '🚤', '🛥', '🛳', '⛴', '🚢'],
-            'avion': ['✈️', '🛫', '🛬'],
-            'train': ['🚂', '🚆', '🚇', '🚊', '🚝', '🚄', '🚅'],
-            'velo': ['🚲', '🚴', '🚵'],
-            'nature': ['🌸', '💐', '🌹', '🥀', '🌺', '🌻', '🌼', '🌷', '🌱', '🌿', '🍀', '🌾', '🌵', '🌴', '🌳', '🌲', '🌲', '🍃', '🍂', '🍁', '🍄'],
-            'fleur': ['🌸', '💐', '🌹', '🥀', '🌺', '🌻', '🌼', '🌷'],
-            'rose': ['🌹', '🥀'],
-            'arbre': ['🌲', '🌳', '🌴', '🎄'],
-            'meteo': ['☀️', '🌤', '⛅', '🌥', '☁️', '🌦', '🌧', '⛈', '🌩', '🌨', '❄️', '☃️', '⛄', '💨', '💧', '💦', '☔', '⚡', '🌈', '🌪'],
-            'soleil': ['☀️', '🌤', '⛅', '🌞'],
-            'pluie': ['🌧', '☔', '💧', '💦'],
-            'neige': ['❄️', '☃️', '⛄', '🌨'],
-            'nuage': ['☁️', '🌤', '⛅', '🌥'],
-            'eclair': ['⚡', '⛈'],
-            'arc': ['🌈'],
-            'feu': ['🔥'],
-            'eau': ['💧', '💦', '🌊', '🚿', '🛁'],
-            'telephone': ['📱', '📲', '☎️', '📞'],
-            'ordinateur': ['💻', '🖥', '⌨️'],
-            'musique': ['🎵', '🎶', '🎤', '🎧', '🎼', '🎹', '🥁', '🎷', '🎺', '🎸', '🎻'],
-            'note': ['🎵', '🎶'],
-            'micro': ['🎤'],
-            'guitare': ['🎸'],
-            'piano': ['🎹'],
-            'maison': ['🏠', '🏡', '🏘', '🏚', '🏢', '🏬', '🏣', '🏤', '🏥', '🏦', '🏨', '🏪', '🏫', '🏩', '💒', '🏛', '⛪', '🕌'],
-            'ecole': ['🏫', '🎓'],
-            'hopital': ['🏥'],
-            'banque': ['🏦'],
-            'hotel': ['🏨'],
-            'etoile': ['⭐', '🌟', '✨', '💫'],
-            'lune': ['🌙', '🌝', '🌛', '🌜', '🌚', '🌕', '🌖', '🌗', '🌘', '🌑', '🌒', '🌓', '🌔'],
-            'temps': ['⏰', '⏱', '⏲', '⌚', '🕐', '🕑', '🕒', '🕓', '🕔', '🕕', '🕖', '🕗', '🕘', '🕙', '🕚', '🕛'],
-            'horloge': ['⏰', '⏱', '⏲', '🕐', '🕑', '🕒', '🕓', '🕔', '🕕', '🕖', '🕗', '🕘', '🕙', '🕚', '🕛'],
-            'montre': ['⌚'],
-            'fete': ['🎉', '🎊', '🎈', '🎁', '🎀', '🎂', '🎄', '🎃', '🎆', '🎇', '✨', '🎋', '🎍', '🎏', '🎐', '🎑', '🧧'],
-            'cadeau': ['🎁', '🎀'],
-            'ballon': ['🎈'],
-            'drapeau': ['🏳️', '🏴', '🏁', '🚩', '🏳️‍🌈', '🇫🇷'],
-            'france': ['🇫🇷'],
-            'check': ['✅', '✔️', '☑️'],
-            'croix': ['❌', '❎'],
-            'fleche': ['➡️', '⬅️', '⬆️', '⬇️', '↗️', '↘️', '↙️', '↖️', '↕️', '↔️', '↪️', '↩️', '⤴️', '⤵️'],
-            'attention': ['⚠️', '🚸'],
-            'interdit': ['🚫', '⛔', '🚷', '🚯', '🚳', '🚱', '🔞', '📵', '🚭'],
-            'question': ['❓', '❔', '⁉️'],
-            'exclamation': ['❗', '❕', '‼️'],
-            'info': ['ℹ️'],
-            'argent': ['💰', '💵', '💴', '💶', '💷', '💳', '💸', '💲', '🪙'],
-            'dollar': ['💵', '💲'],
-            'euro': ['💶'],
-        };
-        
-        // Chercher dans les mots-clés
-        const results = new Set();
-        for (const [keyword, emojis] of Object.entries(keywords)) {
-            if (keyword.includes(search)) {
-                emojis.forEach(emoji => results.add(emoji));
-            }
-        }
-        
-        // Si aucun résultat dans les mots-clés, chercher directement dans les emojis affichés
-        if (results.size === 0) {
-            return this.availableEmojis.filter(emoji => {
-                // Garder l'emoji actuel dans les résultats
-                if (emoji === currentEmoji) return true;
-                return false;
-            });
-        }
-        
-        return Array.from(results);
-    },
-
     // État actuel de l'édition
     currentEdit: null,
     currentContext: null,
@@ -494,32 +384,11 @@ const tags = {
         
         this.currentEdit = { fieldType, value, tag, isDefault, selectedColor: currentColor };
         
-        // Rendre les emojis
-        const emojiPicker = document.getElementById('emojiPicker');
-        const currentEmoji = tag.label.split(' ')[0];
+        // Rendre tous les emojis initialement
+        this.renderEmojis(this.availableEmojis, currentEmoji);
         
-        const renderEmojis = (searchTerm = '') => {
-            const emojisToShow = this.searchEmoji(searchTerm, currentEmoji);
-            
-            emojiPicker.innerHTML = emojisToShow.map(emoji => `
-                <div class="emoji-option ${currentEmoji === emoji ? 'selected' : ''}" 
-                     onclick="tags.selectEmoji('${emoji}')">${emoji}</div>
-            `).join('');
-            
-            // Afficher un message si aucun résultat
-            if (emojisToShow.length === 0) {
-                emojiPicker.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 20px; color: #868e96;">Aucun emoji trouvé</div>';
-            }
-        };
-        
-        renderEmojis();
-        
-        // Ajouter le listener pour la recherche
-        const emojiSearch = document.getElementById('emojiSearch');
-        if (emojiSearch) {
-            emojiSearch.value = '';
-            emojiSearch.oninput = (e) => renderEmojis(e.target.value);
-        }
+        // Vider le champ de recherche
+        document.getElementById('emojiSearch').value = '';
         
         // Rendre les couleurs avec la couleur actuelle sélectionnée
         const colorPicker = document.getElementById('colorPicker');
@@ -534,6 +403,46 @@ const tags = {
         // Show overlay and modal - overlay BEHIND modal
         document.getElementById('overlay').classList.add('active');
         document.getElementById('tagEditModal').classList.add('active');
+    },
+
+    // Rendre les emojis
+    renderEmojis(emojis, selectedEmoji = '') {
+        const emojiPicker = document.getElementById('emojiPicker');
+        emojiPicker.innerHTML = emojis.map(emoji => `
+            <div class="emoji-option ${selectedEmoji === emoji ? 'selected' : ''}" 
+                 onclick="tags.selectEmoji('${emoji}')">${emoji}</div>
+        `).join('');
+    },
+
+    // Rechercher des emojis
+    searchEmojis(query) {
+        query = query.toLowerCase().trim();
+        
+        // Si pas de recherche, afficher tous les emojis
+        if (!query) {
+            const currentEmoji = this.currentEdit.tag.label.split(' ')[0];
+            this.renderEmojis(this.availableEmojis, currentEmoji);
+            return;
+        }
+        
+        // Rechercher dans les mots-clés
+        const results = [];
+        this.availableEmojis.forEach(emoji => {
+            const keywords = window.emojiKeywords && window.emojiKeywords[emoji];
+            if (keywords) {
+                // Vérifier si le query correspond à un mot-clé
+                const matches = keywords.some(keyword => keyword.toLowerCase().includes(query));
+                if (matches) {
+                    results.push(emoji);
+                }
+            } else if (emoji.includes(query)) {
+                // Fallback : recherche directe dans l'emoji
+                results.push(emoji);
+            }
+        });
+        
+        const currentEmoji = this.currentEdit.tag.label.split(' ')[0];
+        this.renderEmojis(results, currentEmoji);
     },
 
     // Sélectionner un emoji
