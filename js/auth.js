@@ -554,7 +554,9 @@ const authManager = {
             console.log('✅ Contacts loaded from Firebase:', app.dataStore.contacts.length);
             
             // Re-render UI
+            contacts.renderFilters(); // Regénérer les filtres avec les champs actuels
             contacts.render();
+            stats.renderTabs(); // Regénérer les onglets avec les champs actuels
             stats.render();
 
         } catch (error) {
