@@ -390,7 +390,22 @@ const contacts = {
         allFields.forEach(field => {
             const value = contact[field.id];
             
-            if (field.type === 'select') {
+            if (field.id === 'birthday' && value) {
+                // Cas spécial : birthday avec 3 selects
+                const [year, month, day] = value.split('-');
+                const daySelect = document.getElementById('birthday_day');
+                const monthSelect = document.getElementById('birthday_month');
+                const yearSelect = document.getElementById('birthday_year');
+                const hiddenInput = document.getElementById('birthday');
+                
+                if (daySelect) daySelect.value = parseInt(day);
+                if (monthSelect) monthSelect.value = parseInt(month);
+                if (yearSelect) yearSelect.value = year;
+                if (hiddenInput) hiddenInput.value = value;
+            } else if (field.id === 'birthYear') {
+                // Ignorer birthYear car il est maintenant dans birthday
+                return;
+            } else if (field.type === 'select') {
                 // Tag selector
                 const hiddenInput = document.getElementById(field.id);
                 const displayEl = document.getElementById(field.id + 'Display');
@@ -765,10 +780,14 @@ const contacts = {
             const field = allFields[i];
             const nextField = allFields[i + 1];
             
-            // Si c'est birthYear et que le champ suivant est birthday, les mettre sur la même ligne
-            if (field.id === 'birthYear' && nextField && nextField.id === 'birthday') {
-                dynamicFieldsHTML += this.renderBirthFields(field, nextField);
-                i++; // Sauter birthday car déjà rendu
+            // Si c'est birthYear, le sauter (il sera intégré dans birthday)
+            if (field.id === 'birthYear') {
+                continue;
+            }
+            
+            // Si c'est birthday, afficher les 3 selects
+            if (field.id === 'birthday') {
+                dynamicFieldsHTML += this.renderBirthFields(null, field);
             } else {
                 dynamicFieldsHTML += this.renderField(field);
             }
@@ -788,47 +807,39 @@ const contacts = {
 
         form.innerHTML = fixedFieldsHTML + dynamicFieldsHTML + actionsHTML;
         
-        // Lier birthYear et birthday
+        // Lier les 3 selects de date de naissance
         setTimeout(() => {
-            const birthYearSelect = document.getElementById('birthYear');
-            const birthdayInput = document.getElementById('birthday');
+            const daySelect = document.getElementById('birthday_day');
+            const monthSelect = document.getElementById('birthday_month');
+            const yearSelect = document.getElementById('birthday_year');
+            const hiddenInput = document.getElementById('birthday');
             
-            if (birthYearSelect && birthdayInput) {
-                // Quand on focus sur birthday, définir la date min/max selon l'année sélectionnée
-                birthdayInput.addEventListener('focus', function() {
-                    if (birthYearSelect.value && !this.value) {
-                        // Définir l'année dans l'attribut min pour que le calendrier s'ouvre sur cette année
-                        const selectedYear = birthYearSelect.value;
-                        this.setAttribute('min', `${selectedYear}-01-01`);
-                        this.setAttribute('max', `${selectedYear}-12-31`);
+            if (daySelect && monthSelect && yearSelect && hiddenInput) {
+                // Fonction pour mettre à jour le champ caché
+                const updateHiddenField = () => {
+                    const day = daySelect.value;
+                    const month = monthSelect.value;
+                    const year = yearSelect.value;
+                    
+                    // Si les 3 sont remplis, créer la date au format YYYY-MM-DD
+                    if (day && month && year) {
+                        const paddedDay = String(day).padStart(2, '0');
+                        const paddedMonth = String(month).padStart(2, '0');
+                        hiddenInput.value = `${year}-${paddedMonth}-${paddedDay}`;
+                    } else {
+                        hiddenInput.value = '';
                     }
-                });
+                };
                 
-                // Quand on sort du focus, enlever les restrictions
-                birthdayInput.addEventListener('blur', function() {
-                    if (!this.value && this.getAttribute('min')) {
-                        this.removeAttribute('min');
-                        this.removeAttribute('max');
-                    }
-                });
-                
-                // Quand on change birthday, synchroniser l'année si elle est différente
-                birthdayInput.addEventListener('change', function() {
-                    if (this.value) {
-                        const yearFromBirthday = this.value.split('-')[0];
-                        if (birthYearSelect.value !== yearFromBirthday) {
-                            birthYearSelect.value = yearFromBirthday;
-                        }
-                        // Enlever les restrictions après sélection
-                        this.removeAttribute('min');
-                        this.removeAttribute('max');
-                    }
-                });
+                // Écouter les changements sur les 3 selects
+                daySelect.addEventListener('change', updateHiddenField);
+                monthSelect.addEventListener('change', updateHiddenField);
+                yearSelect.addEventListener('change', updateHiddenField);
             }
         }, 100);
     },
 
-    // Rendre les champs birthYear et birthday sur la même ligne
+    // Rendre les champs birthYear et birthday sur la même ligne (3 selects)
     renderBirthFields(yearField, dateField) {
         // Générer les années de 1940 à aujourd'hui
         const currentYear = new Date().getFullYear();
@@ -838,25 +849,38 @@ const contacts = {
         }
         const yearOptions = years.map(y => `<option value="${y}">${y}</option>`).join('');
         
+        // Générer les mois
+        const months = [
+            'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+            'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
+        ];
+        const monthOptions = months.map((m, i) => `<option value="${i + 1}">${m}</option>`).join('');
+        
+        // Générer les jours (1-31)
+        const dayOptions = Array.from({length: 31}, (_, i) => i + 1)
+            .map(d => `<option value="${d}">${d}</option>`).join('');
+        
         const yearRequired = yearField.required ? '<span style="color: #ff4757;">*</span>' : '';
         const dateRequired = dateField.required ? '<span style="color: #ff4757;">*</span>' : '';
         
         return `
-            <div class="form-group" style="display: grid; grid-template-columns: 140px 1fr; gap: 12px; align-items: start;">
-                <div>
-                    <label style="display: block; margin-bottom: 8px;">${yearField.label} ${yearRequired}</label>
-                    <select id="${yearField.id}" class="year-select" ${yearField.required ? 'required' : ''}>
-                        <option value="">Année...</option>
+            <div class="form-group">
+                <label style="display: block; margin-bottom: 8px;">${dateField.label} ${dateRequired}</label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+                    <select id="birthday_day" class="birth-select">
+                        <option value="">Jour</option>
+                        ${dayOptions}
+                    </select>
+                    <select id="birthday_month" class="birth-select">
+                        <option value="">Mois</option>
+                        ${monthOptions}
+                    </select>
+                    <select id="birthday_year" class="birth-select">
+                        <option value="">Année</option>
                         ${yearOptions}
                     </select>
                 </div>
-                <div>
-                    <label style="display: block; margin-bottom: 8px;">${dateField.label} ${dateRequired}</label>
-                    <input type="date" class="date-input" id="${dateField.id}" ${dateField.required ? 'required' : ''} 
-                           placeholder="jj/mm/aaaa"
-                           onfocus="this.showPicker ? this.showPicker() : null"
-                           onclick="this.showPicker ? this.showPicker() : null">
-                </div>
+                <input type="hidden" id="${dateField.id}" ${dateField.required ? 'required' : ''}>
             </div>
         `;
     },
