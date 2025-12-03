@@ -1905,7 +1905,8 @@ body.dark-mode .empty-state-text {
 }
 
 /* Select année de naissance compact */
-.year-select {
+.year-select,
+.birth-select {
     width: 100% !important;
     padding: 14px 12px !important;
     font-size: 16px;
@@ -1914,7 +1915,8 @@ body.dark-mode .empty-state-text {
 
 /* Sur mobile, limiter la hauteur du dropdown */
 @media (max-width: 768px) {
-    .year-select {
+    .year-select,
+    .birth-select {
         font-size: 16px; /* Empêche le zoom sur iOS */
         max-height: 250px;
     }
@@ -3408,6 +3410,20 @@ input[type="date"],
     min-width: 150px;
     max-width: 100%;
     width: 100%;
+}
+
+/* Placeholder pour les champs date vides (iOS/Safari) */
+input[type="date"]:not(:focus):not(:valid),
+.date-input:not(:focus):not(:valid) {
+    color: transparent;
+}
+
+input[type="date"]:not(:focus):not(:valid)::before,
+.date-input:not(:focus):not(:valid)::before {
+    content: attr(placeholder);
+    color: #999;
+    position: absolute;
+    left: 16px;
 }
 
 /* Afficher le texte placeholder sur mobile */
