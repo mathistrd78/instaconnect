@@ -824,9 +824,6 @@ const contacts = {
                         this.removeAttribute('max');
                     }
                 });
-                        }
-                    }
-                });
             }
         }, 100);
     },
