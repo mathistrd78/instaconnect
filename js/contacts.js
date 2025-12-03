@@ -759,7 +759,20 @@ const contacts = {
 
         // Générer les champs dynamiques
         const allFields = app.getAllFields();
-        const dynamicFieldsHTML = allFields.map(field => this.renderField(field)).join('');
+        let dynamicFieldsHTML = '';
+        
+        for (let i = 0; i < allFields.length; i++) {
+            const field = allFields[i];
+            const nextField = allFields[i + 1];
+            
+            // Si c'est birthYear et que le champ suivant est birthday, les mettre sur la même ligne
+            if (field.id === 'birthYear' && nextField && nextField.id === 'birthday') {
+                dynamicFieldsHTML += this.renderBirthFields(field, nextField);
+                i++; // Sauter birthday car déjà rendu
+            } else {
+                dynamicFieldsHTML += this.renderField(field);
+            }
+        }
 
         // Boutons d'action
         const actionsHTML = `
@@ -781,11 +794,21 @@ const contacts = {
             const birthdayInput = document.getElementById('birthday');
             
             if (birthYearSelect && birthdayInput) {
-                // Quand on change l'année de naissance, pré-remplir l'année dans birthday
-                birthYearSelect.addEventListener('change', function() {
-                    if (this.value && !birthdayInput.value) {
-                        // Mettre la date au 1er janvier de l'année sélectionnée
-                        birthdayInput.value = `${this.value}-01-01`;
+                // Quand on focus sur birthday, définir la date min/max selon l'année sélectionnée
+                birthdayInput.addEventListener('focus', function() {
+                    if (birthYearSelect.value && !this.value) {
+                        // Définir l'année dans l'attribut min pour que le calendrier s'ouvre sur cette année
+                        const selectedYear = birthYearSelect.value;
+                        this.setAttribute('min', `${selectedYear}-01-01`);
+                        this.setAttribute('max', `${selectedYear}-12-31`);
+                    }
+                });
+                
+                // Quand on sort du focus, enlever les restrictions
+                birthdayInput.addEventListener('blur', function() {
+                    if (!this.value && this.getAttribute('min')) {
+                        this.removeAttribute('min');
+                        this.removeAttribute('max');
                     }
                 });
                 
@@ -796,10 +819,49 @@ const contacts = {
                         if (birthYearSelect.value !== yearFromBirthday) {
                             birthYearSelect.value = yearFromBirthday;
                         }
+                        // Enlever les restrictions après sélection
+                        this.removeAttribute('min');
+                        this.removeAttribute('max');
+                    }
+                });
+                        }
                     }
                 });
             }
         }, 100);
+    },
+
+    // Rendre les champs birthYear et birthday sur la même ligne
+    renderBirthFields(yearField, dateField) {
+        // Générer les années de 1940 à aujourd'hui
+        const currentYear = new Date().getFullYear();
+        const years = [];
+        for (let year = currentYear; year >= 1940; year--) {
+            years.push(year);
+        }
+        const yearOptions = years.map(y => `<option value="${y}">${y}</option>`).join('');
+        
+        const yearRequired = yearField.required ? '<span style="color: #ff4757;">*</span>' : '';
+        const dateRequired = dateField.required ? '<span style="color: #ff4757;">*</span>' : '';
+        
+        return `
+            <div class="form-group" style="display: grid; grid-template-columns: 140px 1fr; gap: 12px; align-items: start;">
+                <div>
+                    <label style="display: block; margin-bottom: 8px;">${yearField.label} ${yearRequired}</label>
+                    <select id="${yearField.id}" class="year-select" ${yearField.required ? 'required' : ''}>
+                        <option value="">Année...</option>
+                        ${yearOptions}
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 8px;">${dateField.label} ${dateRequired}</label>
+                    <input type="date" class="date-input" id="${dateField.id}" ${dateField.required ? 'required' : ''} 
+                           placeholder="jj/mm/aaaa"
+                           onfocus="this.showPicker ? this.showPicker() : null"
+                           onclick="this.showPicker ? this.showPicker() : null">
+                </div>
+            </div>
+        `;
     },
 
     renderField(field) {
