@@ -774,6 +774,32 @@ const contacts = {
         `;
 
         form.innerHTML = fixedFieldsHTML + dynamicFieldsHTML + actionsHTML;
+        
+        // Lier birthYear et birthday
+        setTimeout(() => {
+            const birthYearSelect = document.getElementById('birthYear');
+            const birthdayInput = document.getElementById('birthday');
+            
+            if (birthYearSelect && birthdayInput) {
+                // Quand on change l'année de naissance, pré-remplir l'année dans birthday
+                birthYearSelect.addEventListener('change', function() {
+                    if (this.value && !birthdayInput.value) {
+                        // Mettre la date au 1er janvier de l'année sélectionnée
+                        birthdayInput.value = `${this.value}-01-01`;
+                    }
+                });
+                
+                // Quand on change birthday, synchroniser l'année si elle est différente
+                birthdayInput.addEventListener('change', function() {
+                    if (this.value) {
+                        const yearFromBirthday = this.value.split('-')[0];
+                        if (birthYearSelect.value !== yearFromBirthday) {
+                            birthYearSelect.value = yearFromBirthday;
+                        }
+                    }
+                });
+            }
+        }, 100);
     },
 
     renderField(field) {
@@ -834,12 +860,31 @@ const contacts = {
                     </div>
                 `;
             
+            case 'year':
+                // Générer les années de 1940 à aujourd'hui
+                const currentYear = new Date().getFullYear();
+                const years = [];
+                for (let year = currentYear; year >= 1940; year--) {
+                    years.push(year);
+                }
+                const yearOptions = years.map(y => `<option value="${y}">${y}</option>`).join('');
+                return `
+                    <div class="form-group">
+                        <label>${field.label} ${requiredMark}</label>
+                        <select id="${field.id}" ${field.required ? 'required' : ''}>
+                            <option value="">Sélectionner...</option>
+                            ${yearOptions}
+                        </select>
+                    </div>
+                `;
+            
             case 'date':
                 const minDate = field.futureOnly ? `min="${new Date().toISOString().split('T')[0]}"` : '';
                 return `
                     <div class="form-group">
                         <label>${field.label} ${requiredMark}</label>
-                        <input type="date" id="${field.id}" ${minDate} ${field.required ? 'required' : ''} 
+                        <input type="date" class="date-input" id="${field.id}" ${minDate} ${field.required ? 'required' : ''} 
+                               placeholder="jj/mm/aaaa"
                                onfocus="this.showPicker ? this.showPicker() : null"
                                onclick="this.showPicker ? this.showPicker() : null">
                     </div>
