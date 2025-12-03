@@ -106,6 +106,7 @@ const tags = {
         '🏥', '🏦', '🏨', '🏪', '🏫', '🏩', '💒', '🏛', '⛪', '🕌', '🕍', '🛕',
         '🕋', '⛩', '🛤', '🛣', '🗾', '🎑', '🏞', '🌅', '🌄', '🌠', '🎇', '🎆',
         '🌇', '🌆', '🏙', '🌃', '🌌', '🌉', '🌁',
+        '🌍', '🌎', '🌏', '🌐', '🗺', '🗾', '🧭', '🏔', '⛰', '🌋',
         
         // Objects
         '⌚', '📱', '📲', '💻', '⌨️', '🖥', '🖨', '🖱', '🖲', '🕹', '🗜', '💾',
@@ -518,7 +519,11 @@ const tags = {
                     this.availableEmojis.forEach(emoji => {
                         const keywords = window.emojiKeywords[emoji];
                         if (keywords) {
-                            const matches = keywords.some(keyword => keyword.toLowerCase().includes(search));
+                            // Chercher mot exact OU début de mot
+                            const matches = keywords.some(keyword => {
+                                const kw = keyword.toLowerCase();
+                                return kw === search || kw.startsWith(search);
+                            });
                             if (matches) {
                                 emojisToShow.push(emoji);
                             }
