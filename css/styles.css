@@ -325,9 +325,19 @@ h1 {
     min-height: 44px;
 }
 
+/* Conteneur pour search + bouton calendrier */
+.search-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 20px;
+    margin-bottom: 2px;
+}
+
 .search-box {
-    margin: 0 20px 2px 20px;
-    width: calc(100% - 40px);
+    flex: 1;
+    margin: 0;
+    width: auto;
 }
 
 .search-box:focus {
@@ -1933,6 +1943,10 @@ body.dark-mode .empty-state-text {
     color: #495057;
 }
 
+body.dark-mode .tag-selector-value {
+    color: #f8f9fa;
+}
+
 .tag-selector-arrow {
     color: #868e96;
     font-size: 12px;
@@ -2112,11 +2126,18 @@ body.dark-mode .empty-state-text {
     background: #f8f9fa;
 }
 
+.tag-option-preview-container {
+    flex: 1;
+    cursor: pointer;
+    padding: 4px 0;
+}
+
 .tag-option-preview {
     padding: 6px 14px;
     border-radius: 14px;
     font-size: 14px;
     font-weight: 600;
+    display: inline-block;
 }
 
 .tag-edit-btn {
@@ -2130,6 +2151,7 @@ body.dark-mode .empty-state-text {
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    flex-shrink: 0;
 }
 
 .tag-create {
@@ -2181,18 +2203,35 @@ body.dark-mode .empty-state-text {
     font-weight: 600;
 }
 
-/* Champ de recherche d'emoji */
+/* Champ de recherche emoji (support des deux classes) */
+.emoji-search-input,
 .emoji-search {
     width: 100%;
-    padding: 10px 16px;
-    border: 2px solid #e9ecef;
+    padding: 12px 16px;
+    border: 1px solid #e9ecef;
     border-radius: 12px;
-    font-size: 16px;
+    font-size: 15px;
     margin-bottom: 12px;
+    background: #f8f9fa;
 }
 
+.emoji-search-input:focus,
 .emoji-search:focus {
     outline: none;
+    border-color: #E1306C;
+    background: white;
+}
+
+body.dark-mode .emoji-search-input,
+body.dark-mode .emoji-search {
+    background: #3a3a3a;
+    border-color: #4a4a4a;
+    color: #f8f9fa;
+}
+
+body.dark-mode .emoji-search-input:focus,
+body.dark-mode .emoji-search:focus {
+    background: #4a4a4a;
     border-color: #E1306C;
 }
 
@@ -2445,6 +2484,29 @@ body.dark-mode .empty-state-text {
 }
 
 /* Nouveaux styles pour les filtres horizontaux */
+/* Bouton calendrier séparé (rose) */
+.btn-calendar-separate {
+    background: linear-gradient(135deg, #E1306C 0%, #fd79a8 100%);
+    color: white;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 10px 16px;
+    border-radius: 12px;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(225, 48, 108, 0.2);
+    flex-shrink: 0;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-calendar-separate:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(225, 48, 108, 0.3);
+}
+
 .contacts-count {
     background: #e3f2fd;
     padding: 6px 16px;
@@ -2460,6 +2522,11 @@ body.dark-mode .empty-state-text {
     font-size: 15px;
     font-weight: 700;
     color: #0d47a1;
+}
+
+/* Supprimer l'ancien style btn-calendar-inline */
+.btn-calendar-inline {
+    display: none;
 }
 
 .filters-horizontal {
@@ -2977,17 +3044,649 @@ body.dark-mode .form-actions {
     border-top-color: #4a4a4a;
 }
 
-/* Dark mode pour recherche emoji */
-body.dark-mode .emoji-search {
+
+/* ============================================
+   CITY SEARCH DROPDOWN
+   ============================================ */
+
+.city-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    margin-top: 4px;
+    max-height: 300px;
+    overflow-y: auto;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    display: none;
+}
+
+.city-dropdown-item {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #f1f3f5;
+}
+
+.city-dropdown-item:last-child {
+    border-bottom: none;
+}
+
+.city-dropdown-item:hover {
+    background: #f8f9fa;
+}
+
+.city-dropdown-item.loading,
+.city-dropdown-item.no-results {
+    color: #868e96;
+    cursor: default;
+    justify-content: center;
+}
+
+.city-dropdown-item.loading:hover,
+.city-dropdown-item.no-results:hover {
+    background: white;
+}
+
+.city-flag {
+    font-size: 24px;
+    min-width: 32px;
+}
+
+.city-name {
+    font-size: 14px;
+    color: #212529;
+    flex: 1;
+}
+
+/* Dark mode */
+body.dark-mode .city-dropdown {
     background: #2a2a2a;
-    color: #f8f9fa;
     border-color: #4a4a4a;
 }
 
-body.dark-mode .emoji-search::placeholder {
+body.dark-mode .city-dropdown-item {
+    border-bottom-color: #3a3a3a;
+}
+
+body.dark-mode .city-dropdown-item:hover {
+    background: #3a3a3a;
+}
+
+body.dark-mode .city-dropdown-item.loading:hover,
+body.dark-mode .city-dropdown-item.no-results:hover {
+    background: #2a2a2a;
+}
+
+body.dark-mode .city-name {
+    color: #f8f9fa;
+}
+
+/* Contact card flag */
+.contact-flag {
+    font-size: 16px;
+    margin-left: 6px;
+}
+
+
+/* ============================================
+   CALENDAR
+   ============================================ */
+
+.calendar-modal .modal-content {
+    max-width: 90vw;
+    width: 900px;
+    padding: 0 !important;
+    margin: 0 auto;
+}
+
+/* Desktop large */
+@media (min-width: 1200px) {
+    .calendar-modal .modal-content {
+        width: 1000px;
+        max-width: 90vw;
+    }
+}
+
+/* Desktop standard */
+@media (min-width: 992px) and (max-width: 1199px) {
+    .calendar-modal .modal-content {
+        width: 900px;
+        max-width: 90vw;
+    }
+}
+
+/* Tablette */
+@media (min-width: 769px) and (max-width: 991px) {
+    .calendar-modal .modal-content {
+        width: 750px;
+        max-width: 90vw;
+    }
+}
+
+.calendar-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 30px;
+    background: linear-gradient(135deg, #E1306C 0%, #fd79a8 100%);
+    color: white;
+}
+
+.calendar-controls h3 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    flex: 1;
+    text-align: center;
+}
+
+.calendar-nav-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    font-size: 20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.calendar-nav-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+.calendar-grid {
+    padding: 20px;
+}
+
+.calendar-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.calendar-day-name {
+    text-align: center;
+    font-weight: 600;
+    color: #495057;
+    font-size: 14px;
+    padding: 10px 0;
+}
+
+.calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: #f8f9fa;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    min-height: 80px;
+}
+
+.calendar-day.empty {
+    background: transparent;
+    cursor: default;
+}
+
+.calendar-day:not(.empty):hover {
+    background: #e9ecef;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.calendar-day.today {
+    background: #E1306C;
+    color: white;
+    font-weight: 600;
+}
+
+.calendar-day.today:hover {
+    background: #c7275e;
+}
+
+.calendar-day.past {
+    opacity: 0.4;
+}
+
+.calendar-day.has-meeting {
+    background: linear-gradient(135deg, #fd79a8 0%, #E1306C 100%);
+    color: white;
+    font-weight: 600;
+}
+
+.calendar-day.has-meeting:hover {
+    background: linear-gradient(135deg, #E1306C 0%, #c7275e 100%);
+}
+
+.day-number {
+    font-size: 18px;
+}
+
+.meeting-dot {
+    background: white;
+    color: #E1306C;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    margin-top: 4px;
+}
+
+.calendar-day.today .meeting-dot {
+    background: rgba(255, 255, 255, 0.3);
+    color: white;
+}
+
+.calendar-details {
+    padding: 30px;
+    border-top: 2px solid #e9ecef;
+    background: #f8f9fa;
+}
+
+.calendar-details h4 {
+    margin: 0 0 20px 0;
+    font-size: 18px;
+    color: #E1306C;
+    text-transform: capitalize;
+}
+
+.calendar-meeting-item {
+    background: white;
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-left: 4px solid #E1306C;
+}
+
+.calendar-meeting-item:hover {
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(225, 48, 108, 0.15);
+}
+
+.meeting-item-name {
+    font-weight: 600;
+    font-size: 16px;
+    color: #212529;
+    margin-bottom: 4px;
+}
+
+.meeting-item-instagram {
+    color: #868e96;
+    font-size: 14px;
+}
+
+/* Dark mode */
+body.dark-mode .calendar-day-name {
+    color: #f8f9fa;
+}
+
+body.dark-mode .calendar-day {
+    background: #3a3a3a;
+    color: #f8f9fa;
+}
+
+body.dark-mode .calendar-day.empty {
+    background: transparent;
+}
+
+body.dark-mode .calendar-day:not(.empty):hover {
+    background: #4a4a4a;
+}
+
+body.dark-mode .calendar-details {
+    background: #2a2a2a;
+    border-top-color: #4a4a4a;
+}
+
+body.dark-mode .calendar-meeting-item {
+    background: #3a3a3a;
+    color: #f8f9fa;
+}
+
+body.dark-mode .meeting-item-name {
+    color: #f8f9fa;
+}
+
+body.dark-mode .meeting-item-instagram {
     color: #adb5bd;
 }
 
-body.dark-mode .emoji-search:focus {
-    border-color: #E1306C;
+/* Bouton calendrier dans la navbar */
+
+
+
+/* Alignement compteur + bouton calendrier */
+.header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+
+/* Conteneur pour compteur + bouton calendrier */
+
+/* Dark mode pour le bouton calendrier inline */
+body.dark-mode .btn-calendar-inline:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Améliorer le champ date pour forcer l'affichage du picker */
+input[type="date"] {
+    position: relative;
+    cursor: pointer;
+    min-width: 150px;
+}
+
+/* Forcer l'affichage de l'icône calendrier */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    font-size: 18px;
+    opacity: 0.8;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+}
+
+/* Firefox */
+input[type="date"]::-moz-calendar-picker-indicator {
+    cursor: pointer;
+}
+
+/* Dark mode pour le bouton calendrier séparé */
+body.dark-mode .btn-calendar-separate {
+    background: linear-gradient(135deg, #E1306C 0%, #c7275e 100%);
+}
+
+body.dark-mode .btn-calendar-separate:hover {
+    box-shadow: 0 4px 12px rgba(225, 48, 108, 0.4);
+}
+
+/* ============================================
+   RESPONSIVE CALENDAR - MOBILE
+   ============================================ */
+
+@media (max-width: 768px) {
+    .calendar-modal .modal-content {
+        max-width: 100%;
+        margin: 0;
+        border-radius: 0;
+        max-height: 100vh;
+        overflow-y: auto;
+    }
+    
+    .calendar-controls {
+        padding: 16px 20px;
+    }
+    
+    .calendar-controls h3 {
+        font-size: 18px;
+    }
+    
+    .calendar-nav-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 18px;
+    }
+    
+    .calendar-grid {
+        padding: 12px;
+    }
+    
+    .calendar-day-name {
+        font-size: 12px;
+        padding: 8px 0;
+    }
+    
+    .calendar-days {
+        gap: 6px;
+    }
+    
+    .calendar-day {
+        min-height: 50px;
+        border-radius: 8px;
+    }
+    
+    .day-number {
+        font-size: 14px;
+    }
+    
+    .meeting-dot {
+        width: 20px;
+        height: 20px;
+        font-size: 10px;
+        margin-top: 2px;
+    }
+    
+    .calendar-details {
+        padding: 20px 12px;
+    }
+    
+    .calendar-details h4 {
+        font-size: 16px;
+        margin-bottom: 16px;
+    }
+    
+    .calendar-meeting-item {
+        padding: 12px;
+        margin-bottom: 10px;
+    }
+    
+    .meeting-item-name {
+        font-size: 15px;
+    }
+    
+    .meeting-item-instagram {
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .calendar-controls h3 {
+        font-size: 16px;
+    }
+    
+    .calendar-nav-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+    }
+    
+    .calendar-grid {
+        padding: 8px;
+    }
+    
+    .calendar-day-name {
+        font-size: 11px;
+        padding: 6px 0;
+    }
+    
+    .calendar-days {
+        gap: 4px;
+    }
+    
+    .calendar-day {
+        min-height: 45px;
+        border-radius: 6px;
+    }
+    
+    .day-number {
+        font-size: 13px;
+    }
+    
+    .meeting-dot {
+        width: 18px;
+        height: 18px;
+        font-size: 9px;
+    }
+}
+
+/* Responsive pour le bouton calendrier et compteur */
+@media (max-width: 768px) {
+    
+    .btn-calendar-separate {
+        padding: 6px 12px;
+        font-size: 18px;
+    }
+    
+    .contacts-count {
+        font-size: 13px;
+        padding: 6px 12px;
+    }
+    
+    #contactsCountNumber {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    
+    .btn-calendar-separate {
+        padding: 5px 10px;
+        font-size: 16px;
+    }
+    
+    .contacts-count {
+        font-size: 12px;
+        padding: 5px 10px;
+    }
+}
+
+/* Ajuster les tailles des jours pour grands écrans */
+@media (min-width: 1200px) {
+    .calendar-day {
+        min-height: 100px;
+    }
+    
+    .day-number {
+        font-size: 20px;
+    }
+    
+    .meeting-dot {
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
+        margin-top: 6px;
+    }
+    
+    .calendar-day-name {
+        font-size: 16px;
+    }
+}
+
+@media (min-width: 992px) and (max-width: 1199px) {
+    .calendar-day {
+        min-height: 90px;
+    }
+    
+    .day-number {
+        font-size: 19px;
+    }
+    
+    .meeting-dot {
+        width: 26px;
+        height: 26px;
+        font-size: 13px;
+        margin-top: 5px;
+    }
+}
+
+/* Responsive pour search-container */
+@media (max-width: 768px) {
+    .search-container {
+        padding: 0 16px;
+        gap: 8px;
+    }
+    
+    .btn-calendar-separate {
+        padding: 8px 12px;
+        font-size: 18px;
+    }
+}
+
+@media (max-width: 480px) {
+    .search-container {
+        padding: 0 12px;
+        gap: 6px;
+    }
+    
+    .btn-calendar-separate {
+        padding: 6px 10px;
+        font-size: 16px;
+    }
+}
+
+/* Responsive pour contacts-count */
+@media (max-width: 768px) {
+    .contacts-count {
+        margin: 0 16px 6px 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .contacts-count {
+        margin: 0 12px 6px 12px;
+    }
+}
+
+/* Message "Pas de rendez-vous" */
+.calendar-no-meeting {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.no-meeting-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.6;
+}
+
+.no-meeting-text {
+    font-size: 16px;
+    color: #868e96;
+    font-weight: 500;
+}
+
+body.dark-mode .no-meeting-text {
+    color: #adb5bd;
+}
+
+@media (max-width: 480px) {
+    .calendar-no-meeting {
+        padding: 30px 20px;
+    }
+    
+    .no-meeting-icon {
+        font-size: 40px;
+    }
+    
+    .no-meeting-text {
+        font-size: 15px;
+    }
 }
