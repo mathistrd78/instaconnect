@@ -258,6 +258,11 @@ const tags = {
             'micro': ['🎤'],
             'guitare': ['🎸'],
             'piano': ['🎹'],
+            'terre': ['🌍', '🌎', '🌏'],
+            'planete': ['🌍', '🌎', '🌏', '🪐'],
+            'monde': ['🌍', '🌎', '🌏'],
+            'globe': ['🌍', '🌎', '🌏', '🌐'],
+            'pomme': ['🍎', '🍏'],
             'maison': ['🏠', '🏡', '🏘', '🏚', '🏢', '🏬', '🏣', '🏤', '🏥', '🏦', '🏨', '🏪', '🏫', '🏩', '💒', '🏛', '⛪', '🕌'],
             'ecole': ['🏫', '🎓'],
             'hopital': ['🏥'],
@@ -499,16 +504,40 @@ const tags = {
         const currentEmoji = tag.label.split(' ')[0];
         
         const renderEmojis = (searchTerm = '') => {
-            const emojisToShow = this.searchEmoji(searchTerm, currentEmoji);
+            let emojisToShow = [];
             
-            emojiPicker.innerHTML = emojisToShow.map(emoji => `
-                <div class="emoji-option ${currentEmoji === emoji ? 'selected' : ''}" 
-                     onclick="tags.selectEmoji('${emoji}')">${emoji}</div>
-            `).join('');
+            if (!searchTerm) {
+                // Pas de recherche : afficher tous les emojis
+                emojisToShow = this.availableEmojis;
+            } else {
+                // Recherche : utiliser emoji-keywords.js si disponible
+                const search = searchTerm.toLowerCase().trim();
+                
+                if (typeof window.emojiKeywords !== 'undefined') {
+                    // Utiliser la base complète
+                    this.availableEmojis.forEach(emoji => {
+                        const keywords = window.emojiKeywords[emoji];
+                        if (keywords) {
+                            const matches = keywords.some(keyword => keyword.toLowerCase().includes(search));
+                            if (matches) {
+                                emojisToShow.push(emoji);
+                            }
+                        }
+                    });
+                } else {
+                    // Fallback : utiliser searchEmoji
+                    emojisToShow = this.searchEmoji(searchTerm, currentEmoji);
+                }
+            }
             
-            // Afficher un message si aucun résultat
+            // Afficher les résultats
             if (emojisToShow.length === 0) {
-                emojiPicker.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 20px; color: #868e96;">Aucun emoji trouvé</div>';
+                emojiPicker.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 20px; color: #868e96;">Aucun résultat</div>';
+            } else {
+                emojiPicker.innerHTML = emojisToShow.map(emoji => `
+                    <div class="emoji-option ${currentEmoji === emoji ? 'selected' : ''}" 
+                         onclick="tags.selectEmoji('${emoji}')">${emoji}</div>
+                `).join('');
             }
         };
         
