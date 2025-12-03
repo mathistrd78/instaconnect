@@ -1904,6 +1904,22 @@ body.dark-mode .empty-state-text {
     font-family: inherit;
 }
 
+/* Select année de naissance compact */
+.year-select {
+    width: 100% !important;
+    padding: 14px 12px !important;
+    font-size: 16px;
+    max-height: 300px;
+}
+
+/* Sur mobile, limiter la hauteur du dropdown */
+@media (max-width: 768px) {
+    .year-select {
+        font-size: 16px; /* Empêche le zoom sur iOS */
+        max-height: 250px;
+    }
+}
+
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
