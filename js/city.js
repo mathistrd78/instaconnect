@@ -100,6 +100,51 @@ const city = {
     async searchCities(query) {
         if (!query || query.length < 1) return [];
 
+        // Liste des pays populaires pour l'autocomplétion
+        const popularCountries = [
+            { name: 'France', code: 'FR' },
+            { name: 'Espagne', code: 'ES' },
+            { name: 'Italie', code: 'IT' },
+            { name: 'Allemagne', code: 'DE' },
+            { name: 'Belgique', code: 'BE' },
+            { name: 'Suisse', code: 'CH' },
+            { name: 'Portugal', code: 'PT' },
+            { name: 'Royaume-Uni', code: 'GB' },
+            { name: 'États-Unis', code: 'US' },
+            { name: 'Canada', code: 'CA' },
+            { name: 'Maroc', code: 'MA' },
+            { name: 'Algérie', code: 'DZ' },
+            { name: 'Tunisie', code: 'TN' }
+        ];
+
+        // Si la recherche ressemble à un pays (pas de virgule, <= 15 caractères)
+        const queryLower = query.toLowerCase();
+        if (!query.includes(',') && query.length <= 15) {
+            const matchingCountries = popularCountries
+                .filter(c => c.name.toLowerCase().startsWith(queryLower))
+                .map(c => ({
+                    city: '',
+                    country: c.name,
+                    countryCode: c.code,
+                    state: '',
+                    displayName: c.name,
+                    flag: this.getFlag(c.code)
+                }));
+            
+            // Si on trouve des pays correspondants, les retourner en premier
+            if (matchingCountries.length > 0) {
+                // Continuer aussi la recherche de villes
+                const cityResults = await this.searchCitiesOnly(query);
+                return [...matchingCountries, ...cityResults].slice(0, 8);
+            }
+        }
+
+        return this.searchCitiesOnly(query);
+    },
+
+    async searchCitiesOnly(query) {
+        if (!query || query.length < 1) return [];
+
         // Pour 1 caractère, chercher seulement dans les villes populaires
         if (query.length === 1) {
             return this.searchPopularCities(query);
@@ -269,29 +314,48 @@ const city = {
 
         // Essayer de parser une chaîne "Ville, Pays" ou "Ville, État, Pays"
         const parts = locationString.split(',').map(p => p.trim());
+        
+        // Mapping des noms de pays vers codes
+        const countryNames = {
+            'france': 'FR', 'états-unis': 'US', 'usa': 'US', 'etats-unis': 'US',
+            'royaume-uni': 'GB', 'uk': 'GB', 'angleterre': 'GB',
+            'allemagne': 'DE', 'espagne': 'ES', 'italie': 'IT',
+            'portugal': 'PT', 'belgique': 'BE', 'suisse': 'CH',
+            'pays-bas': 'NL', 'hollande': 'NL', 'canada': 'CA',
+            'brésil': 'BR', 'bresil': 'BR', 'argentine': 'AR',
+            'mexique': 'MX', 'japon': 'JP', 'chine': 'CN',
+            'inde': 'IN', 'australie': 'AU', 'russie': 'RU',
+            'afrique du sud': 'ZA', 'maroc': 'MA', 'algérie': 'DZ',
+            'algerie': 'DZ', 'tunisie': 'TN', 'egypte': 'EG', 
+            'grèce': 'GR', 'grece': 'GR', 'turquie': 'TR', 
+            'pologne': 'PL', 'suède': 'SE', 'suede': 'SE'
+        };
+        
+        // Si c'est un seul mot, vérifier si c'est un nom de pays
+        if (parts.length === 1) {
+            const textLower = locationString.toLowerCase().trim();
+            const countryCode = countryNames[textLower];
+            
+            if (countryCode) {
+                // C'est un pays reconnu !
+                return {
+                    city: '',
+                    country: locationString.trim(),
+                    countryCode: countryCode,
+                    state: '',
+                    displayName: locationString.trim(),
+                    flag: this.getFlag(countryCode)
+                };
+            }
+        }
+        
         if (parts.length >= 2) {
             const city = parts[0];
             const country = parts[parts.length - 1];
             const state = parts.length > 2 ? parts[1] : '';
             
             // Trouver le code pays et le drapeau
-            // Amélioration : chercher dans les noms complets de pays
             let countryCode = '';
-            
-            // Mapping des noms de pays vers codes
-            const countryNames = {
-                'france': 'FR', 'états-unis': 'US', 'usa': 'US', 'etats-unis': 'US',
-                'royaume-uni': 'GB', 'uk': 'GB', 'angleterre': 'GB',
-                'allemagne': 'DE', 'espagne': 'ES', 'italie': 'IT',
-                'portugal': 'PT', 'belgique': 'BE', 'suisse': 'CH',
-                'pays-bas': 'NL', 'hollande': 'NL', 'canada': 'CA',
-                'brésil': 'BR', 'bresil': 'BR', 'argentine': 'AR',
-                'mexique': 'MX', 'japon': 'JP', 'chine': 'CN',
-                'inde': 'IN', 'australie': 'AU', 'russie': 'RU',
-                'afrique du sud': 'ZA', 'maroc': 'MA', 'algérie': 'DZ',
-                'tunisie': 'TN', 'egypte': 'EG', 'grèce': 'GR',
-                'turquie': 'TR', 'pologne': 'PL', 'suède': 'SE'
-            };
             
             const countryLower = country.toLowerCase();
             countryCode = countryNames[countryLower] || '';
