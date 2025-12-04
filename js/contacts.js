@@ -965,10 +965,14 @@ const contacts = {
                 return `
                     <div class="form-group">
                         <label>${field.label} ${requiredMark}</label>
-                        <input type="date" class="date-input" id="${field.id}" ${minDate} ${field.required ? 'required' : ''} 
-                               placeholder="jj/mm/aaaa"
-                               onfocus="this.showPicker ? this.showPicker() : null"
-                               onclick="this.showPicker ? this.showPicker() : null">
+                        <div style="position: relative;">
+                            <input type="date" class="date-input" id="${field.id}" ${minDate} ${field.required ? 'required' : ''} 
+                                   placeholder="jj/mm/aaaa"
+                                   data-placeholder="jj/mm/aaaa"
+                                   onfocus="this.showPicker ? this.showPicker() : null"
+                                   onclick="this.showPicker ? this.showPicker() : null">
+                            <span class="date-placeholder">jj/mm/aaaa</span>
+                        </div>
                     </div>
                 `;
             
