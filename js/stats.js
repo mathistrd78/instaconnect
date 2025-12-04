@@ -206,7 +206,7 @@ const stats = {
         return countryStats.map((stat, i) => ({
             label: `${stat.flag} ${stat.country}`,
             value: stat.count,
-            color: colors[i % colors.length]
+            color: stat.country === 'Non défini' ? '#868e96' : colors[i % colors.length]
         }));
     },
 
