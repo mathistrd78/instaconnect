@@ -394,6 +394,7 @@ const city = {
     // Obtenir les statistiques par pays
     getCountryStats(contacts) {
         const countryCount = {};
+        let undefinedCount = 0;
         
         contacts.forEach(contact => {
             let location = null;
@@ -403,7 +404,7 @@ const city = {
                 location = contact.location;
             }
             // Sinon, parser
-            else {
+            else if (contact.location) {
                 location = this.parseLocation(contact.location);
             }
             
@@ -418,10 +419,25 @@ const city = {
                     };
                 }
                 countryCount[key].count++;
+            } else {
+                // Pas de pays défini
+                undefinedCount++;
             }
         });
 
-        return Object.values(countryCount).sort((a, b) => b.count - a.count);
+        const result = Object.values(countryCount).sort((a, b) => b.count - a.count);
+        
+        // Ajouter "Non défini" à la fin si nécessaire
+        if (undefinedCount > 0) {
+            result.push({
+                country: 'Non défini',
+                countryCode: '',
+                flag: '❓',
+                count: undefinedCount
+            });
+        }
+        
+        return result;
     }
 };
 
