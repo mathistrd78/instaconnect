@@ -89,8 +89,8 @@ const stats = {
     updateGlobalStats() {
         const contacts = app.dataStore.contacts;
         const totalContacts = contacts.length;
-        const maleCount = contacts.filter(c => c.gender === 'Homme').length;
-        const femaleCount = contacts.filter(c => c.gender === 'Femme').length;
+        const maleCount = contacts.filter(c => c.gender === '👨 Homme' || c.gender === 'Homme').length;
+        const femaleCount = contacts.filter(c => c.gender === '👩 Femme' || c.gender === 'Femme').length;
 
         document.getElementById('totalContactsStat').textContent = totalContacts;
         document.getElementById('totalMaleStat').textContent = maleCount;
@@ -153,16 +153,16 @@ const stats = {
 
     groupByGender() {
         const contacts = app.dataStore.contacts;
-        const maleCount = contacts.filter(c => c.gender === 'Homme').length;
-        const femaleCount = contacts.filter(c => c.gender === 'Femme').length;
+        const maleCount = contacts.filter(c => c.gender === '👨 Homme' || c.gender === 'Homme').length;
+        const femaleCount = contacts.filter(c => c.gender === '👩 Femme' || c.gender === 'Femme').length;
         const undefinedCount = contacts.filter(c => !c.gender || c.gender === '').length;
 
         const data = [];
         if (maleCount > 0) {
-            data.push({ label: 'Homme', value: maleCount, color: '#4A90E2' });
+            data.push({ label: '👨 Homme', value: maleCount, color: '#4A90E2' });
         }
         if (femaleCount > 0) {
-            data.push({ label: 'Femme', value: femaleCount, color: '#E91E63' });
+            data.push({ label: '👩 Femme', value: femaleCount, color: '#E91E63' });
         }
         if (undefinedCount > 0) {
             data.push({ label: 'Non défini', value: undefinedCount, color: '#868e96' });
@@ -236,7 +236,25 @@ const stats = {
             document.body.removeChild(el);
             return this.rgbToHex(color);
         }
-        return '#868e96';
+        
+        // Couleurs par défaut pour les options sans tags
+        const defaultColors = {
+            'Oui': '#00b894',
+            'Non': '#d63031',
+            'Oui ✅': '#00b894',
+            'Non ❌': '#d63031',
+            'Non défini': '#868e96'
+        };
+        
+        // Si c'est une valeur connue, utiliser la couleur par défaut
+        if (defaultColors[value]) {
+            return defaultColors[value];
+        }
+        
+        // Sinon, générer une couleur aléatoire mais stable (basée sur le hash du texte)
+        const colors = ['#a29bfe', '#fd79a8', '#74b9ff', '#ff7675', '#55efc4', '#E1306C', '#feca57', '#00b894', '#0984e3', '#6c5ce7'];
+        const hash = value.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+        return colors[hash % colors.length];
     },
 
     rgbToHex(rgb) {
