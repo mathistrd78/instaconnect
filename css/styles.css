@@ -1787,6 +1787,11 @@ body.dark-mode .profile-info {
     background: #2d2d2d;
 }
 
+body.dark-mode .profile-actions {
+    background: #2d2d2d;
+    border-top-color: #4a4a4a;
+}
+
 body.dark-mode .view-detail-item {
     border-bottom-color: #4a4a4a;
 }
@@ -3012,14 +3017,20 @@ body.dark-mode .modal-content {
 
 .profile-info {
     background: white;
-    margin-bottom: 24px;
+    margin-bottom: 80px; /* Laisser de l'espace pour les boutons sticky */
 }
 
 .profile-actions {
-    margin-top: 20px;
+    position: sticky;
+    bottom: 0;
+    background: white;
+    padding: 16px;
+    margin: 0 -24px -24px; /* Compenser le padding du parent */
+    border-top: 1px solid #e9ecef;
     display: flex;
     flex-direction: column;
     gap: 12px;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .profile-actions .btn {
@@ -3436,27 +3447,25 @@ input[type="date"],
     color: #999;
     pointer-events: none;
     font-size: 16px;
-    display: none; /* Caché par défaut */
 }
 
-/* Afficher le placeholder uniquement sur iOS quand le champ est vide */
-input[type="date"]:invalid + .date-placeholder,
-.date-input:invalid + .date-placeholder {
-    display: block;
-}
-
-/* Cacher le placeholder quand le champ a une valeur */
-input[type="date"]:valid + .date-placeholder,
-.date-input:valid + .date-placeholder {
+/* Cacher le placeholder quand le champ a une valeur ou le focus */
+input[type="date"]:focus + .date-placeholder,
+.date-input:focus + .date-placeholder,
+input[type="date"].has-value + .date-placeholder,
+.date-input.has-value + .date-placeholder {
     display: none;
 }
 
 /* Sur iOS, masquer la valeur par défaut du champ date vide */
-@supports (-webkit-touch-callout: none) {
-    input[type="date"]:invalid,
-    .date-input:invalid {
-        color: transparent;
-    }
+input[type="date"]:not(.has-value),
+.date-input:not(.has-value) {
+    color: transparent;
+}
+
+input[type="date"].has-value,
+.date-input.has-value {
+    color: #212529;
 }
 
 /* Placeholder pour les champs date vides (iOS/Safari) */
