@@ -594,14 +594,22 @@
         function playTutorialVideo() {
             const video = document.getElementById('tutorialVideo');
             const overlay = document.getElementById('videoOverlay');
+            const container = video.closest('.video-container');
             
-            if (video && overlay) {
+            if (video && overlay && container) {
+                // Faire disparaître l'overlay
                 overlay.style.opacity = '0';
                 setTimeout(() => {
                     overlay.style.display = 'none';
                 }, 300);
                 
+                // Agrandir le container pour afficher la vidéo en taille normale
+                container.style.maxWidth = '700px';
+                container.style.height = 'auto';
+                
+                // Activer les contrôles et lancer la vidéo
                 video.setAttribute('controls', 'controls');
+                video.style.objectFit = 'contain';
                 video.play();
             }
         }
