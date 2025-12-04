@@ -338,8 +338,21 @@ const contacts = {
         const detailsContainer = document.getElementById('profileInfo');
         
         let detailsHTML = '';
+        let birthYearValue = null;
+        let birthdayValue = null;
+        
         allFields.forEach(field => {
             const value = contact[field.id];
+            
+            // Capturer birthYear et birthday pour les fusionner
+            if (field.id === 'birthYear') {
+                birthYearValue = value;
+                return; // Ne pas afficher séparément
+            }
+            if (field.id === 'birthday') {
+                birthdayValue = value;
+                return; // Ne pas afficher séparément
+            }
             
             if (value !== undefined && value !== null && value !== '') {
                 let displayValue = value;
@@ -393,6 +406,32 @@ const contacts = {
                 `;
             }
         });
+        
+        // Ajouter le champ fusionné "Naissance" si birthYear ou birthday existe
+        if (birthdayValue || birthYearValue) {
+            let birthDisplay = '';
+            
+            if (birthdayValue) {
+                // Date complète : afficher en toutes lettres (ex: 17 janvier 2000)
+                const [year, month, day] = birthdayValue.split('-');
+                const monthNames = [
+                    'janvier', 'février', 'mars', 'avril', 'mai', 'juin',
+                    'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'
+                ];
+                const monthName = monthNames[parseInt(month) - 1];
+                birthDisplay = `${parseInt(day)} ${monthName} ${year}`;
+            } else if (birthYearValue) {
+                // Seulement l'année
+                birthDisplay = birthYearValue;
+            }
+            
+            detailsHTML += `
+                <div class="view-detail-item">
+                    <div class="view-detail-label">Naissance</div>
+                    <div class="view-detail-value">${birthDisplay}</div>
+                </div>
+            `;
+        }
         
         detailsContainer.innerHTML = detailsHTML;
         document.getElementById('viewModal').classList.add('active');
