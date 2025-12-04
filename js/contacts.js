@@ -390,20 +390,29 @@ const contacts = {
         allFields.forEach(field => {
             const value = contact[field.id];
             
-            if (field.id === 'birthday' && value) {
+            if (field.id === 'birthday') {
                 // Cas spécial : birthday avec 3 selects
-                const [year, month, day] = value.split('-');
                 const daySelect = document.getElementById('birthday_day');
                 const monthSelect = document.getElementById('birthday_month');
                 const yearSelect = document.getElementById('birthday_year');
-                const hiddenInput = document.getElementById('birthday');
+                const birthdayInput = document.getElementById('birthday');
+                const birthYearInput = document.getElementById('birthYear');
                 
-                if (daySelect) daySelect.value = parseInt(day);
-                if (monthSelect) monthSelect.value = parseInt(month);
-                if (yearSelect) yearSelect.value = year;
-                if (hiddenInput) hiddenInput.value = value;
+                if (value) {
+                    // Si birthday (date complète) existe, le charger
+                    const [year, month, day] = value.split('-');
+                    if (daySelect) daySelect.value = parseInt(day);
+                    if (monthSelect) monthSelect.value = parseInt(month);
+                    if (yearSelect) yearSelect.value = year;
+                    if (birthdayInput) birthdayInput.value = value;
+                    if (birthYearInput) birthYearInput.value = year;
+                } else if (contact.birthYear) {
+                    // Sinon, si juste birthYear existe, charger uniquement l'année
+                    if (yearSelect) yearSelect.value = contact.birthYear;
+                    if (birthYearInput) birthYearInput.value = contact.birthYear;
+                }
             } else if (field.id === 'birthYear') {
-                // Ignorer birthYear car il est maintenant dans birthday
+                // Ne rien faire, déjà géré dans birthday
                 return;
             } else if (field.type === 'select') {
                 // Tag selector
@@ -834,29 +843,37 @@ const contacts = {
             const daySelect = document.getElementById('birthday_day');
             const monthSelect = document.getElementById('birthday_month');
             const yearSelect = document.getElementById('birthday_year');
-            const hiddenInput = document.getElementById('birthday');
+            const birthdayInput = document.getElementById('birthday');
+            const birthYearInput = document.getElementById('birthYear');
             
-            if (daySelect && monthSelect && yearSelect && hiddenInput) {
-                // Fonction pour mettre à jour le champ caché
-                const updateHiddenField = () => {
+            if (daySelect && monthSelect && yearSelect && birthdayInput && birthYearInput) {
+                // Fonction pour mettre à jour les champs cachés
+                const updateHiddenFields = () => {
                     const day = daySelect.value;
                     const month = monthSelect.value;
                     const year = yearSelect.value;
                     
-                    // Si les 3 sont remplis, créer la date au format YYYY-MM-DD
+                    // Toujours sauvegarder l'année si elle est remplie
+                    if (year) {
+                        birthYearInput.value = year;
+                    } else {
+                        birthYearInput.value = '';
+                    }
+                    
+                    // Si les 3 sont remplis, créer la date complète
                     if (day && month && year) {
                         const paddedDay = String(day).padStart(2, '0');
                         const paddedMonth = String(month).padStart(2, '0');
-                        hiddenInput.value = `${year}-${paddedMonth}-${paddedDay}`;
+                        birthdayInput.value = `${year}-${paddedMonth}-${paddedDay}`;
                     } else {
-                        hiddenInput.value = '';
+                        birthdayInput.value = '';
                     }
                 };
                 
                 // Écouter les changements sur les 3 selects
-                daySelect.addEventListener('change', updateHiddenField);
-                monthSelect.addEventListener('change', updateHiddenField);
-                yearSelect.addEventListener('change', updateHiddenField);
+                daySelect.addEventListener('change', updateHiddenFields);
+                monthSelect.addEventListener('change', updateHiddenFields);
+                yearSelect.addEventListener('change', updateHiddenFields);
             }
         }, 100);
     },
@@ -901,6 +918,7 @@ const contacts = {
                         ${yearOptions}
                     </select>
                 </div>
+                <input type="hidden" id="birthYear">
                 <input type="hidden" id="${dateField.id}" ${dateField.required ? 'required' : ''}>
             </div>
         `;
