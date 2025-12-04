@@ -183,7 +183,25 @@ const contacts = {
                 const statTag = tags.findTag('discussionStatus', contact.discussionStatus);
                 
                 // Extraire le drapeau du pays si disponible
-                const locationData = typeof city !== 'undefined' ? city.parseLocation(contact.location) : null;
+                let locationData = null;
+                if (contact.location) {
+                    // Si c'est déjà un objet (depuis Firebase)
+                    if (typeof contact.location === 'object') {
+                        locationData = contact.location;
+                    }
+                    // Si c'est un JSON stringifié
+                    else if (typeof contact.location === 'string' && contact.location.startsWith('{')) {
+                        try {
+                            locationData = JSON.parse(contact.location);
+                        } catch (e) {
+                            locationData = typeof city !== 'undefined' ? city.parseLocation(contact.location) : null;
+                        }
+                    }
+                    // Sinon, c'est du texte simple
+                    else {
+                        locationData = typeof city !== 'undefined' ? city.parseLocation(contact.location) : null;
+                    }
+                }
                 const flag = locationData && locationData.flag ? `<span class="contact-flag">${locationData.flag}</span>` : '';
                 
                 html += `
@@ -339,9 +357,27 @@ const contacts = {
                     displayValue = (value === true || value === 'true') ? '✅ Oui' : '❌ Non';
                 } else if (field.type === 'city') {
                     // Pour les champs city, parser et afficher le displayName avec le drapeau
-                    const locationData = typeof city !== 'undefined' ? city.parseLocation(value) : null;
-                    if (locationData) {
-                        displayValue = `${locationData.flag} ${locationData.displayName}`;
+                    let locationData = null;
+                    
+                    // Si c'est déjà un objet (depuis Firebase)
+                    if (typeof value === 'object') {
+                        locationData = value;
+                    }
+                    // Si c'est un JSON stringifié
+                    else if (typeof value === 'string' && value.startsWith('{')) {
+                        try {
+                            locationData = JSON.parse(value);
+                        } catch (e) {
+                            locationData = typeof city !== 'undefined' ? city.parseLocation(value) : null;
+                        }
+                    }
+                    // Sinon, c'est du texte simple
+                    else {
+                        locationData = typeof city !== 'undefined' ? city.parseLocation(value) : null;
+                    }
+                    
+                    if (locationData && locationData.flag) {
+                        displayValue = `${locationData.flag} ${locationData.displayName || locationData.country || value}`;
                     } else {
                         displayValue = value;
                     }
@@ -445,10 +481,19 @@ const contacts = {
                 // Champ city : parser la valeur et remplir
                 const input = document.getElementById(field.id);
                 if (input && value) {
-                    // Essayer de parser la valeur
-                    const cityData = typeof city !== 'undefined' ? city.parseLocation(value) : null;
+                    let cityData = null;
+                    
+                    // Si c'est déjà un objet
+                    if (typeof value === 'object') {
+                        cityData = value;
+                    }
+                    // Sinon, essayer de parser
+                    else {
+                        cityData = typeof city !== 'undefined' ? city.parseLocation(value) : null;
+                    }
+                    
                     if (cityData) {
-                        input.value = cityData.displayName;
+                        input.value = cityData.displayName || cityData.country || value;
                         input.setAttribute('data-city-json', JSON.stringify(cityData));
                     } else {
                         // Si on ne peut pas parser, juste afficher la valeur texte
@@ -502,7 +547,18 @@ const contacts = {
                 const input = document.getElementById(field.id);
                 if (input) {
                     const cityJson = input.getAttribute('data-city-json');
-                    contactData[field.id] = cityJson || input.value;
+                    if (cityJson) {
+                        // Si on a un JSON, le parser pour sauvegarder l'objet (pas la string)
+                        try {
+                            contactData[field.id] = JSON.parse(cityJson);
+                        } catch (e) {
+                            // Si le parsing échoue, sauvegarder le texte brut
+                            contactData[field.id] = input.value;
+                        }
+                    } else {
+                        // Sinon, sauvegarder le texte brut
+                        contactData[field.id] = input.value;
+                    }
                 }
             } else {
                 const input = document.getElementById(field.id);
