@@ -206,14 +206,7 @@
                 <div class="analyse-instructions">
                     <h3 class="instructions-title">📱 Comment exporter vos données Instagram ?</h3>
                     
-                    <!-- Vidéo tutoriel -->
-                    <div class="instructions-video">
-                        <video controls class="tutorial-video">
-                            <source src="tutorial-instagram-export.mp4" type="video/mp4">
-                            Votre navigateur ne supporte pas la lecture de vidéos.
-                        </video>
-                        <p class="video-caption">📹 Tutoriel vidéo : Comment exporter vos données Instagram</p>
-                    </div>
+            
 
                     <!-- Instructions Mobile -->
                     <div class="instructions-section">
@@ -709,6 +702,13 @@
         // Vérifier IMMÉDIATEMENT si l'utilisateur est connecté pour éviter le flash
         (function() {
             const checkAuthState = () => {
+                // Attendre que Firebase soit initialisé
+                if (typeof firebase === 'undefined' || !firebase.apps || firebase.apps.length === 0) {
+                    console.log('⏳ Waiting for Firebase to initialize...');
+                    setTimeout(checkAuthState, 50);
+                    return;
+                }
+                
                 firebase.auth().onAuthStateChanged((user) => {
                     const landingPage = document.getElementById('landingPage');
                     const authPage = document.getElementById('authPage');
@@ -758,12 +758,16 @@
                 });
             };
             
-            // Vérifier dès que Firebase est prêt
-            if (typeof firebase !== 'undefined' && firebase.auth) {
-                checkAuthState();
-            } else {
-                window.addEventListener('load', checkAuthState);
-            }
+            // Attendre que Firebase soit complètement initialisé
+            const waitForFirebase = () => {
+                if (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length > 0) {
+                    checkAuthState();
+                } else {
+                    setTimeout(waitForFirebase, 50);
+                }
+            };
+            
+            waitForFirebase();
         })();
     </script>
 </div> <!-- End of appPage -->
