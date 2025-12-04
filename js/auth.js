@@ -590,6 +590,21 @@ const authManager = {
                     contact.gender = '👩 Femme';
                 }
                 
+                // Migration : nettoyer les champs location corrompus (double stringify)
+                if (contact.location && typeof contact.location === 'string') {
+                    // Si c'est un JSON stringifié qui commence par "{\"city\""
+                    if (contact.location.startsWith('{"') || contact.location.startsWith('{"city"')) {
+                        try {
+                            // Parser pour récupérer l'objet propre
+                            const parsed = JSON.parse(contact.location);
+                            contact.location = parsed;
+                            console.log('🔧 Cleaned corrupted location for', contact.firstName);
+                        } catch (e) {
+                            // Si ça échoue, laisser tel quel
+                        }
+                    }
+                }
+                
                 // Vérifier si ce contact est dans la liste "À ne plus suivre"
                 const instagramUsername = contact.instagram.toLowerCase().replace('@', '');
                 if (unfollowers.data.doNotFollowList.has(instagramUsername)) {
