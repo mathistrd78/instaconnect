@@ -12,9 +12,11 @@ const stats = {
         }
         
         // Récupérer tous les champs filtrables (select, radio, checkbox)
+        // SAUF gender car déjà affiché dans les stats globales en haut
         const allFields = app.getAllFields();
         const filterableFields = allFields.filter(field => 
-            field.type === 'select' || field.type === 'radio' || field.type === 'checkbox'
+            (field.type === 'select' || field.type === 'radio' || field.type === 'checkbox') &&
+            field.id !== 'gender' // Exclure gender
         );
         
         console.log('📋 Filterable fields for stats:', filterableFields.length, filterableFields.map(f => f.label));
@@ -288,8 +290,16 @@ const stats = {
     },
 
     renderLegend(data) {
-        const total = data.reduce((sum, d) => sum + d.value, 0);
-        const html = data.map(d => {
+        // Trier par ordre alphabétique du label
+        const sortedData = [...data].sort((a, b) => {
+            // Retirer les emojis pour le tri
+            const labelA = a.label.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').trim();
+            const labelB = b.label.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').trim();
+            return labelA.localeCompare(labelB, 'fr');
+        });
+        
+        const total = sortedData.reduce((sum, d) => sum + d.value, 0);
+        const html = sortedData.map(d => {
             const percent = total > 0 ? Math.round((d.value / total) * 100) : 0;
             return `
                 <div class="legend-item">
