@@ -396,7 +396,17 @@ const city = {
         const countryCount = {};
         
         contacts.forEach(contact => {
-            const location = this.parseLocation(contact.location);
+            let location = null;
+            
+            // Si contact.location est déjà un objet
+            if (typeof contact.location === 'object' && contact.location !== null) {
+                location = contact.location;
+            }
+            // Sinon, parser
+            else {
+                location = this.parseLocation(contact.location);
+            }
+            
             if (location && location.country) {
                 const key = location.country;
                 if (!countryCount[key]) {
