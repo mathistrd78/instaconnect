@@ -807,6 +807,28 @@ const contacts = {
 
         form.innerHTML = fixedFieldsHTML + dynamicFieldsHTML + actionsHTML;
         
+        // Gérer les placeholders des champs date
+        setTimeout(() => {
+            const dateInputs = document.querySelectorAll('input[type="date"]');
+            dateInputs.forEach(input => {
+                // Fonction pour vérifier si le champ a une valeur
+                const updatePlaceholder = () => {
+                    if (input.value) {
+                        input.classList.add('has-value');
+                    } else {
+                        input.classList.remove('has-value');
+                    }
+                };
+                
+                // Vérifier au chargement
+                updatePlaceholder();
+                
+                // Vérifier à chaque changement
+                input.addEventListener('change', updatePlaceholder);
+                input.addEventListener('input', updatePlaceholder);
+            });
+        }, 50);
+        
         // Lier les 3 selects de date de naissance
         setTimeout(() => {
             const daySelect = document.getElementById('birthday_day');
