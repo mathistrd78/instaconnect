@@ -100,7 +100,7 @@ const city = {
     async searchCities(query) {
         if (!query || query.length < 1) return [];
 
-        // Liste des pays populaires pour l'autocomplétion
+        // Liste des pays populaires pour l'autocomplétion (affichage immédiat)
         const popularCountries = [
             { name: 'France', code: 'FR' },
             { name: 'Espagne', code: 'ES' },
@@ -114,14 +114,23 @@ const city = {
             { name: 'Canada', code: 'CA' },
             { name: 'Maroc', code: 'MA' },
             { name: 'Algérie', code: 'DZ' },
-            { name: 'Tunisie', code: 'TN' }
+            { name: 'Tunisie', code: 'TN' },
+            { name: 'Brésil', code: 'BR' },
+            { name: 'Argentine', code: 'AR' },
+            { name: 'Mexique', code: 'MX' },
+            { name: 'Japon', code: 'JP' },
+            { name: 'Chine', code: 'CN' },
+            { name: 'Inde', code: 'IN' },
+            { name: 'Australie', code: 'AU' }
         ];
 
-        // Si la recherche ressemble à un pays (pas de virgule, <= 15 caractères)
         const queryLower = query.toLowerCase();
-        if (!query.includes(',') && query.length <= 15) {
-            const matchingCountries = popularCountries
-                .filter(c => c.name.toLowerCase().startsWith(queryLower))
+        
+        // Si la recherche ressemble à un pays (pas de virgule, >= 3 caractères)
+        if (!query.includes(',') && query.length >= 3) {
+            // Chercher dans les pays populaires
+            const matchingPopularCountries = popularCountries
+                .filter(c => c.name.toLowerCase().includes(queryLower))
                 .map(c => ({
                     city: '',
                     country: c.name,
@@ -131,11 +140,60 @@ const city = {
                     flag: this.getFlag(c.code)
                 }));
             
-            // Si on trouve des pays correspondants, les retourner en premier
-            if (matchingCountries.length > 0) {
-                // Continuer aussi la recherche de villes
+            // Chercher aussi via l'API Nominatim pour tous les pays du monde
+            let apiCountries = [];
+            try {
+                const countryResponse = await fetch(
+                    `https://nominatim.openstreetmap.org/search?` +
+                    `q=${encodeURIComponent(query)}&` +
+                    `format=json&` +
+                    `addressdetails=1&` +
+                    `limit=5&` +
+                    `featuretype=country&` +
+                    `accept-language=fr`,
+                    {
+                        headers: {
+                            'User-Agent': 'InstaConnect CRM'
+                        }
+                    }
+                );
+                
+                if (countryResponse.ok) {
+                    const countryResults = await countryResponse.json();
+                    apiCountries = countryResults
+                        .filter(r => r.type === 'country' || r.addresstype === 'country')
+                        .map(r => {
+                            const countryName = r.display_name.split(',')[0].trim();
+                            const countryCode = r.address?.country_code?.toUpperCase() || '';
+                            return {
+                                city: '',
+                                country: countryName,
+                                countryCode: countryCode,
+                                state: '',
+                                displayName: countryName,
+                                flag: this.getFlag(countryCode)
+                            };
+                        });
+                }
+            } catch (e) {
+                console.log('Country search API error:', e);
+            }
+            
+            // Combiner pays populaires + API, dédupliquer
+            const allCountries = [...matchingPopularCountries];
+            const existingCountries = new Set(allCountries.map(c => c.country.toLowerCase()));
+            
+            apiCountries.forEach(country => {
+                if (!existingCountries.has(country.country.toLowerCase())) {
+                    allCountries.push(country);
+                    existingCountries.add(country.country.toLowerCase());
+                }
+            });
+            
+            // Si on a des pays, les retourner en premier + recherche de villes
+            if (allCountries.length > 0) {
                 const cityResults = await this.searchCitiesOnly(query);
-                return [...matchingCountries, ...cityResults].slice(0, 8);
+                return [...allCountries, ...cityResults].slice(0, 8);
             }
         }
 
@@ -315,20 +373,76 @@ const city = {
         // Essayer de parser une chaîne "Ville, Pays" ou "Ville, État, Pays"
         const parts = locationString.split(',').map(p => p.trim());
         
-        // Mapping des noms de pays vers codes
+        // Mapping des noms de pays vers codes (100+ pays)
         const countryNames = {
-            'france': 'FR', 'états-unis': 'US', 'usa': 'US', 'etats-unis': 'US',
+            // Europe
+            'france': 'FR', 'espagne': 'ES', 'italie': 'IT', 'allemagne': 'DE',
             'royaume-uni': 'GB', 'uk': 'GB', 'angleterre': 'GB',
-            'allemagne': 'DE', 'espagne': 'ES', 'italie': 'IT',
             'portugal': 'PT', 'belgique': 'BE', 'suisse': 'CH',
-            'pays-bas': 'NL', 'hollande': 'NL', 'canada': 'CA',
+            'pays-bas': 'NL', 'hollande': 'NL', 'autriche': 'AT',
+            'grèce': 'GR', 'grece': 'GR', 'turquie': 'TR',
+            'pologne': 'PL', 'suède': 'SE', 'suede': 'SE',
+            'norvège': 'NO', 'norvege': 'NO', 'danemark': 'DK',
+            'finlande': 'FI', 'irlande': 'IE', 'islande': 'IS',
+            'luxembourg': 'LU', 'malte': 'MT', 'chypre': 'CY',
+            'république tchèque': 'CZ', 'tchéquie': 'CZ',
+            'hongrie': 'HU', 'roumanie': 'RO', 'bulgarie': 'BG',
+            'croatie': 'HR', 'slovénie': 'SI', 'slovaquie': 'SK',
+            'estonie': 'EE', 'lettonie': 'LV', 'lituanie': 'LT',
+            'serbie': 'RS', 'monténégro': 'ME', 'bosnie': 'BA',
+            'albanie': 'AL', 'macédoine': 'MK',
+            
+            // Amériques
+            'états-unis': 'US', 'etats-unis': 'US', 'usa': 'US',
+            'canada': 'CA', 'mexique': 'MX',
             'brésil': 'BR', 'bresil': 'BR', 'argentine': 'AR',
-            'mexique': 'MX', 'japon': 'JP', 'chine': 'CN',
-            'inde': 'IN', 'australie': 'AU', 'russie': 'RU',
-            'afrique du sud': 'ZA', 'maroc': 'MA', 'algérie': 'DZ',
-            'algerie': 'DZ', 'tunisie': 'TN', 'egypte': 'EG', 
-            'grèce': 'GR', 'grece': 'GR', 'turquie': 'TR', 
-            'pologne': 'PL', 'suède': 'SE', 'suede': 'SE'
+            'chili': 'CL', 'pérou': 'PE', 'perou': 'PE',
+            'colombie': 'CO', 'venezuela': 'VE', 'équateur': 'EC',
+            'bolivie': 'BO', 'paraguay': 'PY', 'uruguay': 'UY',
+            'costa rica': 'CR', 'panama': 'PA', 'cuba': 'CU',
+            'république dominicaine': 'DO', 'haïti': 'HT', 'haiti': 'HT',
+            'jamaïque': 'JM', 'jamaique': 'JM',
+            'trinité-et-tobago': 'TT', 'bahamas': 'BS', 'barbade': 'BB',
+            
+            // Asie
+            'japon': 'JP', 'chine': 'CN', 'inde': 'IN',
+            'corée du sud': 'KR', 'coree du sud': 'KR',
+            'corée du nord': 'KP', 'coree du nord': 'KP',
+            'thaïlande': 'TH', 'thailande': 'TH',
+            'vietnam': 'VN', 'indonésie': 'ID', 'indonesie': 'ID',
+            'philippines': 'PH', 'malaisie': 'MY', 'singapour': 'SG',
+            'pakistan': 'PK', 'bangladesh': 'BD', 'sri lanka': 'LK',
+            'népal': 'NP', 'nepal': 'NP',
+            'afghanistan': 'AF', 'iran': 'IR', 'irak': 'IQ',
+            'syrie': 'SY', 'liban': 'LB', 'jordanie': 'JO',
+            'israël': 'IL', 'israel': 'IL', 'palestine': 'PS',
+            'arabie saoudite': 'SA', 'émirats arabes unis': 'AE',
+            'koweït': 'KW', 'koweit': 'KW', 'qatar': 'QA',
+            'oman': 'OM', 'yémen': 'YE', 'yemen': 'YE',
+            
+            // Afrique
+            'maroc': 'MA', 'algérie': 'DZ', 'algerie': 'DZ',
+            'tunisie': 'TN', 'égypte': 'EG', 'egypte': 'EG',
+            'libye': 'LY', 'soudan': 'SD',
+            'afrique du sud': 'ZA',
+            'kenya': 'KE', 'tanzanie': 'TZ', 'ouganda': 'UG',
+            'éthiopie': 'ET', 'ethiopie': 'ET',
+            'ghana': 'GH', 'nigeria': 'NG', 'sénégal': 'SN', 'senegal': 'SN',
+            'côte d\'ivoire': 'CI', 'cote d\'ivoire': 'CI',
+            'cameroun': 'CM', 'congo': 'CD', 'angola': 'AO',
+            'zimbabwe': 'ZW', 'mozambique': 'MZ', 'namibie': 'NA',
+            'botswana': 'BW', 'zambie': 'ZM', 'malawi': 'MW',
+            
+            // Océanie
+            'australie': 'AU', 'nouvelle-zélande': 'NZ',
+            'nouvelle-zelande': 'NZ', 'fidji': 'FJ',
+            'papouasie-nouvelle-guinée': 'PG',
+            
+            // Russie & anciennes républiques
+            'russie': 'RU', 'ukraine': 'UA', 'biélorussie': 'BY',
+            'kazakhstan': 'KZ', 'ouzbékistan': 'UZ',
+            'géorgie': 'GE', 'georgie': 'GE', 'arménie': 'AM',
+            'azerbaïdjan': 'AZ', 'azerbaidjan': 'AZ'
         };
         
         // Si c'est un seul mot, vérifier si c'est un nom de pays
@@ -432,7 +546,7 @@ const city = {
             result.push({
                 country: 'Non défini',
                 countryCode: '',
-                flag: '',
+                flag: '❓',
                 count: undefinedCount
             });
         }
