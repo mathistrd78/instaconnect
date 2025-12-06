@@ -429,16 +429,16 @@ const app = {
             document.querySelectorAll('.nav-item')[0].classList.add('active');
             header.style.display = 'block';
             
-            // Calculer la hauteur exacte du header et ajuster le margin et le sticky
+            // Calculer la hauteur exacte du header et ajuster le sticky
             setTimeout(() => {
                 const headerHeight = header.offsetHeight;
-                container.style.marginTop = (headerHeight + 12) + 'px'; // header + petit espace
+                container.style.marginTop = headerHeight + 'px'; // Pas d'espace supplémentaire
                 
-                // Ajuster la position sticky des letter-headers
+                // Ajuster la position sticky des letter-headers pour qu'ils se collent juste sous le header
                 document.querySelectorAll('.letter-header').forEach(letterHeader => {
                     letterHeader.style.top = headerHeight + 'px';
                 });
-            }, 50); // Petit délai pour que le header soit bien rendu
+            }, 50);
             
             contacts.render();
         } else if (section === 'stats') {
