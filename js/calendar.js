@@ -10,7 +10,9 @@ const calendar = {
         }
         
         this.render();
-        document.getElementById('calendarModal').classList.add('active');
+        const calendarModal = document.getElementById('calendarModal');
+        calendarModal.classList.add('active');
+        calendarModal.scrollTop = 0;
     },
     
     // Fermer le calendrier
