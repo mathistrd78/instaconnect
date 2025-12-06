@@ -367,7 +367,7 @@ h1 {
 /* Container */
 .container {
     padding: 8px 12px 12px 12px;
-    margin-top: 160px; /* Espace pour le header fixe */
+    margin-top: 180px; /* Espace pour le header fixe + marge pour le bandeau */
 }
 
 /* Quand le header n'est pas affiché (Stats, Analyse, Unfollowers, Profil) */
@@ -862,11 +862,11 @@ body.hide-header .container {
     letter-spacing: 2px;
     text-transform: uppercase;
     position: sticky;
-    top: 165px; /* Position sous le header (hauteur du header + petit espace) */
+    top: 0; /* Sticky directement en haut de la zone de scroll */
     z-index: 1;
 }
 
-/* Sur la page unfollowers, pas de header donc top: 0 */
+/* Sur la page unfollowers, pareil */
 #unfollowersSection .letter-header {
     top: 0;
 }
