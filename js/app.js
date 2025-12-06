@@ -401,6 +401,9 @@ const app = {
     },
 
     switchSection(section) {
+        // Reset scroll to top
+        window.scrollTo(0, 0);
+        
         // Save current section
         this.currentSection = section;
         localStorage.setItem('currentSection', section);
@@ -495,7 +498,11 @@ const app = {
         document.getElementById('genderFemale').checked = false;
         
         document.getElementById('modalTitle').textContent = '➕ Nouveau contact';
-        document.getElementById('addModal').classList.add('active');
+        
+        // Reset scroll to top of modal
+        const addModal = document.getElementById('addModal');
+        addModal.classList.add('active');
+        addModal.scrollTop = 0;
     },
 
     closeAddModal() {
