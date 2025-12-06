@@ -324,17 +324,17 @@ const city = {
                 if (cities.length === 0) {
                     dropdown.innerHTML = '<div class="city-dropdown-item no-results">Aucune ville trouvée</div>';
                 } else {
-                    dropdown.innerHTML = cities.map(city => `
-                        <div class="city-dropdown-item" data-city='${JSON.stringify(city)}'>
+                    dropdown.innerHTML = cities.map((city, index) => `
+                        <div class="city-dropdown-item" data-city-index="${index}">
                             <span class="city-flag">${city.flag}</span>
                             <span class="city-name">${city.displayName}</span>
                         </div>
                     `).join('');
 
                     // Ajouter les événements de clic
-                    dropdown.querySelectorAll('.city-dropdown-item').forEach(item => {
+                    dropdown.querySelectorAll('.city-dropdown-item').forEach((item, index) => {
                         item.addEventListener('click', () => {
-                            const cityData = JSON.parse(item.getAttribute('data-city'));
+                            const cityData = cities[index];
                             input.value = cityData.displayName;
                             dropdown.style.display = 'none';
                             if (onSelect) onSelect(cityData);
