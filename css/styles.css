@@ -367,7 +367,7 @@ h1 {
 /* Container */
 .container {
     padding: 8px 12px 12px 12px;
-    margin-top: 180px; /* Espace pour le header fixe + marge pour le bandeau */
+    margin-top: 168px; /* Espace pour le header fixe (sera ajusté dynamiquement) */
 }
 
 /* Quand le header n'est pas affiché (Stats, Analyse, Unfollowers, Profil) */
