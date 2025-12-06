@@ -389,7 +389,7 @@ const tags = {
         let html = options.map((opt, index) => `
             <div class="tag-option" draggable="true" data-tag-value="${opt.value.replace(/"/g, '&quot;')}" data-tag-index="${index}">
                 <span class="tag-drag-handle">⋮⋮</span>
-                <div onclick="tags.selectTag('${opt.value.replace(/'/g, "\\'")}')">
+                <div class="tag-option-content" onclick="tags.selectTag('${opt.value.replace(/'/g, "\\'")}')">
                     <span class="tag-option-preview ${opt.class}">${opt.label}</span>
                 </div>
                 <span class="tag-edit-btn" onclick="event.stopPropagation(); tags.openEditModal('${this.currentContext.fieldType}', '${opt.value.replace(/'/g, "\\'")}')">✏️</span>
