@@ -2295,13 +2295,16 @@ body.dark-mode .emoji-search-input:focus {
 }
 
 .emoji-picker {
-    display: flex;
-    gap: 12px;
+    display: grid;
+    grid-template-rows: repeat(4, 1fr);
+    grid-auto-flow: column;
+    gap: 8px;
     overflow-x: auto;
     overflow-y: hidden;
     padding: 16px 12px;
     background: #f8f9fa;
     border-radius: 12px;
+    max-height: 280px;
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none; /* Firefox */
@@ -2312,8 +2315,8 @@ body.dark-mode .emoji-search-input:focus {
 }
 
 .emoji-option {
-    font-size: 40px;
-    min-width: 56px;
+    font-size: 36px;
+    width: 56px;
     height: 56px;
     display: flex;
     align-items: center;
