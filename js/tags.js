@@ -386,8 +386,9 @@ const tags = {
     renderOptions(options, searchValue = '') {
         const list = document.getElementById('tagOptionsList');
         
-        let html = options.map(opt => `
-            <div class="tag-option">
+        let html = options.map((opt, index) => `
+            <div class="tag-option" draggable="true" data-tag-value="${opt.value.replace(/"/g, '&quot;')}" data-tag-index="${index}">
+                <span class="tag-drag-handle">⋮⋮</span>
                 <div onclick="tags.selectTag('${opt.value.replace(/'/g, "\\'")}')">
                     <span class="tag-option-preview ${opt.class}">${opt.label}</span>
                 </div>
@@ -405,6 +406,89 @@ const tags = {
         }
         
         list.innerHTML = html;
+        
+        // Ajouter les événements drag & drop
+        this.initDragAndDrop(list);
+    },
+    
+    // Initialiser le drag & drop pour les tags
+    initDragAndDrop(list) {
+        let draggedElement = null;
+        let draggedIndex = null;
+        
+        const tagOptions = list.querySelectorAll('.tag-option[draggable="true"]');
+        
+        tagOptions.forEach((item, index) => {
+            item.addEventListener('dragstart', (e) => {
+                draggedElement = item;
+                draggedIndex = parseInt(item.getAttribute('data-tag-index'));
+                item.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+            });
+            
+            item.addEventListener('dragend', (e) => {
+                item.classList.remove('dragging');
+                draggedElement = null;
+                draggedIndex = null;
+            });
+            
+            item.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                
+                if (draggedElement && draggedElement !== item) {
+                    const rect = item.getBoundingClientRect();
+                    const midpoint = rect.top + rect.height / 2;
+                    
+                    if (e.clientY < midpoint) {
+                        item.parentNode.insertBefore(draggedElement, item);
+                    } else {
+                        item.parentNode.insertBefore(draggedElement, item.nextSibling);
+                    }
+                }
+            });
+            
+            item.addEventListener('drop', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                if (draggedElement) {
+                    // Sauvegarder le nouvel ordre
+                    this.saveTagOrder();
+                }
+            });
+        });
+    },
+    
+    // Sauvegarder le nouvel ordre des tags
+    saveTagOrder() {
+        if (!this.currentContext) return;
+        
+        const list = document.getElementById('tagOptionsList');
+        const tagElements = list.querySelectorAll('.tag-option[draggable="true"]');
+        const newOrder = Array.from(tagElements).map(el => el.getAttribute('data-tag-value'));
+        
+        // Mettre à jour l'ordre dans field.tags
+        const allFields = [...app.defaultFields, ...app.customFields];
+        const field = allFields.find(f => f.id === this.currentContext.fieldType);
+        
+        if (field && field.tags) {
+            // Réorganiser les tags selon le nouvel ordre
+            const reorderedTags = [];
+            newOrder.forEach(value => {
+                const tag = field.tags.find(t => t.value === value);
+                if (tag) {
+                    reorderedTags.push(tag);
+                }
+            });
+            
+            field.tags = reorderedTags;
+            
+            // Sauvegarder dans Firebase
+            app.dataStore.saveUserData();
+            
+            console.log('✅ Tag order saved:', newOrder);
+        }
     },
 
     // Sélectionner un tag
