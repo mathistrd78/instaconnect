@@ -428,7 +428,18 @@ const app = {
             document.getElementById('contactsSection').classList.add('active');
             document.querySelectorAll('.nav-item')[0].classList.add('active');
             header.style.display = 'block';
-            container.style.marginTop = '180px'; // Remettre la marge pour le header
+            
+            // Calculer la hauteur exacte du header et ajuster le margin et le sticky
+            setTimeout(() => {
+                const headerHeight = header.offsetHeight;
+                container.style.marginTop = (headerHeight + 12) + 'px'; // header + petit espace
+                
+                // Ajuster la position sticky des letter-headers
+                document.querySelectorAll('.letter-header').forEach(letterHeader => {
+                    letterHeader.style.top = headerHeight + 'px';
+                });
+            }, 50); // Petit délai pour que le header soit bien rendu
+            
             contacts.render();
         } else if (section === 'stats') {
             document.getElementById('statsSection').classList.add('active');
