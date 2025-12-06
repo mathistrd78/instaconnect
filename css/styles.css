@@ -2143,6 +2143,34 @@ body.dark-mode .tag-selector-value {
     justify-content: space-between;
     align-items: center;
     min-height: 56px;
+    gap: 12px;
+    transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.tag-option.dragging {
+    opacity: 0.5;
+    transform: scale(0.95);
+}
+
+.tag-option[draggable="true"] {
+    cursor: grab;
+}
+
+.tag-option[draggable="true"]:active {
+    cursor: grabbing;
+}
+
+.tag-drag-handle {
+    color: #adb5bd;
+    font-size: 18px;
+    cursor: grab;
+    padding: 4px;
+    user-select: none;
+    flex-shrink: 0;
+}
+
+.tag-drag-handle:active {
+    cursor: grabbing;
 }
 
 .tag-option:active {
