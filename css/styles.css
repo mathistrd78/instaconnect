@@ -2177,6 +2177,13 @@ body.dark-mode .tag-selector-value {
     background: #f8f9fa;
 }
 
+.tag-option-content {
+    flex: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
 .tag-option-preview-container {
     flex: 1;
     cursor: pointer;
