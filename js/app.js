@@ -401,8 +401,15 @@ const app = {
     },
 
     switchSection(section) {
-        // Reset scroll to top
+        // Reset scroll to top - body et container
         window.scrollTo(0, 0);
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
+        
+        // Reset scroll de toutes les sections
+        document.querySelectorAll('.section').forEach(s => {
+            s.scrollTop = 0;
+        });
         
         // Save current section
         this.currentSection = section;
