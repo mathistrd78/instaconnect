@@ -862,8 +862,8 @@ body.hide-header .container {
     letter-spacing: 2px;
     text-transform: uppercase;
     position: sticky;
-    top: 0; /* Sticky directement en haut de la zone de scroll */
-    z-index: 1;
+    top: 168px; /* Juste sous le header (hauteur approximative du header) */
+    z-index: 999; /* Juste sous le header (1000) */
 }
 
 /* Sur la page unfollowers, pareil */
