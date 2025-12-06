@@ -428,7 +428,7 @@ const app = {
             document.getElementById('contactsSection').classList.add('active');
             document.querySelectorAll('.nav-item')[0].classList.add('active');
             header.style.display = 'block';
-            container.style.marginTop = '160px'; // Remettre la marge pour le header
+            container.style.marginTop = '180px'; // Remettre la marge pour le header
             contacts.render();
         } else if (section === 'stats') {
             document.getElementById('statsSection').classList.add('active');
