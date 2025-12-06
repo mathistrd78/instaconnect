@@ -434,7 +434,11 @@ const contacts = {
         }
         
         detailsContainer.innerHTML = detailsHTML;
-        document.getElementById('viewModal').classList.add('active');
+        
+        // Reset scroll to top of modal
+        const viewModal = document.getElementById('viewModal');
+        viewModal.classList.add('active');
+        viewModal.scrollTop = 0;
     },
 
     editProfile(contactId) {
@@ -549,7 +553,11 @@ const contacts = {
         });
 
         document.getElementById('modalTitle').textContent = '✏️ Modifier le contact';
-        document.getElementById('addModal').classList.add('active');
+        
+        // Reset scroll to top of modal
+        const addModal = document.getElementById('addModal');
+        addModal.classList.add('active');
+        addModal.scrollTop = 0;
     },
 
     async saveContact(event) {
