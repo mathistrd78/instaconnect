@@ -2145,32 +2145,42 @@ body.dark-mode .tag-selector-value {
     min-height: 56px;
     gap: 12px;
     transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+    user-select: none; /* Empêche la sélection de texte pendant le drag */
+    -webkit-user-select: none;
+    touch-action: none; /* Empêche le scroll pendant le drag sur mobile */
 }
 
 .tag-option.dragging {
     opacity: 0.5;
     transform: scale(0.95);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .tag-option[draggable="true"] {
     cursor: grab;
+    cursor: -webkit-grab;
 }
 
 .tag-option[draggable="true"]:active {
     cursor: grabbing;
+    cursor: -webkit-grabbing;
 }
 
 .tag-drag-handle {
     color: #adb5bd;
     font-size: 18px;
     cursor: grab;
+    cursor: -webkit-grab;
     padding: 4px;
     user-select: none;
+    -webkit-user-select: none;
     flex-shrink: 0;
+    touch-action: none;
 }
 
 .tag-drag-handle:active {
     cursor: grabbing;
+    cursor: -webkit-grabbing;
 }
 
 .tag-option:active {
