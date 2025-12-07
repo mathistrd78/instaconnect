@@ -411,17 +411,71 @@ const tags = {
         this.initDragAndDrop(list);
     },
     
-    // Initialiser le drag & drop pour les tags
+    // Initialiser le drag & drop pour les tags (compatible mobile)
     initDragAndDrop(list) {
         let draggedElement = null;
-        let draggedIndex = null;
+        let touchStartY = 0;
+        let placeholder = null;
         
         const tagOptions = list.querySelectorAll('.tag-option[draggable="true"]');
         
-        tagOptions.forEach((item, index) => {
+        tagOptions.forEach((item) => {
+            // Touch events pour mobile (iOS)
+            item.addEventListener('touchstart', (e) => {
+                draggedElement = item;
+                touchStartY = e.touches[0].clientY;
+                item.classList.add('dragging');
+                
+                // Créer un placeholder visuel
+                placeholder = item.cloneNode(true);
+                placeholder.style.opacity = '0.3';
+                placeholder.style.pointerEvents = 'none';
+                
+                // Empêcher le scroll pendant le drag
+                e.preventDefault();
+            }, { passive: false });
+            
+            item.addEventListener('touchmove', (e) => {
+                if (!draggedElement) return;
+                
+                e.preventDefault();
+                
+                const touch = e.touches[0];
+                const currentY = touch.clientY;
+                
+                // Trouver l'élément sous le doigt
+                const elementsAtPoint = document.elementsFromPoint(touch.clientX, touch.clientY);
+                const targetItem = elementsAtPoint.find(el => 
+                    el.classList.contains('tag-option') && el !== draggedElement
+                );
+                
+                if (targetItem && targetItem.parentNode === draggedElement.parentNode) {
+                    const rect = targetItem.getBoundingClientRect();
+                    const midpoint = rect.top + rect.height / 2;
+                    
+                    if (currentY < midpoint) {
+                        targetItem.parentNode.insertBefore(draggedElement, targetItem);
+                    } else {
+                        targetItem.parentNode.insertBefore(draggedElement, targetItem.nextSibling);
+                    }
+                }
+            }, { passive: false });
+            
+            item.addEventListener('touchend', (e) => {
+                if (!draggedElement) return;
+                
+                item.classList.remove('dragging');
+                
+                // Sauvegarder le nouvel ordre
+                this.saveTagOrder();
+                
+                draggedElement = null;
+                placeholder = null;
+            });
+            
+            // Desktop drag & drop (garde la compatibilité)
             item.addEventListener('dragstart', (e) => {
                 draggedElement = item;
-                draggedIndex = parseInt(item.getAttribute('data-tag-index'));
                 item.classList.add('dragging');
                 e.dataTransfer.effectAllowed = 'move';
             });
@@ -429,7 +483,6 @@ const tags = {
             item.addEventListener('dragend', (e) => {
                 item.classList.remove('dragging');
                 draggedElement = null;
-                draggedIndex = null;
             });
             
             item.addEventListener('dragover', (e) => {
@@ -453,7 +506,6 @@ const tags = {
                 e.stopPropagation();
                 
                 if (draggedElement) {
-                    // Sauvegarder le nouvel ordre
                     this.saveTagOrder();
                 }
             });
