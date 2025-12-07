@@ -302,12 +302,21 @@ const city = {
             console.log('✅ Dropdown created for:', inputId);
         }
 
-        // Fonction pour obtenir les localisations existantes
-        const getExistingLocations = () => {
-            const locations = new Map(); // Utiliser Map pour éviter les doublons
+        // Fonction pour obtenir les 5 dernières localisations saisies
+        const getRecentLocations = () => {
+            const locations = [];
+            const seen = new Set(); // Pour éviter les doublons
             
             if (typeof app !== 'undefined' && app.dataStore && app.dataStore.contacts) {
-                app.dataStore.contacts.forEach(contact => {
+                // Trier les contacts par date d'ajout/modification (du plus récent au plus ancien)
+                const sortedContacts = [...app.dataStore.contacts].sort((a, b) => {
+                    const dateA = a.dateModified || a.dateAdded || 0;
+                    const dateB = b.dateModified || b.dateAdded || 0;
+                    return dateB - dateA; // Du plus récent au plus ancien
+                });
+                
+                // Parcourir les contacts et extraire les localisations
+                for (const contact of sortedContacts) {
                     if (contact.location) {
                         let locationData = null;
                         
@@ -329,28 +338,33 @@ const city = {
                         }
                         
                         if (locationData && locationData.displayName) {
-                            // Utiliser displayName comme clé pour éviter les doublons
-                            locations.set(locationData.displayName, locationData);
+                            // Éviter les doublons
+                            if (!seen.has(locationData.displayName)) {
+                                locations.push(locationData);
+                                seen.add(locationData.displayName);
+                                
+                                // S'arrêter à 5 localisations
+                                if (locations.length >= 5) {
+                                    break;
+                                }
+                            }
                         }
                     }
-                });
+                }
             }
             
-            // Convertir en tableau et trier par popularité (nombre d'occurrences)
-            return Array.from(locations.values()).sort((a, b) => {
-                return a.displayName.localeCompare(b.displayName);
-            });
+            return locations;
         };
 
-        // Afficher les localisations existantes au focus
+        // Afficher les localisations récentes au focus
         input.addEventListener('focus', () => {
             if (input.value.trim().length === 0) {
-                const existingLocations = getExistingLocations();
+                const recentLocations = getRecentLocations();
                 
-                if (existingLocations.length > 0) {
+                if (recentLocations.length > 0) {
                     dropdown.innerHTML = `
-                        <div class="city-dropdown-header">Localisations récentes</div>
-                        ${existingLocations.slice(0, 8).map((loc, index) => `
+                        <div class="city-dropdown-header">Dernières localisations</div>
+                        ${recentLocations.map((loc, index) => `
                             <div class="city-dropdown-item" data-existing-index="${index}">
                                 <span class="city-flag">${loc.flag || ''}</span>
                                 <span class="city-name">${loc.displayName}</span>
@@ -361,7 +375,7 @@ const city = {
                     // Ajouter les événements de clic
                     dropdown.querySelectorAll('.city-dropdown-item').forEach((item, index) => {
                         item.addEventListener('click', () => {
-                            const cityData = existingLocations[index];
+                            const cityData = recentLocations[index];
                             input.value = cityData.displayName;
                             dropdown.style.display = 'none';
                             if (onSelect) onSelect(cityData);
