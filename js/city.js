@@ -308,14 +308,27 @@ const city = {
             const seen = new Set(); // Pour éviter les doublons
             
             if (typeof app !== 'undefined' && app.dataStore && app.dataStore.contacts) {
-                // Trier les contacts par date d'ajout/modification (du plus récent au plus ancien)
+                // Trier les contacts par dateModified (si existe) sinon par dateAdded sinon par ID
                 const sortedContacts = [...app.dataStore.contacts].sort((a, b) => {
-                    const dateA = a.dateModified || a.dateAdded || 0;
-                    const dateB = b.dateModified || b.dateAdded || 0;
-                    return dateB - dateA; // Du plus récent au plus ancien
+                    // Utiliser dateModified en priorité, sinon dateAdded, sinon ID
+                    const getTimestamp = (contact) => {
+                        if (contact.dateModified) return new Date(contact.dateModified).getTime();
+                        if (contact.dateAdded) return new Date(contact.dateAdded).getTime();
+                        return parseInt(contact.id) || 0;
+                    };
+                    
+                    return getTimestamp(b) - getTimestamp(a); // Du plus récent au plus ancien
                 });
                 
-                // Parcourir les contacts et extraire les localisations
+                console.log('🔍 Top 10 contacts triés:', sortedContacts.slice(0, 10).map(c => ({
+                    name: c.firstName,
+                    location: c.location?.displayName || c.location,
+                    dateModified: c.dateModified,
+                    dateAdded: c.dateAdded,
+                    id: c.id
+                })));
+                
+                // Parcourir les contacts du plus récent au plus ancien
                 for (const contact of sortedContacts) {
                     if (contact.location) {
                         let locationData = null;
@@ -333,7 +346,7 @@ const city = {
                             }
                         }
                         // Sinon, texte simple
-                        else {
+                        else if (typeof contact.location === 'string') {
                             locationData = this.parseLocation(contact.location);
                         }
                         
@@ -342,6 +355,7 @@ const city = {
                             if (!seen.has(locationData.displayName)) {
                                 locations.push(locationData);
                                 seen.add(locationData.displayName);
+                                console.log('✅ Ajouté:', locationData.displayName);
                                 
                                 // S'arrêter à 5 localisations
                                 if (locations.length >= 5) {
@@ -351,6 +365,8 @@ const city = {
                         }
                     }
                 }
+                
+                console.log('📍 Localisations récentes:', locations.map(l => l.displayName));
             }
             
             return locations;
@@ -377,6 +393,8 @@ const city = {
                         item.addEventListener('click', () => {
                             const cityData = recentLocations[index];
                             input.value = cityData.displayName;
+                            // Stocker le JSON dans l'attribut data
+                            input.setAttribute('data-city-json', JSON.stringify(cityData));
                             dropdown.style.display = 'none';
                             if (onSelect) onSelect(cityData);
                         });
