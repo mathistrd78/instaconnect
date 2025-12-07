@@ -302,6 +302,77 @@ const city = {
             console.log('✅ Dropdown created for:', inputId);
         }
 
+        // Fonction pour obtenir les localisations existantes
+        const getExistingLocations = () => {
+            const locations = new Map(); // Utiliser Map pour éviter les doublons
+            
+            if (typeof app !== 'undefined' && app.dataStore && app.dataStore.contacts) {
+                app.dataStore.contacts.forEach(contact => {
+                    if (contact.location) {
+                        let locationData = null;
+                        
+                        // Si c'est déjà un objet
+                        if (typeof contact.location === 'object') {
+                            locationData = contact.location;
+                        }
+                        // Si c'est un JSON stringifié
+                        else if (typeof contact.location === 'string' && contact.location.startsWith('{')) {
+                            try {
+                                locationData = JSON.parse(contact.location);
+                            } catch (e) {
+                                locationData = this.parseLocation(contact.location);
+                            }
+                        }
+                        // Sinon, texte simple
+                        else {
+                            locationData = this.parseLocation(contact.location);
+                        }
+                        
+                        if (locationData && locationData.displayName) {
+                            // Utiliser displayName comme clé pour éviter les doublons
+                            locations.set(locationData.displayName, locationData);
+                        }
+                    }
+                });
+            }
+            
+            // Convertir en tableau et trier par popularité (nombre d'occurrences)
+            return Array.from(locations.values()).sort((a, b) => {
+                return a.displayName.localeCompare(b.displayName);
+            });
+        };
+
+        // Afficher les localisations existantes au focus
+        input.addEventListener('focus', () => {
+            if (input.value.trim().length === 0) {
+                const existingLocations = getExistingLocations();
+                
+                if (existingLocations.length > 0) {
+                    dropdown.innerHTML = `
+                        <div class="city-dropdown-header">Localisations récentes</div>
+                        ${existingLocations.slice(0, 8).map((loc, index) => `
+                            <div class="city-dropdown-item" data-existing-index="${index}">
+                                <span class="city-flag">${loc.flag || ''}</span>
+                                <span class="city-name">${loc.displayName}</span>
+                            </div>
+                        `).join('')}
+                    `;
+                    
+                    // Ajouter les événements de clic
+                    dropdown.querySelectorAll('.city-dropdown-item').forEach((item, index) => {
+                        item.addEventListener('click', () => {
+                            const cityData = existingLocations[index];
+                            input.value = cityData.displayName;
+                            dropdown.style.display = 'none';
+                            if (onSelect) onSelect(cityData);
+                        });
+                    });
+                    
+                    dropdown.style.display = 'block';
+                }
+            }
+        });
+
         // Événement sur l'input
         input.addEventListener('input', (e) => {
             clearTimeout(this.debounceTimer);
