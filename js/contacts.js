@@ -639,12 +639,14 @@ const contacts = {
         if (this.currentEditId) {
             const contact = app.dataStore.contacts.find(c => c.id === this.currentEditId);
             Object.assign(contact, contactData);
+            contact.dateModified = new Date().toISOString(); // Mettre à jour la date de modification
             await app.dataStore.save(contact);
         } else {
             const newContact = {
                 id: Date.now().toString(),
                 ...contactData,
-                dateAdded: new Date().toISOString()
+                dateAdded: new Date().toISOString(),
+                dateModified: new Date().toISOString() // Initialiser dateModified
             };
             app.dataStore.contacts.push(newContact);
             await app.dataStore.save(newContact);
