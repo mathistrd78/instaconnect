@@ -308,12 +308,9 @@ const stats = {
     },
 
     renderLegend(data) {
-        // Trier par ordre alphabétique du label
+        // Trier par quantité (du plus récurrent au moins récurrent)
         const sortedData = [...data].sort((a, b) => {
-            // Retirer les emojis pour le tri
-            const labelA = a.label.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').trim();
-            const labelB = b.label.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').trim();
-            return labelA.localeCompare(labelB, 'fr');
+            return b.value - a.value; // Du plus grand au plus petit
         });
         
         const total = sortedData.reduce((sum, d) => sum + d.value, 0);
