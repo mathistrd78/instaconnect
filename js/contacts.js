@@ -150,18 +150,26 @@ const contacts = {
         grid.style.display = 'grid';
         empty.style.display = 'none';
         
-        // Grouper les contacts par première lettre (en ignorant les @)
+        // Grouper les contacts par première lettre (en ignorant les caractères spéciaux)
         const groupedContacts = {};
         const letters = [];
         
         filtered.forEach(contact => {
-            // Enlever les @ au début du prénom si présents
-            let name = contact.firstName;
-            while (name.charAt(0) === '@') {
-                name = name.substring(1);
-            }
+            // Fonction pour extraire la première lettre alphabétique
+            const getFirstLetter = (name) => {
+                // Chercher le premier caractère alphabétique
+                for (let i = 0; i < name.length; i++) {
+                    const char = name.charAt(i);
+                    // Vérifier si c'est une lettre (A-Z, a-z, lettres accentuées)
+                    if (/[a-zA-ZÀ-ÿ]/.test(char)) {
+                        return char.toUpperCase();
+                    }
+                }
+                // Si aucune lettre trouvée, retourner '#'
+                return '#';
+            };
             
-            const firstLetter = name.charAt(0).toUpperCase();
+            const firstLetter = getFirstLetter(contact.firstName);
             if (!groupedContacts[firstLetter]) {
                 groupedContacts[firstLetter] = [];
                 letters.push(firstLetter);
@@ -169,8 +177,12 @@ const contacts = {
             groupedContacts[firstLetter].push(contact);
         });
         
-        // Trier les lettres
-        letters.sort();
+        // Trier les lettres (# à la fin)
+        letters.sort((a, b) => {
+            if (a === '#') return 1;
+            if (b === '#') return -1;
+            return a.localeCompare(b);
+        });
         
         // Générer le HTML avec des séparateurs de lettres
         let html = '';
