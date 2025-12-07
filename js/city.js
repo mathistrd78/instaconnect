@@ -649,7 +649,7 @@ const city = {
             result.push({
                 country: 'Non défini',
                 countryCode: '',
-                flag: '❓',
+                flag: '',
                 count: undefinedCount
             });
         }
