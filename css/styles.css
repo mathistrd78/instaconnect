@@ -873,13 +873,12 @@ body.hide-header .container {
 }
 
 .letter-header {
-    padding: 12px 16px;
-    background: linear-gradient(135deg, #E1306C 0%, #C13584 100%);
-    color: white;
+    padding: 16px 16px 8px 16px;
+    background: #212529; /* Fond noir */
+    color: #E1306C; /* Lettre en rose */
+    border-bottom: 1px solid #E1306C; /* Trait fin rose */
     font-weight: 700;
     font-size: 16px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
     position: sticky;
     top: 168px; /* Juste sous le header (hauteur approximative du header) */
     z-index: 999; /* Juste sous le header (1000) */
@@ -2847,24 +2846,29 @@ body.dark-mode .emoji-search-input:focus {
 /* Marqueur de lettre dans la grille */
 .letter-divider {
     grid-column: 1 / -1;
-    padding: 16px 0 8px 16px; /* Ajout padding-left pour aligner */
+    padding: 16px 16px 8px 16px; /* Padding uniforme */
     font-size: 16px;
     font-weight: 700;
-    color: white; /* Texte blanc au lieu de rose */
-    background: linear-gradient(135deg, #E1306C 0%, #C13584 100%); /* Fond rose au lieu de blanc */
-    border-bottom: none; /* Pas de bordure */
+    color: #E1306C; /* Lettre en rose */
+    background: #212529; /* Fond noir */
+    border-bottom: 1px solid #E1306C; /* Trait fin rose */
     margin-bottom: 8px;
     position: sticky;
     top: 165px; /* Juste sous le header (ajusté dynamiquement) */
     z-index: 999; /* En dessous du header (1000) */
-    letter-spacing: 2px;
-    text-transform: uppercase;
 }
 
 /* Dark mode pour les séparateurs de lettres */
 body.dark-mode .letter-divider {
-    background: linear-gradient(135deg, #E1306C 0%, #C13584 100%); /* Garder le fond rose */
-    color: white; /* Garder le texte blanc */
+    background: #1a1a1a; /* Fond légèrement différent en dark mode */
+    color: #E1306C; /* Lettre rose */
+    border-bottom: 1px solid #E1306C; /* Trait fin rose */
+}
+
+body.dark-mode .letter-header {
+    background: #1a1a1a; /* Fond légèrement différent en dark mode */
+    color: #E1306C; /* Lettre rose */
+    border-bottom: 1px solid #E1306C; /* Trait fin rose */
 }
 
 /* Dark mode pour la page d'authentification */
