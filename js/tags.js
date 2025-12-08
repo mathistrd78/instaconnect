@@ -415,63 +415,74 @@ const tags = {
     initDragAndDrop(list) {
         let draggedElement = null;
         let touchStartY = 0;
-        let placeholder = null;
+        let isDragging = false;
         
         const tagOptions = list.querySelectorAll('.tag-option[draggable="true"]');
         
         tagOptions.forEach((item) => {
-            // Touch events pour mobile (iOS)
-            item.addEventListener('touchstart', (e) => {
-                draggedElement = item;
-                touchStartY = e.touches[0].clientY;
-                item.classList.add('dragging');
-                
-                // Créer un placeholder visuel
-                placeholder = item.cloneNode(true);
-                placeholder.style.opacity = '0.3';
-                placeholder.style.pointerEvents = 'none';
-                
-                // Empêcher le scroll pendant le drag
-                e.preventDefault();
-            }, { passive: false });
+            const dragHandle = item.querySelector('.tag-drag-handle');
             
-            item.addEventListener('touchmove', (e) => {
-                if (!draggedElement) return;
-                
-                e.preventDefault();
-                
-                const touch = e.touches[0];
-                const currentY = touch.clientY;
-                
-                // Trouver l'élément sous le doigt
-                const elementsAtPoint = document.elementsFromPoint(touch.clientX, touch.clientY);
-                const targetItem = elementsAtPoint.find(el => 
-                    el.classList.contains('tag-option') && el !== draggedElement
-                );
-                
-                if (targetItem && targetItem.parentNode === draggedElement.parentNode) {
-                    const rect = targetItem.getBoundingClientRect();
-                    const midpoint = rect.top + rect.height / 2;
+            // Touch events pour mobile (iOS) - SEULEMENT sur la poignée
+            if (dragHandle) {
+                dragHandle.addEventListener('touchstart', (e) => {
+                    draggedElement = item;
+                    touchStartY = e.touches[0].clientY;
+                    isDragging = false; // Pas encore en train de dragger
                     
-                    if (currentY < midpoint) {
-                        targetItem.parentNode.insertBefore(draggedElement, targetItem);
-                    } else {
-                        targetItem.parentNode.insertBefore(draggedElement, targetItem.nextSibling);
+                    // Ne pas empêcher le comportement par défaut tout de suite
+                    // pour permettre le clic
+                }, { passive: true });
+                
+                dragHandle.addEventListener('touchmove', (e) => {
+                    if (!draggedElement) return;
+                    
+                    // Détecter si on a bougé suffisamment pour considérer comme un drag
+                    const touch = e.touches[0];
+                    const moveY = Math.abs(touch.clientY - touchStartY);
+                    
+                    if (moveY > 10 && !isDragging) {
+                        // On commence vraiment à dragger
+                        isDragging = true;
+                        draggedElement.classList.add('dragging');
                     }
-                }
-            }, { passive: false });
-            
-            item.addEventListener('touchend', (e) => {
-                if (!draggedElement) return;
+                    
+                    if (isDragging) {
+                        e.preventDefault();
+                        
+                        const currentY = touch.clientY;
+                        
+                        // Trouver l'élément sous le doigt
+                        const elementsAtPoint = document.elementsFromPoint(touch.clientX, touch.clientY);
+                        const targetItem = elementsAtPoint.find(el => 
+                            el.classList.contains('tag-option') && el !== draggedElement
+                        );
+                        
+                        if (targetItem && targetItem.parentNode === draggedElement.parentNode) {
+                            const rect = targetItem.getBoundingClientRect();
+                            const midpoint = rect.top + rect.height / 2;
+                            
+                            if (currentY < midpoint) {
+                                targetItem.parentNode.insertBefore(draggedElement, targetItem);
+                            } else {
+                                targetItem.parentNode.insertBefore(draggedElement, targetItem.nextSibling);
+                            }
+                        }
+                    }
+                }, { passive: false });
                 
-                item.classList.remove('dragging');
-                
-                // Sauvegarder le nouvel ordre
-                this.saveTagOrder();
-                
-                draggedElement = null;
-                placeholder = null;
-            });
+                dragHandle.addEventListener('touchend', (e) => {
+                    if (!draggedElement) return;
+                    
+                    if (isDragging) {
+                        draggedElement.classList.remove('dragging');
+                        // Sauvegarder le nouvel ordre
+                        this.saveTagOrder();
+                    }
+                    
+                    draggedElement = null;
+                    isDragging = false;
+                });
+            }
             
             // Desktop drag & drop (garde la compatibilité)
             item.addEventListener('dragstart', (e) => {
