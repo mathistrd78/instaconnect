@@ -773,18 +773,19 @@ const contacts = {
             ).length;
             const incompleteCount = app.dataStore.contacts.length - completeCount;
             
-            content.innerHTML = `
+            // Afficher dans l'ordre décroissant (plus récurrent en premier)
+            const options = [
+                { value: 'non', label: '❌ Non', count: incompleteCount },
+                { value: 'oui', label: '✅ Oui', count: completeCount }
+            ].sort((a, b) => b.count - a.count);
+            
+            content.innerHTML = options.map(opt => `
                 <label class="filter-option">
-                    <input type="checkbox" value="oui" ${this.activeFilters.complete.includes('oui') ? 'checked' : ''} 
-                           onchange="contacts.toggleFilter('complete', 'oui')">
-                    <span>✅ Oui (${completeCount})</span>
+                    <input type="checkbox" value="${opt.value}" ${this.activeFilters.complete.includes(opt.value) ? 'checked' : ''} 
+                           onchange="contacts.toggleFilter('complete', '${opt.value}')">
+                    <span>${opt.label} (${opt.count})</span>
                 </label>
-                <label class="filter-option">
-                    <input type="checkbox" value="non" ${this.activeFilters.complete.includes('non') ? 'checked' : ''} 
-                           onchange="contacts.toggleFilter('complete', 'non')">
-                    <span>❌ Non (${incompleteCount})</span>
-                </label>
-            `;
+            `).join('');
         } else if (filterType === 'country') {
             // Filtre spécial pour les pays
             const countries = {};
