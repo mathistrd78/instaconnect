@@ -3,8 +3,31 @@
 // Helper pour accéder à tags de manière sûre
 const getTags = () => {
     if (typeof window.tags === 'undefined') {
-        console.warn('⚠️ tags module not loaded yet');
-        return null;
+        // Créer un objet tags minimal en fallback
+        if (!window._tagsWarningShown) {
+            console.warn('⚠️ tags module not loaded yet - using fallback');
+            window._tagsWarningShown = true;
+        }
+        
+        // Retourner un objet avec des fonctions stub
+        return {
+            findTag: (fieldType, value) => {
+                // Essayer de trouver le tag directement dans app.defaultFields
+                const allFields = [...(app.defaultFields || []), ...(app.customFields || [])];
+                const field = allFields.find(f => f.id === fieldType);
+                if (field && field.tags) {
+                    return field.tags.find(t => t.value === value);
+                }
+                // Essayer dans customTags (ancienne structure)
+                if (app.customTags && app.customTags[fieldType]) {
+                    return app.customTags[fieldType].find(t => t.value === value);
+                }
+                return null;
+            },
+            closeDropdown: () => {
+                // Stub
+            }
+        };
     }
     return window.tags;
 };
@@ -38,16 +61,14 @@ const contacts = {
         
         // Update display
         const tagsModule = getTags();
-        if (tagsModule) {
-            const tag = tagsModule.findTag(this.currentFieldType, value);
-            if (tag) {
-                const displayEl = document.getElementById(this.currentFieldType + 'Display');
-                displayEl.textContent = tag.label;
-                displayEl.className = 'tag-selector-value';
-            }
-            
-            tagsModule.closeDropdown();
+        const tag = tagsModule.findTag(this.currentFieldType, value);
+        if (tag) {
+            const displayEl = document.getElementById(this.currentFieldType + 'Display');
+            displayEl.textContent = tag.label;
+            displayEl.className = 'tag-selector-value';
         }
+        
+        tagsModule.closeDropdown();
         this.currentFieldType = null;
     },
 
@@ -205,11 +226,11 @@ const contacts = {
             html += `<div class="letter-divider" data-letter="${letter}" id="letter-${letter}">${letter}</div>`;
             
             groupedContacts[letter].forEach(contact => {
-                // Vérifier que tags est disponible
+                // Récupérer les tags
                 const tagsModule = getTags();
-                const relTag = tagsModule ? tagsModule.findTag('relationType', contact.relationType) : null;
-                const meetTag = tagsModule ? tagsModule.findTag('meetingPlace', contact.meetingPlace) : null;
-                const statTag = tagsModule ? tagsModule.findTag('discussionStatus', contact.discussionStatus) : null;
+                const relTag = tagsModule.findTag('relationType', contact.relationType);
+                const meetTag = tagsModule.findTag('meetingPlace', contact.meetingPlace);
+                const statTag = tagsModule.findTag('discussionStatus', contact.discussionStatus);
                 
                 // Extraire le drapeau du pays si disponible
                 let locationData = null;
@@ -411,7 +432,7 @@ const contacts = {
                 if (field.type === 'select' || field.type === 'radio') {
                     // Pour les champs avec tags, afficher le tag formaté
                     const tagsModule = getTags();
-                    const tag = tagsModule ? tagsModule.findTag(field.id, value) : null;
+                    const tag = tagsModule.findTag(field.id, value);
                     if (tag) {
                         displayValue = `<span class="tag-mini ${tag.class}">${tag.label}</span>`;
                     } else if (field.type === 'radio' && field.options) {
@@ -552,7 +573,7 @@ const contacts = {
                 if (hiddenInput && displayEl && value) {
                     hiddenInput.value = value;
                     const tagsModule = getTags();
-                    const tag = tagsModule ? tagsModule.findTag(field.id, value) : null;
+                    const tag = tagsModule.findTag(field.id, value);
                     if (tag) {
                         displayEl.textContent = tag.label;
                         displayEl.className = 'tag-selector-value';
