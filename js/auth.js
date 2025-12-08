@@ -300,9 +300,15 @@ const authManager = {
     },
 
     // Charger les données utilisateur depuis Firebase
-    async loadUserData() {
+    async loadUserData(forceReload = false) {
         try {
             const userId = this.currentUser.uid;
+            
+            // Si les données sont déjà chargées et qu'on ne force pas le reload, skip
+            if (!forceReload && app.dataStore.contacts.length > 0) {
+                console.log('⏭️ Data already loaded, skipping reload');
+                return;
+            }
 
             // Charger les tags personnalisés et unfollowers normaux
             const userDoc = await db.collection('users').doc(userId).get();
