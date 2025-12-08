@@ -2847,22 +2847,24 @@ body.dark-mode .emoji-search-input:focus {
 /* Marqueur de lettre dans la grille */
 .letter-divider {
     grid-column: 1 / -1;
-    padding: 16px 0 8px 0;
+    padding: 16px 0 8px 16px; /* Ajout padding-left pour aligner */
     font-size: 16px;
     font-weight: 700;
-    color: #E1306C;
-    border-bottom: 2px solid #E1306C;
+    color: white; /* Texte blanc au lieu de rose */
+    background: linear-gradient(135deg, #E1306C 0%, #C13584 100%); /* Fond rose au lieu de blanc */
+    border-bottom: none; /* Pas de bordure */
     margin-bottom: 8px;
     position: sticky;
-    top: 149px; /* 165px - 16px (padding-top) = 149px pour que le haut du padding touche le header */
-    background: #f8f9fa;
-    z-index: 1001; /* Au-dessus du header pour être visible */
+    top: 165px; /* Juste sous le header (ajusté dynamiquement) */
+    z-index: 999; /* En dessous du header (1000) */
+    letter-spacing: 2px;
+    text-transform: uppercase;
 }
 
 /* Dark mode pour les séparateurs de lettres */
 body.dark-mode .letter-divider {
-    background: #212529;
-    color: #E1306C;
+    background: linear-gradient(135deg, #E1306C 0%, #C13584 100%); /* Garder le fond rose */
+    color: white; /* Garder le texte blanc */
 }
 
 /* Dark mode pour la page d'authentification */
