@@ -259,8 +259,8 @@ const fields = {
                     ...fieldData
                 };
                 
-                // Sauvegarder dans Firebase (champs + contacts migrés)
-                app.dataStore.save();
+                // Sauvegarder dans Firebase (seulement les champs, pas les contacts)
+                app.dataStore.saveSettings();
                 
                 console.log('✅ Field updated:', this.currentEditFieldId);
             }
@@ -591,8 +591,8 @@ const fields = {
             }
         });
         
-        // Sauvegarder dans Firebase
-        app.dataStore.save();
+        // Sauvegarder dans Firebase avec debounce (attendre 2s pour éviter trop d'appels pendant le drag)
+        app.dataStore.save(null, { skipContacts: true, debounce: true });
         
         console.log('✅ Ordre des champs sauvegardé');
     },
