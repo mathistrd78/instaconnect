@@ -195,7 +195,7 @@ const fields = {
                 };
                 
                 // Sauvegarder dans Firebase
-                app.dataStore.saveUserData();
+                app.dataStore.save();
                 
                 console.log('✅ Field updated:', this.currentEditFieldId);
             }
