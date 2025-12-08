@@ -498,10 +498,9 @@ const app = {
                 container.style.marginTop = headerHeight + 'px';
                 
                 // Ajuster la position sticky des letter-divider (bandeaux de lettres)
-                // On soustrait 16px (padding-top) pour que le haut du bandeau touche le header
-                const letterDividerTop = headerHeight - 16;
+                // Le top = hauteur du header pour que le bandeau soit juste en dessous
                 document.querySelectorAll('#contactsSection .letter-divider').forEach(letterDivider => {
-                    letterDivider.style.top = letterDividerTop + 'px';
+                    letterDivider.style.top = headerHeight + 'px';
                 });
             }, 50);
             
