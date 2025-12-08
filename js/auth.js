@@ -605,6 +605,48 @@ const authManager = {
                     }
                 }
                 
+                // Migration : mettre à jour les valeurs des champs radio personnalisés
+                if (app.customFields && app.customFields.length > 0) {
+                    app.customFields.forEach(field => {
+                        if (field.type === 'radio' && field.options && contact[field.id]) {
+                            const currentValue = contact[field.id];
+                            const currentClean = currentValue.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').trim().toLowerCase();
+                            
+                            // Chercher une correspondance dans les options actuelles
+                            let matchFound = false;
+                            for (const option of field.options) {
+                                const optionClean = option.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').trim().toLowerCase();
+                                
+                                // Si correspondance exacte (sans emojis)
+                                if (currentClean === optionClean) {
+                                    if (currentValue !== option) {
+                                        console.log(`🔄 Migrating ${field.id} for ${contact.firstName}: "${currentValue}" → "${option}"`);
+                                        contact[field.id] = option;
+                                    }
+                                    matchFound = true;
+                                    break;
+                                }
+                            }
+                            
+                            // Si aucune correspondance, essayer par position
+                            if (!matchFound && field.options.length > 0) {
+                                // Chercher dans les anciennes valeurs communes
+                                const commonMappings = {
+                                    'oui': field.options.find(o => o.toLowerCase().includes('oui')),
+                                    'non': field.options.find(o => o.toLowerCase().includes('non')),
+                                    'yes': field.options.find(o => o.toLowerCase().includes('yes')),
+                                    'no': field.options.find(o => o.toLowerCase().includes('no'))
+                                };
+                                
+                                if (commonMappings[currentClean]) {
+                                    console.log(`🔄 Migrating ${field.id} for ${contact.firstName}: "${currentValue}" → "${commonMappings[currentClean]}"`);
+                                    contact[field.id] = commonMappings[currentClean];
+                                }
+                            }
+                        }
+                    });
+                }
+                
                 // Vérifier si ce contact est dans la liste "À ne plus suivre"
                 const instagramUsername = contact.instagram.toLowerCase().replace('@', '');
                 if (unfollowers.data.doNotFollowList.has(instagramUsername)) {
@@ -628,6 +670,23 @@ const authManager = {
             }
             
             console.log('✅ Contacts loaded from Firebase:', app.dataStore.contacts.length);
+            
+            // Sauvegarder les contacts migrés dans Firebase (si des migrations ont eu lieu)
+            const needsSave = app.dataStore.contacts.some(contact => {
+                // Vérifier si au moins un contact a été migré
+                return app.customFields && app.customFields.some(field => {
+                    if (field.type === 'radio' && field.options && contact[field.id]) {
+                        const currentValue = contact[field.id];
+                        return field.options.includes(currentValue);
+                    }
+                    return false;
+                });
+            });
+            
+            if (needsSave) {
+                console.log('💾 Saving migrated contacts to Firebase...');
+                await app.dataStore.save();
+            }
             
             // Re-render UI
             contacts.renderFilters(); // Regénérer les filtres avec les champs actuels
