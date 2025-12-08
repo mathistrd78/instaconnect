@@ -1,4 +1,14 @@
 // contacts.js - Gestion des contacts
+
+// Helper pour accéder à tags de manière sûre
+const getTags = () => {
+    if (typeof window.tags === 'undefined') {
+        console.warn('⚠️ tags module not loaded yet');
+        return null;
+    }
+    return window.tags;
+};
+
 const contacts = {
     currentViewId: null,
     currentEditId: null,
@@ -27,14 +37,17 @@ const contacts = {
         document.getElementById(this.currentFieldType).value = value;
         
         // Update display
-        const tag = tags.findTag(this.currentFieldType, value);
-        if (tag) {
-            const displayEl = document.getElementById(this.currentFieldType + 'Display');
-            displayEl.textContent = tag.label;
-            displayEl.className = 'tag-selector-value';
+        const tagsModule = getTags();
+        if (tagsModule) {
+            const tag = tagsModule.findTag(this.currentFieldType, value);
+            if (tag) {
+                const displayEl = document.getElementById(this.currentFieldType + 'Display');
+                displayEl.textContent = tag.label;
+                displayEl.className = 'tag-selector-value';
+            }
+            
+            tagsModule.closeDropdown();
         }
-        
-        tags.closeDropdown();
         this.currentFieldType = null;
     },
 
@@ -193,9 +206,10 @@ const contacts = {
             
             groupedContacts[letter].forEach(contact => {
                 // Vérifier que tags est disponible
-                const relTag = (typeof window.tags !== 'undefined') ? window.tags.findTag('relationType', contact.relationType) : null;
-                const meetTag = (typeof window.tags !== 'undefined') ? window.tags.findTag('meetingPlace', contact.meetingPlace) : null;
-                const statTag = (typeof window.tags !== 'undefined') ? window.tags.findTag('discussionStatus', contact.discussionStatus) : null;
+                const tagsModule = getTags();
+                const relTag = tagsModule ? tagsModule.findTag('relationType', contact.relationType) : null;
+                const meetTag = tagsModule ? tagsModule.findTag('meetingPlace', contact.meetingPlace) : null;
+                const statTag = tagsModule ? tagsModule.findTag('discussionStatus', contact.discussionStatus) : null;
                 
                 // Extraire le drapeau du pays si disponible
                 let locationData = null;
@@ -396,7 +410,8 @@ const contacts = {
                 
                 if (field.type === 'select' || field.type === 'radio') {
                     // Pour les champs avec tags, afficher le tag formaté
-                    const tag = tags.findTag(field.id, value);
+                    const tagsModule = getTags();
+                    const tag = tagsModule ? tagsModule.findTag(field.id, value) : null;
                     if (tag) {
                         displayValue = `<span class="tag-mini ${tag.class}">${tag.label}</span>`;
                     } else if (field.type === 'radio' && field.options) {
@@ -536,7 +551,8 @@ const contacts = {
                 const displayEl = document.getElementById(field.id + 'Display');
                 if (hiddenInput && displayEl && value) {
                     hiddenInput.value = value;
-                    const tag = tags.findTag(field.id, value);
+                    const tagsModule = getTags();
+                    const tag = tagsModule ? tagsModule.findTag(field.id, value) : null;
                     if (tag) {
                         displayEl.textContent = tag.label;
                         displayEl.className = 'tag-selector-value';
