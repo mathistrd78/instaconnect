@@ -2934,6 +2934,12 @@ body.dark-mode .auth-message-success {
     color: #868e96;
 }
 
+.field-item-actions {
+    display: flex;
+    gap: 4px;
+}
+
+.field-item-edit,
 .field-item-delete {
     background: transparent;
     border: none;
@@ -2944,11 +2950,17 @@ body.dark-mode .auth-message-success {
     transition: all 0.2s;
 }
 
+.field-item-edit:hover {
+    background: #e3f2fd;
+    transform: scale(1.1);
+}
+
 .field-item-delete:hover {
     background: #fff5f5;
     transform: scale(1.1);
 }
 
+.field-item-edit:active,
 .field-item-delete:active {
     transform: scale(0.95);
 }
