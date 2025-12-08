@@ -115,28 +115,8 @@ const app = {
             console.log('📦 Data will be loaded from Firebase');
         },
         
-        saveTimeout: null, // Pour le debounce
-        quotaExceeded: false, // Flag pour savoir si le quota est dépassé
-        
-        async save(specificContact = null, options = {}) {
-            // Options: { skipContacts: false, skipSettings: false, debounce: false }
-            const { skipContacts = false, skipSettings = false, debounce = false } = options;
-            
-            // Si le quota est dépassé, ne pas sauvegarder (sauf si on force)
-            if (this.quotaExceeded && !options.force) {
-                console.warn('⚠️ Quota exceeded, skipping save. Data will be saved when quota is restored.');
-                return;
-            }
-            
-            // Si debounce activé, attendre 2 secondes avant de sauvegarder
-            if (debounce) {
-                clearTimeout(this.saveTimeout);
-                this.saveTimeout = setTimeout(() => {
-                    this.save(specificContact, { ...options, debounce: false });
-                }, 2000);
-                return;
-            }
-            
+        async save(specificContact = null) {
+            // Sauvegarder dans Firebase au lieu de localStorage
             if (!authManager.currentUser) {
                 console.warn('⚠️ No user logged in, cannot save to Firebase');
                 return;
@@ -147,89 +127,57 @@ const app = {
                 console.log('💾 SAVING to Firebase - User:', userId);
 
                 const batch = db.batch();
-                let operationCount = 0;
                 
-                // Sauvegarder les contacts seulement si demandé
-                if (!skipContacts) {
-                    if (specificContact) {
-                        // Sauvegarder un seul contact
-                        console.log('💾 Saving specific contact:', specificContact.id);
-                        const contactRef = db.collection('users').doc(userId).collection('contacts').doc(specificContact.id);
-                        batch.set(contactRef, specificContact);
-                        operationCount++;
-                    } else if (this.contacts.length > 0) {
-                        // Sauvegarder tous les contacts seulement s'il y en a
-                        console.log('💾 Saving ALL contacts in batch:', this.contacts.length);
-                        const contactsRef = db.collection('users').doc(userId).collection('contacts');
-                        this.contacts.forEach(contact => {
-                            batch.set(contactsRef.doc(contact.id), contact);
-                            operationCount++;
-                        });
-                    }
+                if (specificContact) {
+                    // Sauvegarder un seul contact
+                    console.log('💾 Saving specific contact:', specificContact.id);
+                    const contactRef = db.collection('users').doc(userId).collection('contacts').doc(specificContact.id);
+                    batch.set(contactRef, specificContact);
+                } else if (this.contacts.length > 0) {
+                    // Sauvegarder tous les contacts seulement s'il y en a
+                    console.log('💾 Saving ALL contacts in batch:', this.contacts.length);
+                    const contactsRef = db.collection('users').doc(userId).collection('contacts');
+                    this.contacts.forEach(contact => {
+                        batch.set(contactsRef.doc(contact.id), contact);
+                    });
                 }
 
-                // Sauvegarder les tags et champs seulement si demandé
-                if (!skipSettings) {
-                    console.log('📤 Saving settings (tags & fields) to Firebase');
-                    
-                    // Nettoyer les undefined pour Firebase
-                    const cleanDefaultFields = app.defaultFields.map(f => {
-                        const clean = { ...f };
-                        Object.keys(clean).forEach(key => {
-                            if (clean[key] === undefined) delete clean[key];
-                        });
-                        return clean;
+                // TOUJOURS sauvegarder les tags et champs personnalisés
+                console.log('📤 Saving customTags to Firebase:', JSON.stringify(app.customTags));
+                console.log('📤 Saving customFields to Firebase:', JSON.stringify(app.customFields));
+                console.log('📤 Saving defaultFields to Firebase');
+                
+                // Nettoyer les undefined pour Firebase (Firebase n'accepte pas undefined)
+                const cleanDefaultFields = app.defaultFields.map(f => {
+                    const clean = { ...f };
+                    // Supprimer les propriétés undefined
+                    Object.keys(clean).forEach(key => {
+                        if (clean[key] === undefined) delete clean[key];
                     });
-                    
-                    const cleanCustomFields = app.customFields.map(f => {
-                        const clean = { ...f };
-                        Object.keys(clean).forEach(key => {
-                            if (clean[key] === undefined) delete clean[key];
-                        });
-                        return clean;
+                    return clean;
+                });
+                
+                const cleanCustomFields = app.customFields.map(f => {
+                    const clean = { ...f };
+                    // Supprimer les propriétés undefined
+                    Object.keys(clean).forEach(key => {
+                        if (clean[key] === undefined) delete clean[key];
                     });
-                    
-                    const userDoc = db.collection('users').doc(userId);
-                    batch.set(userDoc, {
-                        customTags: app.customTags,
-                        customFields: cleanCustomFields,
-                        defaultFields: cleanDefaultFields
-                    }, { merge: true });
-                    operationCount++;
-                }
+                    return clean;
+                });
+                
+                const userDoc = db.collection('users').doc(userId);
+                batch.set(userDoc, {
+                    customTags: app.customTags,
+                    customFields: cleanCustomFields,
+                    defaultFields: cleanDefaultFields
+                }, { merge: true });
 
-                if (operationCount > 0) {
-                    await batch.commit();
-                    console.log(`✅ Saved ${operationCount} operations to Firebase`);
-                    this.quotaExceeded = false; // Réinitialiser le flag si la sauvegarde réussit
-                } else {
-                    console.log('⭐️ Nothing to save');
-                }
+                await batch.commit();
+                console.log('✅ All data saved to Firebase successfully');
             } catch (error) {
                 console.error('❌ Error saving to Firebase:', error);
-                if (error.code === 'resource-exhausted') {
-                    this.quotaExceeded = true;
-                    console.error('🚫 QUOTA EXCEEDED - Sauvegardes désactivées temporairement');
-                    alert('⚠️ Quota Firebase dépassé. Les modifications seront sauvegardées automatiquement dans quelques minutes.');
-                    
-                    // Réessayer dans 5 minutes
-                    setTimeout(() => {
-                        console.log('🔄 Réinitialisation du quota, tentative de sauvegarde...');
-                        this.quotaExceeded = false;
-                        this.save(specificContact, { ...options, force: true });
-                    }, 5 * 60 * 1000); // 5 minutes
-                }
             }
-        },
-        
-        // Sauvegarder seulement les paramètres (tags, champs) - rapide
-        async saveSettings() {
-            return this.save(null, { skipContacts: true, skipSettings: false });
-        },
-        
-        // Sauvegarder seulement les contacts - plus lourd
-        async saveContacts() {
-            return this.save(null, { skipContacts: false, skipSettings: true });
         },
 
         async deleteContact(contactId) {
@@ -266,14 +214,7 @@ const app = {
             this.currentSection = savedSection;
             
             this.setupEventListeners();
-            
-            // Attendre que tous les modules soient chargés
-            await this.waitForModules();
-            
-            // Vérifier si relations est défini avant d'initialiser
-            if (typeof relations !== 'undefined') {
-                relations.init();
-            }
+            unfollowers.init();
             
             // Attendre un peu que les données Firebase soient chargées
             setTimeout(() => {
@@ -293,35 +234,8 @@ const app = {
                 contacts.render();
                 stats.render();
                 this.switchSection(savedSection);
-            }, 1000);
+            }, 1000); // Augmenté à 1 seconde pour laisser le temps à Firebase
         }
-    },
-
-    // Attendre que tous les modules requis soient chargés
-    async waitForModules() {
-        const maxWait = 3000; // 3 secondes max
-        const checkInterval = 100; // Vérifier tous les 100ms
-        let elapsed = 0;
-        
-        return new Promise((resolve) => {
-            const checkModules = setInterval(() => {
-                elapsed += checkInterval;
-                
-                // Vérifier si tous les modules essentiels sont chargés
-                const modulesLoaded = 
-                    typeof contacts !== 'undefined' &&
-                    typeof stats !== 'undefined' &&
-                    typeof tags !== 'undefined';
-                
-                if (modulesLoaded || elapsed >= maxWait) {
-                    clearInterval(checkModules);
-                    if (!modulesLoaded) {
-                        console.warn('⚠️ Some modules did not load in time');
-                    }
-                    resolve();
-                }
-            }, checkInterval);
-        });
     },
 
     setupEventListeners() {
@@ -497,19 +411,6 @@ const app = {
             s.scrollTop = 0;
         });
         
-        // NETTOYAGE : Réinitialiser tous les styles dynamiques
-        const container = document.querySelector('.container');
-        const header = document.querySelector('.header');
-        
-        // Reset des styles potentiellement cassés (SEULEMENT dans contactsSection)
-        document.querySelectorAll('#contactsSection .letter-header, #contactsSection .letter-divider').forEach(el => {
-            el.style.top = '';
-            el.style.position = '';
-        });
-        
-        // Reset du container
-        container.style.marginTop = '';
-        
         // Save current section
         this.currentSection = section;
         localStorage.setItem('currentSection', section);
@@ -519,8 +420,10 @@ const app = {
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
 
         // Gérer l'affichage du header
+        const header = document.querySelector('.header');
+        const container = document.querySelector('.container');
         
-        // Ordre des onglets : Contacts (0), Stats (1), Analyse (2), Relations (3), Profil (4)
+        // Ordre des onglets : Contacts (0), Stats (1), Analyse (2), Unfollowers (3), Profil (4)
         if (section === 'contacts') {
             document.getElementById('contactsSection').classList.add('active');
             document.querySelectorAll('.nav-item')[0].classList.add('active');
@@ -529,12 +432,11 @@ const app = {
             // Calculer la hauteur exacte du header et ajuster le sticky
             setTimeout(() => {
                 const headerHeight = header.offsetHeight;
-                container.style.marginTop = headerHeight + 'px';
+                container.style.marginTop = headerHeight + 'px'; // Pas d'espace supplémentaire
                 
-                // Ajuster la position sticky des letter-divider (bandeaux de lettres)
-                // Le top = hauteur du header pour que le bandeau soit juste en dessous
-                document.querySelectorAll('#contactsSection .letter-divider').forEach(letterDivider => {
-                    letterDivider.style.top = headerHeight + 'px';
+                // Ajuster la position sticky des letter-headers pour qu'ils se collent juste sous le header
+                document.querySelectorAll('.letter-header').forEach(letterHeader => {
+                    letterHeader.style.top = headerHeight + 'px';
                 });
             }, 50);
             
@@ -550,18 +452,11 @@ const app = {
             document.querySelectorAll('.nav-item')[2].classList.add('active');
             header.style.display = 'none';
             container.style.marginTop = '0'; // Supprimer la marge
-        } else if (section === 'relations') {
-            document.getElementById('relationsSection').classList.add('active');
+        } else if (section === 'unfollowers') {
+            document.getElementById('unfollowersSection').classList.add('active');
             document.querySelectorAll('.nav-item')[3].classList.add('active');
             header.style.display = 'none';
             container.style.marginTop = '0'; // Supprimer la marge
-            
-            // S'assurer que les letter-header de relations ont le bon top
-            setTimeout(() => {
-                document.querySelectorAll('#relationsSection .letter-header').forEach(letterHeader => {
-                    letterHeader.style.top = '0'; // Valeur par défaut pour relations
-                });
-            }, 50);
         } else if (section === 'profil') {
             document.getElementById('profilSection').classList.add('active');
             document.querySelectorAll('.nav-item')[4].classList.add('active');
@@ -580,15 +475,8 @@ const app = {
         
         // Mettre à jour les statistiques
         document.getElementById('profilContactsCount').textContent = app.dataStore.contacts.length;
-        
-        // Vérifier si relations est défini avant d'accéder à ses propriétés
-        if (typeof relations !== 'undefined' && relations.data) {
-            document.getElementById('profilFollowersCount').textContent = relations.data.followers.length;
-            document.getElementById('profilUnfollowersCount').textContent = relations.data.unfollowers.length;
-        } else {
-            document.getElementById('profilFollowersCount').textContent = '0';
-            document.getElementById('profilUnfollowersCount').textContent = '0';
-        }
+        document.getElementById('profilFollowersCount').textContent = unfollowers.data.followers.length;
+        document.getElementById('profilUnfollowersCount').textContent = unfollowers.data.unfollowers.length;
         
         // Synchroniser le toggle du mode sombre
         const darkModeToggle = document.getElementById('darkModeToggle');
