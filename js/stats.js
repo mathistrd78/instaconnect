@@ -113,6 +113,9 @@ const stats = {
         let data = [];
         let title = '';
 
+        // Stocker l'ID du champ actuel pour les filtres
+        this.currentFieldId = this.currentType;
+
         if (this.currentType === 'mois') {
             // Cas spécial : par mois
             title = 'Répartition par mois d\'ajout';
@@ -120,6 +123,7 @@ const stats = {
         } else if (this.currentType === 'pays') {
             // Cas spécial : par pays
             title = 'Répartition par pays';
+            this.currentFieldId = 'country'; // Utiliser 'country' pour le filtre
             data = this.groupByCountry();
         } else {
             // Trouver le champ correspondant
@@ -159,13 +163,13 @@ const stats = {
 
         const data = [];
         if (maleCount > 0) {
-            data.push({ label: '👨 Homme', value: maleCount, color: '#4A90E2' });
+            data.push({ label: '👨 Homme', value: maleCount, color: '#4A90E2', filterValue: '👨 Homme' });
         }
         if (femaleCount > 0) {
-            data.push({ label: '👩 Femme', value: femaleCount, color: '#E91E63' });
+            data.push({ label: '👩 Femme', value: femaleCount, color: '#E91E63', filterValue: '👩 Femme' });
         }
         if (undefinedCount > 0) {
-            data.push({ label: 'Non défini', value: undefinedCount, color: '#868e96' });
+            data.push({ label: 'Non défini', value: undefinedCount, color: '#868e96', filterValue: '' });
         }
 
         return data;
@@ -180,7 +184,8 @@ const stats = {
         return Object.entries(counts).map(([label, value]) => ({
             label,
             value,
-            color: this.getColorForValue(field, label)
+            color: this.getColorForValue(field, label),
+            filterValue: label === 'Non défini' ? '' : label
         }));
     },
 
@@ -206,7 +211,8 @@ const stats = {
         return countryStats.map((stat, i) => ({
             label: `${stat.flag} ${stat.country}`,
             value: stat.count,
-            color: stat.country === 'Non défini' ? '#868e96' : colors[i % colors.length]
+            color: stat.country === 'Non défini' ? '#868e96' : colors[i % colors.length],
+            filterValue: stat.country === 'Non défini' ? '' : stat.country
         }));
     },
 
@@ -221,8 +227,8 @@ const stats = {
             }
         });
         return [
-            { label: '✅ Oui', value: counts['Oui'], color: '#00b894' },
-            { label: '❌ Non', value: counts['Non'], color: '#d63031' }
+            { label: '✅ Oui', value: counts['Oui'], color: '#00b894', filterValue: 'oui' },
+            { label: '❌ Non', value: counts['Non'], color: '#d63031', filterValue: 'non' }
         ];
     },
 
@@ -316,8 +322,13 @@ const stats = {
         const total = sortedData.reduce((sum, d) => sum + d.value, 0);
         const html = sortedData.map(d => {
             const percent = total > 0 ? Math.round((d.value / total) * 100) : 0;
+            // Ajouter un attribut data pour le filtre
+            const filterValue = d.value || d.label; // Utiliser la valeur ou le label
             return `
-                <div class="legend-item">
+                <div class="legend-item legend-item-clickable" 
+                     data-field-id="${this.currentFieldId || ''}" 
+                     data-filter-value="${d.filterValue || d.label}"
+                     onclick="stats.applyFilterAndNavigate('${this.currentFieldId || ''}', '${(d.filterValue || d.label).replace(/'/g, "\\'")}')">
                     <div class="legend-label">
                         <div class="legend-color" style="background: ${d.color};"></div>
                         <span>${d.label}</span>
@@ -330,6 +341,29 @@ const stats = {
             `;
         }).join('');
         document.getElementById('chartLegend').innerHTML = html;
+    },
+    
+    // Appliquer un filtre et naviguer vers la page Contacts
+    applyFilterAndNavigate(fieldId, filterValue) {
+        console.log('🎯 Applying filter:', fieldId, '=', filterValue);
+        
+        // Réinitialiser tous les filtres
+        contacts.resetFilters();
+        
+        // Appliquer le filtre sélectionné
+        if (fieldId && filterValue) {
+            if (!contacts.activeFilters[fieldId]) {
+                contacts.activeFilters[fieldId] = [];
+            }
+            contacts.activeFilters[fieldId] = [filterValue];
+        }
+        
+        // Naviguer vers la page Contacts
+        app.switchSection('contacts');
+        
+        // Mettre à jour l'affichage des filtres et contacts
+        contacts.updateFilterButtons();
+        contacts.render();
     }
 };
 
