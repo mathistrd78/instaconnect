@@ -167,7 +167,7 @@
                 
                 <div style="text-align: center; margin-top: 12px;">
                     <input type="file" id="zipFileInputAnalyse" accept=".zip,application/zip,application/x-zip-compressed,application/octet-stream" 
-                           style="display: none;" onchange="unfollowers.handleFileUploadAnalyse(event)">
+                           style="display: none;" onchange="relations.handleFileUploadAnalyse(event)">
                     <button onclick="document.getElementById('zipFileInputAnalyse').click()" class="btn btn-primary" 
                            style="display: block; margin: 0 auto; padding: 12px 20px; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; max-width: 280px;">
                         📁 Choisir un fichier ZIP
@@ -175,7 +175,7 @@
                 </div>
                 
                 <div id="analyseButtonContainer" style="display: none; text-align: center; margin-top: 16px;">
-                    <button class="btn btn-primary" onclick="unfollowers.analyzeFileForContacts()" style="width: 100%; max-width: 400px;">
+                    <button class="btn btn-primary" onclick="relations.analyzeFileForContacts()" style="width: 100%; max-width: 400px;">
                         🚀 Lancer l'analyse complète
                     </button>
                 </div>
@@ -260,50 +260,122 @@
             </div>
         </div>
 
-        <!-- Section Unfollowers -->
-        <div id="unfollowersSection" class="section">
-            <div class="unfollowers-header">
-                <div class="unfollowers-title">🔴 Unfollowers</div>
+        <!-- Section Relations -->
+        <div id="relationsSection" class="section">
+            <div class="relations-header">
+                <div class="relations-title">👥 Relations</div>
             </div>
 
-            <!-- Boutons toujours visibles -->
-            <div class="unfollowers-permanent-actions">
-                <button class="unfollowers-action-btn" onclick="unfollowers.showNormalUnfollowers()" style="background: #feca57; color: #2d3436;">
-                    ⭐ Unfollowers normaux (<span id="normalCount">0</span>)
+            <!-- Tabs de navigation -->
+            <div class="relations-tabs">
+                <button class="relations-tab active" data-tab="unfollowers" onclick="relations.switchTab('unfollowers')">
+                    <span class="tab-icon">❌</span>
+                    <span class="tab-label">Unfollowers</span>
+                    <span class="tab-count" id="unfollowersTabCount">0</span>
                 </button>
-                <button class="unfollowers-action-btn" onclick="unfollowers.showDoNotFollowList()" style="background: #ff7675; color: white;">
-                    ❌ À ne plus suivre (<span id="doNotFollowCount">0</span>)
+                <button class="relations-tab" data-tab="fans" onclick="relations.switchTab('fans')">
+                    <span class="tab-icon">⭐</span>
+                    <span class="tab-label">Fans</span>
+                    <span class="tab-count" id="fansTabCount">0</span>
+                </button>
+                <button class="relations-tab" data-tab="pending" onclick="relations.switchTab('pending')">
+                    <span class="tab-icon">⏳</span>
+                    <span class="tab-label">En attente</span>
+                    <span class="tab-count" id="pendingTabCount">0</span>
                 </button>
             </div>
 
-            <div id="unfollowersResults">
-                <div class="unfollowers-stats">
-                    <div class="unfollower-stat-card">
-                        <div class="unfollower-stat-value" id="followersCount">0</div>
-                        <div class="unfollower-stat-label">Followers</div>
+            <!-- Tab Content: Unfollowers -->
+            <div class="relations-content active" id="unfollowersContent">
+                <!-- Boutons toujours visibles -->
+                <div class="unfollowers-permanent-actions">
+                    <button class="unfollowers-action-btn" onclick="relations.showNormalUnfollowers()" style="background: #feca57; color: #2d3436;">
+                        ⭐ Unfollowers normaux (<span id="normalCount">0</span>)
+                    </button>
+                    <button class="unfollowers-action-btn" onclick="relations.showDoNotFollowList()" style="background: #ff7675; color: white;">
+                        ❌ À ne plus suivre (<span id="doNotFollowCount">0</span>)
+                    </button>
+                </div>
+
+                <div id="unfollowersResults">
+                    <div class="unfollowers-stats">
+                        <div class="unfollower-stat-card">
+                            <div class="unfollower-stat-value" id="followersCount">0</div>
+                            <div class="unfollower-stat-label">Followers</div>
+                        </div>
+                        <div class="unfollower-stat-card">
+                            <div class="unfollower-stat-value" id="followingCount">0</div>
+                            <div class="unfollower-stat-label">Following</div>
+                        </div>
+                        <div class="unfollower-stat-card">
+                            <div class="unfollower-stat-value" id="unfollowersCount">0</div>
+                            <div class="unfollower-stat-label">Unfollowers</div>
+                        </div>
                     </div>
-                    <div class="unfollower-stat-card">
-                        <div class="unfollower-stat-value" id="followingCount">0</div>
-                        <div class="unfollower-stat-label">Following</div>
-                    </div>
-                    <div class="unfollower-stat-card">
-                        <div class="unfollower-stat-value" id="unfollowersCount">0</div>
-                        <div class="unfollower-stat-label">Unfollowers</div>
+
+                    <div class="unfollowers-list">
+                        <div class="unfollowers-list-header">
+                            <span>Liste des unfollowers</span>
+                        </div>
+                        <div id="unfollowersList"></div>
                     </div>
                 </div>
 
-                <div class="unfollowers-list">
-                    <div class="unfollowers-list-header">
-                        <span>Liste des unfollowers</span>
-                    </div>
-                    <div id="unfollowersList"></div>
+                <div id="emptyUnfollowers" class="empty-unfollowers">
+                    <div class="empty-unfollowers-icon">📊</div>
+                    <div style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">Aucune analyse effectuée</div>
+                    <div style="font-size: 14px;">Allez dans l'onglet "Analyse" pour analyser votre export Instagram</div>
                 </div>
             </div>
 
-            <div id="emptyUnfollowers" class="empty-unfollowers">
-                <div class="empty-unfollowers-icon">📊</div>
-                <div style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">Aucune analyse effectuée</div>
-                <div style="font-size: 14px;">Allez dans l'onglet "Analyse" pour analyser votre export Instagram</div>
+            <!-- Tab Content: Fans -->
+            <div class="relations-content" id="fansContent">
+                <div id="fansResults">
+                    <div class="unfollowers-stats">
+                        <div class="unfollower-stat-card">
+                            <div class="unfollower-stat-value" id="fansCount">0</div>
+                            <div class="unfollower-stat-label">Fans</div>
+                        </div>
+                    </div>
+
+                    <div class="unfollowers-list">
+                        <div class="unfollowers-list-header">
+                            <span>Liste des fans (vous suivent mais vous ne les suivez pas)</span>
+                        </div>
+                        <div id="fansList"></div>
+                    </div>
+                </div>
+
+                <div id="emptyFans" class="empty-unfollowers">
+                    <div class="empty-unfollowers-icon">📊</div>
+                    <div style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">Aucune analyse effectuée</div>
+                    <div style="font-size: 14px;">Allez dans l'onglet "Analyse" pour analyser votre export Instagram</div>
+                </div>
+            </div>
+
+            <!-- Tab Content: En attente -->
+            <div class="relations-content" id="pendingContent">
+                <div id="pendingResults">
+                    <div class="unfollowers-stats">
+                        <div class="unfollower-stat-card">
+                            <div class="unfollower-stat-value" id="pendingCount">0</div>
+                            <div class="unfollower-stat-label">En attente</div>
+                        </div>
+                    </div>
+
+                    <div class="unfollowers-list">
+                        <div class="unfollowers-list-header">
+                            <span>Demandes de follow en attente</span>
+                        </div>
+                        <div id="pendingList"></div>
+                    </div>
+                </div>
+
+                <div id="emptyPending" class="empty-unfollowers">
+                    <div class="empty-unfollowers-icon">📊</div>
+                    <div style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">Aucune analyse effectuée</div>
+                    <div style="font-size: 14px;">Allez dans l'onglet "Analyse" pour analyser votre export Instagram</div>
+                </div>
             </div>
         </div>
     </div>
@@ -384,9 +456,9 @@
             <span class="nav-icon">🔍</span>
             <span>Analyse</span>
         </div>
-        <div class="nav-item" onclick="app.switchSection('unfollowers')">
-            <span class="nav-icon">🔴</span>
-            <span>Unfollowers</span>
+        <div class="nav-item" onclick="app.switchSection('relations')">
+            <span class="nav-icon">👥</span>
+            <span>Relations</span>
         </div>
         <div class="nav-item" onclick="app.switchSection('profil')">
             <span class="nav-icon">👤</span>
@@ -564,7 +636,7 @@
     <script src="js/fields.js"></script>
     <script src="js/contacts.js"></script>
     <script src="js/stats.js"></script>
-    <script src="js/unfollowers.js"></script>
+    <script src="js/relations.js"></script>
     <script src="js/app.js"></script>
     
     <!-- Auth Functions -->
