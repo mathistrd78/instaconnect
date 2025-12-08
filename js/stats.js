@@ -233,14 +233,17 @@ const stats = {
     },
 
     getColorForValue(field, value) {
-        const tag = tags.findTag(field, value);
-        if (tag) {
-            const el = document.createElement('div');
-            el.className = tag.class;
-            document.body.appendChild(el);
-            const color = getComputedStyle(el).backgroundColor;
-            document.body.removeChild(el);
-            return this.rgbToHex(color);
+        // Vérifier que tags est disponible
+        if (typeof window.tags !== 'undefined') {
+            const tag = window.tags.findTag(field, value);
+            if (tag) {
+                const el = document.createElement('div');
+                el.className = tag.class;
+                document.body.appendChild(el);
+                const color = getComputedStyle(el).backgroundColor;
+                document.body.removeChild(el);
+                return this.rgbToHex(color);
+            }
         }
         
         // Couleurs par défaut pour les options sans tags
