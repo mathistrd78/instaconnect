@@ -885,9 +885,15 @@ body.hide-header .container {
     z-index: 999; /* Juste sous le header (1000) */
 }
 
-/* Sur la page unfollowers, pareil */
+/* Sur la page contacts, augmenter le z-index pour passer au-dessus du header */
+#contactsSection .letter-header {
+    z-index: 1001; /* Au-dessus du header (1000) */
+}
+
+/* Sur la page unfollowers, garder z-index par défaut */
 #unfollowersSection .letter-header {
     top: 0;
+    z-index: 999; /* En dessous du header si nécessaire */
 }
 
 .unfollower-item {
