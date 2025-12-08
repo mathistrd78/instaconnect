@@ -557,10 +557,10 @@ const authManager = {
                     
                     console.log(`🔍 Filtered unfollowers: ${rawUnfollowers.length} -> ${relations.data.unfollowers.length}`);
                     
-                    // Update display
-                    document.getElementById('followersCount').textContent = relations.data.followers.length;
-                    document.getElementById('followingCount').textContent = relations.data.following.length;
-                    document.getElementById('unfollowersCount').textContent = relations.data.unfollowers.length;
+                    // Update display (compteurs supprimés de l'interface)
+                    // document.getElementById('followersCount').textContent = relations.data.followers.length;
+                    // document.getElementById('followingCount').textContent = relations.data.following.length;
+                    // document.getElementById('unfollowersCount').textContent = relations.data.unfollowers.length;
                     
                     // Show appropriate section
                     if (relations.data.unfollowers.length === 0) {
