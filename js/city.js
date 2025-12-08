@@ -626,8 +626,7 @@ const city = {
             }
             
             if (location && location.country) {
-                // Utiliser countryCode comme clé pour éviter les doublons (Allemagne/Germany)
-                const key = location.countryCode || location.country;
+                const key = location.country;
                 if (!countryCount[key]) {
                     countryCount[key] = {
                         country: location.country,
@@ -650,7 +649,7 @@ const city = {
             result.push({
                 country: 'Non défini',
                 countryCode: '',
-                flag: '', // Pas d'emoji
+                flag: '',
                 count: undefinedCount
             });
         }
