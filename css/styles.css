@@ -931,7 +931,7 @@ body.hide-header .container {
 
 .unfollowers-list-header {
     padding: 16px;
-    background: #212529; /* Fond noir comme letter-header */
+    background: white; /* Fond blanc en light mode */
     font-weight: 700;
     color: #E1306C; /* Texte rose */
     border-bottom: 1px solid #E1306C; /* Trait fin rose */
@@ -946,7 +946,7 @@ body.hide-header .container {
 
 .letter-header {
     padding: 16px 16px 8px 16px;
-    background: #212529; /* Fond noir */
+    background: white; /* Fond blanc en light mode */
     color: #E1306C; /* Lettre en rose */
     border-bottom: 1px solid #E1306C; /* Trait fin rose */
     font-weight: 700;
@@ -1206,10 +1206,16 @@ body.hide-header .container {
     margin-top: 12px;
 }
 
+.empty-unfollowers,
 .empty-unfollowers {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     text-align: center;
-    padding: 60px 20px;
+    padding: 80px 20px;
     color: #868e96;
+    min-height: 300px;
 }
 
 .empty-unfollowers-icon {
@@ -1725,12 +1731,44 @@ body.dark-mode .upload-subtext {
 }
 
 body.dark-mode .unfollowers-header,
+body.dark-mode .relations-header,
 body.dark-mode .unfollowers-stats {
     background: #1a1a1a;
 }
 
-body.dark-mode .unfollowers-title {
+body.dark-mode .unfollowers-title,
+body.dark-mode .relations-title {
     color: #ffffff;
+}
+
+/* Dark mode pour les tabs Relations */
+body.dark-mode .relations-tabs {
+    background: transparent;
+}
+
+body.dark-mode .relations-tab {
+    background: #2d2d2d; /* Gris foncé au lieu de blanc */
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+body.dark-mode .relations-tab:hover {
+    background: #3a3a3a;
+}
+
+body.dark-mode .relations-tab.active {
+    background: linear-gradient(135deg, #E1306C 0%, #C13584 100%);
+}
+
+body.dark-mode .relations-tab .tab-label,
+body.dark-mode .relations-tab .tab-count {
+    color: #ffffff;
+}
+
+body.dark-mode .relations-tab.active .tab-label,
+body.dark-mode .relations-tab.active .tab-count,
+body.dark-mode .relations-tab.active .tab-icon {
+    color: white;
 }
 
 body.dark-mode .unfollower-stat-card {
@@ -1744,6 +1782,10 @@ body.dark-mode .unfollower-stat-label {
 
 body.dark-mode .unfollowers-list {
     background: #2d2d2d;
+}
+
+body.dark-mode .empty-unfollowers {
+    color: #a0a0a0;
 }
 
 body.dark-mode .unfollowers-list-header {
@@ -2923,7 +2965,7 @@ body.dark-mode .emoji-search-input:focus {
     font-size: 16px;
     font-weight: 700;
     color: #E1306C; /* Lettre en rose */
-    background: #212529; /* Fond noir */
+    background: white; /* Fond blanc en light mode */
     border-bottom: 1px solid #E1306C; /* Trait fin rose */
     margin-bottom: 8px;
     position: sticky;
