@@ -957,6 +957,7 @@ const contacts = {
     },
     
     resetFilters() {
+        // Réinitialiser les filtres de base
         this.activeFilters = {
             gender: [],
             relationType: [],
@@ -965,6 +966,14 @@ const contacts = {
             complete: [],
             country: []
         };
+        
+        // Réinitialiser aussi les champs personnalisés
+        const allFields = app.getAllFields();
+        allFields.forEach(field => {
+            if (field.type === 'select' || field.type === 'radio' || field.type === 'checkbox') {
+                this.activeFilters[field.id] = [];
+            }
+        });
         
         // Réinitialiser aussi la barre de recherche
         const searchBox = document.getElementById('searchBox');
