@@ -2854,9 +2854,9 @@ body.dark-mode .emoji-search-input:focus {
     border-bottom: 2px solid #E1306C;
     margin-bottom: 8px;
     position: sticky;
-    top: 165px;
+    top: 149px; /* 165px - 16px (padding-top) = 149px pour que le haut du padding touche le header */
     background: #f8f9fa;
-    z-index: 10;
+    z-index: 1001; /* Au-dessus du header pour être visible */
 }
 
 /* Dark mode pour les séparateurs de lettres */
