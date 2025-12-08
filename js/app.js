@@ -116,10 +116,17 @@ const app = {
         },
         
         saveTimeout: null, // Pour le debounce
+        quotaExceeded: false, // Flag pour savoir si le quota est dépassé
         
         async save(specificContact = null, options = {}) {
             // Options: { skipContacts: false, skipSettings: false, debounce: false }
             const { skipContacts = false, skipSettings = false, debounce = false } = options;
+            
+            // Si le quota est dépassé, ne pas sauvegarder (sauf si on force)
+            if (this.quotaExceeded && !options.force) {
+                console.warn('⚠️ Quota exceeded, skipping save. Data will be saved when quota is restored.');
+                return;
+            }
             
             // Si debounce activé, attendre 2 secondes avant de sauvegarder
             if (debounce) {
@@ -194,13 +201,23 @@ const app = {
                 if (operationCount > 0) {
                     await batch.commit();
                     console.log(`✅ Saved ${operationCount} operations to Firebase`);
+                    this.quotaExceeded = false; // Réinitialiser le flag si la sauvegarde réussit
                 } else {
                     console.log('⏭️ Nothing to save');
                 }
             } catch (error) {
                 console.error('❌ Error saving to Firebase:', error);
                 if (error.code === 'resource-exhausted') {
-                    alert('⚠️ Quota Firebase dépassé. Attendez quelques minutes avant de réessayer.');
+                    this.quotaExceeded = true;
+                    console.error('🚫 QUOTA EXCEEDED - Sauvegardes désactivées temporairement');
+                    alert('⚠️ Quota Firebase dépassé. Les modifications seront sauvegardées automatiquement dans quelques minutes.');
+                    
+                    // Réessayer dans 5 minutes
+                    setTimeout(() => {
+                        console.log('🔄 Réinitialisation du quota, tentative de sauvegarde...');
+                        this.quotaExceeded = false;
+                        this.save(specificContact, { ...options, force: true });
+                    }, 5 * 60 * 1000); // 5 minutes
                 }
             }
         },
