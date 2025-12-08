@@ -647,10 +647,25 @@ body.hide-header .container {
 .legend-item {
     display: flex;
     justify-content: space-between;
-    padding: 12px;
-    margin-bottom: 8px;
+    padding: 10px 12px; /* Réduit la hauteur */
+    margin-bottom: 12px; /* Plus d'espace entre les items */
     background: #f8f9fa;
-    border-radius: 10px;
+    border-radius: 8px; /* Plus carré */
+    transition: all 0.2s ease;
+}
+
+.legend-item-clickable {
+    cursor: pointer;
+}
+
+.legend-item-clickable:hover {
+    background: #e9ecef;
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.legend-item-clickable:active {
+    transform: translateX(2px);
 }
 
 .legend-label {
