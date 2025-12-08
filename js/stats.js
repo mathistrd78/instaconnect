@@ -1,4 +1,14 @@
 // stats.js - Graphiques et statistiques
+
+// Helper pour accéder à tags de manière sûre
+const getTagsModule = () => {
+    if (typeof window.tags === 'undefined') {
+        console.warn('⚠️ tags module not loaded yet');
+        return null;
+    }
+    return window.tags;
+};
+
 const stats = {
     currentType: null, // Sera initialisé par renderTabs()
 
@@ -234,8 +244,9 @@ const stats = {
 
     getColorForValue(field, value) {
         // Vérifier que tags est disponible
-        if (typeof window.tags !== 'undefined') {
-            const tag = window.tags.findTag(field, value);
+        const tagsModule = getTagsModule();
+        if (tagsModule) {
+            const tag = tagsModule.findTag(field, value);
             if (tag) {
                 const el = document.createElement('div');
                 el.className = tag.class;
