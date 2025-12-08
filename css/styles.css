@@ -1,645 +1,4065 @@
-// app.js - Coordinateur principal
-const app = {
-    // Configuration des champs par défaut (non supprimables)
-    defaultFields: [
-        { 
-            id: 'relationType', 
-            type: 'select', 
-            label: 'Type de relation', 
-            required: true,
-            order: 0,
-            tags: [] // Tags définis par l'utilisateur
-        },
-        { 
-            id: 'meetingPlace', 
-            type: 'select', 
-            label: 'Lieu de rencontre', 
-            required: true,
-            order: 1,
-            tags: []
-        },
-        { 
-            id: 'discussionStatus', 
-            type: 'select', 
-            label: 'Statut de discussion', 
-            required: true,
-            order: 2,
-            tags: []
-        },
-        { 
-            id: 'gender', 
-            type: 'radio', 
-            label: 'Sexe', 
-            required: true,
-            order: 3,
-            options: ['👨 Homme', '👩 Femme']
-        },
-        { 
-            id: 'location', 
-            type: 'city', 
-            label: 'Localisation', 
-            required: false,
-            order: 4
-        },
-        { 
-            id: 'birthYear', 
-            type: 'year', 
-            label: 'Année de naissance', 
-            required: false,
-            order: 5
-        },
-        { 
-            id: 'birthday', 
-            type: 'date', 
-            label: 'Date d\'anniversaire', 
-            required: false,
-            order: 6,
-            futureOnly: false
-        },
-        { 
-            id: 'notes', 
-            type: 'textarea', 
-            label: 'Notes personnelles', 
-            required: false,
-            order: 7
-        },
-        { 
-            id: 'meetingDate', 
-            type: 'date', 
-            label: 'RDV', 
-            required: false,
-            order: 8,
-            futureOnly: true
-        }
-    ],
+/* STYLES.CSS - InstaConnect Mobile CRM */
 
-    // Champs personnalisés créés par l'utilisateur
-    customFields: [],
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
 
-    // ANCIEN SYSTÈME - Conservé pour compatibilité avec les anciens users
-    // Configuration des tags par défaut (sera migré vers defaultFields[].tags)
-    defaultTags: {
-        relationType: [
-            { value: 'Ami', label: '👥 Ami', class: 'tag-ami' },
-            { value: 'Famille', label: '👨‍👩‍👧 Famille', class: 'tag-famille' },
-            { value: 'Connaissance', label: '🤝 Connaissance', class: 'tag-connaissance' },
-            { value: 'Sexe', label: '❤️ Sexe', class: 'tag-sexe' }
-        ],
-        meetingPlace: [
-            { value: 'IRL', label: '🌍 IRL', class: 'tag-irl' },
-            { value: 'Insta', label: '📸 Insta', class: 'tag-insta' },
-            { value: 'Tinder', label: '🔥 Tinder', class: 'tag-tinder' },
-            { value: 'Hinge', label: '💜 Hinge', class: 'tag-hinge' },
-            { value: 'Soirée Tech', label: '🎵 Soirée Tech', class: 'tag-soiree-tech' }
-        ],
-        discussionStatus: [
-            { value: 'Déjà parlé', label: '💬 Déjà parlé', class: 'tag-deja-parle' },
-            { value: 'Jamais parlé', label: '🤐 Jamais parlé', class: 'tag-jamais-parle' },
-            { value: 'En vu', label: '👀 En vu', class: 'tag-en-vu' },
-            { value: 'En cours', label: '📝 En cours', class: 'tag-en-cours' }
-        ]
-    },
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f8f9fa;
+    min-height: 100vh;
+    padding-bottom: calc(75px + env(safe-area-inset-bottom));
+    overflow-x: hidden;
+}
 
-    customTags: {
-        relationType: [],
-        meetingPlace: [],
-        discussionStatus: []
-    },
+/* Pour garder la bottom nav ancrée sur iPhone */
+html {
+    height: 100%;
+    overflow: hidden;
+}
 
-    dataStore: {
-        contacts: [],
-        
-        load() {
-            // Les données sont maintenant chargées depuis Firebase dans auth.js
-            // Cette fonction est gardée pour compatibilité mais ne fait plus rien
-            console.log('📦 Data will be loaded from Firebase');
-        },
-        
-        saveTimeout: null, // Pour le debounce
-        quotaExceeded: false, // Flag pour savoir si le quota est dépassé
-        
-        async save(specificContact = null, options = {}) {
-            // Options: { skipContacts: false, skipSettings: false, debounce: false }
-            const { skipContacts = false, skipSettings = false, debounce = false } = options;
-            
-            // Si le quota est dépassé, ne pas sauvegarder (sauf si on force)
-            if (this.quotaExceeded && !options.force) {
-                console.warn('⚠️ Quota exceeded, skipping save. Data will be saved when quota is restored.');
-                return;
-            }
-            
-            // Si debounce activé, attendre 2 secondes avant de sauvegarder
-            if (debounce) {
-                clearTimeout(this.saveTimeout);
-                this.saveTimeout = setTimeout(() => {
-                    this.save(specificContact, { ...options, debounce: false });
-                }, 2000);
-                return;
-            }
-            
-            if (!authManager.currentUser) {
-                console.warn('⚠️ No user logged in, cannot save to Firebase');
-                return;
-            }
+body {
+    height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
 
-            try {
-                const userId = authManager.currentUser.uid;
-                console.log('💾 SAVING to Firebase - User:', userId);
+/* Landing Page */
+.landing-page {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: linear-gradient(135deg, #E1306C 0%, #C13584 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 30000;
+    animation: landingFadeOut 0.5s ease 2.5s forwards;
+}
 
-                const batch = db.batch();
-                let operationCount = 0;
-                
-                // Sauvegarder les contacts seulement si demandé
-                if (!skipContacts) {
-                    if (specificContact) {
-                        // Sauvegarder un seul contact
-                        console.log('💾 Saving specific contact:', specificContact.id);
-                        const contactRef = db.collection('users').doc(userId).collection('contacts').doc(specificContact.id);
-                        batch.set(contactRef, specificContact);
-                        operationCount++;
-                    } else if (this.contacts.length > 0) {
-                        // Sauvegarder tous les contacts seulement s'il y en a
-                        console.log('💾 Saving ALL contacts in batch:', this.contacts.length);
-                        const contactsRef = db.collection('users').doc(userId).collection('contacts');
-                        this.contacts.forEach(contact => {
-                            batch.set(contactsRef.doc(contact.id), contact);
-                            operationCount++;
-                        });
-                    }
-                }
-
-                // Sauvegarder les tags et champs seulement si demandé
-                if (!skipSettings) {
-                    console.log('📤 Saving settings (tags & fields) to Firebase');
-                    
-                    // Nettoyer les undefined pour Firebase
-                    const cleanDefaultFields = app.defaultFields.map(f => {
-                        const clean = { ...f };
-                        Object.keys(clean).forEach(key => {
-                            if (clean[key] === undefined) delete clean[key];
-                        });
-                        return clean;
-                    });
-                    
-                    const cleanCustomFields = app.customFields.map(f => {
-                        const clean = { ...f };
-                        Object.keys(clean).forEach(key => {
-                            if (clean[key] === undefined) delete clean[key];
-                        });
-                        return clean;
-                    });
-                    
-                    const userDoc = db.collection('users').doc(userId);
-                    batch.set(userDoc, {
-                        customTags: app.customTags,
-                        customFields: cleanCustomFields,
-                        defaultFields: cleanDefaultFields
-                    }, { merge: true });
-                    operationCount++;
-                }
-
-                if (operationCount > 0) {
-                    await batch.commit();
-                    console.log(`✅ Saved ${operationCount} operations to Firebase`);
-                    this.quotaExceeded = false; // Réinitialiser le flag si la sauvegarde réussit
-                } else {
-                    console.log('⏭️ Nothing to save');
-                }
-            } catch (error) {
-                console.error('❌ Error saving to Firebase:', error);
-                if (error.code === 'resource-exhausted') {
-                    this.quotaExceeded = true;
-                    console.error('🚫 QUOTA EXCEEDED - Sauvegardes désactivées temporairement');
-                    alert('⚠️ Quota Firebase dépassé. Les modifications seront sauvegardées automatiquement dans quelques minutes.');
-                    
-                    // Réessayer dans 5 minutes
-                    setTimeout(() => {
-                        console.log('🔄 Réinitialisation du quota, tentative de sauvegarde...');
-                        this.quotaExceeded = false;
-                        this.save(specificContact, { ...options, force: true });
-                    }, 5 * 60 * 1000); // 5 minutes
-                }
-            }
-        },
-        
-        // Sauvegarder seulement les paramètres (tags, champs) - rapide
-        async saveSettings() {
-            return this.save(null, { skipContacts: true, skipSettings: false });
-        },
-        
-        // Sauvegarder seulement les contacts - plus lourd
-        async saveContacts() {
-            return this.save(null, { skipContacts: false, skipSettings: true });
-        },
-
-        async deleteContact(contactId) {
-            if (!authManager.currentUser) return;
-            
-            try {
-                const userId = authManager.currentUser.uid;
-                await db.collection('users').doc(userId).collection('contacts').doc(contactId).delete();
-                console.log('✅ Contact deleted from Firebase');
-            } catch (error) {
-                console.error('❌ Error deleting contact:', error);
-            }
-        }
-    },
-
-    currentSection: 'contacts',
-
-    async init() {
-        // Attendre l'initialisation de Firebase
-        if (!initFirebase()) {
-            alert('Erreur de chargement de Firebase');
-            return;
-        }
-
-        // Charger la préférence du mode sombre (localStorage, pas Firebase)
-        this.loadDarkModePreference();
-
-        // Vérifier l'authentification
-        const isLoggedIn = await authManager.checkAuth();
-        
-        if (isLoggedIn) {
-            // Restaurer la dernière section active
-            const savedSection = localStorage.getItem('currentSection') || 'contacts';
-            this.currentSection = savedSection;
-            
-            this.setupEventListeners();
-            relations.init();
-            
-            // Attendre un peu que les données Firebase soient chargées
-            setTimeout(() => {
-                console.log('📋 Rendering dynamic form with fields:', app.getAllFields().length);
-                console.log('   - Default fields:', app.defaultFields.length);
-                console.log('   - Custom fields:', app.customFields.length);
-                
-                // Générer le formulaire dynamiquement avec les champs personnalisés
-                contacts.renderDynamicForm();
-                
-                // Générer les filtres dynamiquement
-                contacts.renderFilters();
-                
-                // Générer les onglets de stats dynamiquement
-                stats.renderTabs();
-                
-                contacts.render();
-                stats.render();
-                this.switchSection(savedSection);
-            }, 1000); // Augmenté à 1 seconde pour laisser le temps à Firebase
-        }
-    },
-
-    setupEventListeners() {
-        document.getElementById('searchBox').addEventListener('input', () => contacts.render());
-
-        // Close filter dropdown when clicking outside
-        document.addEventListener('click', (e) => {
-            const dropdown = document.getElementById('filterDropdown');
-            const isFilterChip = e.target.closest('.filter-chip');
-            if (!isFilterChip && dropdown && dropdown.style.display === 'block') {
-                contacts.closeFilterDropdown();
-            }
-        });
-
-        // Overlay click handling
-        const overlay = document.getElementById('overlay');
-        overlay.addEventListener('click', (e) => {
-            // Check which modal is open
-            const tagEditModal = document.getElementById('tagEditModal');
-            const tagDropdown = document.getElementById('tagDropdown');
-            
-            // If tag edit modal is open, close only that
-            if (tagEditModal && tagEditModal.classList.contains('active')) {
-                tags.closeEditModal();
-            }
-            // Otherwise close tag dropdown
-            else if (tagDropdown && tagDropdown.classList.contains('active')) {
-                tags.closeDropdown();
-            }
-        });
-        
-        // Prevent clicks inside modals from propagating to overlay
-        document.querySelectorAll('.modal, .tag-dropdown-container').forEach(modal => {
-            modal.addEventListener('click', (e) => {
-                e.stopPropagation();
-            });
-        });
-    },
-
-    // ==========================================
-    // GESTION DES CHAMPS PERSONNALISÉS
-    // ==========================================
-    
-    // Récupérer tous les champs (défaut + custom) triés par ordre
-    getAllFields() {
-        return [...this.defaultFields, ...this.customFields].sort((a, b) => a.order - b.order);
-    },
-
-    // Ajouter un nouveau champ personnalisé
-    addCustomField(fieldData) {
-        console.log('➕ addCustomField called with:', fieldData);
-        const newField = {
-            id: 'custom_' + Date.now(),
-            type: fieldData.type,
-            label: fieldData.label,
-            required: false,
-            order: this.getAllFields().length,
-            placeholder: fieldData.placeholder || '',
-            options: fieldData.options || [] // Pour select/radio
-        };
-        
-        // Ajouter tags SEULEMENT pour les champs select (pas undefined pour Firebase)
-        if (fieldData.type === 'select') {
-            newField.tags = [];
-        }
-        
-        console.log('➕ New field created:', newField);
-        this.customFields.push(newField);
-        console.log('➕ customFields after push:', this.customFields.length, this.customFields);
-        this.dataStore.save();
-        console.log('➕ save() called');
-        return newField;
-    },
-
-    // Supprimer un champ personnalisé
-    deleteCustomField(fieldId) {
-        const index = this.customFields.findIndex(f => f.id === fieldId);
-        if (index === -1) return false;
-        
-        // Supprimer le champ
-        this.customFields.splice(index, 1);
-        
-        // Supprimer les valeurs de ce champ dans tous les contacts
-        this.dataStore.contacts.forEach(contact => {
-            if (contact[fieldId]) {
-                delete contact[fieldId];
-            }
-        });
-        
-        this.dataStore.save();
-        return true;
-    },
-
-    // Réordonner les champs
-    reorderFields(fieldId, newOrder) {
-        const allFields = this.getAllFields();
-        const field = allFields.find(f => f.id === fieldId);
-        if (!field) return false;
-        
-        field.order = newOrder;
-        
-        // Réajuster les ordres des autres champs
-        allFields.forEach((f, index) => {
-            if (f.id !== fieldId) {
-                f.order = index >= newOrder ? index + 1 : index;
-            }
-        });
-        
-        this.dataStore.save();
-        return true;
-    },
-
-    // Migrer les anciens tags vers le nouveau système
-    migrateToNewFieldSystem() {
-        console.log('🔄 Migration vers le nouveau système de champs...');
-        
-        // Fonction helper pour fusionner les tags sans doublons
-        const mergeTags = (defaults, customs) => {
-            const tagMap = new Map();
-            
-            // D'abord ajouter les defaults
-            defaults.forEach(tag => {
-                tagMap.set(tag.value, tag);
-            });
-            
-            // Ensuite ajouter/remplacer avec les customs (priorité aux customs)
-            customs.forEach(tag => {
-                tagMap.set(tag.value, tag);
-            });
-            
-            return Array.from(tagMap.values());
-        };
-        
-        // Pour les utilisateurs existants, copier leurs tags dans les champs
-        const relationField = this.defaultFields.find(f => f.id === 'relationType');
-        if (relationField && this.customTags.relationType) {
-            relationField.tags = mergeTags(
-                this.defaultTags.relationType || [], 
-                this.customTags.relationType || []
-            );
-            console.log('✅ Migrated relationType tags:', relationField.tags.length);
-        }
-        
-        const meetingField = this.defaultFields.find(f => f.id === 'meetingPlace');
-        if (meetingField && this.customTags.meetingPlace) {
-            meetingField.tags = mergeTags(
-                this.defaultTags.meetingPlace || [], 
-                this.customTags.meetingPlace || []
-            );
-            console.log('✅ Migrated meetingPlace tags:', meetingField.tags.length);
-        }
-        
-        const statusField = this.defaultFields.find(f => f.id === 'discussionStatus');
-        if (statusField && this.customTags.discussionStatus) {
-            statusField.tags = mergeTags(
-                this.defaultTags.discussionStatus || [], 
-                this.customTags.discussionStatus || []
-            );
-            console.log('✅ Migrated discussionStatus tags:', statusField.tags.length);
-        }
-        
-        console.log('✅ Migration terminée');
-    },
-
-    switchSection(section) {
-        // Reset scroll to top - body et container
-        window.scrollTo(0, 0);
-        document.body.scrollTop = 0;
-        document.documentElement.scrollTop = 0;
-        
-        // Reset scroll de toutes les sections
-        document.querySelectorAll('.section').forEach(s => {
-            s.scrollTop = 0;
-        });
-        
-        // NETTOYAGE : Réinitialiser tous les styles dynamiques
-        const container = document.querySelector('.container');
-        const header = document.querySelector('.header');
-        
-        // Reset des styles potentiellement cassés (SEULEMENT dans contactsSection)
-        document.querySelectorAll('#contactsSection .letter-header, #contactsSection .letter-divider').forEach(el => {
-            el.style.top = '';
-            el.style.position = '';
-        });
-        
-        // Reset du container
-        container.style.marginTop = '';
-        
-        // Save current section
-        this.currentSection = section;
-        localStorage.setItem('currentSection', section);
-        
-        // Retirer active de toutes les sections
-        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-
-        // Gérer l'affichage du header
-        
-        // Ordre des onglets : Contacts (0), Stats (1), Analyse (2), Relations (3), Profil (4)
-        if (section === 'contacts') {
-            document.getElementById('contactsSection').classList.add('active');
-            document.querySelectorAll('.nav-item')[0].classList.add('active');
-            header.style.display = 'block';
-            
-            // Calculer la hauteur exacte du header et ajuster le sticky
-            setTimeout(() => {
-                const headerHeight = header.offsetHeight;
-                container.style.marginTop = headerHeight + 'px';
-                
-                // Ajuster la position sticky des letter-divider (bandeaux de lettres)
-                // Le top = hauteur du header pour que le bandeau soit juste en dessous
-                document.querySelectorAll('#contactsSection .letter-divider').forEach(letterDivider => {
-                    letterDivider.style.top = headerHeight + 'px';
-                });
-            }, 50);
-            
-            contacts.render();
-        } else if (section === 'stats') {
-            document.getElementById('statsSection').classList.add('active');
-            document.querySelectorAll('.nav-item')[1].classList.add('active');
-            header.style.display = 'none';
-            container.style.marginTop = '0'; // Supprimer la marge
-            stats.render();
-        } else if (section === 'analyse') {
-            document.getElementById('analyseSection').classList.add('active');
-            document.querySelectorAll('.nav-item')[2].classList.add('active');
-            header.style.display = 'none';
-            container.style.marginTop = '0'; // Supprimer la marge
-        } else if (section === 'relations') {
-            document.getElementById('relationsSection').classList.add('active');
-            document.querySelectorAll('.nav-item')[3].classList.add('active');
-            header.style.display = 'none';
-            container.style.marginTop = '0'; // Supprimer la marge
-            
-            // S'assurer que les letter-header de relations ont le bon top
-            setTimeout(() => {
-                document.querySelectorAll('#relationsSection .letter-header').forEach(letterHeader => {
-                    letterHeader.style.top = '0'; // Valeur par défaut pour relations
-                });
-            }, 50);
-        } else if (section === 'profil') {
-            document.getElementById('profilSection').classList.add('active');
-            document.querySelectorAll('.nav-item')[4].classList.add('active');
-            header.style.display = 'none';
-            container.style.marginTop = '0'; // Supprimer la marge
-            this.updateProfilSection();
-        }
-    },
-
-    updateProfilSection() {
-        // Mettre à jour les informations du profil
-        const userEmailEl = document.getElementById('profilUserEmail');
-        if (userEmailEl && authManager.currentUser) {
-            userEmailEl.textContent = authManager.currentUser.email;
-        }
-        
-        // Mettre à jour les statistiques
-        document.getElementById('profilContactsCount').textContent = app.dataStore.contacts.length;
-        document.getElementById('profilFollowersCount').textContent = relations.data.followers.length;
-        document.getElementById('profilUnfollowersCount').textContent = relations.data.unfollowers.length;
-        
-        // Synchroniser le toggle du mode sombre
-        const darkModeToggle = document.getElementById('darkModeToggle');
-        if (darkModeToggle) {
-            darkModeToggle.checked = localStorage.getItem('darkMode') === 'true';
-        }
-    },
-
-    openAddModal() {
-        contacts.currentEditId = null;
-        
-        // Générer le formulaire dynamiquement avec les champs personnalisés
-        contacts.renderDynamicForm();
-        
-        // Initialiser les champs city
-        contacts.initCityFields();
-        
-        document.getElementById('contactForm').reset();
-        
-        // Reset tag selectors - TEXTE ET VALEURS
-        ['relationType', 'meetingPlace', 'discussionStatus'].forEach(fieldId => {
-            // Reset du texte affiché
-            const displayEl = document.getElementById(fieldId + 'Display');
-            if (displayEl) {
-                displayEl.textContent = 'Sélectionner...';
-                displayEl.className = 'tag-selector-placeholder';
-            }
-            // Reset de la valeur cachée
-            const hiddenInput = document.getElementById(fieldId);
-            if (hiddenInput) {
-                hiddenInput.value = '';
-            }
-        });
-        
-        // Reset gender radio buttons
-        document.getElementById('genderMale').checked = false;
-        document.getElementById('genderFemale').checked = false;
-        
-        document.getElementById('modalTitle').textContent = '➕ Nouveau contact';
-        
-        // Reset scroll to top of modal
-        const addModal = document.getElementById('addModal');
-        addModal.classList.add('active');
-        addModal.scrollTop = 0;
-    },
-
-    closeAddModal() {
-        document.getElementById('addModal').classList.remove('active');
-        contacts.currentEditId = null;
-        
-        // Reset scroll lors de la fermeture pour qu'il soit à 0 à la prochaine ouverture
-        const modalContent = document.querySelector('#addModal .modal-content');
-        if (modalContent) {
-            modalContent.scrollTop = 0;
-        }
-    },
-
-    closeViewModal() {
-        document.getElementById('viewModal').classList.remove('active');
-        contacts.currentViewId = null;
-    },
-
-    // Dark Mode Management
-    loadDarkModePreference() {
-        const darkMode = localStorage.getItem('darkMode') === 'true';
-        if (darkMode) {
-            document.body.classList.add('dark-mode');
-        }
-        // Update toggle state when visiting profile
-        setTimeout(() => {
-            const toggle = document.getElementById('darkModeToggle');
-            if (toggle) {
-                toggle.checked = darkMode;
-            }
-        }, 100);
-    },
-
-    toggleDarkMode() {
-        const toggle = document.getElementById('darkModeToggle');
-        const isDarkMode = toggle.checked;
-        
-        if (isDarkMode) {
-            document.body.classList.add('dark-mode');
-            localStorage.setItem('darkMode', 'true');
-        } else {
-            document.body.classList.remove('dark-mode');
-            localStorage.setItem('darkMode', 'false');
-        }
-        
-        console.log('🌙 Dark mode:', isDarkMode ? 'enabled' : 'disabled');
+@keyframes landingFadeOut {
+    to {
+        opacity: 0;
+        visibility: hidden;
     }
-};
+}
 
-// Initialisation au chargement de la page
-window.addEventListener('DOMContentLoaded', () => app.init());
+.landing-content {
+    text-align: center;
+}
+
+.landing-logo {
+    font-size: 48px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+}
+
+.landing-letter {
+    display: inline-block;
+    color: white;
+    opacity: 0;
+    animation: letterPop 0.6s ease forwards;
+    text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.landing-letter:nth-child(1) { animation-delay: 0.1s; }
+.landing-letter:nth-child(2) { animation-delay: 0.2s; }
+.landing-letter:nth-child(3) { animation-delay: 0.3s; }
+.landing-letter:nth-child(4) { animation-delay: 0.4s; }
+.landing-letter:nth-child(5) { animation-delay: 0.5s; }
+.landing-letter:nth-child(6) { animation-delay: 0.6s; }
+.landing-letter:nth-child(7) { animation-delay: 0.7s; }
+.landing-letter:nth-child(8) { animation-delay: 0.8s; }
+.landing-letter:nth-child(9) { animation-delay: 0.9s; }
+.landing-letter:nth-child(10) { animation-delay: 1.0s; }
+.landing-letter:nth-child(11) { animation-delay: 1.1s; }
+.landing-letter:nth-child(12) { animation-delay: 1.2s; }
+
+@keyframes letterPop {
+    0% {
+        opacity: 0;
+        transform: scale(0) rotate(-180deg);
+    }
+    50% {
+        transform: scale(1.2) rotate(10deg);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+}
+
+.landing-subtitle {
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+    opacity: 0;
+    animation: subtitleFadeIn 0.8s ease 1.3s forwards;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+@keyframes subtitleFadeIn {
+    to {
+        opacity: 1;
+    }
+}
+
+/* Auth Page */
+.auth-page {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: radial-gradient(circle at center, #E1306C 0%, #C13584 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 20000;
+}
+
+.auth-container {
+    background: white;
+    border-radius: 20px;
+    padding: 40px 30px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+}
+
+.auth-logo {
+    font-size: 48px;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.auth-subtitle {
+    text-align: center;
+    font-size: 18px;
+    color: #495057;
+    font-weight: 600;
+    margin-bottom: 30px;
+}
+
+.auth-form h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #212529;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.auth-input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    font-size: 16px;
+    margin-bottom: 12px;
+    box-sizing: border-box;
+}
+
+.auth-input:focus {
+    outline: none;
+    border-color: #E1306C;
+}
+
+.auth-btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+}
+
+.auth-btn-primary {
+    background: linear-gradient(135deg, #E1306C 0%, #C13584 100%);
+    color: white;
+}
+
+.auth-btn-primary:active {
+    opacity: 0.9;
+}
+
+.auth-link {
+    text-align: center;
+    color: #E1306C;
+    font-size: 14px;
+    margin-top: 16px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.auth-link:active {
+    opacity: 0.7;
+}
+
+.auth-message {
+    margin-top: 16px;
+    padding: 12px;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.auth-message-success {
+    background: #d4edda;
+    color: #155724;
+}
+
+.auth-message-error {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+/* User Menu */
+.user-menu-icon {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: white;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    z-index: 100;
+}
+
+.user-menu-icon:active {
+    transform: scale(0.95);
+}
+
+.user-menu-dropdown {
+    position: absolute;
+    top: 54px;
+    right: 0;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    display: none;
+    z-index: 1000;
+    overflow: hidden;
+    min-width: 200px;
+}
+
+.user-menu-dropdown.active {
+    display: block;
+}
+
+.user-menu-email {
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #495057;
+    font-weight: 600;
+    word-break: break-all;
+}
+
+.user-menu-divider {
+    height: 1px;
+    background: #e9ecef;
+}
+
+.user-menu-item {
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #495057;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.user-menu-item:active {
+    background: #f8f9fa;
+}
+
+
+/* Header */
+.header {
+    background: white;
+    padding: 8px 16px 10px 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+}
+
+.header-top {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 12px;
+    position: relative;
+}
+
+h1 {
+    color: #E1306C;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.search-box, .filters-toggle, .filter-select {
+    width: 100%;
+    padding: 10px 16px;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    font-size: 16px;
+    min-height: 44px;
+}
+
+/* Conteneur pour search + bouton calendrier */
+.search-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 20px;
+    margin-bottom: 12px; /* Augmenté de 2px à 12px */
+}
+
+.search-box {
+    flex: 1;
+    margin: 0;
+    width: auto;
+}
+
+.search-box:focus {
+    outline: none;
+    border-color: #E1306C;
+}
+
+.filters-toggle {
+    background: #f8f9fa;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    cursor: pointer;
+}
+
+.filters-panel {
+    display: none;
+    padding: 12px 0;
+    gap: 8px;
+    flex-direction: column;
+}
+
+.filters-panel.active {
+    display: flex;
+}
+
+/* Container */
+.container {
+    padding: 8px 12px 12px 12px;
+    margin-top: 168px; /* Espace pour le header fixe (sera ajusté dynamiquement) */
+}
+
+/* Quand le header n'est pas affiché (Stats, Analyse, Unfollowers, Profil) */
+#statsSection.active ~ * .container,
+#analyseSection.active ~ * .container,
+#unfollowersSection.active ~ * .container,
+#profilSection.active ~ * .container {
+    margin-top: 0;
+}
+
+.section {
+    display: none;
+}
+
+.section.active {
+    display: block;
+}
+
+/* Hide header on Stats and Unfollowers */
+#statsSection.active ~ body .header,
+#unfollowersSection.active ~ body .header {
+    display: none;
+}
+
+body.hide-header .header {
+    display: none;
+}
+
+body.hide-header .container {
+    padding-top: 12px;
+    margin-top: 0;
+}
+
+/* Contacts Grid */
+.contacts-grid {
+    display: grid;
+    gap: 12px;
+}
+
+.contact-card {
+    background: white;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.contact-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.contact-info {
+    flex: 1;
+}
+
+.contact-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: #212529;
+}
+
+.contact-instagram {
+    font-size: 15px;
+    color: #E1306C;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+    text-decoration: none;
+    display: block;
+}
+
+.contact-instagram:active {
+    opacity: 0.7;
+}
+
+.btn-view-eye {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    min-height: 36px;
+    border: none;
+    border-radius: 8px;
+    background: #E1306C;
+    color: white;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    padding: 0;
+}
+
+.btn-view-eye:active {
+    transform: scale(0.95);
+    opacity: 0.8;
+}
+
+.contact-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.tag-mini {
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    min-height: 32px;
+    cursor: pointer;
+}
+
+.contact-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #f1f3f5;
+}
+
+.btn-action {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    min-height: 44px;
+    cursor: pointer;
+}
+
+.btn-view {
+    background: #E1306C;
+    color: white;
+}
+
+.btn-insta {
+    background: #f8f9fa;
+    color: #495057;
+}
+
+/* Tag Colors */
+.tag-ami { background: #a29bfe; color: white; }
+.tag-famille { background: #fd79a8; color: white; }
+.tag-connaissance { background: #74b9ff; color: white; }
+.tag-sexe { background: #ff7675; color: white; }
+.tag-irl { background: #55efc4; color: #2d3436; }
+.tag-insta { background: #E1306C; color: white; }
+.tag-tinder { background: #ff6348; color: white; }
+.tag-hinge { background: #a55eea; color: white; }
+.tag-soiree-tech { background: #feca57; color: #2d3436; }
+.tag-deja-parle { background: #00b894; color: white; }
+.tag-jamais-parle { background: #dfe6e9; color: #2d3436; }
+.tag-en-vu { background: #fdcb6e; color: #2d3436; }
+.tag-en-cours { background: #0984e3; color: white; }
+
+/* Stats */
+/* Stats Page */
+.stats-page {
+    padding: 16px 12px;
+}
+
+.stats-global {
+    margin-bottom: 20px;
+}
+
+.stats-page-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #212529;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.stats-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.stat-card {
+    background: white;
+    padding: 16px 12px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    text-align: center;
+}
+
+.stat-card-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #E1306C;
+    margin-bottom: 6px;
+}
+
+.stat-card-label {
+    font-size: 11px;
+    color: #868e96;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.stats-selector {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    -webkit-overflow-scrolling: touch;
+}
+
+.stats-selector::-webkit-scrollbar {
+    display: none;
+}
+
+.stat-tab {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px; /* Réduit l'espace entre icône et texte */
+    padding: 8px 12px; /* Réduit le padding */
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 8px; /* Plus carré */
+    font-size: 10px; /* Texte plus petit */
+    font-weight: 600;
+    color: #868e96;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 65px; /* Légèrement plus petit */
+    width: 65px;
+}
+
+.stat-tab.active {
+    background: #E1306C;
+    color: white;
+    border-color: #E1306C;
+}
+
+.stat-tab-icon {
+    font-size: 18px; /* Icône plus petite */
+}
+
+.stat-tab:active {
+    transform: scale(0.95);
+}
+
+.chart-container {
+    background: white;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.chart-title {
+    font-size: 18px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.chart-svg {
+    width: 100%;
+    max-width: 280px;
+    height: 280px;
+    margin: 0 auto 20px;
+    display: block;
+}
+
+.legend-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* Centrer verticalement */
+    padding: 8px 12px; /* Encore plus réduit */
+    margin-bottom: 10px; /* Espace entre les items */
+    background: #f8f9fa;
+    border-radius: 6px; /* Encore plus carré */
+    transition: all 0.2s ease;
+    min-height: auto; /* Pas de hauteur minimale */
+}
+
+.legend-item-clickable {
+    cursor: pointer;
+}
+
+.legend-item-clickable:hover {
+    background: #e9ecef;
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.legend-item-clickable:active {
+    transform: translateX(2px);
+}
+
+.legend-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 14px; /* Réduire la taille du texte */
+}
+
+.legend-color {
+    width: 16px; /* Plus petit */
+    height: 16px; /* Plus petit */
+    border-radius: 4px;
+    flex-shrink: 0; /* Ne pas rétrécir */
+}
+
+.legend-value {
+    font-size: 16px; /* Plus petit */
+    font-weight: 700;
+}
+
+.legend-percent {
+    font-size: 13px; /* Plus petit */
+    color: #868e96;
+}
+
+/* Coming Soon */
+.coming-soon {
+    text-align: center;
+    padding: 80px 20px;
+}
+
+.coming-soon-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+}
+
+.coming-soon-text {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+/* Unfollowers Section */
+.unfollowers-header,
+.relations-header {
+    background: white;
+    padding: 12px 16px;
+    margin-bottom: 6px;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    text-align: center;
+}
+
+.unfollowers-title,
+.relations-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #E1306C;
+    margin-bottom: 0;
+}
+
+/* Styles pour les tabs Relations */
+.relations-tabs {
+    display: flex;
+    gap: 8px;
+    padding: 0 16px 8px 16px;
+    margin-bottom: 8px;
+}
+
+.relations-tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 12px 8px;
+    border: none;
+    border-radius: 12px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+.relations-tab:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.relations-tab.active {
+    background: linear-gradient(135deg, #E1306C 0%, #C13584 100%);
+    box-shadow: 0 4px 12px rgba(225, 48, 108, 0.3);
+}
+
+.relations-tab .tab-icon {
+    font-size: 20px;
+}
+
+.relations-tab.active .tab-icon,
+.relations-tab.active .tab-label,
+.relations-tab.active .tab-count {
+    color: white;
+}
+
+.relations-tab .tab-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #495057;
+}
+
+.relations-tab .tab-count {
+    font-size: 16px;
+    font-weight: 700;
+    color: #E1306C;
+}
+
+/* Contenu des tabs */
+.relations-content {
+    display: none;
+}
+
+.relations-content.active {
+    display: block;
+}
+
+.pending-date {
+    font-size: 12px;
+    color: #868e96;
+    margin-left: 8px;
+}
+
+.unfollowers-subtitle {
+    font-size: 14px;
+    color: #868e96;
+    margin-bottom: 8px;
+}
+
+.unfollowers-permanent-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 0 16px 8px 16px;
+    margin-bottom: 8px;
+}
+
+.unfollowers-action-btn {
+    padding: 10px 12px;
+    border: none;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+.unfollowers-action-btn:active {
+    transform: scale(0.98);
+}
+
+}
+
+.upload-zone {
+    border: 3px dashed #e9ecef;
+    border-radius: 16px;
+    padding: 40px 20px;
+    text-align: center;
+    background: #f8f9fa;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.upload-zone:hover {
+    border-color: #ff4757;
+    background: #fff5f5;
+}
+
+.upload-zone.dragover {
+    border-color: #ff4757;
+    background: #fff5f5;
+    transform: scale(1.02);
+}
+
+.upload-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+
+.upload-text {
+    font-size: 16px;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 8px;
+}
+
+.upload-subtext {
+    font-size: 13px;
+    color: #868e96;
+}
+
+#zipFileInput {
+    display: none;
+}
+
+.analyzing {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #ff4757;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.unfollowers-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.unfollower-stat-card {
+    background: white;
+    padding: 10px 8px;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    text-align: center;
+}
+
+.unfollower-stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #ff4757;
+}
+
+.unfollower-stat-label {
+    font-size: 11px;
+    color: #868e96;
+    font-weight: 600;
+    margin-top: 4px;
+}
+
+.unfollowers-list {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    overflow: hidden;
+}
+
+.unfollowers-list-header {
+    padding: 16px;
+    background: #212529; /* Fond noir comme letter-header */
+    font-weight: 700;
+    color: #E1306C; /* Texte rose */
+    border-bottom: 1px solid #E1306C; /* Trait fin rose */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.letter-section {
+    margin-bottom: 0;
+}
+
+.letter-header {
+    padding: 16px 16px 8px 16px;
+    background: #212529; /* Fond noir */
+    color: #E1306C; /* Lettre en rose */
+    border-bottom: 1px solid #E1306C; /* Trait fin rose */
+    font-weight: 700;
+    font-size: 16px;
+    position: sticky;
+    top: 168px; /* Juste sous le header (hauteur approximative du header) */
+    z-index: 999; /* Juste sous le header (1000) */
+}
+
+/* Sur la page contacts, augmenter le z-index pour passer au-dessus du header */
+#contactsSection .letter-header {
+    z-index: 1001; /* Au-dessus du header (1000) */
+}
+
+/* Sur la page unfollowers, garder z-index par défaut */
+#unfollowersSection .letter-header {
+    top: 0;
+    z-index: 999; /* En dessous du header si nécessaire */
+}
+
+.unfollower-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    border-bottom: 1px solid #f1f3f5;
+    transition: background 0.2s;
+}
+
+.unfollower-item:last-child {
+    border-bottom: none;
+}
+
+.unfollower-item.unfollowed {
+    opacity: 0.5;
+    background: #f8f9fa;
+}
+
+.unfollower-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.unfollower-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff4757 0%, #ff6348 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.unfollower-username {
+    font-size: 15px;
+    font-weight: 600;
+    color: #495057;
+    word-break: break-all;
+}
+
+.unfollower-date {
+    font-size: 11px;
+    color: #868e96;
+    font-weight: 500;
+    margin-left: 8px;
+    white-space: nowrap;
+}
+
+
+.unfollower-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-unfollow {
+    padding: 8px 16px;
+    background: #ff4757;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.btn-unfollow:disabled {
+    background: #dfe6e9;
+    cursor: not-allowed;
+}
+
+.btn-mark {
+    padding: 8px 12px;
+    background: #f8f9fa;
+    color: #495057;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.btn-normal {
+    padding: 8px 12px;
+    background: #feca57;
+    color: #2d3436;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* Nouveaux boutons pour la liste des unfollowers */
+.unfollower-username-link {
+    color: #E1306C;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 600;
+    transition: opacity 0.2s ease;
+}
+
+.unfollower-username-link:active {
+    opacity: 0.7;
+}
+
+.btn-mark-unfollow {
+    padding: 8px 16px;
+    background: #00b894;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.btn-mark-unfollow:active {
+    background: #00a380;
+    transform: scale(0.98);
+}
+
+.btn-mark-normal {
+    padding: 8px 16px;
+    background: #fdcb6e;
+    color: #2d3436;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.btn-mark-normal:active {
+    background: #f0b849;
+    transform: scale(0.98);
+}
+
+/* Nouveaux boutons emoji uniquement */
+.btn-emoji-normal {
+    padding: 8px 12px;
+    background: #fdcb6e;
+    color: #2d3436;
+    border: none;
+    border-radius: 8px;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-emoji-normal:active {
+    background: #f0b849;
+    transform: scale(0.95);
+}
+
+.btn-emoji-unfollow {
+    padding: 8px 12px;
+    background: #ff7675;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-emoji-unfollow:active {
+    background: #d63031;
+    transform: scale(0.95);
+}
+
+/* Styles pour les modales unfollowers */
+.modal-content-unfollowers {
+    background: white;
+}
+
+.modal-header-unfollowers {
+    background: white;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.modal-header-unfollowers h3 {
+    color: #212529;
+}
+
+.modal-close-btn {
+    background: #f8f9fa;
+    color: #212529;
+}
+
+.modal-search-input {
+    background: white;
+    color: #212529;
+    border: 1px solid #e9ecef;
+}
+
+.modal-filter-btn {
+    background: #f8f9fa;
+    color: #495057;
+}
+
+.modal-list-content {
+    background: white;
+}
+
+.reset-btn {
+    padding: 12px 24px;
+    background: #f8f9fa;
+    color: #495057;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 12px;
+}
+
+.empty-unfollowers {
+    text-align: center;
+    padding: 60px 20px;
+    color: #868e96;
+}
+
+.empty-unfollowers-icon {
+    font-size: 64px;
+    margin-bottom: 16px;
+}
+
+
+/* Bottom Nav */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    display: flex;
+    align-items: flex-start;
+    padding: 4px 8px calc(env(safe-area-inset-bottom) + 4px) 8px;
+    z-index: 1000;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.12);
+    border-top: 1px solid rgba(0,0,0,0.08);
+    min-height: 75px;
+}
+
+.nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 4px 4px 8px 4px;
+    color: #2d3436;
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    min-width: 0;
+    z-index: 1;
+}
+
+.nav-item span:not(.nav-icon) {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.nav-item.active {
+    color: #E1306C;
+}
+
+.nav-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 3px;
+    background: #E1306C;
+    border-radius: 3px 3px 0 0;
+}
+
+/* Main nav item (Analyse) - bigger avec background arrondi */
+.nav-item-main {
+    flex: 1.3;
+    padding: 0px 4px 8px 4px;
+    margin-top: -20px;
+    position: relative;
+    z-index: 2;
+}
+
+.nav-item-main-bg {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70px;
+    height: 70px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.08);
+    z-index: -1;
+}
+
+.nav-item-main .nav-icon {
+    font-size: 32px !important;
+    margin-bottom: 2px;
+    margin-top: 8px;
+    position: relative;
+    z-index: 3;
+}
+
+.nav-item-main span:not(.nav-icon) {
+    font-size: 10px;
+    font-weight: 600;
+    position: relative;
+    z-index: 3;
+}
+
+/* Créer une séparation arrondie autour de l'onglet Analyse */
+.nav-item-main::before,
+.nav-item-main::after {
+    content: '';
+    position: absolute;
+    bottom: 8px;
+    width: 20px;
+    height: 20px;
+    background: transparent;
+}
+
+.nav-item-main::before {
+    left: -20px;
+    border-bottom-right-radius: 20px;
+    box-shadow: 10px 0 0 0 white;
+}
+
+.nav-item-main::after {
+    right: -20px;
+    border-bottom-left-radius: 20px;
+    box-shadow: -10px 0 0 0 white;
+}
+
+.nav-icon {
+    font-size: 20px;
+    transition: transform 0.3s ease;
+}
+
+.nav-item:active .nav-icon {
+    transform: scale(0.9);
+}
+
+/* Section Profil */
+.profil-container {
+    padding: 20px;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.profil-header {
+    text-align: center;
+    padding: 40px 20px 30px;
+    background: radial-gradient(circle at center, #E1306C 0%, #C13584 100%);
+    border-radius: 16px;
+    margin-bottom: 24px;
+}
+
+.profil-avatar {
+    font-size: 64px;
+    margin-bottom: 16px;
+    background: white;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.profil-email {
+    font-size: 16px;
+    font-weight: 600;
+    color: white;
+    word-break: break-word;
+}
+
+.profil-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.profil-stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.profil-stat-number {
+    font-size: 28px;
+    font-weight: 700;
+    color: #E1306C;
+    margin-bottom: 6px;
+}
+
+.profil-stat-label {
+    font-size: 12px;
+    color: #868e96;
+    font-weight: 600;
+}
+
+.profil-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.profil-btn {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.profil-btn-danger {
+    background: linear-gradient(135deg, #E1306C 0%, #C13584 100%);
+    color: white;
+}
+
+.profil-btn-danger:active {
+    opacity: 0.8;
+    transform: scale(0.98);
+}
+
+/* Profil Settings */
+.profil-settings {
+    margin-bottom: 24px;
+}
+
+.profil-setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    min-height: 76px; /* Hauteur minimale pour aligner les deux items */
+}
+
+.profil-setting-item + .profil-setting-item {
+    margin-top: 12px; /* Espacement entre les items */
+}
+
+.profil-setting-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1; /* Prendre tout l'espace disponible */
+}
+
+.profil-setting-icon {
+    font-size: 24px;
+    flex-shrink: 0; /* Ne pas rétrécir */
+}
+
+.profil-setting-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 2px;
+}
+
+.profil-setting-desc {
+    font-size: 12px;
+    color: #868e96;
+}
+
+/* Aligner le bouton et le toggle à la même hauteur */
+.profil-btn-icon,
+.toggle-switch {
+    flex-shrink: 0; /* Ne pas rétrécir */
+}
+
+/* Toggle Switch */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 28px;
+    flex-shrink: 0;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .3s;
+    border-radius: 28px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+    background: linear-gradient(135deg, #E1306C 0%, #C13584 100%);
+}
+
+.toggle-switch input:checked + .toggle-slider:before {
+    transform: translateX(20px);
+}
+
+/* Dark Mode */
+body.dark-mode {
+    background: #1a1a1a;
+    color: #ffffff;
+}
+
+body.dark-mode .header {
+    background: #2d2d2d;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+body.dark-mode h1 {
+    color: #E1306C;
+}
+
+body.dark-mode .search-box {
+    background: #3a3a3a;
+    border-color: #4a4a4a;
+    color: #ffffff;
+}
+
+body.dark-mode .search-box::placeholder {
+    color: #a0a0a0;
+}
+
+body.dark-mode .contacts-count {
+    background: #1e3a8a;
+    color: #60a5fa;
+}
+
+body.dark-mode #contactsCountNumber {
+    color: #93c5fd;
+}
+
+body.dark-mode .filter-chip {
+    background: #3a3a3a;
+    border-color: #4a4a4a;
+    color: #ffffff;
+}
+
+body.dark-mode .filter-chip.active {
+    background: #E1306C;
+    border-color: #E1306C;
+    color: white;
+}
+
+body.dark-mode .filter-dropdown {
+    background: #2d2d2d;
+    border-color: #4a4a4a;
+}
+
+body.dark-mode .filter-option {
+    color: #ffffff;
+}
+
+body.dark-mode .filter-option:hover {
+    background: #3a3a3a;
+}
+
+body.dark-mode .filter-option.selected {
+    background: #E1306C;
+    color: #ffffff;
+}
+
+body.dark-mode .contact-card {
+    background: #2d2d2d;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+body.dark-mode .contact-name {
+    color: #ffffff;
+}
+
+body.dark-mode .contact-instagram {
+    color: #E1306C;
+}
+
+body.dark-mode .btn-view-eye {
+    background: #E1306C;
+    color: white;
+}
+
+body.dark-mode .stats-page {
+    background: #1a1a1a;
+}
+
+body.dark-mode .stats-page-title {
+    color: #ffffff;
+}
+
+body.dark-mode .stat-card,
+body.dark-mode .profil-stat-card {
+    background: #2d2d2d;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+body.dark-mode .stat-card-label,
+body.dark-mode .profil-stat-label {
+    color: #a0a0a0;
+}
+
+body.dark-mode .stat-tab {
+    background: #2d2d2d;
+    border-color: #4a4a4a;
+    color: #ffffff;
+}
+
+body.dark-mode .stat-tab.active {
+    background: #E1306C;
+    border-color: #E1306C;
+    color: white;
+}
+
+body.dark-mode .chart-container {
+    background: #2d2d2d;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+body.dark-mode .chart-title {
+    color: #ffffff;
+}
+
+body.dark-mode .legend-item {
+    background: #3a3a3a;
+}
+
+body.dark-mode .legend-label span {
+    color: #ffffff;
+}
+
+body.dark-mode .analyse-container {
+    color: #ffffff;
+}
+
+body.dark-mode .analyse-title {
+    color: #ffffff;
+}
+
+body.dark-mode .analyse-subtitle {
+    color: #a0a0a0;
+}
+
+body.dark-mode .analyse-instructions {
+    background: #2d2d2d;
+    color: #ffffff;
+}
+
+body.dark-mode .instructions-title {
+    color: #ffffff;
+}
+
+body.dark-mode .instructions-subtitle {
+    color: #ffffff;
+}
+
+body.dark-mode .instructions-list {
+    color: #d0d0d0;
+}
+
+body.dark-mode .instructions-list li strong {
+    color: #ffffff;
+}
+
+body.dark-mode .instructions-note {
+    background: #3a3a3a;
+    border-left-color: #ffc107;
+}
+
+body.dark-mode .note-title {
+    color: #ffc107;
+}
+
+body.dark-mode .note-text {
+    color: #d0d0d0;
+}
+
+body.dark-mode .video-caption {
+    color: #a0a0a0;
+}
+
+body.dark-mode .upload-zone-analyse {
+    background: #2d2d2d;
+    border-color: #4a4a4a;
+}
+
+body.dark-mode .upload-text {
+    color: #ffffff;
+}
+
+body.dark-mode .upload-subtext {
+    color: #a0a0a0;
+}
+
+body.dark-mode .unfollowers-header,
+body.dark-mode .unfollowers-stats {
+    background: #1a1a1a;
+}
+
+body.dark-mode .unfollowers-title {
+    color: #ffffff;
+}
+
+body.dark-mode .unfollower-stat-card {
+    background: #2d2d2d;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+body.dark-mode .unfollower-stat-label {
+    color: #a0a0a0;
+}
+
+body.dark-mode .unfollowers-list {
+    background: #2d2d2d;
+}
+
+body.dark-mode .unfollowers-list-header {
+    background: #1a1a1a; /* Fond noir légèrement différent */
+    color: #E1306C; /* Texte rose */
+    border-bottom: 1px solid #E1306C; /* Trait fin rose */
+}
+
+body.dark-mode .unfollower-item {
+    background: #2d2d2d;
+    border-color: #4a4a4a;
+}
+
+body.dark-mode .unfollower-username {
+    color: #ffffff;
+}
+
+body.dark-mode .unfollower-username-link {
+    color: #E1306C;
+}
+
+/* Dark mode pour les modales unfollowers */
+body.dark-mode .modal-content-unfollowers {
+    background: #2d2d2d;
+}
+
+body.dark-mode .modal-header-unfollowers {
+    background: #2d2d2d;
+    border-bottom-color: #4a4a4a;
+}
+
+body.dark-mode .modal-header-unfollowers h3 {
+    color: #ffffff;
+}
+
+body.dark-mode .modal-close-btn {
+    background: #ffffff;
+    color: #212529;
+}
+
+body.dark-mode .modal-search-input {
+    background: #3a3a3a;
+    color: #ffffff;
+    border-color: #4a4a4a;
+}
+
+body.dark-mode .modal-search-input::placeholder {
+    color: #a0a0a0;
+}
+
+body.dark-mode .modal-filter-btn {
+    background: #3a3a3a;
+    color: #ffffff;
+}
+
+body.dark-mode .modal-list-content {
+    background: #2d2d2d;
+}
+
+body.dark-mode .profil-container {
+    background: #1a1a1a;
+}
+
+body.dark-mode .profil-setting-item {
+    background: #2d2d2d;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+body.dark-mode .profil-setting-title {
+    color: #ffffff;
+}
+
+body.dark-mode .profil-setting-desc {
+    color: #a0a0a0;
+}
+
+body.dark-mode .bottom-nav {
+    background: #2d2d2d;
+    border-top-color: rgba(255,255,255,0.1);
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
+}
+
+body.dark-mode .nav-item {
+    color: white;
+}
+
+body.dark-mode .nav-item-main-bg {
+    background: #2d2d2d;
+}
+
+body.dark-mode .nav-item-main::before {
+    box-shadow: 10px 0 0 0 #2d2d2d;
+}
+
+body.dark-mode .nav-item-main::after {
+    box-shadow: -10px 0 0 0 #2d2d2d;
+}
+
+body.dark-mode .modal {
+    background: #2d2d2d;
+}
+
+body.dark-mode .modal-header {
+    background: #2d2d2d;
+    border-bottom-color: #4a4a4a;
+}
+
+body.dark-mode .modal-title {
+    color: #ffffff;
+}
+
+body.dark-mode .form-group label {
+    color: #ffffff;
+}
+
+body.dark-mode .form-input,
+body.dark-mode .form-textarea,
+body.dark-mode .tag-selector {
+    background: #3a3a3a;
+    border-color: #4a4a4a;
+    color: #ffffff;
+}
+
+body.dark-mode .form-input::placeholder,
+body.dark-mode .form-textarea::placeholder {
+    color: #a0a0a0;
+}
+
+body.dark-mode .gender-options {
+    background: #3a3a3a;
+}
+
+body.dark-mode .gender-option {
+    color: #ffffff;
+}
+
+body.dark-mode .gender-option.selected {
+    background: #E1306C;
+    color: white;
+}
+
+body.dark-mode .profile-view {
+    background: #2d2d2d;
+}
+
+body.dark-mode .profile-name {
+    color: #f8f9fa;
+}
+
+body.dark-mode .profile-info {
+    background: #2d2d2d;
+}
+
+body.dark-mode .profile-actions {
+    background: #2d2d2d;
+    border-top-color: #4a4a4a;
+}
+
+body.dark-mode .view-detail-item {
+    border-bottom-color: #4a4a4a;
+}
+
+body.dark-mode .view-detail-label {
+    color: #adb5bd;
+}
+
+body.dark-mode .view-detail-value {
+    color: #f8f9fa;
+}
+
+body.dark-mode .profile-info-item {
+    border-bottom-color: #4a4a4a;
+}
+
+body.dark-mode .profile-info-item strong {
+    color: #adb5bd;
+}
+
+body.dark-mode .tag-dropdown-container {
+    background: #2d2d2d;
+    border-color: #4a4a4a;
+}
+
+body.dark-mode .tag-dropdown-header {
+    background: #3a3a3a;
+    border-bottom-color: #4a4a4a;
+    color: #ffffff;
+}
+
+body.dark-mode .tag-item {
+    color: #ffffff;
+}
+
+body.dark-mode .tag-item:hover {
+    background: #3a3a3a;
+}
+
+body.dark-mode .empty-state-text {
+    color: #a0a0a0;
+}
+
+/* Modals */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: white;
+    z-index: 2000;
+    overflow-y: auto;
+}
+
+.modal.active {
+    display: block;
+}
+
+/* Tag edit modal needs higher z-index */
+#tagEditModal {
+    z-index: 12000;
+}
+
+#tagEditModal.active ~ .overlay,
+#tagEditModal.active ~ #overlay {
+    z-index: 11999 !important;
+}
+
+.modal-header {
+    position: sticky;
+    top: 0;
+    background: white;
+    padding: 16px;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    z-index: 10;
+}
+
+.close-btn {
+    background: #f8f9fa;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.modal-content {
+    padding: 20px;
+}
+
+/* Forms */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    font-size: 16px;
+    font-family: inherit;
+}
+
+/* Select année de naissance compact */
+.year-select,
+.birth-select {
+    width: 100% !important;
+    padding: 14px 12px !important;
+    font-size: 16px;
+    max-height: 300px;
+}
+
+/* Sur mobile, limiter la hauteur du dropdown */
+@media (max-width: 768px) {
+    .year-select,
+    .birth-select {
+        font-size: 16px; /* Empêche le zoom sur iOS */
+        max-height: 250px;
+    }
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #E1306C;
+}
+
+.form-group textarea {
+    min-height: 100px;
+}
+
+.tag-selector {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    font-size: 16px;
+    min-height: 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    background: white;
+    transition: border-color 0.2s;
+}
+
+.tag-selector:active {
+    border-color: #E1306C;
+}
+
+.tag-selector-placeholder {
+    color: #868e96;
+}
+
+.tag-selector-value {
+    font-weight: 600;
+    color: #495057;
+}
+
+body.dark-mode .tag-selector-value {
+    color: #f8f9fa;
+}
+
+.tag-selector-arrow {
+    color: #868e96;
+    font-size: 12px;
+}
+
+.form-group input[type="hidden"] {
+    display: none;
+}
+
+
+.form-actions {
+    position: sticky;
+    bottom: 0;
+    background: white;
+    padding: 16px;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    gap: 12px;
+    margin: 0 -20px -20px;
+}
+
+.btn {
+    flex: 1;
+    padding: 14px 24px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    min-height: 52px;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #E1306C 0%, #C13584 100%);
+    color: white;
+}
+
+.btn-secondary {
+    background: #f8f9fa;
+    color: #495057;
+}
+
+.btn-danger {
+    background: #ff4757;
+    color: white;
+}
+
+/* Profile */
+.profile-name {
+    font-size: 26px;
+    font-weight: 700;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.profile-instagram {
+    color: #E1306C;
+    font-size: 18px;
+    text-align: center;
+    margin: 10px 0 20px;
+    cursor: pointer;
+}
+
+.profile-info-item {
+    padding: 16px 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.profile-info-item:last-child {
+    border-bottom: none;
+}
+
+.profile-info-item strong {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #868e96;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+/* Tag Dropdown */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 9999;
+    display: none;
+}
+
+.overlay.active {
+    display: block;
+}
+
+.tag-dropdown-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    z-index: 10000;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    display: none;
+    flex-direction: column;
+}
+
+.tag-dropdown-container.active {
+    display: flex;
+}
+
+.tag-dropdown-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.tag-dropdown-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #212529;
+}
+
+.tag-dropdown-close {
+    background: #f8f9fa;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 20px;
+    color: #495057;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tag-search {
+    padding: 16px 20px;
+    border-bottom: 1px solid #f1f3f5;
+}
+
+.tag-search input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    font-size: 16px;
+}
+
+.tag-options {
+    overflow-y: auto;
+    padding: 8px 16px;
+    flex: 1;
+}
+
+.tag-option {
+    padding: 14px 16px;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 56px;
+    gap: 12px;
+    transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+    user-select: none; /* Empêche la sélection de texte pendant le drag */
+    -webkit-user-select: none;
+    touch-action: none; /* Empêche le scroll pendant le drag sur mobile */
+}
+
+.tag-option.dragging {
+    opacity: 0.5;
+    transform: scale(0.95);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.tag-option[draggable="true"] {
+    cursor: grab;
+    cursor: -webkit-grab;
+}
+
+.tag-option[draggable="true"]:active {
+    cursor: grabbing;
+    cursor: -webkit-grabbing;
+}
+
+.tag-drag-handle {
+    color: #adb5bd;
+    font-size: 18px;
+    cursor: grab;
+    cursor: -webkit-grab;
+    padding: 4px;
+    user-select: none;
+    -webkit-user-select: none;
+    flex-shrink: 0;
+    touch-action: none;
+}
+
+.tag-drag-handle:active {
+    cursor: grabbing;
+    cursor: -webkit-grabbing;
+}
+
+.tag-option:active {
+    background: #f8f9fa;
+}
+
+.tag-option-content {
+    flex: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.tag-option-preview-container {
+    flex: 1;
+    cursor: pointer;
+    padding: 4px 0;
+}
+
+.tag-option-preview {
+    padding: 6px 14px;
+    border-radius: 14px;
+    font-size: 14px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.tag-edit-btn {
+    padding: 8px 16px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    font-size: 16px;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.tag-create {
+    padding: 16px;
+    color: #495057;
+    font-size: 15px;
+    border-top: 1px solid #f1f3f5;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 56px;
+    cursor: pointer;
+}
+
+.tag-create-icon {
+    color: #E1306C;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+/* Tag Edit */
+.tag-preview-section {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    margin: 0 0 20px 0;
+    padding: 20px;
+    background: white;
+    border-bottom: 2px solid #e9ecef;
+    text-align: center;
+}
+
+.tag-preview {
+    padding: 10px 20px;
+    border-radius: 16px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.tag-edit-section {
+    margin-bottom: 24px;
+}
+
+.tag-edit-section label {
+    display: block;
+    margin-bottom: 12px;
+    color: #495057;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.emoji-search-input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    font-size: 16px;
+    margin-bottom: 16px;
+    background: white;
+    transition: all 0.2s;
+}
+
+.emoji-search-input:focus {
+    outline: none;
+    border-color: #E1306C;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(225, 48, 108, 0.1);
+}
+
+.emoji-search-input::placeholder {
+    color: #adb5bd;
+}
+
+body.dark-mode .emoji-search-input {
+    background: #3a3a3a;
+    border-color: #4a4a4a;
+    color: #f8f9fa;
+}
+
+body.dark-mode .emoji-search-input:focus {
+    background: #4a4a4a;
+    border-color: #E1306C;
+}
+
+.emoji-picker {
+    display: grid;
+    grid-template-rows: repeat(4, 1fr);
+    grid-auto-flow: column;
+    gap: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 16px 12px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    max-height: 280px;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+}
+
+.emoji-picker::-webkit-scrollbar {
+    display: none; /* Chrome, Safari */
+}
+
+.emoji-option {
+    font-size: 36px;
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform 0.2s, background 0.2s;
+}
+
+.emoji-option:active {
+    background: #e9ecef;
+    transform: scale(0.95);
+}
+
+.emoji-option.selected {
+    background: #E1306C;
+    transform: scale(1.1);
+}
+
+.color-picker {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+}
+
+.color-option {
+    aspect-ratio: 1;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    min-height: 40px;
+}
+
+.color-option.selected {
+    border-color: #212529;
+    transform: scale(1.05);
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.empty-state-icon {
+    font-size: 64px;
+    margin-bottom: 16px;
+}
+
+/* Responsive */
+@media (min-width: 768px) {
+    .contacts-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Analyse Section Styles */
+.analyse-container {
+    padding: 20px;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.analyse-title {
+    font-size: 24px;
+    margin-bottom: 8px;
+    text-align: center;
+    color: #2d3436;
+}
+
+.analyse-subtitle {
+    color: #6c757d;
+    margin-bottom: 24px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.analyse-instructions {
+    background: white;
+    padding: 24px;
+    border-radius: 16px;
+    margin-top: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.instructions-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #2d3436;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.instructions-video {
+    margin-bottom: 32px;
+    text-align: center;
+}
+
+.video-container {
+    position: relative;
+    display: inline-block;
+    max-width: 400px;
+    width: 100%;
+    height: 250px; /* Hauteur fixe réduite */
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transition: max-width 0.4s ease, height 0.4s ease;
+}
+
+.tutorial-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.video-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000000; /* Noir opaque à 100% */
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+    z-index: 10;
+}
+
+.video-overlay:hover {
+    background: #1a1a1a; /* Légèrement plus clair au hover */
+}
+
+.play-button {
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    color: #E1306C;
+    transition: transform 0.2s ease, background 0.2s ease;
+    padding-left: 6px; /* Centrer visuellement le triangle */
+}
+
+.video-overlay:hover .play-button {
+    transform: scale(1.1);
+    background: white;
+}
+
+.video-caption {
+    font-size: 13px;
+    color: #868e96;
+    margin-top: 12px;
+    font-style: italic;
+}
+
+.instructions-section {
+    margin-bottom: 32px;
+}
+
+.instructions-subtitle {
+    font-size: 18px;
+    font-weight: 700;
+    color: #495057;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.instructions-list {
+    margin: 0;
+    padding-left: 24px;
+    line-height: 1.8;
+    color: #495057;
+}
+
+.instructions-list li {
+    margin-bottom: 12px;
+}
+
+.instructions-list li strong {
+    color: #2d3436;
+    font-weight: 600;
+}
+
+.instructions-note {
+    display: flex;
+    gap: 12px;
+    background: #fff3cd;
+    padding: 16px;
+    border-radius: 12px;
+    border-left: 4px solid #ffc107;
+}
+
+.note-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.note-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #856404;
+    margin-bottom: 4px;
+}
+
+.note-text {
+    font-size: 13px;
+    color: #856404;
+    line-height: 1.6;
+}
+
+.upload-zone-analyse {
+    background: white;
+    border: 3px dashed #007bff;
+    border-radius: 16px;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 8px;
+}
+
+.upload-zone-analyse:hover {
+    border-color: #0056b3;
+    background: #f8f9ff;
+}
+
+.upload-zone-analyse.dragover {
+    background: #e3f2fd;
+    border-color: #0056b3;
+}
+
+.upload-zone-analyse .upload-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+}
+
+.upload-zone-analyse .upload-text {
+    font-size: 16px;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 4px;
+}
+
+.upload-zone-analyse .upload-subtext {
+    font-size: 13px;
+    color: #868e96;
+}
+
+#analyseProgress {
+    padding: 40px 20px;
+}
+
+#analyseProgressText {
+    font-size: 14px;
+    color: #6c757d;
+    margin-top: 12px;
+}
+
+#analyseResults {
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Nouveaux styles pour les filtres horizontaux */
+/* Bouton calendrier séparé (rose) */
+.btn-calendar-separate {
+    background: linear-gradient(135deg, #E1306C 0%, #fd79a8 100%);
+    color: white;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 10px 16px;
+    border-radius: 12px;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(225, 48, 108, 0.2);
+    flex-shrink: 0;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-calendar-separate:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(225, 48, 108, 0.3);
+}
+
+.contacts-count {
+    background: #e3f2fd;
+    padding: 6px 16px;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1976d2;
+    margin: 0 20px 12px 20px; /* Augmenté de 6px à 12px */
+}
+
+#contactsCountNumber {
+    font-size: 15px;
+    font-weight: 700;
+    color: #0d47a1;
+}
+
+/* Supprimer l'ancien style btn-calendar-inline */
+.btn-calendar-inline {
+    display: none;
+}
+
+.filters-horizontal {
+    display: flex;
+    gap: 8px;
+    padding: 0 20px 12px 20px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.filters-horizontal::-webkit-scrollbar {
+    display: none;
+}
+
+.filter-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #495057;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.filter-chip:hover {
+    border-color: #007bff;
+    color: #007bff;
+    background: #f8f9ff;
+}
+
+.filter-chip.active {
+    background: #007bff;
+    border-color: #007bff;
+    color: white;
+}
+
+.filter-chip.active .filter-arrow {
+    color: white;
+}
+
+.filter-reset {
+    background: #ff7675;
+    border-color: #ff7675;
+    color: white;
+}
+
+.filter-reset:hover {
+    background: #d63031;
+    border-color: #d63031;
+}
+
+.filter-arrow {
+    font-size: 10px;
+    color: #868e96;
+    transition: transform 0.2s ease;
+}
+
+.filter-chip.active .filter-arrow {
+    transform: rotate(180deg);
+}
+
+.filter-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 20px;
+    right: 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    z-index: 1000;
+    max-height: 300px;
+    overflow-y: auto;
+    margin-top: 8px;
+}
+
+.filter-dropdown-content {
+    padding: 12px;
+}
+
+.filter-option {
+    padding: 12px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+}
+
+.filter-option:hover {
+    background: #f8f9fa;
+}
+
+.filter-option.selected {
+    background: #e3f2fd;
+    color: #1976d2;
+    font-weight: 600;
+}
+
+.filter-option-checkbox {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #dee2e6;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.filter-option.selected .filter-option-checkbox {
+    background: #007bff;
+    border-color: #007bff;
+    color: white;
+}
+
+.filter-option-checkbox::after {
+    content: '✓';
+    display: none;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.filter-option.selected .filter-option-checkbox::after {
+    display: block;
+}
+
+/* Fix pour le dropdown des filtres - z-index déjà défini dans .header principal */
+
+.filter-dropdown {
+    position: absolute;
+    top: calc(100% - 8px);
+    left: 20px;
+    right: 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    z-index: 1000;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+/* Marqueur de lettre dans la grille */
+.letter-divider {
+    grid-column: 1 / -1;
+    padding: 16px 16px 8px 16px; /* Padding uniforme */
+    font-size: 16px;
+    font-weight: 700;
+    color: #E1306C; /* Lettre en rose */
+    background: #212529; /* Fond noir */
+    border-bottom: 1px solid #E1306C; /* Trait fin rose */
+    margin-bottom: 8px;
+    position: sticky;
+    top: 165px; /* Juste sous le header (ajusté dynamiquement) */
+    z-index: 999; /* En dessous du header (1000) */
+}
+
+/* Dark mode pour les séparateurs de lettres */
+body.dark-mode .letter-divider {
+    background: #1a1a1a; /* Fond légèrement différent en dark mode */
+    color: #E1306C; /* Lettre rose */
+    border-bottom: 1px solid #E1306C; /* Trait fin rose */
+}
+
+body.dark-mode .letter-header {
+    background: #1a1a1a; /* Fond légèrement différent en dark mode */
+    color: #E1306C; /* Lettre rose */
+    border-bottom: 1px solid #E1306C; /* Trait fin rose */
+}
+
+/* Dark mode pour la page d'authentification */
+body.dark-mode .auth-container {
+    background: #2d2d2d;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}
+
+body.dark-mode .auth-logo {
+    color: #ffffff;
+}
+
+body.dark-mode .auth-subtitle {
+    color: #a0a0a0;
+}
+
+body.dark-mode .auth-form h2 {
+    color: #ffffff;
+}
+
+body.dark-mode .auth-input {
+    background: #3a3a3a;
+    border-color: #4a4a4a;
+    color: #ffffff;
+}
+
+body.dark-mode .auth-input::placeholder {
+    color: #868e96;
+}
+
+body.dark-mode .auth-message-error {
+    background: #3d1a1a;
+    color: #ff6b6b;
+}
+
+body.dark-mode .auth-message-success {
+    background: #1a3d1a;
+    color: #51cf66;
+}
+/* ========================================
+   CUSTOM FIELDS - Styles additionnels
+   ======================================== */
+
+/* Modal de gestion des champs */
+.field-item {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: move;
+    transition: all 0.2s;
+}
+
+.field-item:hover {
+    border-color: #E1306C;
+    box-shadow: 0 2px 8px rgba(225, 48, 108, 0.1);
+}
+
+.field-item.field-default {
+    background: #f8f9fa;
+}
+
+.field-item.field-custom {
+    background: white;
+}
+
+.field-item-handle {
+    font-size: 18px;
+    color: #868e96;
+    cursor: grab;
+}
+
+.field-item-handle:active {
+    cursor: grabbing;
+}
+
+.field-item-info {
+    flex: 1;
+}
+
+.field-item-label {
+    font-weight: 600;
+    font-size: 14px;
+    color: #212529;
+    margin-bottom: 2px;
+}
+
+.field-item-meta {
+    font-size: 12px;
+    color: #868e96;
+}
+
+.field-item-actions {
+    display: flex;
+    gap: 4px;
+}
+
+.field-item-edit,
+.field-item-delete {
+    background: transparent;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.field-item-edit:hover {
+    background: #e3f2fd;
+    transform: scale(1.1);
+}
+
+.field-item-delete:hover {
+    background: #fff5f5;
+    transform: scale(1.1);
+}
+
+.field-item-edit:active,
+.field-item-delete:active {
+    transform: scale(0.95);
+}
+
+/* Style pour le select de type de champ */
+#newFieldType {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 15px;
+    background: white;
+    cursor: pointer;
+}
+
+#newFieldType:focus {
+    outline: none;
+    border-color: #E1306C;
+}
+
+/* Style pour textarea dans la modal */
+#newFieldOptions {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    resize: vertical;
+}
+
+#newFieldOptions:focus {
+    outline: none;
+    border-color: #E1306C;
+}
+
+/* Animation drag */
+.field-item.dragging {
+    opacity: 0.5;
+    transform: scale(0.98);
+}
+
+.field-item.drag-over {
+    border-top: 3px solid #E1306C !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .field-item {
+        padding: 10px;
+    }
+    
+    .field-item-label {
+        font-size: 13px;
+    }
+    
+    .field-item-meta {
+        font-size: 11px;
+    }
+}
+
+/* Dark mode support */
+.dark-mode .field-item {
+    background: #2c3e50;
+    border-color: #34495e;
+}
+
+.dark-mode .field-item.field-default {
+    background: #34495e;
+}
+
+.dark-mode .field-item:hover {
+    border-color: #E1306C;
+    box-shadow: 0 2px 8px rgba(225, 48, 108, 0.2);
+}
+
+.dark-mode .field-item-label {
+    color: #ecf0f1;
+}
+
+.dark-mode .field-item-meta {
+    color: #95a5a6;
+}
+
+.dark-mode #newFieldType,
+.dark-mode #newFieldOptions {
+    background: #34495e;
+    border-color: #2c3e50;
+    color: #ecf0f1;
+}
+
+/* Bouton icône pour les settings */
+.profil-btn-icon {
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    color: #E1306C;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.profil-btn-icon:hover {
+    background: rgba(225, 48, 108, 0.1);
+    transform: translateX(3px);
+}
+
+.profil-btn-icon:active {
+    transform: translateX(3px) scale(0.95);
+}
+
+/* Drag & Drop mobile-friendly */
+.field-item-dragging {
+    opacity: 0.9;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    transform: scale(1.05);
+    transition: none;
+}
+
+.field-item-placeholder {
+    border: 2px dashed #E1306C;
+    background: rgba(225, 48, 108, 0.05);
+}
+
+.field-item-handle {
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* Dark mode - Tag search input */
+body.dark-mode .tag-search {
+    border-bottom-color: #4a4a4a;
+}
+
+body.dark-mode .tag-search input {
+    background: #3a3a3a;
+    border-color: #4a4a4a;
+    color: #ffffff;
+}
+
+body.dark-mode .tag-search input::placeholder {
+    color: #a0a0a0;
+}
+
+
+/* Dark mode - Tag dropdown close button (croix noire sur fond blanc) */
+body.dark-mode .tag-dropdown-close {
+    background: #ffffff;
+    color: #000000;
+}
+
+body.dark-mode .tag-dropdown-close:hover {
+    background: #e9ecef;
+}
+
+/* Dark mode - Tag dropdown title (blanc pur) */
+body.dark-mode .tag-dropdown-title {
+    color: #ffffff;
+}
+
+/* Dark mode - Modal content (pour éviter le fond blanc) */
+body.dark-mode .modal-content {
+    background: #2d2d2d;
+}
+
+/* Profile view - base */
+.profile-view {
+    background: white;
+    padding: 24px;
+}
+
+.profile-name {
+    font-size: 28px;
+    font-weight: 700;
+    text-align: center;
+    margin: 0 0 8px 0;
+    color: #212529;
+}
+
+.profile-instagram {
+    color: #E1306C;
+    font-size: 16px;
+    text-align: center;
+    margin: 0 0 32px 0;
+    cursor: pointer;
+    text-decoration: none;
+    display: block;
+    font-weight: 500;
+}
+
+.profile-instagram:hover {
+    text-decoration: underline;
+}
+
+.profile-info {
+    background: white;
+    margin-bottom: 80px; /* Laisser de l'espace pour les boutons sticky */
+}
+
+.profile-actions {
+    position: sticky;
+    bottom: 0;
+    background: white;
+    padding: 16px;
+    margin: 0 -24px -24px; /* Compenser le padding du parent */
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.profile-actions .btn {
+    width: 100%;
+    flex: none; /* Désactiver flex: 1 pour forcer width: 100% */
+}
+
+.view-detail-item {
+    padding: 16px 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.view-detail-item:last-child {
+    border-bottom: none;
+}
+
+.view-detail-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #868e96;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.view-detail-value {
+    font-size: 15px;
+    color: #212529;
+    line-height: 1.6;
+    word-wrap: break-word;
+}
+
+.view-detail-value .tag-mini {
+    display: inline-block;
+    margin: 2px 0;
+}
+
+body.dark-mode .form-actions {
+    background: #2d2d2d;
+    border-top-color: #4a4a4a;
+}
+
+
+/* ============================================
+   CITY SEARCH DROPDOWN
+   ============================================ */
+
+.city-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    margin-top: 4px;
+    max-height: 300px;
+    overflow-y: auto;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    display: none;
+}
+
+.city-dropdown-header {
+    padding: 10px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #868e96;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.city-dropdown-item {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #f1f3f5;
+}
+
+.city-dropdown-item:last-child {
+    border-bottom: none;
+}
+
+.city-dropdown-item:hover {
+    background: #f8f9fa;
+}
+
+.city-dropdown-item.loading,
+.city-dropdown-item.no-results {
+    color: #868e96;
+    cursor: default;
+    justify-content: center;
+}
+
+.city-dropdown-item.loading:hover,
+.city-dropdown-item.no-results:hover {
+    background: white;
+}
+
+.city-flag {
+    font-size: 24px;
+    min-width: 32px;
+}
+
+.city-name {
+    font-size: 14px;
+    color: #212529;
+    flex: 1;
+}
+
+/* Dark mode */
+body.dark-mode .city-dropdown {
+    background: #2a2a2a;
+    border-color: #4a4a4a;
+}
+
+body.dark-mode .city-dropdown-header {
+    background: #1f1f1f;
+    border-bottom-color: #4a4a4a;
+    color: #adb5bd;
+}
+
+body.dark-mode .city-dropdown-item {
+    border-bottom-color: #3a3a3a;
+}
+
+body.dark-mode .city-dropdown-item:hover {
+    background: #3a3a3a;
+}
+
+body.dark-mode .city-dropdown-item.loading:hover,
+body.dark-mode .city-dropdown-item.no-results:hover {
+    background: #2a2a2a;
+}
+
+body.dark-mode .city-name {
+    color: #f8f9fa;
+}
+
+/* Contact card flag */
+.contact-flag {
+    font-size: 16px;
+    margin-left: 6px;
+}
+
+
+/* ============================================
+   CALENDAR
+   ============================================ */
+
+.calendar-modal .modal-content {
+    max-width: 90vw;
+    width: 900px;
+    padding: 0 !important;
+    margin: 0 auto;
+}
+
+/* Desktop large */
+@media (min-width: 1200px) {
+    .calendar-modal .modal-content {
+        width: 1000px;
+        max-width: 90vw;
+    }
+}
+
+/* Desktop standard */
+@media (min-width: 992px) and (max-width: 1199px) {
+    .calendar-modal .modal-content {
+        width: 900px;
+        max-width: 90vw;
+    }
+}
+
+/* Tablette */
+@media (min-width: 769px) and (max-width: 991px) {
+    .calendar-modal .modal-content {
+        width: 750px;
+        max-width: 90vw;
+    }
+}
+
+.calendar-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 30px;
+    background: linear-gradient(135deg, #E1306C 0%, #fd79a8 100%);
+    color: white;
+}
+
+.calendar-controls h3 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    flex: 1;
+    text-align: center;
+}
+
+.calendar-nav-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    font-size: 20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.calendar-nav-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+.calendar-grid {
+    padding: 20px;
+}
+
+.calendar-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.calendar-day-name {
+    text-align: center;
+    font-weight: 600;
+    color: #495057;
+    font-size: 14px;
+    padding: 10px 0;
+}
+
+.calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: #f8f9fa;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    min-height: 80px;
+}
+
+.calendar-day.empty {
+    background: transparent;
+    cursor: default;
+}
+
+.calendar-day:not(.empty):hover {
+    background: #e9ecef;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.calendar-day.today {
+    background: #E1306C;
+    color: white;
+    font-weight: 600;
+}
+
+.calendar-day.today:hover {
+    background: #c7275e;
+}
+
+.calendar-day.past {
+    opacity: 0.4;
+}
+
+.calendar-day.has-meeting {
+    background: linear-gradient(135deg, #fd79a8 0%, #E1306C 100%);
+    color: white;
+    font-weight: 600;
+}
+
+.calendar-day.has-meeting:hover {
+    background: linear-gradient(135deg, #E1306C 0%, #c7275e 100%);
+}
+
+.day-number {
+    font-size: 18px;
+}
+
+.meeting-dot {
+    background: white;
+    color: #E1306C;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    margin-top: 4px;
+}
+
+.calendar-day.today .meeting-dot {
+    background: rgba(255, 255, 255, 0.3);
+    color: white;
+}
+
+.calendar-details {
+    padding: 30px;
+    border-top: 2px solid #e9ecef;
+    background: #f8f9fa;
+}
+
+.calendar-details h4 {
+    margin: 0 0 20px 0;
+    font-size: 18px;
+    color: #E1306C;
+    text-transform: capitalize;
+}
+
+.calendar-meeting-item {
+    background: white;
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-left: 4px solid #E1306C;
+}
+
+.calendar-meeting-item:hover {
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(225, 48, 108, 0.15);
+}
+
+.meeting-item-name {
+    font-weight: 600;
+    font-size: 16px;
+    color: #212529;
+    margin-bottom: 4px;
+}
+
+.meeting-item-instagram {
+    color: #868e96;
+    font-size: 14px;
+}
+
+/* Dark mode */
+body.dark-mode .calendar-day-name {
+    color: #f8f9fa;
+}
+
+body.dark-mode .calendar-day {
+    background: #3a3a3a;
+    color: #f8f9fa;
+}
+
+body.dark-mode .calendar-day.empty {
+    background: transparent;
+}
+
+body.dark-mode .calendar-day:not(.empty):hover {
+    background: #4a4a4a;
+}
+
+body.dark-mode .calendar-details {
+    background: #2a2a2a;
+    border-top-color: #4a4a4a;
+}
+
+body.dark-mode .calendar-meeting-item {
+    background: #3a3a3a;
+    color: #f8f9fa;
+}
+
+body.dark-mode .meeting-item-name {
+    color: #f8f9fa;
+}
+
+body.dark-mode .meeting-item-instagram {
+    color: #adb5bd;
+}
+
+/* Bouton calendrier dans la navbar */
+
+
+
+/* Alignement compteur + bouton calendrier */
+.header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+
+/* Conteneur pour compteur + bouton calendrier */
+
+/* Dark mode pour le bouton calendrier inline */
+body.dark-mode .btn-calendar-inline:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Améliorer le champ date pour forcer l'affichage du picker */
+input[type="date"],
+.date-input {
+    position: relative;
+    cursor: pointer;
+    min-width: 150px;
+    max-width: 100%;
+    width: 100%;
+    padding: 14px 16px !important; /* Même padding que les autres inputs */
+    height: auto;
+    min-height: 52px; /* Même hauteur que les autres inputs */
+}
+
+/* Placeholder personnalisé pour iOS (span) */
+.date-placeholder {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+    pointer-events: none;
+    font-size: 16px;
+}
+
+/* Cacher le placeholder quand le champ a une valeur ou le focus */
+input[type="date"]:focus + .date-placeholder,
+.date-input:focus + .date-placeholder,
+input[type="date"].has-value + .date-placeholder,
+.date-input.has-value + .date-placeholder {
+    display: none;
+}
+
+/* Sur iOS, masquer la valeur par défaut du champ date vide */
+input[type="date"]:not(.has-value),
+.date-input:not(.has-value) {
+    color: transparent;
+}
+
+input[type="date"].has-value,
+.date-input.has-value {
+    color: #212529;
+}
+
+/* Placeholder pour les champs date vides (iOS/Safari) */
+input[type="date"]:not(:focus):not(:valid),
+.date-input:not(:focus):not(:valid) {
+    color: transparent;
+}
+
+input[type="date"]:not(:focus):not(:valid)::before,
+.date-input:not(:focus):not(:valid)::before {
+    content: attr(placeholder);
+    color: #999;
+    position: absolute;
+    left: 16px;
+}
+
+/* Afficher le texte placeholder sur mobile */
+input[type="date"]:not(:focus):invalid,
+.date-input:not(:focus):invalid {
+    color: #999;
+}
+
+/* Forcer l'affichage de l'icône calendrier */
+input[type="date"]::-webkit-calendar-picker-indicator,
+.date-input::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    font-size: 18px;
+    opacity: 0.8;
+    position: absolute;
+    right: 10px;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover,
+.date-input::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+}
+
+/* Firefox */
+input[type="date"]::-moz-calendar-picker-indicator,
+.date-input::-moz-calendar-picker-indicator {
+    cursor: pointer;
+}
+
+/* Mobile : forcer l'affichage de l'icône */
+@media (max-width: 768px) {
+    input[type="date"],
+    .date-input {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        padding-right: 40px;
+    }
+    
+    input[type="date"]::-webkit-calendar-picker-indicator,
+    .date-input::-webkit-calendar-picker-indicator {
+        display: block !important;
+        opacity: 1;
+    }
+}
+
+/* Dark mode pour le bouton calendrier séparé */
+body.dark-mode .btn-calendar-separate {
+    background: linear-gradient(135deg, #E1306C 0%, #c7275e 100%);
+}
+
+body.dark-mode .btn-calendar-separate:hover {
+    box-shadow: 0 4px 12px rgba(225, 48, 108, 0.4);
+}
+
+/* ============================================
+   RESPONSIVE CALENDAR - MOBILE
+   ============================================ */
+
+@media (max-width: 768px) {
+    .calendar-modal .modal-content {
+        max-width: 100%;
+        margin: 0;
+        border-radius: 0;
+        max-height: 100vh;
+        overflow-y: auto;
+    }
+    
+    .calendar-controls {
+        padding: 16px 20px;
+    }
+    
+    .calendar-controls h3 {
+        font-size: 18px;
+    }
+    
+    .calendar-nav-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 18px;
+    }
+    
+    .calendar-grid {
+        padding: 12px;
+    }
+    
+    .calendar-day-name {
+        font-size: 12px;
+        padding: 8px 0;
+    }
+    
+    .calendar-days {
+        gap: 6px;
+    }
+    
+    .calendar-day {
+        min-height: 50px;
+        border-radius: 8px;
+    }
+    
+    .day-number {
+        font-size: 14px;
+    }
+    
+    .meeting-dot {
+        width: 20px;
+        height: 20px;
+        font-size: 10px;
+        margin-top: 2px;
+    }
+    
+    .calendar-details {
+        padding: 20px 12px;
+    }
+    
+    .calendar-details h4 {
+        font-size: 16px;
+        margin-bottom: 16px;
+    }
+    
+    .calendar-meeting-item {
+        padding: 12px;
+        margin-bottom: 10px;
+    }
+    
+    .meeting-item-name {
+        font-size: 15px;
+    }
+    
+    .meeting-item-instagram {
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .calendar-controls h3 {
+        font-size: 16px;
+    }
+    
+    .calendar-nav-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+    }
+    
+    .calendar-grid {
+        padding: 8px;
+    }
+    
+    .calendar-day-name {
+        font-size: 11px;
+        padding: 6px 0;
+    }
+    
+    .calendar-days {
+        gap: 4px;
+    }
+    
+    .calendar-day {
+        min-height: 45px;
+        border-radius: 6px;
+    }
+    
+    .day-number {
+        font-size: 13px;
+    }
+    
+    .meeting-dot {
+        width: 18px;
+        height: 18px;
+        font-size: 9px;
+    }
+}
+
+/* Responsive pour le bouton calendrier et compteur */
+@media (max-width: 768px) {
+    
+    .btn-calendar-separate {
+        padding: 6px 12px;
+        font-size: 18px;
+    }
+    
+    .contacts-count {
+        font-size: 13px;
+        padding: 6px 12px;
+    }
+    
+    #contactsCountNumber {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    
+    .btn-calendar-separate {
+        padding: 5px 10px;
+        font-size: 16px;
+    }
+    
+    .contacts-count {
+        font-size: 12px;
+        padding: 5px 10px;
+    }
+}
+
+/* Ajuster les tailles des jours pour grands écrans */
+@media (min-width: 1200px) {
+    .calendar-day {
+        min-height: 100px;
+    }
+    
+    .day-number {
+        font-size: 20px;
+    }
+    
+    .meeting-dot {
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
+        margin-top: 6px;
+    }
+    
+    .calendar-day-name {
+        font-size: 16px;
+    }
+}
+
+@media (min-width: 992px) and (max-width: 1199px) {
+    .calendar-day {
+        min-height: 90px;
+    }
+    
+    .day-number {
+        font-size: 19px;
+    }
+    
+    .meeting-dot {
+        width: 26px;
+        height: 26px;
+        font-size: 13px;
+        margin-top: 5px;
+    }
+}
+
+/* Responsive pour search-container */
+@media (max-width: 768px) {
+    .search-container {
+        padding: 0 16px;
+        gap: 8px;
+    }
+    
+    .btn-calendar-separate {
+        padding: 8px 12px;
+        font-size: 18px;
+    }
+}
+
+@media (max-width: 480px) {
+    .search-container {
+        padding: 0 12px;
+        gap: 6px;
+    }
+    
+    .btn-calendar-separate {
+        padding: 6px 10px;
+        font-size: 16px;
+    }
+}
+
+/* Responsive pour contacts-count */
+@media (max-width: 768px) {
+    .contacts-count {
+        margin: 0 16px 6px 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .contacts-count {
+        margin: 0 12px 6px 12px;
+    }
+}
+
+/* Message "Pas de rendez-vous" */
+.calendar-no-meeting {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.no-meeting-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.6;
+}
+
+.no-meeting-text {
+    font-size: 16px;
+    color: #868e96;
+    font-weight: 500;
+}
+
+body.dark-mode .no-meeting-text {
+    color: #adb5bd;
+}
+
+@media (max-width: 480px) {
+    .calendar-no-meeting {
+        padding: 30px 20px;
+    }
+    
+    .no-meeting-icon {
+        font-size: 40px;
+    }
+    
+    .no-meeting-text {
+        font-size: 15px;
+    }
+}
