@@ -331,7 +331,7 @@ h1 {
     align-items: center;
     gap: 12px;
     padding: 0 20px;
-    margin-bottom: 2px;
+    margin-bottom: 12px; /* Augmenté de 2px à 12px */
 }
 
 .search-box {
@@ -859,10 +859,10 @@ body.hide-header .container {
 
 .unfollowers-list-header {
     padding: 16px;
-    background: #f8f9fa;
+    background: #212529; /* Fond noir comme letter-header */
     font-weight: 700;
-    color: #495057;
-    border-bottom: 2px solid #e9ecef;
+    color: #E1306C; /* Texte rose */
+    border-bottom: 1px solid #E1306C; /* Trait fin rose */
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -1675,8 +1675,9 @@ body.dark-mode .unfollowers-list {
 }
 
 body.dark-mode .unfollowers-list-header {
-    background: #3a3a3a;
-    color: #ffffff;
+    background: #1a1a1a; /* Fond noir légèrement différent */
+    color: #E1306C; /* Texte rose */
+    border-bottom: 1px solid #E1306C; /* Trait fin rose */
 }
 
 body.dark-mode .unfollower-item {
@@ -2680,7 +2681,7 @@ body.dark-mode .emoji-search-input:focus {
     font-size: 14px;
     font-weight: 600;
     color: #1976d2;
-    margin: 0 20px 6px 20px;
+    margin: 0 20px 12px 20px; /* Augmenté de 6px à 12px */
 }
 
 #contactsCountNumber {
