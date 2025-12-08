@@ -55,9 +55,10 @@ const contacts = {
         );
         console.log('🔍 Filterable fields:', filterableFields.length, filterableFields.map(f => f.label));
         
-        // Ajouter "Profil complet" comme filtre spécial
+        // Ajouter "Profil complet" et "Pays" comme filtres spéciaux
         const specialFilters = [
-            { id: 'complete', label: 'Profil complet' }
+            { id: 'complete', label: 'Profil complet' },
+            { id: 'country', label: 'Pays' }
         ];
         
         // Générer les boutons de filtres
@@ -908,7 +909,7 @@ const contacts = {
         
         // Profil complet
         const hasCompleteFilter = this.activeFilters.complete && this.activeFilters.complete.length > 0;
-        const completeBtn = document.getElementById('filterCompleteBtn');
+        const completeBtn = document.getElementById('filter_complete_Btn');
         if (completeBtn) {
             completeBtn.classList.toggle('active', hasCompleteFilter);
         }
@@ -916,7 +917,7 @@ const contacts = {
         
         // Pays
         const hasCountryFilter = this.activeFilters.country && this.activeFilters.country.length > 0;
-        const countryBtn = document.getElementById('filterCountryBtn');
+        const countryBtn = document.getElementById('filter_country_Btn');
         if (countryBtn) {
             countryBtn.classList.toggle('active', hasCountryFilter);
         }
