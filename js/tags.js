@@ -547,8 +547,8 @@ const tags = {
             
             field.tags = reorderedTags;
             
-            // Sauvegarder dans Firebase
-            app.dataStore.saveUserData();
+            // Sauvegarder dans Firebase avec debounce (attendre 2s pendant le drag)
+            app.dataStore.save(null, { skipContacts: true, debounce: true });
             
             console.log('✅ Tag order saved:', newOrder);
         }
@@ -567,7 +567,7 @@ const tags = {
         const contact = app.dataStore.contacts.find(c => c.id === this.currentContext.contactId);
         if (contact) {
             contact[this.currentContext.fieldType] = value;
-            app.dataStore.save();
+            app.dataStore.save(contact); // Sauvegarder SEULEMENT ce contact
             contacts.render();
         }
         
@@ -612,7 +612,7 @@ const tags = {
         style.textContent = `.${className} { background: ${color}; color: white; }`;
         document.head.appendChild(style);
         
-        app.dataStore.save();
+        app.dataStore.saveSettings(); // Sauvegarder seulement les paramètres
         return newTag;
     },
 
@@ -881,9 +881,9 @@ const tags = {
             styleElement.textContent = `.${className} { background: ${newColor}; color: white; }`;
         }
         
-        console.log('📤 Calling save to Firebase...');
+        console.log('📤 Calling saveSettings to Firebase...');
         
-        app.dataStore.save();
+        app.dataStore.saveSettings(); // Sauvegarder seulement les paramètres
         contacts.render();
         this.closeEditModal();
     },
@@ -941,8 +941,10 @@ const tags = {
         
         console.log(`✅ ${contactsUpdated} contacts updated`);
         
-        // Sauvegarder
-        app.dataStore.save();
+        // Sauvegarder SEULEMENT les paramètres (pas tous les contacts)
+        // Les contacts seront sauvegardés individuellement quand on les éditera
+        await app.dataStore.saveSettings();
+        
         contacts.render();
         this.closeEditModal();
         
