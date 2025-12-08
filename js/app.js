@@ -266,7 +266,7 @@ const app = {
             this.currentSection = savedSection;
             
             this.setupEventListeners();
-            unfollowers.init();
+            relations.init();
             
             // Attendre un peu que les données Firebase soient chargées
             setTimeout(() => {
@@ -486,7 +486,7 @@ const app = {
 
         // Gérer l'affichage du header
         
-        // Ordre des onglets : Contacts (0), Stats (1), Analyse (2), Unfollowers (3), Profil (4)
+        // Ordre des onglets : Contacts (0), Stats (1), Analyse (2), Relations (3), Profil (4)
         if (section === 'contacts') {
             document.getElementById('contactsSection').classList.add('active');
             document.querySelectorAll('.nav-item')[0].classList.add('active');
@@ -516,16 +516,16 @@ const app = {
             document.querySelectorAll('.nav-item')[2].classList.add('active');
             header.style.display = 'none';
             container.style.marginTop = '0'; // Supprimer la marge
-        } else if (section === 'unfollowers') {
-            document.getElementById('unfollowersSection').classList.add('active');
+        } else if (section === 'relations') {
+            document.getElementById('relationsSection').classList.add('active');
             document.querySelectorAll('.nav-item')[3].classList.add('active');
             header.style.display = 'none';
             container.style.marginTop = '0'; // Supprimer la marge
             
-            // S'assurer que les letter-header d'unfollowers ont le bon top
+            // S'assurer que les letter-header de relations ont le bon top
             setTimeout(() => {
-                document.querySelectorAll('#unfollowersSection .letter-header').forEach(letterHeader => {
-                    letterHeader.style.top = '0'; // Valeur par défaut pour unfollowers
+                document.querySelectorAll('#relationsSection .letter-header').forEach(letterHeader => {
+                    letterHeader.style.top = '0'; // Valeur par défaut pour relations
                 });
             }, 50);
         } else if (section === 'profil') {
@@ -546,8 +546,8 @@ const app = {
         
         // Mettre à jour les statistiques
         document.getElementById('profilContactsCount').textContent = app.dataStore.contacts.length;
-        document.getElementById('profilFollowersCount').textContent = unfollowers.data.followers.length;
-        document.getElementById('profilUnfollowersCount').textContent = unfollowers.data.unfollowers.length;
+        document.getElementById('profilFollowersCount').textContent = relations.data.followers.length;
+        document.getElementById('profilUnfollowersCount').textContent = relations.data.unfollowers.length;
         
         // Synchroniser le toggle du mode sombre
         const darkModeToggle = document.getElementById('darkModeToggle');
