@@ -463,6 +463,19 @@ const app = {
             s.scrollTop = 0;
         });
         
+        // NETTOYAGE : Réinitialiser tous les styles dynamiques
+        const container = document.querySelector('.container');
+        const header = document.querySelector('.header');
+        
+        // Reset des styles potentiellement cassés (SEULEMENT dans contactsSection)
+        document.querySelectorAll('#contactsSection .letter-header, #contactsSection .letter-divider').forEach(el => {
+            el.style.top = '';
+            el.style.position = '';
+        });
+        
+        // Reset du container
+        container.style.marginTop = '';
+        
         // Save current section
         this.currentSection = section;
         localStorage.setItem('currentSection', section);
@@ -472,8 +485,6 @@ const app = {
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
 
         // Gérer l'affichage du header
-        const header = document.querySelector('.header');
-        const container = document.querySelector('.container');
         
         // Ordre des onglets : Contacts (0), Stats (1), Analyse (2), Unfollowers (3), Profil (4)
         if (section === 'contacts') {
@@ -486,8 +497,8 @@ const app = {
                 const headerHeight = header.offsetHeight;
                 container.style.marginTop = headerHeight + 'px'; // Pas d'espace supplémentaire
                 
-                // Ajuster la position sticky des letter-headers pour qu'ils se collent juste sous le header
-                document.querySelectorAll('.letter-header').forEach(letterHeader => {
+                // Ajuster la position sticky des letter-headers UNIQUEMENT dans contactsSection
+                document.querySelectorAll('#contactsSection .letter-header').forEach(letterHeader => {
                     letterHeader.style.top = headerHeight + 'px';
                 });
             }, 50);
@@ -509,6 +520,13 @@ const app = {
             document.querySelectorAll('.nav-item')[3].classList.add('active');
             header.style.display = 'none';
             container.style.marginTop = '0'; // Supprimer la marge
+            
+            // S'assurer que les letter-header d'unfollowers ont le bon top
+            setTimeout(() => {
+                document.querySelectorAll('#unfollowersSection .letter-header').forEach(letterHeader => {
+                    letterHeader.style.top = '0'; // Valeur par défaut pour unfollowers
+                });
+            }, 50);
         } else if (section === 'profil') {
             document.getElementById('profilSection').classList.add('active');
             document.querySelectorAll('.nav-item')[4].classList.add('active');
