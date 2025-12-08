@@ -308,6 +308,28 @@ const contacts = {
             });
         }
         
+        // Filtre pays
+        if (this.activeFilters.country && this.activeFilters.country.length > 0) {
+            result = result.filter(contact => {
+                if (!contact.location) return false;
+                
+                let locationData = null;
+                if (typeof contact.location === 'object') {
+                    locationData = contact.location;
+                } else if (typeof contact.location === 'string' && contact.location.startsWith('{')) {
+                    try {
+                        locationData = JSON.parse(contact.location);
+                    } catch (e) {
+                        locationData = typeof city !== 'undefined' ? city.parseLocation(contact.location) : null;
+                    }
+                } else {
+                    locationData = typeof city !== 'undefined' ? city.parseLocation(contact.location) : null;
+                }
+                
+                return locationData && locationData.country && this.activeFilters.country.includes(locationData.country);
+            });
+        }
+        
         // Sort by firstName
         result.sort((a, b) => {
             const aName = a.firstName.replace(/^@+/, '');
@@ -755,6 +777,57 @@ const contacts = {
                     <span>❌ Non</span>
                 </label>
             `;
+        } else if (filterType === 'country') {
+            // Filtre spécial pour les pays
+            const countries = {};
+            
+            app.dataStore.contacts.forEach(contact => {
+                if (contact.location) {
+                    let locationData = null;
+                    
+                    if (typeof contact.location === 'object') {
+                        locationData = contact.location;
+                    } else if (typeof contact.location === 'string' && contact.location.startsWith('{')) {
+                        try {
+                            locationData = JSON.parse(contact.location);
+                        } catch (e) {
+                            locationData = typeof city !== 'undefined' ? city.parseLocation(contact.location) : null;
+                        }
+                    } else {
+                        locationData = typeof city !== 'undefined' ? city.parseLocation(contact.location) : null;
+                    }
+                    
+                    if (locationData && locationData.country) {
+                        const key = locationData.country;
+                        if (!countries[key]) {
+                            countries[key] = {
+                                country: locationData.country,
+                                flag: locationData.flag || '🌍',
+                                count: 0
+                            };
+                        }
+                        countries[key].count++;
+                    }
+                }
+            });
+            
+            // Trier par ordre alphabétique
+            const sortedCountries = Object.values(countries).sort((a, b) => 
+                a.country.localeCompare(b.country, 'fr')
+            );
+            
+            if (sortedCountries.length === 0) {
+                content.innerHTML = '<div style="padding: 12px; text-align: center; color: #868e96;">Aucun pays trouvé</div>';
+            } else {
+                content.innerHTML = sortedCountries.map(c => `
+                    <label class="filter-option">
+                        <input type="checkbox" value="${c.country}" 
+                               ${this.activeFilters.country.includes(c.country) ? 'checked' : ''} 
+                               onchange="contacts.toggleFilter('country', '${c.country.replace(/'/g, "\\'")}')">
+                        <span>${c.flag} ${c.country} (${c.count})</span>
+                    </label>
+                `).join('');
+            }
         } else {
             // Trouver le champ correspondant
             const allFields = app.getAllFields();
@@ -853,7 +926,8 @@ const contacts = {
             relationType: [],
             meetingPlace: [],
             discussionStatus: [],
-            complete: []
+            complete: [],
+            country: []
         };
         
         // Réinitialiser aussi la barre de recherche
