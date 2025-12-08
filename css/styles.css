@@ -1351,16 +1351,23 @@ body.hide-header .container {
     padding: 16px;
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    min-height: 76px; /* Hauteur minimale pour aligner les deux items */
+}
+
+.profil-setting-item + .profil-setting-item {
+    margin-top: 12px; /* Espacement entre les items */
 }
 
 .profil-setting-info {
     display: flex;
     align-items: center;
     gap: 12px;
+    flex: 1; /* Prendre tout l'espace disponible */
 }
 
 .profil-setting-icon {
     font-size: 24px;
+    flex-shrink: 0; /* Ne pas rétrécir */
 }
 
 .profil-setting-title {
@@ -1373,6 +1380,12 @@ body.hide-header .container {
 .profil-setting-desc {
     font-size: 12px;
     color: #868e96;
+}
+
+/* Aligner le bouton et le toggle à la même hauteur */
+.profil-btn-icon,
+.toggle-switch {
+    flex-shrink: 0; /* Ne pas rétrécir */
 }
 
 /* Toggle Switch */
