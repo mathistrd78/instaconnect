@@ -192,9 +192,10 @@ const contacts = {
             html += `<div class="letter-divider" data-letter="${letter}" id="letter-${letter}">${letter}</div>`;
             
             groupedContacts[letter].forEach(contact => {
-                const relTag = tags.findTag('relationType', contact.relationType);
-                const meetTag = tags.findTag('meetingPlace', contact.meetingPlace);
-                const statTag = tags.findTag('discussionStatus', contact.discussionStatus);
+                // Vérifier que tags est disponible
+                const relTag = (typeof window.tags !== 'undefined') ? window.tags.findTag('relationType', contact.relationType) : null;
+                const meetTag = (typeof window.tags !== 'undefined') ? window.tags.findTag('meetingPlace', contact.meetingPlace) : null;
+                const statTag = (typeof window.tags !== 'undefined') ? window.tags.findTag('discussionStatus', contact.discussionStatus) : null;
                 
                 // Extraire le drapeau du pays si disponible
                 let locationData = null;
