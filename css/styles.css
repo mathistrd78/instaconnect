@@ -647,11 +647,13 @@ body.hide-header .container {
 .legend-item {
     display: flex;
     justify-content: space-between;
-    padding: 10px 12px; /* Réduit la hauteur */
-    margin-bottom: 12px; /* Plus d'espace entre les items */
+    align-items: center; /* Centrer verticalement */
+    padding: 8px 12px; /* Encore plus réduit */
+    margin-bottom: 10px; /* Espace entre les items */
     background: #f8f9fa;
-    border-radius: 8px; /* Plus carré */
+    border-radius: 6px; /* Encore plus carré */
     transition: all 0.2s ease;
+    min-height: auto; /* Pas de hauteur minimale */
 }
 
 .legend-item-clickable {
@@ -673,21 +675,23 @@ body.hide-header .container {
     align-items: center;
     gap: 10px;
     font-weight: 600;
+    font-size: 14px; /* Réduire la taille du texte */
 }
 
 .legend-color {
-    width: 20px;
-    height: 20px;
-    border-radius: 6px;
+    width: 16px; /* Plus petit */
+    height: 16px; /* Plus petit */
+    border-radius: 4px;
+    flex-shrink: 0; /* Ne pas rétrécir */
 }
 
 .legend-value {
-    font-size: 18px;
+    font-size: 16px; /* Plus petit */
     font-weight: 700;
 }
 
 .legend-percent {
-    font-size: 14px;
+    font-size: 13px; /* Plus petit */
     color: #868e96;
 }
 
