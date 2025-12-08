@@ -10,7 +10,8 @@ const contacts = {
         relationType: [],
         meetingPlace: [],
         discussionStatus: [],
-        complete: [] // 'oui' ou 'non'
+        complete: [], // 'oui' ou 'non'
+        country: [] // pays
     },
     currentFilterDropdown: null,
 
@@ -907,11 +908,19 @@ const contacts = {
         
         // Profil complet
         const hasCompleteFilter = this.activeFilters.complete && this.activeFilters.complete.length > 0;
-        const completeBtn = document.getElementById('filter_complete_Btn');
+        const completeBtn = document.getElementById('filterCompleteBtn');
         if (completeBtn) {
             completeBtn.classList.toggle('active', hasCompleteFilter);
         }
         if (hasCompleteFilter) hasAnyFilter = true;
+        
+        // Pays
+        const hasCountryFilter = this.activeFilters.country && this.activeFilters.country.length > 0;
+        const countryBtn = document.getElementById('filterCountryBtn');
+        if (countryBtn) {
+            countryBtn.classList.toggle('active', hasCountryFilter);
+        }
+        if (hasCountryFilter) hasAnyFilter = true;
         
         // Show/hide reset button
         const resetBtn = document.getElementById('filterResetBtn');
