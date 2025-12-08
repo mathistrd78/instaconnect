@@ -258,10 +258,10 @@ const relations = {
                     this.data.followers = data.unfollowersData.followers || [];
                     this.data.unfollowers = data.unfollowersData.unfollowers || [];
                     
-                    // Update display
-                    document.getElementById('followersCount').textContent = this.data.followers.length;
-                    document.getElementById('followingCount').textContent = this.data.following.length;
-                    document.getElementById('unfollowersCount').textContent = this.data.unfollowers.length;
+                    // Update display (compteurs supprimés)
+                    // document.getElementById('followersCount').textContent = this.data.followers.length;
+                    // document.getElementById('followingCount').textContent = this.data.following.length;
+                    // document.getElementById('unfollowersCount').textContent = this.data.unfollowers.length;
                     
                     // Show appropriate section
                     if (this.data.unfollowers.length === 0) {
@@ -429,10 +429,10 @@ const relations = {
             // Save unfollowers data to Firebase
             await this.saveUnfollowersDataToFirebase();
             
-            // Update unfollowers display
-            document.getElementById('followersCount').textContent = followersList.length;
-            document.getElementById('followingCount').textContent = followingList.length;
-            document.getElementById('unfollowersCount').textContent = this.data.unfollowers.length;
+            // Update unfollowers display (compteurs supprimés)
+            // document.getElementById('followersCount').textContent = followersList.length;
+            // document.getElementById('followingCount').textContent = followingList.length;
+            // document.getElementById('unfollowersCount').textContent = this.data.unfollowers.length;
             
             // Show unfollowers section
             if (this.data.unfollowers.length === 0) {
@@ -795,10 +795,10 @@ const relations = {
         // Hide analyzing
         document.getElementById('analyzingState').style.display = 'none';
 
-        // Update stats - NOUVEL ORDRE: Followers, Following, Unfollowers
-        document.getElementById('followersCount').textContent = this.data.followers.length;
-        document.getElementById('followingCount').textContent = this.data.following.length;
-        document.getElementById('unfollowersCount').textContent = this.data.unfollowers.length;
+        // Update stats (compteurs supprimés)
+        // document.getElementById('followersCount').textContent = this.data.followers.length;
+        // document.getElementById('followingCount').textContent = this.data.following.length;
+        // document.getElementById('unfollowersCount').textContent = this.data.unfollowers.length;
         
         // Update normal unfollowers count
         const normalCountEl = document.getElementById('normalCount');
@@ -935,17 +935,14 @@ const relations = {
             if (typeof stats !== 'undefined' && stats.render) {
                 stats.render();
             }
-        }
         
-        // NOUVEAU: Diminuer le compteur de following
-        const followingCountEl = document.getElementById('followingCount');
-        if (followingCountEl) {
-            const currentFollowing = parseInt(followingCountEl.textContent);
-            followingCountEl.textContent = currentFollowing - 1;
-        }
-        
-        // Update unfollowers counter
-        document.getElementById('unfollowersCount').textContent = this.data.unfollowers.length;
+        // Compteurs supprimés de l'interface
+        // const followingCountEl = document.getElementById('followingCount');
+        // if (followingCountEl) {
+        //     const currentFollowing = parseInt(followingCountEl.textContent);
+        //     followingCountEl.textContent = currentFollowing - 1;
+        // }
+        // document.getElementById('unfollowersCount').textContent = this.data.unfollowers.length;
         
         // Update counts (including doNotFollowCount)
         this.updateCounts();
@@ -974,7 +971,8 @@ const relations = {
         });
         
         // Update counter
-        document.getElementById('unfollowersCount').textContent = this.data.unfollowers.length;
+        // Compteur supprimé
+        // document.getElementById('unfollowersCount').textContent = this.data.unfollowers.length;
         
         // Re-render (disparaît immédiatement)
         if (this.data.unfollowers.length === 0) {
