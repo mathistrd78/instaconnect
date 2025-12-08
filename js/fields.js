@@ -1,7 +1,6 @@
 // fields.js - Gestion des champs personnalisés
 const fields = {
     currentEditField: null,
-    currentEditFieldId: null, // ID du champ en cours d'édition
     draggedFieldId: null,
 
     // Types de champs disponibles
@@ -26,7 +25,6 @@ const fields = {
         }
         
         // Reset form
-        this.currentEditFieldId = null; // Réinitialiser l'ID d'édition
         document.getElementById('newFieldType').value = 'text';
         document.getElementById('newFieldLabel').value = '';
         document.getElementById('newFieldRequired').checked = false;
@@ -34,47 +32,6 @@ const fields = {
         // Hide options for non-select/radio fields
         document.getElementById('fieldOptionsSection').style.display = 'none';
         
-        // Changer le titre et le bouton
-        document.querySelector('#addFieldModal .modal-header h2').textContent = '➕ Ajouter un champ';
-        document.querySelector('#addFieldForm button[type="submit"]').textContent = '✅ Créer le champ';
-        
-        document.getElementById('addFieldModal').classList.add('active');
-    },
-    
-    // Éditer un champ personnalisé
-    editField(fieldId) {
-        const field = app.customFields.find(f => f.id === fieldId);
-        if (!field) {
-            console.error('Field not found:', fieldId);
-            return;
-        }
-        
-        // Créer la modal si elle n'existe pas
-        const modal = document.getElementById('addFieldModal');
-        if (!modal) {
-            this.createAddFieldModal();
-        }
-        
-        // Stocker l'ID du champ en cours d'édition
-        this.currentEditFieldId = fieldId;
-        
-        // Pré-remplir le formulaire
-        document.getElementById('newFieldType').value = field.type;
-        document.getElementById('newFieldLabel').value = field.label;
-        document.getElementById('newFieldRequired').checked = field.required || false;
-        
-        // Gérer les options si c'est un select/radio
-        this.onFieldTypeChange();
-        if (field.type === 'select' || field.type === 'radio') {
-            const options = field.options || [];
-            document.getElementById('newFieldOptions').value = options.join('\n');
-        }
-        
-        // Changer le titre et le bouton
-        document.querySelector('#addFieldModal .modal-header h2').textContent = '✏️ Modifier le champ';
-        document.querySelector('#addFieldForm button[type="submit"]').textContent = '✅ Enregistrer';
-        
-        // Ouvrir la modal
         document.getElementById('addFieldModal').classList.add('active');
     },
 
@@ -183,91 +140,8 @@ const fields = {
             }
         }
         
-        // Mode édition ou création
-        if (this.currentEditFieldId) {
-            // Mode édition : mettre à jour le champ existant
-            const fieldIndex = app.customFields.findIndex(f => f.id === this.currentEditFieldId);
-            if (fieldIndex !== -1) {
-                const oldField = app.customFields[fieldIndex];
-                const oldOptions = oldField.options || [];
-                const newOptions = fieldData.options || [];
-                
-                // Migration automatique des valeurs pour les champs radio
-                if (fieldData.type === 'radio' && oldOptions.length > 0 && newOptions.length > 0) {
-                    console.log('🔄 Migrating radio field values...');
-                    console.log('   Old options:', oldOptions);
-                    console.log('   New options:', newOptions);
-                    
-                    // Créer un mapping des anciennes valeurs vers les nouvelles
-                    // Stratégie : chercher des correspondances par mots-clés
-                    const migration = {};
-                    
-                    oldOptions.forEach((oldOption, oldIndex) => {
-                        // Nettoyer les emojis pour la comparaison
-                        const oldClean = oldOption.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').trim().toLowerCase();
-                        
-                        // Chercher une correspondance dans les nouvelles options
-                        let bestMatch = null;
-                        let bestScore = 0;
-                        
-                        newOptions.forEach((newOption) => {
-                            const newClean = newOption.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').trim().toLowerCase();
-                            
-                            // Correspondance exacte
-                            if (oldClean === newClean) {
-                                bestMatch = newOption;
-                                bestScore = 100;
-                            }
-                            // Correspondance partielle
-                            else if (oldClean.includes(newClean) || newClean.includes(oldClean)) {
-                                const score = Math.max(oldClean.length, newClean.length) / 
-                                             Math.min(oldClean.length, newClean.length);
-                                if (score > bestScore) {
-                                    bestMatch = newOption;
-                                    bestScore = score;
-                                }
-                            }
-                        });
-                        
-                        // Si correspondance trouvée, créer le mapping
-                        if (bestMatch) {
-                            migration[oldOption] = bestMatch;
-                            console.log(`   ✅ "${oldOption}" → "${bestMatch}"`);
-                        } else if (oldIndex < newOptions.length) {
-                            // Fallback : mapper par position
-                            migration[oldOption] = newOptions[oldIndex];
-                            console.log(`   ⚠️ "${oldOption}" → "${newOptions[oldIndex]}" (by position)`);
-                        }
-                    });
-                    
-                    // Appliquer la migration sur tous les contacts
-                    let migratedCount = 0;
-                    app.dataStore.contacts.forEach(contact => {
-                        const currentValue = contact[this.currentEditFieldId];
-                        if (currentValue && migration[currentValue]) {
-                            contact[this.currentEditFieldId] = migration[currentValue];
-                            migratedCount++;
-                        }
-                    });
-                    
-                    console.log(`✅ Migrated ${migratedCount} contacts`);
-                }
-                
-                // Conserver l'ID et l'ordre existants
-                app.customFields[fieldIndex] = {
-                    ...app.customFields[fieldIndex],
-                    ...fieldData
-                };
-                
-                // Sauvegarder dans Firebase (seulement les champs, pas les contacts)
-                app.dataStore.saveSettings();
-                
-                console.log('✅ Field updated:', this.currentEditFieldId);
-            }
-        } else {
-            // Mode création : ajouter un nouveau champ
-            app.addCustomField(fieldData);
-        }
+        // Ajouter le champ
+        app.addCustomField(fieldData);
         
         // Fermer la modal
         this.closeAddFieldModal();
@@ -403,14 +277,9 @@ const fields = {
                         </div>
                     </div>
                     ${!isDefault ? `
-                        <div class="field-item-actions">
-                            <button class="field-item-edit" onclick="fields.editField('${field.id}')" title="Modifier">
-                                ✏️
-                            </button>
-                            <button class="field-item-delete" onclick="fields.deleteField('${field.id}')" title="Supprimer">
-                                🗑️
-                            </button>
-                        </div>
+                        <button class="field-item-delete" onclick="fields.deleteField('${field.id}')" title="Supprimer">
+                            🗑️
+                        </button>
                     ` : `
                         <div style="width: 32px;"></div>
                     `}
@@ -591,8 +460,8 @@ const fields = {
             }
         });
         
-        // Sauvegarder dans Firebase avec debounce (attendre 2s pour éviter trop d'appels pendant le drag)
-        app.dataStore.save(null, { skipContacts: true, debounce: true });
+        // Sauvegarder dans Firebase
+        app.dataStore.save();
         
         console.log('✅ Ordre des champs sauvegardé');
     },
