@@ -267,6 +267,9 @@ const app = {
             
             this.setupEventListeners();
             
+            // Attendre que tous les modules soient chargés
+            await this.waitForModules();
+            
             // Vérifier si relations est défini avant d'initialiser
             if (typeof relations !== 'undefined') {
                 relations.init();
@@ -290,8 +293,35 @@ const app = {
                 contacts.render();
                 stats.render();
                 this.switchSection(savedSection);
-            }, 1000); // Augmenté à 1 seconde pour laisser le temps à Firebase
+            }, 1000);
         }
+    },
+
+    // Attendre que tous les modules requis soient chargés
+    async waitForModules() {
+        const maxWait = 3000; // 3 secondes max
+        const checkInterval = 100; // Vérifier tous les 100ms
+        let elapsed = 0;
+        
+        return new Promise((resolve) => {
+            const checkModules = setInterval(() => {
+                elapsed += checkInterval;
+                
+                // Vérifier si tous les modules essentiels sont chargés
+                const modulesLoaded = 
+                    typeof contacts !== 'undefined' &&
+                    typeof stats !== 'undefined' &&
+                    typeof tags !== 'undefined';
+                
+                if (modulesLoaded || elapsed >= maxWait) {
+                    clearInterval(checkModules);
+                    if (!modulesLoaded) {
+                        console.warn('⚠️ Some modules did not load in time');
+                    }
+                    resolve();
+                }
+            }, checkInterval);
+        });
     },
 
     setupEventListeners() {
@@ -552,7 +582,7 @@ const app = {
         document.getElementById('profilContactsCount').textContent = app.dataStore.contacts.length;
         
         // Vérifier si relations est défini avant d'accéder à ses propriétés
-        if (typeof relations !== 'undefined') {
+        if (typeof relations !== 'undefined' && relations.data) {
             document.getElementById('profilFollowersCount').textContent = relations.data.followers.length;
             document.getElementById('profilUnfollowersCount').textContent = relations.data.unfollowers.length;
         } else {
