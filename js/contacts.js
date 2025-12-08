@@ -767,16 +767,22 @@ const contacts = {
         
         // Générer le contenu selon le type de filtre
         if (filterType === 'complete') {
+            // Compter profils complets/incomplets
+            const completeCount = app.dataStore.contacts.filter(contact => 
+                this.isProfileComplete(contact)
+            ).length;
+            const incompleteCount = app.dataStore.contacts.length - completeCount;
+            
             content.innerHTML = `
                 <label class="filter-option">
                     <input type="checkbox" value="oui" ${this.activeFilters.complete.includes('oui') ? 'checked' : ''} 
                            onchange="contacts.toggleFilter('complete', 'oui')">
-                    <span>✅ Oui</span>
+                    <span>✅ Oui (${completeCount})</span>
                 </label>
                 <label class="filter-option">
                     <input type="checkbox" value="non" ${this.activeFilters.complete.includes('non') ? 'checked' : ''} 
                            onchange="contacts.toggleFilter('complete', 'non')">
-                    <span>❌ Non</span>
+                    <span>❌ Non (${incompleteCount})</span>
                 </label>
             `;
         } else if (filterType === 'country') {
@@ -813,9 +819,9 @@ const contacts = {
                 }
             });
             
-            // Trier par ordre alphabétique
+            // Trier par ordre décroissant (plus récurrent en premier)
             const sortedCountries = Object.values(countries).sort((a, b) => 
-                a.country.localeCompare(b.country, 'fr')
+                b.count - a.count
             );
             
             if (sortedCountries.length === 0) {
@@ -837,7 +843,7 @@ const contacts = {
             
             if (field) {
                 if (field.type === 'select' || field.type === 'radio') {
-                    // Récupérer les options/tags
+                    // Récupérer les options/tags et compter les occurrences
                     let options = [];
                     if (field.type === 'select' && field.tags) {
                         options = field.tags.map(tag => ({ value: tag.value, label: tag.label }));
@@ -845,25 +851,44 @@ const contacts = {
                         options = field.options.map(opt => ({ value: opt, label: opt }));
                     }
                     
-                    content.innerHTML = options.map(opt => `
+                    // Compter les occurrences de chaque valeur
+                    const optionsWithCount = options.map(opt => {
+                        const count = app.dataStore.contacts.filter(contact => 
+                            contact[filterType] === opt.value
+                        ).length;
+                        return { ...opt, count };
+                    });
+                    
+                    // Trier par ordre décroissant (plus récurrent en premier)
+                    optionsWithCount.sort((a, b) => b.count - a.count);
+                    
+                    content.innerHTML = optionsWithCount.map(opt => `
                         <label class="filter-option">
                             <input type="checkbox" value="${opt.value}" 
                                    ${this.activeFilters[filterType].includes(opt.value) ? 'checked' : ''} 
                                    onchange="contacts.toggleFilter('${filterType}', '${opt.value}')">
-                            <span>${opt.label}</span>
+                            <span>${opt.label} (${opt.count})</span>
                         </label>
                     `).join('');
                 } else if (field.type === 'checkbox') {
+                    // Compter oui/non pour les checkbox
+                    const yesCount = app.dataStore.contacts.filter(contact => 
+                        contact[filterType] === true || contact[filterType] === 'true'
+                    ).length;
+                    const noCount = app.dataStore.contacts.filter(contact => 
+                        contact[filterType] === false || contact[filterType] === 'false' || !contact[filterType]
+                    ).length;
+                    
                     content.innerHTML = `
                         <label class="filter-option">
                             <input type="checkbox" value="oui" ${this.activeFilters[filterType].includes('oui') ? 'checked' : ''} 
                                    onchange="contacts.toggleFilter('${filterType}', 'oui')">
-                            <span>✅ Oui</span>
+                            <span>✅ Oui (${yesCount})</span>
                         </label>
                         <label class="filter-option">
                             <input type="checkbox" value="non" ${this.activeFilters[filterType].includes('non') ? 'checked' : ''} 
                                    onchange="contacts.toggleFilter('${filterType}', 'non')">
-                            <span>❌ Non</span>
+                            <span>❌ Non (${noCount})</span>
                         </label>
                     `;
                 }
