@@ -188,13 +188,78 @@ const fields = {
             // Mode édition : mettre à jour le champ existant
             const fieldIndex = app.customFields.findIndex(f => f.id === this.currentEditFieldId);
             if (fieldIndex !== -1) {
+                const oldField = app.customFields[fieldIndex];
+                const oldOptions = oldField.options || [];
+                const newOptions = fieldData.options || [];
+                
+                // Migration automatique des valeurs pour les champs radio
+                if (fieldData.type === 'radio' && oldOptions.length > 0 && newOptions.length > 0) {
+                    console.log('🔄 Migrating radio field values...');
+                    console.log('   Old options:', oldOptions);
+                    console.log('   New options:', newOptions);
+                    
+                    // Créer un mapping des anciennes valeurs vers les nouvelles
+                    // Stratégie : chercher des correspondances par mots-clés
+                    const migration = {};
+                    
+                    oldOptions.forEach((oldOption, oldIndex) => {
+                        // Nettoyer les emojis pour la comparaison
+                        const oldClean = oldOption.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').trim().toLowerCase();
+                        
+                        // Chercher une correspondance dans les nouvelles options
+                        let bestMatch = null;
+                        let bestScore = 0;
+                        
+                        newOptions.forEach((newOption) => {
+                            const newClean = newOption.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').trim().toLowerCase();
+                            
+                            // Correspondance exacte
+                            if (oldClean === newClean) {
+                                bestMatch = newOption;
+                                bestScore = 100;
+                            }
+                            // Correspondance partielle
+                            else if (oldClean.includes(newClean) || newClean.includes(oldClean)) {
+                                const score = Math.max(oldClean.length, newClean.length) / 
+                                             Math.min(oldClean.length, newClean.length);
+                                if (score > bestScore) {
+                                    bestMatch = newOption;
+                                    bestScore = score;
+                                }
+                            }
+                        });
+                        
+                        // Si correspondance trouvée, créer le mapping
+                        if (bestMatch) {
+                            migration[oldOption] = bestMatch;
+                            console.log(`   ✅ "${oldOption}" → "${bestMatch}"`);
+                        } else if (oldIndex < newOptions.length) {
+                            // Fallback : mapper par position
+                            migration[oldOption] = newOptions[oldIndex];
+                            console.log(`   ⚠️ "${oldOption}" → "${newOptions[oldIndex]}" (by position)`);
+                        }
+                    });
+                    
+                    // Appliquer la migration sur tous les contacts
+                    let migratedCount = 0;
+                    app.dataStore.contacts.forEach(contact => {
+                        const currentValue = contact[this.currentEditFieldId];
+                        if (currentValue && migration[currentValue]) {
+                            contact[this.currentEditFieldId] = migration[currentValue];
+                            migratedCount++;
+                        }
+                    });
+                    
+                    console.log(`✅ Migrated ${migratedCount} contacts`);
+                }
+                
                 // Conserver l'ID et l'ordre existants
                 app.customFields[fieldIndex] = {
                     ...app.customFields[fieldIndex],
                     ...fieldData
                 };
                 
-                // Sauvegarder dans Firebase
+                // Sauvegarder dans Firebase (champs + contacts migrés)
                 app.dataStore.save();
                 
                 console.log('✅ Field updated:', this.currentEditFieldId);
