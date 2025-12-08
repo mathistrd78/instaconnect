@@ -183,15 +183,18 @@ const authManager = {
             // Vider les contacts
             app.dataStore.contacts = [];
             
-            // Vider les unfollowers
-            unfollowers.data = {
+            // Vider les relations
+            relations.data = {
                 followers: [],
                 following: [],
                 unfollowers: [],
+                fans: [],
+                pending: [],
                 normalUnfollowers: new Set(),
                 doNotFollowList: new Set(),
                 marked: new Set(),
-                normalCategories: {}
+                normalCategories: {},
+                currentTab: 'unfollowers'
             };
             
             // Réinitialiser les tags par défaut (pour éviter contamination)
@@ -530,37 +533,37 @@ const authManager = {
                 }
                 
                 if (data.normalUnfollowers) {
-                    unfollowers.data.normalUnfollowers = new Set(data.normalUnfollowers);
+                    relations.data.normalUnfollowers = new Set(data.normalUnfollowers);
                 }
                 if (data.doNotFollowList) {
-                    unfollowers.data.doNotFollowList = new Set(data.doNotFollowList);
+                    relations.data.doNotFollowList = new Set(data.doNotFollowList);
                 }
                 if (data.normalCategories) {
-                    unfollowers.data.normalCategories = data.normalCategories;
+                    relations.data.normalCategories = data.normalCategories;
                 }
                 
-                // Charger les données des unfollowers (following, followers, unfollowers)
+                // Charger les données des relations (following, followers, unfollowers)
                 if (data.unfollowersData) {
-                    unfollowers.data.following = data.unfollowersData.following || [];
-                    unfollowers.data.followers = data.unfollowersData.followers || [];
+                    relations.data.following = data.unfollowersData.following || [];
+                    relations.data.followers = data.unfollowersData.followers || [];
                     
                     // ⚠️ IMPORTANT: Refiltrer les unfollowers pour exclure ceux marqués comme normaux ou à ne plus suivre
                     const rawUnfollowers = data.unfollowersData.unfollowers || [];
-                    unfollowers.data.unfollowers = rawUnfollowers.filter(item => {
+                    relations.data.unfollowers = rawUnfollowers.filter(item => {
                         const username = typeof item === 'string' ? item : item.username;
-                        return !unfollowers.data.normalUnfollowers.has(username) && 
-                               !unfollowers.data.doNotFollowList.has(username);
+                        return !relations.data.normalUnfollowers.has(username) && 
+                               !relations.data.doNotFollowList.has(username);
                     });
                     
-                    console.log(`🔍 Filtered unfollowers: ${rawUnfollowers.length} -> ${unfollowers.data.unfollowers.length}`);
+                    console.log(`🔍 Filtered unfollowers: ${rawUnfollowers.length} -> ${relations.data.unfollowers.length}`);
                     
                     // Update display
-                    document.getElementById('followersCount').textContent = unfollowers.data.followers.length;
-                    document.getElementById('followingCount').textContent = unfollowers.data.following.length;
-                    document.getElementById('unfollowersCount').textContent = unfollowers.data.unfollowers.length;
+                    document.getElementById('followersCount').textContent = relations.data.followers.length;
+                    document.getElementById('followingCount').textContent = relations.data.following.length;
+                    document.getElementById('unfollowersCount').textContent = relations.data.unfollowers.length;
                     
                     // Show appropriate section
-                    if (unfollowers.data.unfollowers.length === 0) {
+                    if (relations.data.unfollowers.length === 0) {
                         document.getElementById('unfollowersResults').style.display = 'none';
                         document.getElementById('emptyUnfollowers').style.display = 'block';
                         const emptyDiv2 = document.getElementById('emptyUnfollowers').querySelector('div:nth-child(2)');
@@ -570,14 +573,14 @@ const authManager = {
                     } else {
                         document.getElementById('unfollowersResults').style.display = 'block';
                         document.getElementById('emptyUnfollowers').style.display = 'none';
-                        unfollowers.renderList();
+                        relations.renderList();
                     }
                     
-                    console.log('✅ Unfollowers data loaded:', unfollowers.data.unfollowers.length, 'unfollowers');
+                    console.log('✅ Relations data loaded:', relations.data.unfollowers.length, 'unfollowers');
                 }
                 
                 // Update counts
-                unfollowers.updateCounts();
+                relations.updateCounts();
             }
 
             // Charger les contacts UNE SEULE FOIS au démarrage (pas de listener temps réel)
@@ -655,7 +658,7 @@ const authManager = {
                 
                 // Vérifier si ce contact est dans la liste "À ne plus suivre"
                 const instagramUsername = contact.instagram.toLowerCase().replace('@', '');
-                if (unfollowers.data.doNotFollowList.has(instagramUsername)) {
+                if (relations.data.doNotFollowList.has(instagramUsername)) {
                     console.log(`🗑️ Contact @${instagramUsername} is in doNotFollow list - marking for deletion`);
                     contactsToDelete.push(contact.id);
                 } else {
