@@ -650,7 +650,7 @@ const city = {
             result.push({
                 country: 'Non défini',
                 countryCode: '',
-                flag: '❓',
+                flag: '', // Pas d'emoji
                 count: undefinedCount
             });
         }
