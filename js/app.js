@@ -495,11 +495,13 @@ const app = {
             // Calculer la hauteur exacte du header et ajuster le sticky
             setTimeout(() => {
                 const headerHeight = header.offsetHeight;
-                container.style.marginTop = headerHeight + 'px'; // Pas d'espace supplémentaire
+                container.style.marginTop = headerHeight + 'px';
                 
-                // Ajuster la position sticky des letter-headers UNIQUEMENT dans contactsSection
-                document.querySelectorAll('#contactsSection .letter-header').forEach(letterHeader => {
-                    letterHeader.style.top = headerHeight + 'px';
+                // Ajuster la position sticky des letter-divider (bandeaux de lettres)
+                // On soustrait 16px (padding-top) pour que le haut du bandeau touche le header
+                const letterDividerTop = headerHeight - 16;
+                document.querySelectorAll('#contactsSection .letter-divider').forEach(letterDivider => {
+                    letterDivider.style.top = letterDividerTop + 'px';
                 });
             }, 50);
             
