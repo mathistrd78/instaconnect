@@ -3,8 +3,27 @@
 // Helper pour accéder à tags de manière sûre
 const getTagsModule = () => {
     if (typeof window.tags === 'undefined') {
-        console.warn('⚠️ tags module not loaded yet');
-        return null;
+        if (!window._statsTagsWarningShown) {
+            console.warn('⚠️ tags module not loaded in stats - using fallback');
+            window._statsTagsWarningShown = true;
+        }
+        
+        // Retourner un objet avec findTag en fallback
+        return {
+            findTag: (fieldType, value) => {
+                // Essayer de trouver le tag directement dans app.defaultFields
+                const allFields = [...(app.defaultFields || []), ...(app.customFields || [])];
+                const field = allFields.find(f => f.id === fieldType);
+                if (field && field.tags) {
+                    return field.tags.find(t => t.value === value);
+                }
+                // Essayer dans customTags
+                if (app.customTags && app.customTags[fieldType]) {
+                    return app.customTags[fieldType].find(t => t.value === value);
+                }
+                return null;
+            }
+        };
     }
     return window.tags;
 };
@@ -243,18 +262,16 @@ const stats = {
     },
 
     getColorForValue(field, value) {
-        // Vérifier que tags est disponible
+        // Récupérer le module tags
         const tagsModule = getTagsModule();
-        if (tagsModule) {
-            const tag = tagsModule.findTag(field, value);
-            if (tag) {
-                const el = document.createElement('div');
-                el.className = tag.class;
-                document.body.appendChild(el);
-                const color = getComputedStyle(el).backgroundColor;
-                document.body.removeChild(el);
-                return this.rgbToHex(color);
-            }
+        const tag = tagsModule.findTag(field, value);
+        if (tag) {
+            const el = document.createElement('div');
+            el.className = tag.class;
+            document.body.appendChild(el);
+            const color = getComputedStyle(el).backgroundColor;
+            document.body.removeChild(el);
+            return this.rgbToHex(color);
         }
         
         // Couleurs par défaut pour les options sans tags
