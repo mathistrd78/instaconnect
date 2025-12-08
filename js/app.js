@@ -203,7 +203,7 @@ const app = {
                     console.log(`✅ Saved ${operationCount} operations to Firebase`);
                     this.quotaExceeded = false; // Réinitialiser le flag si la sauvegarde réussit
                 } else {
-                    console.log('⏭️ Nothing to save');
+                    console.log('⭐️ Nothing to save');
                 }
             } catch (error) {
                 console.error('❌ Error saving to Firebase:', error);
@@ -266,7 +266,11 @@ const app = {
             this.currentSection = savedSection;
             
             this.setupEventListeners();
-            relations.init();
+            
+            // Vérifier si relations est défini avant d'initialiser
+            if (typeof relations !== 'undefined') {
+                relations.init();
+            }
             
             // Attendre un peu que les données Firebase soient chargées
             setTimeout(() => {
@@ -546,8 +550,15 @@ const app = {
         
         // Mettre à jour les statistiques
         document.getElementById('profilContactsCount').textContent = app.dataStore.contacts.length;
-        document.getElementById('profilFollowersCount').textContent = relations.data.followers.length;
-        document.getElementById('profilUnfollowersCount').textContent = relations.data.unfollowers.length;
+        
+        // Vérifier si relations est défini avant d'accéder à ses propriétés
+        if (typeof relations !== 'undefined') {
+            document.getElementById('profilFollowersCount').textContent = relations.data.followers.length;
+            document.getElementById('profilUnfollowersCount').textContent = relations.data.unfollowers.length;
+        } else {
+            document.getElementById('profilFollowersCount').textContent = '0';
+            document.getElementById('profilUnfollowersCount').textContent = '0';
+        }
         
         // Synchroniser le toggle du mode sombre
         const darkModeToggle = document.getElementById('darkModeToggle');
