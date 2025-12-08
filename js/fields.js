@@ -1,6 +1,7 @@
 // fields.js - Gestion des champs personnalisés
 const fields = {
     currentEditField: null,
+    currentEditFieldId: null, // ID du champ en cours d'édition
     draggedFieldId: null,
 
     // Types de champs disponibles
@@ -25,6 +26,7 @@ const fields = {
         }
         
         // Reset form
+        this.currentEditFieldId = null; // Réinitialiser l'ID d'édition
         document.getElementById('newFieldType').value = 'text';
         document.getElementById('newFieldLabel').value = '';
         document.getElementById('newFieldRequired').checked = false;
@@ -32,6 +34,47 @@ const fields = {
         // Hide options for non-select/radio fields
         document.getElementById('fieldOptionsSection').style.display = 'none';
         
+        // Changer le titre et le bouton
+        document.querySelector('#addFieldModal .modal-header h2').textContent = '➕ Ajouter un champ';
+        document.querySelector('#addFieldForm button[type="submit"]').textContent = '✅ Créer le champ';
+        
+        document.getElementById('addFieldModal').classList.add('active');
+    },
+    
+    // Éditer un champ personnalisé
+    editField(fieldId) {
+        const field = app.customFields.find(f => f.id === fieldId);
+        if (!field) {
+            console.error('Field not found:', fieldId);
+            return;
+        }
+        
+        // Créer la modal si elle n'existe pas
+        const modal = document.getElementById('addFieldModal');
+        if (!modal) {
+            this.createAddFieldModal();
+        }
+        
+        // Stocker l'ID du champ en cours d'édition
+        this.currentEditFieldId = fieldId;
+        
+        // Pré-remplir le formulaire
+        document.getElementById('newFieldType').value = field.type;
+        document.getElementById('newFieldLabel').value = field.label;
+        document.getElementById('newFieldRequired').checked = field.required || false;
+        
+        // Gérer les options si c'est un select/radio
+        this.onFieldTypeChange();
+        if (field.type === 'select' || field.type === 'radio') {
+            const options = field.options || [];
+            document.getElementById('newFieldOptions').value = options.join('\n');
+        }
+        
+        // Changer le titre et le bouton
+        document.querySelector('#addFieldModal .modal-header h2').textContent = '✏️ Modifier le champ';
+        document.querySelector('#addFieldForm button[type="submit"]').textContent = '✅ Enregistrer';
+        
+        // Ouvrir la modal
         document.getElementById('addFieldModal').classList.add('active');
     },
 
@@ -140,8 +183,26 @@ const fields = {
             }
         }
         
-        // Ajouter le champ
-        app.addCustomField(fieldData);
+        // Mode édition ou création
+        if (this.currentEditFieldId) {
+            // Mode édition : mettre à jour le champ existant
+            const fieldIndex = app.customFields.findIndex(f => f.id === this.currentEditFieldId);
+            if (fieldIndex !== -1) {
+                // Conserver l'ID et l'ordre existants
+                app.customFields[fieldIndex] = {
+                    ...app.customFields[fieldIndex],
+                    ...fieldData
+                };
+                
+                // Sauvegarder dans Firebase
+                app.dataStore.saveUserData();
+                
+                console.log('✅ Field updated:', this.currentEditFieldId);
+            }
+        } else {
+            // Mode création : ajouter un nouveau champ
+            app.addCustomField(fieldData);
+        }
         
         // Fermer la modal
         this.closeAddFieldModal();
@@ -277,9 +338,14 @@ const fields = {
                         </div>
                     </div>
                     ${!isDefault ? `
-                        <button class="field-item-delete" onclick="fields.deleteField('${field.id}')" title="Supprimer">
-                            🗑️
-                        </button>
+                        <div class="field-item-actions">
+                            <button class="field-item-edit" onclick="fields.editField('${field.id}')" title="Modifier">
+                                ✏️
+                            </button>
+                            <button class="field-item-delete" onclick="fields.deleteField('${field.id}')" title="Supprimer">
+                                🗑️
+                            </button>
+                        </div>
                     ` : `
                         <div style="width: 32px;"></div>
                     `}
