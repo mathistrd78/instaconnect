@@ -115,8 +115,21 @@ const app = {
             console.log('📦 Data will be loaded from Firebase');
         },
         
-        async save(specificContact = null) {
-            // Sauvegarder dans Firebase au lieu de localStorage
+        saveTimeout: null, // Pour le debounce
+        
+        async save(specificContact = null, options = {}) {
+            // Options: { skipContacts: false, skipSettings: false, debounce: false }
+            const { skipContacts = false, skipSettings = false, debounce = false } = options;
+            
+            // Si debounce activé, attendre 2 secondes avant de sauvegarder
+            if (debounce) {
+                clearTimeout(this.saveTimeout);
+                this.saveTimeout = setTimeout(() => {
+                    this.save(specificContact, { ...options, debounce: false });
+                }, 2000);
+                return;
+            }
+            
             if (!authManager.currentUser) {
                 console.warn('⚠️ No user logged in, cannot save to Firebase');
                 return;
@@ -127,57 +140,79 @@ const app = {
                 console.log('💾 SAVING to Firebase - User:', userId);
 
                 const batch = db.batch();
+                let operationCount = 0;
                 
-                if (specificContact) {
-                    // Sauvegarder un seul contact
-                    console.log('💾 Saving specific contact:', specificContact.id);
-                    const contactRef = db.collection('users').doc(userId).collection('contacts').doc(specificContact.id);
-                    batch.set(contactRef, specificContact);
-                } else if (this.contacts.length > 0) {
-                    // Sauvegarder tous les contacts seulement s'il y en a
-                    console.log('💾 Saving ALL contacts in batch:', this.contacts.length);
-                    const contactsRef = db.collection('users').doc(userId).collection('contacts');
-                    this.contacts.forEach(contact => {
-                        batch.set(contactsRef.doc(contact.id), contact);
-                    });
+                // Sauvegarder les contacts seulement si demandé
+                if (!skipContacts) {
+                    if (specificContact) {
+                        // Sauvegarder un seul contact
+                        console.log('💾 Saving specific contact:', specificContact.id);
+                        const contactRef = db.collection('users').doc(userId).collection('contacts').doc(specificContact.id);
+                        batch.set(contactRef, specificContact);
+                        operationCount++;
+                    } else if (this.contacts.length > 0) {
+                        // Sauvegarder tous les contacts seulement s'il y en a
+                        console.log('💾 Saving ALL contacts in batch:', this.contacts.length);
+                        const contactsRef = db.collection('users').doc(userId).collection('contacts');
+                        this.contacts.forEach(contact => {
+                            batch.set(contactsRef.doc(contact.id), contact);
+                            operationCount++;
+                        });
+                    }
                 }
 
-                // TOUJOURS sauvegarder les tags et champs personnalisés
-                console.log('📤 Saving customTags to Firebase:', JSON.stringify(app.customTags));
-                console.log('📤 Saving customFields to Firebase:', JSON.stringify(app.customFields));
-                console.log('📤 Saving defaultFields to Firebase');
-                
-                // Nettoyer les undefined pour Firebase (Firebase n'accepte pas undefined)
-                const cleanDefaultFields = app.defaultFields.map(f => {
-                    const clean = { ...f };
-                    // Supprimer les propriétés undefined
-                    Object.keys(clean).forEach(key => {
-                        if (clean[key] === undefined) delete clean[key];
+                // Sauvegarder les tags et champs seulement si demandé
+                if (!skipSettings) {
+                    console.log('📤 Saving settings (tags & fields) to Firebase');
+                    
+                    // Nettoyer les undefined pour Firebase
+                    const cleanDefaultFields = app.defaultFields.map(f => {
+                        const clean = { ...f };
+                        Object.keys(clean).forEach(key => {
+                            if (clean[key] === undefined) delete clean[key];
+                        });
+                        return clean;
                     });
-                    return clean;
-                });
-                
-                const cleanCustomFields = app.customFields.map(f => {
-                    const clean = { ...f };
-                    // Supprimer les propriétés undefined
-                    Object.keys(clean).forEach(key => {
-                        if (clean[key] === undefined) delete clean[key];
+                    
+                    const cleanCustomFields = app.customFields.map(f => {
+                        const clean = { ...f };
+                        Object.keys(clean).forEach(key => {
+                            if (clean[key] === undefined) delete clean[key];
+                        });
+                        return clean;
                     });
-                    return clean;
-                });
-                
-                const userDoc = db.collection('users').doc(userId);
-                batch.set(userDoc, {
-                    customTags: app.customTags,
-                    customFields: cleanCustomFields,
-                    defaultFields: cleanDefaultFields
-                }, { merge: true });
+                    
+                    const userDoc = db.collection('users').doc(userId);
+                    batch.set(userDoc, {
+                        customTags: app.customTags,
+                        customFields: cleanCustomFields,
+                        defaultFields: cleanDefaultFields
+                    }, { merge: true });
+                    operationCount++;
+                }
 
-                await batch.commit();
-                console.log('✅ All data saved to Firebase successfully');
+                if (operationCount > 0) {
+                    await batch.commit();
+                    console.log(`✅ Saved ${operationCount} operations to Firebase`);
+                } else {
+                    console.log('⏭️ Nothing to save');
+                }
             } catch (error) {
                 console.error('❌ Error saving to Firebase:', error);
+                if (error.code === 'resource-exhausted') {
+                    alert('⚠️ Quota Firebase dépassé. Attendez quelques minutes avant de réessayer.');
+                }
             }
+        },
+        
+        // Sauvegarder seulement les paramètres (tags, champs) - rapide
+        async saveSettings() {
+            return this.save(null, { skipContacts: true, skipSettings: false });
+        },
+        
+        // Sauvegarder seulement les contacts - plus lourd
+        async saveContacts() {
+            return this.save(null, { skipContacts: false, skipSettings: true });
         },
 
         async deleteContact(contactId) {
