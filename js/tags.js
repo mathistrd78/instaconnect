@@ -627,15 +627,32 @@ const tags = {
     openEditModal(fieldType, value) {
         this.closeDropdown();
         
-        let tag = app.customTags[fieldType].find(t => t.value === value);
+        let tag = null;
         let isDefault = false;
         
+        // Chercher dans customTags (ancienne structure)
+        if (app.customTags[fieldType]) {
+            tag = app.customTags[fieldType].find(t => t.value === value);
+        }
+        
+        // Chercher dans defaultFields[].tags (nouvelle structure)
         if (!tag) {
+            const field = app.defaultFields.find(f => f.id === fieldType);
+            if (field && field.tags) {
+                tag = field.tags.find(t => t.value === value);
+            }
+        }
+        
+        // Chercher dans defaultTags si toujours pas trouvé
+        if (!tag && app.defaultTags[fieldType]) {
             tag = app.defaultTags[fieldType].find(t => t.value === value);
             isDefault = true;
         }
         
-        if (!tag) return;
+        if (!tag) {
+            console.error('❌ Tag not found:', { fieldType, value });
+            return;
+        }
         
         // Get current color - prefer tag.color if available, otherwise read from CSS
         let currentColor = tag.color || '#868e96'; // Use saved color if exists
@@ -873,9 +890,13 @@ const tags = {
 
     // Supprimer un tag
     deleteTag() {
-        if (!this.currentEdit) return;
+        if (!this.currentEdit) {
+            console.error('❌ No currentEdit defined');
+            return;
+        }
         
         const { fieldType, value, isDefault } = this.currentEdit;
+        console.log('🗑️ Attempting to delete tag:', { fieldType, value, isDefault });
         
         if (isDefault) {
             alert('Impossible de supprimer un tag par défaut.');
@@ -884,17 +905,48 @@ const tags = {
         
         if (!confirm('Supprimer ce tag ?')) return;
         
-        app.customTags[fieldType] = app.customTags[fieldType].filter(t => t.value !== value);
+        let tagFound = false;
+        let contactsUpdated = 0;
         
+        // Vérifier dans customTags (ancienne structure)
+        if (app.customTags[fieldType]) {
+            console.log('📋 Tags in customTags before deletion:', app.customTags[fieldType].length);
+            app.customTags[fieldType] = app.customTags[fieldType].filter(t => t.value !== value);
+            console.log('📋 Tags in customTags after deletion:', app.customTags[fieldType].length);
+            tagFound = true;
+        }
+        
+        // Vérifier dans defaultFields[].tags (nouvelle structure)
+        const field = app.defaultFields.find(f => f.id === fieldType);
+        if (field && field.tags) {
+            console.log('📋 Tags in field.tags before deletion:', field.tags.length);
+            field.tags = field.tags.filter(t => t.value !== value);
+            console.log('📋 Tags in field.tags after deletion:', field.tags.length);
+            tagFound = true;
+        }
+        
+        if (!tagFound) {
+            console.error('❌ No tags found for fieldType:', fieldType);
+            alert('Erreur: Impossible de trouver les tags pour ce champ.');
+            return;
+        }
+        
+        // Mettre à jour les contacts qui utilisent ce tag
         app.dataStore.contacts.forEach(contact => {
             if (contact[fieldType] === value) {
                 contact[fieldType] = '';
+                contactsUpdated++;
             }
         });
         
+        console.log(`✅ ${contactsUpdated} contacts updated`);
+        
+        // Sauvegarder
         app.dataStore.save();
         contacts.render();
         this.closeEditModal();
+        
+        console.log('✅ Tag deleted successfully');
     },
 
     // Fermer la modale d'édition
