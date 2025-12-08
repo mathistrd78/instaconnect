@@ -1,37 +1,4 @@
 // contacts.js - Gestion des contacts
-
-// Helper pour accéder à tags de manière sûre
-const getTags = () => {
-    if (typeof window.tags === 'undefined') {
-        // Créer un objet tags minimal en fallback
-        if (!window._tagsWarningShown) {
-            console.warn('⚠️ tags module not loaded yet - using fallback');
-            window._tagsWarningShown = true;
-        }
-        
-        // Retourner un objet avec des fonctions stub
-        return {
-            findTag: (fieldType, value) => {
-                // Essayer de trouver le tag directement dans app.defaultFields
-                const allFields = [...(app.defaultFields || []), ...(app.customFields || [])];
-                const field = allFields.find(f => f.id === fieldType);
-                if (field && field.tags) {
-                    return field.tags.find(t => t.value === value);
-                }
-                // Essayer dans customTags (ancienne structure)
-                if (app.customTags && app.customTags[fieldType]) {
-                    return app.customTags[fieldType].find(t => t.value === value);
-                }
-                return null;
-            },
-            closeDropdown: () => {
-                // Stub
-            }
-        };
-    }
-    return window.tags;
-};
-
 const contacts = {
     currentViewId: null,
     currentEditId: null,
@@ -43,8 +10,7 @@ const contacts = {
         relationType: [],
         meetingPlace: [],
         discussionStatus: [],
-        complete: [], // 'oui' ou 'non'
-        country: [] // pays
+        complete: [] // 'oui' ou 'non'
     },
     currentFilterDropdown: null,
 
@@ -60,15 +26,14 @@ const contacts = {
         document.getElementById(this.currentFieldType).value = value;
         
         // Update display
-        const tagsModule = getTags();
-        const tag = tagsModule.findTag(this.currentFieldType, value);
+        const tag = tags.findTag(this.currentFieldType, value);
         if (tag) {
             const displayEl = document.getElementById(this.currentFieldType + 'Display');
             displayEl.textContent = tag.label;
             displayEl.className = 'tag-selector-value';
         }
         
-        tagsModule.closeDropdown();
+        tags.closeDropdown();
         this.currentFieldType = null;
     },
 
@@ -89,10 +54,9 @@ const contacts = {
         );
         console.log('🔍 Filterable fields:', filterableFields.length, filterableFields.map(f => f.label));
         
-        // Ajouter "Profil complet" et "Pays" comme filtres spéciaux
+        // Ajouter "Profil complet" comme filtre spécial
         const specialFilters = [
-            { id: 'complete', label: 'Profil complet' },
-            { id: 'country', label: 'Pays' }
+            { id: 'complete', label: 'Profil complet' }
         ];
         
         // Générer les boutons de filtres
@@ -226,11 +190,9 @@ const contacts = {
             html += `<div class="letter-divider" data-letter="${letter}" id="letter-${letter}">${letter}</div>`;
             
             groupedContacts[letter].forEach(contact => {
-                // Récupérer les tags
-                const tagsModule = getTags();
-                const relTag = tagsModule.findTag('relationType', contact.relationType);
-                const meetTag = tagsModule.findTag('meetingPlace', contact.meetingPlace);
-                const statTag = tagsModule.findTag('discussionStatus', contact.discussionStatus);
+                const relTag = tags.findTag('relationType', contact.relationType);
+                const meetTag = tags.findTag('meetingPlace', contact.meetingPlace);
+                const statTag = tags.findTag('discussionStatus', contact.discussionStatus);
                 
                 // Extraire le drapeau du pays si disponible
                 let locationData = null;
@@ -346,28 +308,6 @@ const contacts = {
             });
         }
         
-        // Filtre pays
-        if (this.activeFilters.country && this.activeFilters.country.length > 0) {
-            result = result.filter(contact => {
-                if (!contact.location) return false;
-                
-                let locationData = null;
-                if (typeof contact.location === 'object') {
-                    locationData = contact.location;
-                } else if (typeof contact.location === 'string' && contact.location.startsWith('{')) {
-                    try {
-                        locationData = JSON.parse(contact.location);
-                    } catch (e) {
-                        locationData = typeof city !== 'undefined' ? city.parseLocation(contact.location) : null;
-                    }
-                } else {
-                    locationData = typeof city !== 'undefined' ? city.parseLocation(contact.location) : null;
-                }
-                
-                return locationData && locationData.country && this.activeFilters.country.includes(locationData.country);
-            });
-        }
-        
         // Sort by firstName
         result.sort((a, b) => {
             const aName = a.firstName.replace(/^@+/, '');
@@ -431,8 +371,7 @@ const contacts = {
                 
                 if (field.type === 'select' || field.type === 'radio') {
                     // Pour les champs avec tags, afficher le tag formaté
-                    const tagsModule = getTags();
-                    const tag = tagsModule.findTag(field.id, value);
+                    const tag = tags.findTag(field.id, value);
                     if (tag) {
                         displayValue = `<span class="tag-mini ${tag.class}">${tag.label}</span>`;
                     } else if (field.type === 'radio' && field.options) {
@@ -572,8 +511,7 @@ const contacts = {
                 const displayEl = document.getElementById(field.id + 'Display');
                 if (hiddenInput && displayEl && value) {
                     hiddenInput.value = value;
-                    const tagsModule = getTags();
-                    const tag = tagsModule.findTag(field.id, value);
+                    const tag = tags.findTag(field.id, value);
                     if (tag) {
                         displayEl.textContent = tag.label;
                         displayEl.className = 'tag-selector-value';
@@ -805,76 +743,18 @@ const contacts = {
         
         // Générer le contenu selon le type de filtre
         if (filterType === 'complete') {
-            // Compter profils complets/incomplets
-            const completeCount = app.dataStore.contacts.filter(contact => 
-                this.isProfileComplete(contact)
-            ).length;
-            const incompleteCount = app.dataStore.contacts.length - completeCount;
-            
-            // Afficher dans l'ordre décroissant (plus récurrent en premier)
-            const options = [
-                { value: 'non', label: '❌ Non', count: incompleteCount },
-                { value: 'oui', label: '✅ Oui', count: completeCount }
-            ].sort((a, b) => b.count - a.count);
-            
-            content.innerHTML = options.map(opt => `
+            content.innerHTML = `
                 <label class="filter-option">
-                    <input type="checkbox" value="${opt.value}" ${this.activeFilters.complete.includes(opt.value) ? 'checked' : ''} 
-                           onchange="contacts.toggleFilter('complete', '${opt.value}')">
-                    <span>${opt.label} (${opt.count})</span>
+                    <input type="checkbox" value="oui" ${this.activeFilters.complete.includes('oui') ? 'checked' : ''} 
+                           onchange="contacts.toggleFilter('complete', 'oui')">
+                    <span>✅ Oui</span>
                 </label>
-            `).join('');
-        } else if (filterType === 'country') {
-            // Filtre spécial pour les pays
-            const countries = {};
-            
-            app.dataStore.contacts.forEach(contact => {
-                if (contact.location) {
-                    let locationData = null;
-                    
-                    if (typeof contact.location === 'object') {
-                        locationData = contact.location;
-                    } else if (typeof contact.location === 'string' && contact.location.startsWith('{')) {
-                        try {
-                            locationData = JSON.parse(contact.location);
-                        } catch (e) {
-                            locationData = typeof city !== 'undefined' ? city.parseLocation(contact.location) : null;
-                        }
-                    } else {
-                        locationData = typeof city !== 'undefined' ? city.parseLocation(contact.location) : null;
-                    }
-                    
-                    if (locationData && locationData.country) {
-                        const key = locationData.country;
-                        if (!countries[key]) {
-                            countries[key] = {
-                                country: locationData.country,
-                                flag: locationData.flag || '🌍',
-                                count: 0
-                            };
-                        }
-                        countries[key].count++;
-                    }
-                }
-            });
-            
-            // Trier par ordre décroissant (plus récurrent en premier)
-            const sortedCountries = Object.values(countries).sort((a, b) => 
-                b.count - a.count
-            );
-            
-            if (sortedCountries.length === 0) {
-                content.innerHTML = '<div style="padding: 12px; text-align: center; color: #868e96;">Aucun pays trouvé</div>';
-            } else {
-                content.innerHTML = sortedCountries.map(c => `
-                    <label class="filter-option">
-                        <input type="checkbox" value="${c.country}" 
-                               ${this.activeFilters.country.includes(c.country) ? 'checked' : ''} 
-                               onchange="contacts.toggleFilter('country', '${c.country.replace(/'/g, "\\'")}')">
-                        <span>${c.flag} ${c.country} (${c.count})</span>
-                    </label>
-                `).join('');
-            }
+                <label class="filter-option">
+                    <input type="checkbox" value="non" ${this.activeFilters.complete.includes('non') ? 'checked' : ''} 
+                           onchange="contacts.toggleFilter('complete', 'non')">
+                    <span>❌ Non</span>
+                </label>
+            `;
         } else {
             // Trouver le champ correspondant
             const allFields = app.getAllFields();
@@ -882,7 +762,7 @@ const contacts = {
             
             if (field) {
                 if (field.type === 'select' || field.type === 'radio') {
-                    // Récupérer les options/tags et compter les occurrences
+                    // Récupérer les options/tags
                     let options = [];
                     if (field.type === 'select' && field.tags) {
                         options = field.tags.map(tag => ({ value: tag.value, label: tag.label }));
@@ -890,44 +770,25 @@ const contacts = {
                         options = field.options.map(opt => ({ value: opt, label: opt }));
                     }
                     
-                    // Compter les occurrences de chaque valeur
-                    const optionsWithCount = options.map(opt => {
-                        const count = app.dataStore.contacts.filter(contact => 
-                            contact[filterType] === opt.value
-                        ).length;
-                        return { ...opt, count };
-                    });
-                    
-                    // Trier par ordre décroissant (plus récurrent en premier)
-                    optionsWithCount.sort((a, b) => b.count - a.count);
-                    
-                    content.innerHTML = optionsWithCount.map(opt => `
+                    content.innerHTML = options.map(opt => `
                         <label class="filter-option">
                             <input type="checkbox" value="${opt.value}" 
                                    ${this.activeFilters[filterType].includes(opt.value) ? 'checked' : ''} 
                                    onchange="contacts.toggleFilter('${filterType}', '${opt.value}')">
-                            <span>${opt.label} (${opt.count})</span>
+                            <span>${opt.label}</span>
                         </label>
                     `).join('');
                 } else if (field.type === 'checkbox') {
-                    // Compter oui/non pour les checkbox
-                    const yesCount = app.dataStore.contacts.filter(contact => 
-                        contact[filterType] === true || contact[filterType] === 'true'
-                    ).length;
-                    const noCount = app.dataStore.contacts.filter(contact => 
-                        contact[filterType] === false || contact[filterType] === 'false' || !contact[filterType]
-                    ).length;
-                    
                     content.innerHTML = `
                         <label class="filter-option">
                             <input type="checkbox" value="oui" ${this.activeFilters[filterType].includes('oui') ? 'checked' : ''} 
                                    onchange="contacts.toggleFilter('${filterType}', 'oui')">
-                            <span>✅ Oui (${yesCount})</span>
+                            <span>✅ Oui</span>
                         </label>
                         <label class="filter-option">
                             <input type="checkbox" value="non" ${this.activeFilters[filterType].includes('non') ? 'checked' : ''} 
                                    onchange="contacts.toggleFilter('${filterType}', 'non')">
-                            <span>❌ Non (${noCount})</span>
+                            <span>❌ Non</span>
                         </label>
                     `;
                 }
@@ -979,14 +840,6 @@ const contacts = {
         }
         if (hasCompleteFilter) hasAnyFilter = true;
         
-        // Pays
-        const hasCountryFilter = this.activeFilters.country && this.activeFilters.country.length > 0;
-        const countryBtn = document.getElementById('filter_country_Btn');
-        if (countryBtn) {
-            countryBtn.classList.toggle('active', hasCountryFilter);
-        }
-        if (hasCountryFilter) hasAnyFilter = true;
-        
         // Show/hide reset button
         const resetBtn = document.getElementById('filterResetBtn');
         if (resetBtn) {
@@ -995,23 +848,13 @@ const contacts = {
     },
     
     resetFilters() {
-        // Réinitialiser les filtres de base
         this.activeFilters = {
             gender: [],
             relationType: [],
             meetingPlace: [],
             discussionStatus: [],
-            complete: [],
-            country: []
+            complete: []
         };
-        
-        // Réinitialiser aussi les champs personnalisés
-        const allFields = app.getAllFields();
-        allFields.forEach(field => {
-            if (field.type === 'select' || field.type === 'radio' || field.type === 'checkbox') {
-                this.activeFilters[field.id] = [];
-            }
-        });
         
         // Réinitialiser aussi la barre de recherche
         const searchBox = document.getElementById('searchBox');
