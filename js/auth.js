@@ -183,19 +183,21 @@ const authManager = {
             // Vider les contacts
             app.dataStore.contacts = [];
             
-            // Vider les relations
-            relations.data = {
-                followers: [],
-                following: [],
-                unfollowers: [],
-                fans: [],
-                pending: [],
-                normalUnfollowers: new Set(),
-                doNotFollowList: new Set(),
-                marked: new Set(),
-                normalCategories: {},
-                currentTab: 'unfollowers'
-            };
+            // Vider les relations (si le module est chargé)
+            if (typeof relations !== 'undefined') {
+                relations.data = {
+                    followers: [],
+                    following: [],
+                    unfollowers: [],
+                    fans: [],
+                    pending: [],
+                    normalUnfollowers: new Set(),
+                    doNotFollowList: new Set(),
+                    marked: new Set(),
+                    normalCategories: {},
+                    currentTab: 'unfollowers'
+                };
+            }
             
             // Réinitialiser les tags par défaut (pour éviter contamination)
             app.defaultTags = {
@@ -532,55 +534,60 @@ const authManager = {
                     }
                 }
                 
-                if (data.normalUnfollowers) {
-                    relations.data.normalUnfollowers = new Set(data.normalUnfollowers);
-                }
-                if (data.doNotFollowList) {
-                    relations.data.doNotFollowList = new Set(data.doNotFollowList);
-                }
-                if (data.normalCategories) {
-                    relations.data.normalCategories = data.normalCategories;
-                }
-                
-                // Charger les données des relations (following, followers, unfollowers)
-                if (data.unfollowersData) {
-                    relations.data.following = data.unfollowersData.following || [];
-                    relations.data.followers = data.unfollowersData.followers || [];
-                    
-                    // ⚠️ IMPORTANT: Refiltrer les unfollowers pour exclure ceux marqués comme normaux ou à ne plus suivre
-                    const rawUnfollowers = data.unfollowersData.unfollowers || [];
-                    relations.data.unfollowers = rawUnfollowers.filter(item => {
-                        const username = typeof item === 'string' ? item : item.username;
-                        return !relations.data.normalUnfollowers.has(username) && 
-                               !relations.data.doNotFollowList.has(username);
-                    });
-                    
-                    console.log(`🔍 Filtered unfollowers: ${rawUnfollowers.length} -> ${relations.data.unfollowers.length}`);
-                    
-                    // Update display (compteurs supprimés de l'interface)
-                    // document.getElementById('followersCount').textContent = relations.data.followers.length;
-                    // document.getElementById('followingCount').textContent = relations.data.following.length;
-                    // document.getElementById('unfollowersCount').textContent = relations.data.unfollowers.length;
-                    
-                    // Show appropriate section
-                    if (relations.data.unfollowers.length === 0) {
-                        document.getElementById('unfollowersResults').style.display = 'none';
-                        document.getElementById('emptyUnfollowers').style.display = 'block';
-                        const emptyDiv2 = document.getElementById('emptyUnfollowers').querySelector('div:nth-child(2)');
-                        const emptyDiv3 = document.getElementById('emptyUnfollowers').querySelector('div:nth-child(3)');
-                        if (emptyDiv2) emptyDiv2.textContent = 'Aucun unfollower !';
-                        if (emptyDiv3) emptyDiv3.textContent = 'Tout le monde que vous suivez vous suit en retour';
-                    } else {
-                        document.getElementById('unfollowersResults').style.display = 'block';
-                        document.getElementById('emptyUnfollowers').style.display = 'none';
-                        relations.renderList();
+                // Vérifier que relations est défini
+                if (typeof relations === 'undefined') {
+                    console.warn('⚠️ relations module not loaded yet, skipping relations data');
+                } else {
+                    if (data.normalUnfollowers) {
+                        relations.data.normalUnfollowers = new Set(data.normalUnfollowers);
+                    }
+                    if (data.doNotFollowList) {
+                        relations.data.doNotFollowList = new Set(data.doNotFollowList);
+                    }
+                    if (data.normalCategories) {
+                        relations.data.normalCategories = data.normalCategories;
                     }
                     
-                    console.log('✅ Relations data loaded:', relations.data.unfollowers.length, 'unfollowers');
+                    // Charger les données des relations (following, followers, unfollowers)
+                    if (data.unfollowersData) {
+                        relations.data.following = data.unfollowersData.following || [];
+                        relations.data.followers = data.unfollowersData.followers || [];
+                        
+                        // ⚠️ IMPORTANT: Refiltrer les unfollowers pour exclure ceux marqués comme normaux ou à ne plus suivre
+                        const rawUnfollowers = data.unfollowersData.unfollowers || [];
+                        relations.data.unfollowers = rawUnfollowers.filter(item => {
+                            const username = typeof item === 'string' ? item : item.username;
+                            return !relations.data.normalUnfollowers.has(username) && 
+                                   !relations.data.doNotFollowList.has(username);
+                        });
+                        
+                        console.log(`🔍 Filtered unfollowers: ${rawUnfollowers.length} -> ${relations.data.unfollowers.length}`);
+                        
+                        // Update display (compteurs supprimés de l'interface)
+                        // document.getElementById('followersCount').textContent = relations.data.followers.length;
+                        // document.getElementById('followingCount').textContent = relations.data.following.length;
+                        // document.getElementById('unfollowersCount').textContent = relations.data.unfollowers.length;
+                        
+                        // Show appropriate section
+                        if (relations.data.unfollowers.length === 0) {
+                            document.getElementById('unfollowersResults').style.display = 'none';
+                            document.getElementById('emptyUnfollowers').style.display = 'block';
+                            const emptyDiv2 = document.getElementById('emptyUnfollowers').querySelector('div:nth-child(2)');
+                            const emptyDiv3 = document.getElementById('emptyUnfollowers').querySelector('div:nth-child(3)');
+                            if (emptyDiv2) emptyDiv2.textContent = 'Aucun unfollower !';
+                            if (emptyDiv3) emptyDiv3.textContent = 'Tout le monde que vous suivez vous suit en retour';
+                        } else {
+                            document.getElementById('unfollowersResults').style.display = 'block';
+                            document.getElementById('emptyUnfollowers').style.display = 'none';
+                            relations.renderList();
+                        }
+                        
+                        console.log('✅ Relations data loaded:', relations.data.unfollowers.length, 'unfollowers');
+                    }
+                    
+                    // Update counts
+                    relations.updateCounts();
                 }
-                
-                // Update counts
-                relations.updateCounts();
             }
 
             // Charger les contacts UNE SEULE FOIS au démarrage (pas de listener temps réel)
@@ -656,9 +663,9 @@ const authManager = {
                     });
                 }
                 
-                // Vérifier si ce contact est dans la liste "À ne plus suivre"
+                // Vérifier si ce contact est dans la liste "À ne plus suivre" (si relations est chargé)
                 const instagramUsername = contact.instagram.toLowerCase().replace('@', '');
-                if (relations.data.doNotFollowList.has(instagramUsername)) {
+                if (typeof relations !== 'undefined' && relations.data.doNotFollowList.has(instagramUsername)) {
                     console.log(`🗑️ Contact @${instagramUsername} is in doNotFollow list - marking for deletion`);
                     contactsToDelete.push(contact.id);
                 } else {
