@@ -433,7 +433,7 @@ const app = {
             document.getElementById('contactsSection').classList.add('active');
             document.querySelectorAll('.nav-item')[0].classList.add('active');
             header.style.display = 'block';
-            container.style.marginTop = '242px'; // Remettre le margin-top pour le header
+            container.style.marginTop = '230px'; // Remettre le margin-top pour le header
             
             contacts.render();
         } else if (section === 'stats') {
