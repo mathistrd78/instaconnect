@@ -386,13 +386,17 @@ const tags = {
     renderOptions(options, searchValue = '') {
         const list = document.getElementById('tagOptionsList');
         
+    // Rendre les options de tags
+    renderOptions(options, searchValue = '') {
+        const list = document.getElementById('tagOptionsList');
+        
         let html = options.map((opt, index) => `
             <div class="tag-option" draggable="true" data-tag-value="${opt.value.replace(/"/g, '&quot;')}" data-tag-index="${index}">
                 <span class="tag-drag-handle">⋮⋮</span>
                 <div class="tag-option-content" onclick="tags.selectTag('${opt.value.replace(/'/g, "\\'")}')">
                     <span class="tag-option-preview ${opt.class}">${opt.label}</span>
                 </div>
-                <span class="tag-edit-btn" onclick="event.stopPropagation(); tags.openEditModal('${this.currentContext.fieldType}', '${opt.value.replace(/'/g, "\\'")}')">✏️</span>
+                <button class="tag-edit-btn" data-field-type="${this.currentContext.fieldType}" data-tag-value="${opt.value.replace(/"/g, '&quot;')}">✏️</button>
             </div>
         `).join('');
         
@@ -407,71 +411,101 @@ const tags = {
         
         list.innerHTML = html;
         
+        // Ajouter les event listeners pour les boutons d'édition
+        list.querySelectorAll('.tag-edit-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                const fieldType = btn.getAttribute('data-field-type');
+                const tagValue = btn.getAttribute('data-tag-value');
+                this.openEditModal(fieldType, tagValue);
+            });
+            
+            // Support tactile pour iPhone
+            btn.addEventListener('touchend', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                const fieldType = btn.getAttribute('data-field-type');
+                const tagValue = btn.getAttribute('data-tag-value');
+                this.openEditModal(fieldType, tagValue);
+            });
+        });
+        
         // Ajouter les événements drag & drop
         this.initDragAndDrop(list);
     },
-    
     // Initialiser le drag & drop pour les tags (compatible mobile)
     initDragAndDrop(list) {
         let draggedElement = null;
         let touchStartY = 0;
-        let placeholder = null;
+        let isDragging = false;
         
         const tagOptions = list.querySelectorAll('.tag-option[draggable="true"]');
         
         tagOptions.forEach((item) => {
-            // Touch events pour mobile (iOS)
-            item.addEventListener('touchstart', (e) => {
-                draggedElement = item;
-                touchStartY = e.touches[0].clientY;
-                item.classList.add('dragging');
-                
-                // Créer un placeholder visuel
-                placeholder = item.cloneNode(true);
-                placeholder.style.opacity = '0.3';
-                placeholder.style.pointerEvents = 'none';
-                
-                // Empêcher le scroll pendant le drag
-                e.preventDefault();
-            }, { passive: false });
+            const dragHandle = item.querySelector('.tag-drag-handle');
             
-            item.addEventListener('touchmove', (e) => {
-                if (!draggedElement) return;
-                
-                e.preventDefault();
-                
-                const touch = e.touches[0];
-                const currentY = touch.clientY;
-                
-                // Trouver l'élément sous le doigt
-                const elementsAtPoint = document.elementsFromPoint(touch.clientX, touch.clientY);
-                const targetItem = elementsAtPoint.find(el => 
-                    el.classList.contains('tag-option') && el !== draggedElement
-                );
-                
-                if (targetItem && targetItem.parentNode === draggedElement.parentNode) {
-                    const rect = targetItem.getBoundingClientRect();
-                    const midpoint = rect.top + rect.height / 2;
+            // Touch events pour mobile (iOS) - SEULEMENT sur la poignée
+            if (dragHandle) {
+                dragHandle.addEventListener('touchstart', (e) => {
+                    draggedElement = item;
+                    touchStartY = e.touches[0].clientY;
+                    isDragging = false; // Pas encore en train de dragger
                     
-                    if (currentY < midpoint) {
-                        targetItem.parentNode.insertBefore(draggedElement, targetItem);
-                    } else {
-                        targetItem.parentNode.insertBefore(draggedElement, targetItem.nextSibling);
+                    // Ne pas empêcher le comportement par défaut tout de suite
+                    // pour permettre le clic
+                }, { passive: true });
+                
+                dragHandle.addEventListener('touchmove', (e) => {
+                    if (!draggedElement) return;
+                    
+                    // Détecter si on a bougé suffisamment pour considérer comme un drag
+                    const touch = e.touches[0];
+                    const moveY = Math.abs(touch.clientY - touchStartY);
+                    
+                    if (moveY > 10 && !isDragging) {
+                        // On commence vraiment à dragger
+                        isDragging = true;
+                        draggedElement.classList.add('dragging');
                     }
-                }
-            }, { passive: false });
-            
-            item.addEventListener('touchend', (e) => {
-                if (!draggedElement) return;
+                    
+                    if (isDragging) {
+                        e.preventDefault();
+                        
+                        const currentY = touch.clientY;
+                        
+                        // Trouver l'élément sous le doigt
+                        const elementsAtPoint = document.elementsFromPoint(touch.clientX, touch.clientY);
+                        const targetItem = elementsAtPoint.find(el => 
+                            el.classList.contains('tag-option') && el !== draggedElement
+                        );
+                        
+                        if (targetItem && targetItem.parentNode === draggedElement.parentNode) {
+                            const rect = targetItem.getBoundingClientRect();
+                            const midpoint = rect.top + rect.height / 2;
+                            
+                            if (currentY < midpoint) {
+                                targetItem.parentNode.insertBefore(draggedElement, targetItem);
+                            } else {
+                                targetItem.parentNode.insertBefore(draggedElement, targetItem.nextSibling);
+                            }
+                        }
+                    }
+                }, { passive: false });
                 
-                item.classList.remove('dragging');
-                
-                // Sauvegarder le nouvel ordre
-                this.saveTagOrder();
-                
-                draggedElement = null;
-                placeholder = null;
-            });
+                dragHandle.addEventListener('touchend', (e) => {
+                    if (!draggedElement) return;
+                    
+                    if (isDragging) {
+                        draggedElement.classList.remove('dragging');
+                        // Sauvegarder le nouvel ordre
+                        this.saveTagOrder();
+                    }
+                    
+                    draggedElement = null;
+                    isDragging = false;
+                });
+            }
             
             // Desktop drag & drop (garde la compatibilité)
             item.addEventListener('dragstart', (e) => {
@@ -536,8 +570,8 @@ const tags = {
             
             field.tags = reorderedTags;
             
-            // Sauvegarder dans Firebase
-            app.dataStore.saveUserData();
+            // Sauvegarder dans Firebase avec debounce (attendre 2s pendant le drag)
+            app.dataStore.save(null, { skipContacts: true, debounce: true });
             
             console.log('✅ Tag order saved:', newOrder);
         }
@@ -556,7 +590,7 @@ const tags = {
         const contact = app.dataStore.contacts.find(c => c.id === this.currentContext.contactId);
         if (contact) {
             contact[this.currentContext.fieldType] = value;
-            app.dataStore.save();
+            app.dataStore.save(contact); // Sauvegarder SEULEMENT ce contact
             contacts.render();
         }
         
@@ -601,7 +635,7 @@ const tags = {
         style.textContent = `.${className} { background: ${color}; color: white; }`;
         document.head.appendChild(style);
         
-        app.dataStore.save();
+        app.dataStore.saveSettings(); // Sauvegarder seulement les paramètres
         return newTag;
     },
 
@@ -616,15 +650,32 @@ const tags = {
     openEditModal(fieldType, value) {
         this.closeDropdown();
         
-        let tag = app.customTags[fieldType].find(t => t.value === value);
+        let tag = null;
         let isDefault = false;
         
+        // Chercher dans customTags (ancienne structure)
+        if (app.customTags[fieldType]) {
+            tag = app.customTags[fieldType].find(t => t.value === value);
+        }
+        
+        // Chercher dans defaultFields[].tags (nouvelle structure)
         if (!tag) {
+            const field = app.defaultFields.find(f => f.id === fieldType);
+            if (field && field.tags) {
+                tag = field.tags.find(t => t.value === value);
+            }
+        }
+        
+        // Chercher dans defaultTags si toujours pas trouvé
+        if (!tag && app.defaultTags[fieldType]) {
             tag = app.defaultTags[fieldType].find(t => t.value === value);
             isDefault = true;
         }
         
-        if (!tag) return;
+        if (!tag) {
+            console.error('❌ Tag not found:', { fieldType, value });
+            return;
+        }
         
         // Get current color - prefer tag.color if available, otherwise read from CSS
         let currentColor = tag.color || '#868e96'; // Use saved color if exists
@@ -853,18 +904,22 @@ const tags = {
             styleElement.textContent = `.${className} { background: ${newColor}; color: white; }`;
         }
         
-        console.log('📤 Calling save to Firebase...');
+        console.log('📤 Calling saveSettings to Firebase...');
         
-        app.dataStore.save();
+        app.dataStore.saveSettings(); // Sauvegarder seulement les paramètres
         contacts.render();
         this.closeEditModal();
     },
 
     // Supprimer un tag
     deleteTag() {
-        if (!this.currentEdit) return;
+        if (!this.currentEdit) {
+            console.error('❌ No currentEdit defined');
+            return;
+        }
         
         const { fieldType, value, isDefault } = this.currentEdit;
+        console.log('🗑️ Attempting to delete tag:', { fieldType, value, isDefault });
         
         if (isDefault) {
             alert('Impossible de supprimer un tag par défaut.');
@@ -873,17 +928,50 @@ const tags = {
         
         if (!confirm('Supprimer ce tag ?')) return;
         
-        app.customTags[fieldType] = app.customTags[fieldType].filter(t => t.value !== value);
+        let tagFound = false;
+        let contactsUpdated = 0;
         
+        // Vérifier dans customTags (ancienne structure)
+        if (app.customTags[fieldType]) {
+            console.log('📋 Tags in customTags before deletion:', app.customTags[fieldType].length);
+            app.customTags[fieldType] = app.customTags[fieldType].filter(t => t.value !== value);
+            console.log('📋 Tags in customTags after deletion:', app.customTags[fieldType].length);
+            tagFound = true;
+        }
+        
+        // Vérifier dans defaultFields[].tags (nouvelle structure)
+        const field = app.defaultFields.find(f => f.id === fieldType);
+        if (field && field.tags) {
+            console.log('📋 Tags in field.tags before deletion:', field.tags.length);
+            field.tags = field.tags.filter(t => t.value !== value);
+            console.log('📋 Tags in field.tags after deletion:', field.tags.length);
+            tagFound = true;
+        }
+        
+        if (!tagFound) {
+            console.error('❌ No tags found for fieldType:', fieldType);
+            alert('Erreur: Impossible de trouver les tags pour ce champ.');
+            return;
+        }
+        
+        // Mettre à jour les contacts qui utilisent ce tag
         app.dataStore.contacts.forEach(contact => {
             if (contact[fieldType] === value) {
                 contact[fieldType] = '';
+                contactsUpdated++;
             }
         });
         
-        app.dataStore.save();
+        console.log(`✅ ${contactsUpdated} contacts updated`);
+        
+        // Sauvegarder SEULEMENT les paramètres (pas tous les contacts)
+        // Les contacts seront sauvegardés individuellement quand on les éditera
+        await app.dataStore.saveSettings();
+        
         contacts.render();
         this.closeEditModal();
+        
+        console.log('✅ Tag deleted successfully');
     },
 
     // Fermer la modale d'édition
