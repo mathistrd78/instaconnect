@@ -548,6 +548,7 @@ const city = {
             'azerbaïdjan': 'AZ', 'azerbaidjan': 'AZ'
         };
         
+        
         // Si c'est un seul mot, vérifier si c'est un nom de pays
         if (parts.length === 1) {
             const textLower = locationString.toLowerCase().trim();
@@ -608,37 +609,186 @@ const city = {
         return null;
     },
 
-    // Obtenir les statistiques par pays
+    // Mapping des noms de pays vers leur forme normalisée (en français)
+    countryNormalization: {
+        // Anglais -> Français
+        'germany': 'Allemagne',
+        'spain': 'Espagne',
+        'italy': 'Italie',
+        'france': 'France',
+        'belgium': 'Belgique',
+        'switzerland': 'Suisse',
+        'portugal': 'Portugal',
+        'united kingdom': 'Royaume-Uni',
+        'united states': 'États-Unis',
+        'canada': 'Canada',
+        'morocco': 'Maroc',
+        'algeria': 'Algérie',
+        'tunisia': 'Tunisie',
+        'brazil': 'Brésil',
+        'argentina': 'Argentine',
+        'mexico': 'Mexique',
+        'japan': 'Japon',
+        'china': 'Chine',
+        'india': 'Inde',
+        'australia': 'Australie',
+        'netherlands': 'Pays-Bas',
+        'poland': 'Pologne',
+        'sweden': 'Suède',
+        'norway': 'Norvège',
+        'denmark': 'Danemark',
+        'finland': 'Finlande',
+        'greece': 'Grèce',
+        'turkey': 'Turquie',
+        'austria': 'Autriche',
+        'czech republic': 'République tchèque',
+        'hungary': 'Hongrie',
+        'romania': 'Roumanie',
+        'bulgaria': 'Bulgarie',
+        'croatia': 'Croatie',
+        'serbia': 'Serbie',
+        'slovakia': 'Slovaquie',
+        'slovenia': 'Slovénie',
+        'ireland': 'Irlande',
+        'luxembourg': 'Luxembourg',
+        'iceland': 'Islande',
+        'malta': 'Malte',
+        // Variantes
+        'allemagne': 'Allemagne',
+        'espagne': 'Espagne',
+        'italie': 'Italie',
+        'belgique': 'Belgique',
+        'suisse': 'Suisse',
+        'portugal': 'Portugal',
+        'royaume-uni': 'Royaume-Uni',
+        'états-unis': 'États-Unis',
+        'canada': 'Canada',
+        'maroc': 'Maroc',
+        'algérie': 'Algérie',
+        'tunisie': 'Tunisie',
+        'brésil': 'Brésil',
+        'argentine': 'Argentine',
+        'mexique': 'Mexique',
+        'japon': 'Japon',
+        'chine': 'Chine',
+        'inde': 'Inde',
+        'australie': 'Australie'
+    },
+
+    // Normaliser un nom de pays
+    normalizeCountryName(countryName) {
+        if (!countryName) return 'Non défini';
+        
+        const lower = countryName.toLowerCase().trim();
+        return this.countryNormalization[lower] || countryName;
+    },
+
+    // Obtenir le drapeau d'un pays par son nom
+    getCountryFlag(countryName) {
+        if (!countryName || countryName === 'Non défini') return '🌍';
+        
+        // Normaliser le nom du pays
+        const normalized = this.normalizeCountryName(countryName);
+        
+        // Trouver le code pays
+        const countryNames = {
+            'france': 'FR',
+            'espagne': 'ES',
+            'italie': 'IT',
+            'allemagne': 'DE',
+            'belgique': 'BE',
+            'suisse': 'CH',
+            'portugal': 'PT',
+            'royaume-uni': 'GB',
+            'états-unis': 'US',
+            'canada': 'CA',
+            'maroc': 'MA',
+            'algérie': 'DZ',
+            'tunisie': 'TN',
+            'brésil': 'BR',
+            'argentine': 'AR',
+            'mexique': 'MX',
+            'japon': 'JP',
+            'chine': 'CN',
+            'inde': 'IN',
+            'australie': 'AU',
+            'pays-bas': 'NL',
+            'pologne': 'PL',
+            'suède': 'SE',
+            'norvège': 'NO',
+            'danemark': 'DK',
+            'finlande': 'FI',
+            'grèce': 'GR',
+            'turquie': 'TR',
+            'autriche': 'AT',
+            'république tchèque': 'CZ',
+            'hongrie': 'HU',
+            'roumanie': 'RO',
+            'bulgarie': 'BG',
+            'croatie': 'HR',
+            'serbie': 'RS',
+            'slovaquie': 'SK',
+            'slovénie': 'SI',
+            'irlande': 'IE',
+            'luxembourg': 'LU',
+            'islande': 'IS',
+            'malte': 'MT'
+        };
+        
+        const countryCode = countryNames[normalized.toLowerCase()];
+        if (countryCode) {
+            return this.getFlag(countryCode);
+        }
+        
+        return '🌍';
+    },
+
+    // Obtenir les statistiques par pays (avec normalisation)
     getCountryStats(contacts) {
         const countryCount = {};
         let undefinedCount = 0;
         
         contacts.forEach(contact => {
-            let location = null;
+            let countryName = 'Non défini';
             
-            // Si contact.location est déjà un objet
-            if (typeof contact.location === 'object' && contact.location !== null) {
-                location = contact.location;
-            }
-            // Sinon, parser
-            else if (contact.location) {
-                location = this.parseLocation(contact.location);
+            // Chercher dans tous les champs de type "city"
+            const allFields = app.getAllFields();
+            const cityFields = allFields.filter(f => f.type === 'city');
+            
+            if (cityFields.length > 0) {
+                const cityFieldId = cityFields[0].id;
+                const cityValue = contact[cityFieldId];
+                
+                if (cityValue) {
+                    try {
+                        const cityData = JSON.parse(cityValue);
+                        if (cityData.country) {
+                            countryName = cityData.country;
+                        }
+                    } catch (e) {
+                        // Si ce n'est pas du JSON, essayer de parser le texte
+                        const parts = cityValue.split(',');
+                        if (parts.length > 1) {
+                            countryName = parts[parts.length - 1].trim();
+                        }
+                    }
+                }
             }
             
-            if (location && location.country) {
-                const key = location.country;
-                if (!countryCount[key]) {
-                    countryCount[key] = {
-                        country: location.country,
-                        countryCode: location.countryCode,
-                        flag: location.flag,
+            // Normaliser le nom du pays
+            const normalizedCountry = this.normalizeCountryName(countryName);
+            
+            if (normalizedCountry === 'Non défini') {
+                undefinedCount++;
+            } else {
+                if (!countryCount[normalizedCountry]) {
+                    countryCount[normalizedCountry] = {
+                        country: normalizedCountry,
+                        flag: this.getCountryFlag(normalizedCountry),
                         count: 0
                     };
                 }
-                countryCount[key].count++;
-            } else {
-                // Pas de pays défini
-                undefinedCount++;
+                countryCount[normalizedCountry].count++;
             }
         });
 
@@ -648,8 +798,7 @@ const city = {
         if (undefinedCount > 0) {
             result.push({
                 country: 'Non défini',
-                countryCode: '',
-                flag: '',
+                flag: '🌍',
                 count: undefinedCount
             });
         }
