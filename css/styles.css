@@ -2852,6 +2852,11 @@ body.dark-mode .emoji-search-input:focus {
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
+/* Quand le header est visible, ajuster le top du letter-divider */
+#contactsSection.active .letter-divider {
+    /* Ce sera défini dynamiquement par JavaScript */
+}
+
 /* Dark mode pour les séparateurs de lettres */
 body.dark-mode .letter-divider {
     background: #212529;
