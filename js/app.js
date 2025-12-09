@@ -234,6 +234,11 @@ const app = {
                 contacts.render();
                 stats.render();
                 this.switchSection(savedSection);
+                
+                // Ajuster le layout après tout
+                if (savedSection === 'contacts') {
+                    setTimeout(() => this.adjustContactsLayout(), 200);
+                }
             }, 1000); // Augmenté à 1 seconde pour laisser le temps à Firebase
         }
     },
@@ -400,14 +405,30 @@ const app = {
         console.log('✅ Migration terminée');
     },
 
-    // Plus besoin d'ajuster le layout car tout est fixé en CSS
-    // On garde la fonction pour compatibilité mais elle ne fait rien
-    _layoutAdjustmentTimer: null,
-    _lastHeaderHeight: 188, // Hauteur fixe
-    
+    // Fonction pour ajuster le layout de la page contacts
     adjustContactsLayout() {
-        // Tout est géré en CSS maintenant, cette fonction ne fait plus rien
-        // On la garde pour ne pas casser les appels existants
+        const header = document.querySelector('.header');
+        const container = document.querySelector('.container');
+        
+        if (!header || !container) return;
+        
+        // Forcer un reflow pour obtenir la vraie hauteur
+        header.offsetHeight;
+        
+        // Attendre que le DOM soit stable
+        requestAnimationFrame(() => {
+            if (header.style.display !== 'none') {
+                const headerHeight = header.offsetHeight;
+                console.log('📐 Adjusting layout - Header height:', headerHeight);
+                
+                container.style.marginTop = headerHeight + 'px';
+                
+                // Ajuster la position sticky des letter-dividers
+                document.querySelectorAll('.letter-divider').forEach(divider => {
+                    divider.style.top = headerHeight + 'px';
+                });
+            }
+        });
     },
 
     switchSection(section) {
@@ -441,8 +462,10 @@ const app = {
             
             contacts.render();
             
-            // Ajuster le layout après le rendu
+            // Ajuster le layout avec plusieurs tentatives pour gérer le timing
             this.adjustContactsLayout();
+            setTimeout(() => this.adjustContactsLayout(), 100);
+            setTimeout(() => this.adjustContactsLayout(), 500);
         } else if (section === 'stats') {
             document.getElementById('statsSection').classList.add('active');
             document.querySelectorAll('.nav-item')[1].classList.add('active');
