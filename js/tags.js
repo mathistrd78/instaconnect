@@ -420,24 +420,8 @@ const tags = {
         const tagOptions = list.querySelectorAll('.tag-option[draggable="true"]');
         
         tagOptions.forEach((item) => {
-            // Empêcher le drag sur le bouton edit
-            const editBtn = item.querySelector('.tag-edit-btn');
-            if (editBtn) {
-                editBtn.addEventListener('mousedown', (e) => {
-                    e.stopPropagation();
-                });
-                editBtn.addEventListener('touchstart', (e) => {
-                    e.stopPropagation();
-                }, { passive: true });
-            }
-            
             // Touch events pour mobile (iOS)
             item.addEventListener('touchstart', (e) => {
-                // Ne pas démarrer le drag si on clique sur le bouton edit
-                if (e.target.closest('.tag-edit-btn')) {
-                    return;
-                }
-                
                 draggedElement = item;
                 touchStartY = e.touches[0].clientY;
                 item.classList.add('dragging');
@@ -617,7 +601,7 @@ const tags = {
         style.textContent = `.${className} { background: ${color}; color: white; }`;
         document.head.appendChild(style);
         
-        app.dataStore.save();
+        app.dataStore.saveMetadata(); // Optimisé: sauvegarde seulement les métadonnées
         return newTag;
     },
 
@@ -869,9 +853,9 @@ const tags = {
             styleElement.textContent = `.${className} { background: ${newColor}; color: white; }`;
         }
         
-        console.log('📤 Calling save to Firebase...');
+        console.log('📤 Calling saveMetadata to Firebase...');
         
-        app.dataStore.save();
+        app.dataStore.saveMetadata(); // Optimisé: sauvegarde seulement les métadonnées
         contacts.render();
         this.closeEditModal();
     },
@@ -897,7 +881,7 @@ const tags = {
             }
         });
         
-        app.dataStore.save();
+        app.dataStore.save(); // Note: modifie les contacts, donc save() complet nécessaire
         contacts.render();
         this.closeEditModal();
     },
