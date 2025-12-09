@@ -1,4 +1,37 @@
 // contacts.js - Gestion des contacts
+
+// Helper pour accéder à tags de manière sûre
+const getTags = () => {
+    if (typeof window.tags === 'undefined') {
+        // Créer un objet tags minimal en fallback
+        if (!window._tagsWarningShown) {
+            console.warn('⚠️ tags module not loaded yet - using fallback');
+            window._tagsWarningShown = true;
+        }
+        
+        // Retourner un objet avec des fonctions stub
+        return {
+            findTag: (fieldType, value) => {
+                // Essayer de trouver le tag directement dans app.defaultFields
+                const allFields = [...(app.defaultFields || []), ...(app.customFields || [])];
+                const field = allFields.find(f => f.id === fieldType);
+                if (field && field.tags) {
+                    return field.tags.find(t => t.value === value);
+                }
+                // Essayer dans customTags (ancienne structure)
+                if (app.customTags && app.customTags[fieldType]) {
+                    return app.customTags[fieldType].find(t => t.value === value);
+                }
+                return null;
+            },
+            closeDropdown: () => {
+                // Stub
+            }
+        };
+    }
+    return window.tags;
+};
+
 const contacts = {
     currentViewId: null,
     currentEditId: null,
@@ -10,7 +43,8 @@ const contacts = {
         relationType: [],
         meetingPlace: [],
         discussionStatus: [],
-        complete: [] // 'oui' ou 'non'
+        complete: [], // 'oui' ou 'non'
+        country: [] // pays
     },
     currentFilterDropdown: null,
 
@@ -26,14 +60,15 @@ const contacts = {
         document.getElementById(this.currentFieldType).value = value;
         
         // Update display
-        const tag = tags.findTag(this.currentFieldType, value);
+        const tagsModule = getTags();
+        const tag = tagsModule.findTag(this.currentFieldType, value);
         if (tag) {
             const displayEl = document.getElementById(this.currentFieldType + 'Display');
             displayEl.textContent = tag.label;
             displayEl.className = 'tag-selector-value';
         }
         
-        tags.closeDropdown();
+        tagsModule.closeDropdown();
         this.currentFieldType = null;
     },
 
@@ -54,9 +89,10 @@ const contacts = {
         );
         console.log('🔍 Filterable fields:', filterableFields.length, filterableFields.map(f => f.label));
         
-        // Ajouter "Profil complet" comme filtre spécial
+        // Ajouter "Profil complet" et "Pays" comme filtres spéciaux
         const specialFilters = [
-            { id: 'complete', label: 'Profil complet' }
+            { id: 'complete', label: 'Profil complet' },
+            { id: 'country', label: 'Pays' }
         ];
         
         // Générer les boutons de filtres
@@ -159,86 +195,52 @@ const contacts = {
             const getFirstLetter = (name) => {
                 // Chercher le premier caractère alphabétique
                 for (let i = 0; i < name.length; i++) {
-                    const char = name.charAt(i);
-                    // Vérifier si c'est une lettre (A-Z, a-z, lettres accentuées)
+                    const char = name[i];
                     if (/[a-zA-ZÀ-ÿ]/.test(char)) {
                         return char.toUpperCase();
                     }
                 }
-                // Si aucune lettre trouvée, retourner '#'
-                return '#';
+                return '#'; // Si aucune lettre alphabétique trouvée
             };
             
-            const firstLetter = getFirstLetter(contact.firstName);
-            if (!groupedContacts[firstLetter]) {
-                groupedContacts[firstLetter] = [];
-                letters.push(firstLetter);
+            const letter = getFirstLetter(contact.firstName || '');
+            
+            if (!groupedContacts[letter]) {
+                groupedContacts[letter] = [];
+                letters.push(letter);
             }
-            groupedContacts[firstLetter].push(contact);
+            groupedContacts[letter].push(contact);
         });
         
-        // Trier les lettres (# à la fin)
+        // Trier les lettres alphabétiquement (# à la fin)
         letters.sort((a, b) => {
             if (a === '#') return 1;
             if (b === '#') return -1;
             return a.localeCompare(b);
         });
         
-        // Générer le HTML avec des séparateurs de lettres
         let html = '';
         letters.forEach(letter => {
-            html += `<div class="letter-divider" data-letter="${letter}" id="letter-${letter}">${letter}</div>`;
-            
+            html += `<div class="letter-divider" id="letter-${letter}">${letter}</div>`;
             groupedContacts[letter].forEach(contact => {
-                const relTag = tags.findTag('relationType', contact.relationType);
-                const meetTag = tags.findTag('meetingPlace', contact.meetingPlace);
-                const statTag = tags.findTag('discussionStatus', contact.discussionStatus);
+                const tag = getTags().findTag('relationType', contact.relationType);
+                const tagClass = tag ? tag.class : 'tag-default';
                 
-                // Extraire le drapeau du pays si disponible
-                let locationData = null;
-                if (contact.location) {
-                    // Si c'est déjà un objet (depuis Firebase)
-                    if (typeof contact.location === 'object') {
-                        locationData = contact.location;
-                    }
-                    // Si c'est un JSON stringifié
-                    else if (typeof contact.location === 'string' && contact.location.startsWith('{')) {
-                        try {
-                            locationData = JSON.parse(contact.location);
-                        } catch (e) {
-                            locationData = typeof city !== 'undefined' ? city.parseLocation(contact.location) : null;
-                        }
-                    }
-                    // Sinon, c'est du texte simple
-                    else {
-                        locationData = typeof city !== 'undefined' ? city.parseLocation(contact.location) : null;
-                    }
-                }
-                const flag = locationData && locationData.flag ? `<span class="contact-flag">${locationData.flag}</span>` : '';
+                const profilePic = contact.profilePicUrl ? 
+                    `<img src="${contact.profilePicUrl}" alt="${contact.firstName}">` :
+                    `<div class="contact-initial">${(contact.firstName || '?').charAt(0).toUpperCase()}</div>`;
                 
                 html += `
-                <div class="contact-card">
-                    <div class="contact-header">
-                        <div class="contact-info">
-                            <div class="contact-name">${contact.firstName}${flag}</div>
-                            <a href="https://instagram.com/${contact.instagram.replace('@', '')}" target="_blank" rel="noopener noreferrer" class="contact-instagram">${contact.instagram}</a>
+                    <div class="contact-card" onclick="contacts.viewProfile('${contact.id}')">
+                        <div class="contact-header">
+                            <div class="contact-avatar">${profilePic}</div>
+                            <div class="contact-info">
+                                <div class="contact-name">${contact.firstName || 'Sans nom'}</div>
+                                <div class="contact-instagram">@${contact.instagram || ''}</div>
+                            </div>
                         </div>
-                        <button class="btn-view-eye" onclick="contacts.viewProfile('${contact.id}')" title="Voir le profil">
-                            👁️
-                        </button>
+                        ${tag ? `<div class="contact-tag ${tagClass}">${tag.label}</div>` : ''}
                     </div>
-                    <div class="contact-tags">
-                        <span class="tag-mini ${relTag?.class || ''}" onclick="tags.showDropdown(event, '${contact.id}', 'relationType')">
-                            ${relTag?.label || 'Type'}
-                        </span>
-                        <span class="tag-mini ${meetTag?.class || ''}" onclick="tags.showDropdown(event, '${contact.id}', 'meetingPlace')">
-                            ${meetTag?.label || 'Lieu'}
-                        </span>
-                        <span class="tag-mini ${statTag?.class || ''}" onclick="tags.showDropdown(event, '${contact.id}', 'discussionStatus')">
-                            ${statTag?.label || 'Statut'}
-                        </span>
-                    </div>
-                </div>
                 `;
             });
         });
@@ -247,774 +249,684 @@ const contacts = {
     },
 
     getFiltered() {
-        let result = [...app.dataStore.contacts];
+        let contacts = app.dataStore.contacts || [];
         
-        // Filtrer les contacts qui sont dans la liste "À ne plus suivre"
-        if (typeof unfollowers !== 'undefined' && unfollowers.data.doNotFollowList) {
-            result = result.filter(contact => {
-                const instagramUsername = contact.instagram.toLowerCase().replace('@', '');
-                return !unfollowers.data.doNotFollowList.has(instagramUsername);
+        // Filtre de recherche
+        const searchQuery = document.getElementById('searchBox')?.value.toLowerCase() || '';
+        if (searchQuery) {
+            contacts = contacts.filter(contact => {
+                const firstName = (contact.firstName || '').toLowerCase();
+                const instagram = (contact.instagram || '').toLowerCase();
+                const fullName = (contact.fullName || '').toLowerCase();
+                return firstName.includes(searchQuery) || 
+                       instagram.includes(searchQuery) || 
+                       fullName.includes(searchQuery);
             });
         }
         
-        // Appliquer la recherche textuelle
-        const searchBox = document.getElementById('searchBox');
-        const searchTerm = searchBox ? searchBox.value.toLowerCase().trim() : '';
-        
-        if (searchTerm) {
-            result = result.filter(contact => {
-                const firstName = contact.firstName.toLowerCase().replace(/^@+/, ''); // Enlever les @ au début
-                const instagram = contact.instagram.toLowerCase().replace('@', '');
-                return firstName.startsWith(searchTerm) || instagram.startsWith(searchTerm);
-            });
-        }
-        
-        // Appliquer les filtres par champs
-        const allFields = app.getAllFields();
-        const filterableFields = allFields.filter(field => 
-            field.type === 'select' || field.type === 'radio' || field.type === 'checkbox'
-        );
-        
-        filterableFields.forEach(field => {
-            const filters = this.activeFilters[field.id];
-            if (filters && filters.length > 0) {
-                result = result.filter(contact => {
-                    const value = contact[field.id];
-                    
-                    if (field.type === 'checkbox') {
-                        // Pour checkbox: vérifier oui/non
-                        if (filters.includes('oui')) {
-                            return value === true || value === 'true';
+        // Appliquer les filtres actifs
+        Object.keys(this.activeFilters).forEach(filterType => {
+            const values = this.activeFilters[filterType];
+            if (values && values.length > 0) {
+                if (filterType === 'complete') {
+                    // Filtre spécial "Profil complet"
+                    contacts = contacts.filter(contact => {
+                        const isComplete = this.isProfileComplete(contact);
+                        if (values.includes('oui')) {
+                            return isComplete;
                         }
-                        if (filters.includes('non')) {
-                            return value === false || value === 'false' || !value;
+                        if (values.includes('non')) {
+                            return !isComplete;
                         }
-                    } else {
-                        // Pour select/radio: vérifier la valeur exacte
-                        return filters.includes(value);
-                    }
-                    return false;
-                });
+                        return true;
+                    });
+                } else if (filterType === 'country') {
+                    // Filtre spécial "Pays"
+                    contacts = contacts.filter(contact => {
+                        // Extraire le pays depuis cityField
+                        let contactCountry = 'Non défini';
+                        const allFields = app.getAllFields();
+                        const cityFields = allFields.filter(f => f.type === 'city');
+                        
+                        if (cityFields.length > 0 && contact[cityFields[0].id]) {
+                            try {
+                                const cityData = JSON.parse(contact[cityFields[0].id]);
+                                contactCountry = cityData.country || 'Non défini';
+                            } catch (e) {
+                                // Si ce n'est pas du JSON, c'est peut-être juste le texte
+                                const parts = contact[cityFields[0].id].split(',');
+                                if (parts.length > 1) {
+                                    contactCountry = parts[parts.length - 1].trim();
+                                }
+                            }
+                        }
+                        
+                        return values.includes(contactCountry);
+                    });
+                } else {
+                    // Filtres normaux
+                    contacts = contacts.filter(contact => {
+                        const contactValue = contact[filterType];
+                        return values.includes(contactValue);
+                    });
+                }
             }
         });
         
-        // Filtre profil complet
-        if (this.activeFilters.complete && this.activeFilters.complete.length > 0) {
-            result = result.filter(contact => {
-                const isComplete = this.isProfileComplete(contact);
-                if (this.activeFilters.complete.includes('oui')) return isComplete;
-                if (this.activeFilters.complete.includes('non')) return !isComplete;
-                return false;
-            });
-        }
-        
-        // Sort by firstName
-        result.sort((a, b) => {
-            const aName = a.firstName.replace(/^@+/, '');
-            const bName = b.firstName.replace(/^@+/, '');
-            return aName.localeCompare(bName);
+        // Tri par ordre alphabétique
+        return contacts.sort((a, b) => {
+            const nameA = (a.firstName || '').toLowerCase();
+            const nameB = (b.firstName || '').toLowerCase();
+            return nameA.localeCompare(nameB);
         });
-        
-        return result;
     },
 
     isProfileComplete(contact) {
-        // Récupérer tous les champs obligatoires
         const allFields = app.getAllFields();
-        const requiredFields = allFields.filter(field => field.required);
+        const requiredFields = allFields.filter(f => f.required);
         
-        // Vérifier que tous les champs obligatoires sont remplis
-        for (const field of requiredFields) {
-            const value = contact[field.id];
-            if (!value || value === '' || value === null || value === undefined) {
+        for (let field of requiredFields) {
+            if (!contact[field.id] || contact[field.id] === '') {
                 return false;
             }
         }
-        
         return true;
     },
 
-    viewProfile(contactId) {
-        const contact = app.dataStore.contacts.find(c => c.id === contactId);
-        if (!contact) return;
-
-        this.currentViewId = contactId;
-
-        // Prénom et Instagram
-        document.getElementById('profileName').textContent = contact.firstName;
-        document.getElementById('profileInsta').href = `https://instagram.com/${contact.instagram.replace('@', '')}`;
-        document.getElementById('profileInsta').textContent = contact.instagram;
-
-        // Générer dynamiquement les détails
-        const allFields = app.getAllFields();
-        const detailsContainer = document.getElementById('profileInfo');
-        
-        let detailsHTML = '';
-        let birthYearValue = null;
-        let birthdayValue = null;
-        
-        allFields.forEach(field => {
-            const value = contact[field.id];
-            
-            // Capturer birthYear et birthday pour les fusionner
-            if (field.id === 'birthYear') {
-                birthYearValue = value;
-                return; // Ne pas afficher séparément
-            }
-            if (field.id === 'birthday') {
-                birthdayValue = value;
-                return; // Ne pas afficher séparément
-            }
-            
-            if (value !== undefined && value !== null && value !== '') {
-                let displayValue = value;
-                
-                if (field.type === 'select' || field.type === 'radio') {
-                    // Pour les champs avec tags, afficher le tag formaté
-                    const tag = tags.findTag(field.id, value);
-                    if (tag) {
-                        displayValue = `<span class="tag-mini ${tag.class}">${tag.label}</span>`;
-                    } else if (field.type === 'radio' && field.options) {
-                        // Pour les radio, chercher dans les options
-                        displayValue = value;
-                    }
-                } else if (field.type === 'checkbox') {
-                    displayValue = (value === true || value === 'true') ? '✅ Oui' : '❌ Non';
-                } else if (field.type === 'city') {
-                    // Pour les champs city, parser et afficher le displayName avec le drapeau
-                    let locationData = null;
-                    
-                    // Si c'est déjà un objet (depuis Firebase)
-                    if (typeof value === 'object') {
-                        locationData = value;
-                    }
-                    // Si c'est un JSON stringifié
-                    else if (typeof value === 'string' && value.startsWith('{')) {
-                        try {
-                            locationData = JSON.parse(value);
-                        } catch (e) {
-                            locationData = typeof city !== 'undefined' ? city.parseLocation(value) : null;
-                        }
-                    }
-                    // Sinon, c'est du texte simple
-                    else {
-                        locationData = typeof city !== 'undefined' ? city.parseLocation(value) : null;
-                    }
-                    
-                    if (locationData && locationData.flag) {
-                        displayValue = `${locationData.flag} ${locationData.displayName || locationData.country || value}`;
-                    } else {
-                        displayValue = value;
-                    }
-                } else if (field.type === 'textarea') {
-                    displayValue = value.replace(/\n/g, '<br>');
-                }
-                
-                detailsHTML += `
-                    <div class="view-detail-item">
-                        <div class="view-detail-label">${field.label}</div>
-                        <div class="view-detail-value">${displayValue}</div>
-                    </div>
-                `;
-            }
-        });
-        
-        // Ajouter le champ fusionné "Naissance" si birthYear ou birthday existe
-        if (birthdayValue || birthYearValue) {
-            let birthDisplay = '';
-            
-            if (birthdayValue) {
-                // Date complète : afficher en toutes lettres (ex: 17 janvier 2000)
-                const [year, month, day] = birthdayValue.split('-');
-                const monthNames = [
-                    'janvier', 'février', 'mars', 'avril', 'mai', 'juin',
-                    'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'
-                ];
-                const monthName = monthNames[parseInt(month) - 1];
-                birthDisplay = `${parseInt(day)} ${monthName} ${year}`;
-            } else if (birthYearValue) {
-                // Seulement l'année
-                birthDisplay = birthYearValue;
-            }
-            
-            detailsHTML += `
-                <div class="view-detail-item">
-                    <div class="view-detail-label">Naissance</div>
-                    <div class="view-detail-value">${birthDisplay}</div>
-                </div>
-            `;
-        }
-        
-        detailsContainer.innerHTML = detailsHTML;
-        
-        // Reset scroll to top of modal
-        const viewModal = document.getElementById('viewModal');
-        viewModal.classList.add('active');
-        viewModal.scrollTop = 0;
-    },
-
-    editProfile(contactId) {
-        // Si aucun ID n'est passé, utiliser currentViewId
-        if (!contactId) {
-            contactId = this.currentViewId;
-        }
-        
-        const contact = app.dataStore.contacts.find(c => c.id === contactId);
-        if (!contact) return;
-
-        app.closeViewModal();
-        
-        this.currentEditId = contactId;
-        
-        // Générer le formulaire dynamiquement
-        this.renderDynamicForm();
-        
-        // Initialiser les champs city
-        this.initCityFields();
-
-        // Remplir le formulaire
-        document.getElementById('firstName').value = contact.firstName;
-        document.getElementById('instagram').value = contact.instagram.replace('@', '');
-
-        // Remplir les champs dynamiques
-        const allFields = app.getAllFields();
-        allFields.forEach(field => {
-            const value = contact[field.id];
-            
-            if (field.id === 'birthday') {
-                // Cas spécial : birthday avec 3 selects
-                const daySelect = document.getElementById('birthday_day');
-                const monthSelect = document.getElementById('birthday_month');
-                const yearSelect = document.getElementById('birthday_year');
-                const birthdayInput = document.getElementById('birthday');
-                const birthYearInput = document.getElementById('birthYear');
-                
-                if (value) {
-                    // Si birthday (date complète) existe, le charger
-                    const [year, month, day] = value.split('-');
-                    if (daySelect) daySelect.value = parseInt(day);
-                    if (monthSelect) monthSelect.value = parseInt(month);
-                    if (yearSelect) yearSelect.value = year;
-                    if (birthdayInput) birthdayInput.value = value;
-                    if (birthYearInput) birthYearInput.value = year;
-                } else if (contact.birthYear) {
-                    // Sinon, si juste birthYear existe, charger uniquement l'année
-                    if (yearSelect) yearSelect.value = contact.birthYear;
-                    if (birthYearInput) birthYearInput.value = contact.birthYear;
-                }
-            } else if (field.id === 'birthYear') {
-                // Ne rien faire, déjà géré dans birthday
-                return;
-            } else if (field.type === 'select') {
-                // Tag selector
-                const hiddenInput = document.getElementById(field.id);
-                const displayEl = document.getElementById(field.id + 'Display');
-                if (hiddenInput && displayEl && value) {
-                    hiddenInput.value = value;
-                    const tag = tags.findTag(field.id, value);
-                    if (tag) {
-                        displayEl.textContent = tag.label;
-                        displayEl.className = 'tag-selector-value';
-                    }
-                }
-            } else if (field.type === 'radio') {
-                // Radio buttons
-                if (field.options) {
-                    field.options.forEach((opt, index) => {
-                        const radio = document.getElementById(`${field.id}_${index}`);
-                        if (radio && value === opt) {
-                            radio.checked = true;
-                        }
-                    });
-                }
-            } else if (field.type === 'checkbox') {
-                const checkbox = document.getElementById(field.id);
-                if (checkbox) {
-                    checkbox.checked = (value === true || value === 'true');
-                }
-            } else if (field.type === 'city') {
-                // Champ city : parser la valeur et remplir
-                const input = document.getElementById(field.id);
-                if (input && value) {
-                    let cityData = null;
-                    
-                    // Si c'est déjà un objet
-                    if (typeof value === 'object') {
-                        cityData = value;
-                    }
-                    // Sinon, essayer de parser
-                    else {
-                        cityData = typeof city !== 'undefined' ? city.parseLocation(value) : null;
-                    }
-                    
-                    if (cityData) {
-                        input.value = cityData.displayName || cityData.country || value;
-                        input.setAttribute('data-city-json', JSON.stringify(cityData));
-                    } else {
-                        // Si on ne peut pas parser, juste afficher la valeur texte
-                        input.value = value;
-                    }
-                }
-            } else {
-                // Text, textarea, number, date, etc.
-                const input = document.getElementById(field.id);
-                if (input && value !== undefined && value !== null) {
-                    input.value = value;
-                }
-            }
-        });
-
-        document.getElementById('modalTitle').textContent = '✏️ Modifier le contact';
-        
-        // Reset scroll to top of modal
-        const addModal = document.getElementById('addModal');
-        addModal.classList.add('active');
-        addModal.scrollTop = 0;
-    },
-
-    async saveContact(event) {
-        event.preventDefault();
-
-        const firstName = document.getElementById('firstName').value;
-        const instagram = '@' + document.getElementById('instagram').value.replace('@', '');
-
-        // Collecter tous les champs dynamiques
-        const allFields = app.getAllFields();
-        const contactData = {
-            firstName,
-            instagram
-        };
-
-        allFields.forEach(field => {
-            if (field.type === 'select') {
-                const value = document.getElementById(field.id)?.value || '';
-                contactData[field.id] = value;
-            } else if (field.type === 'radio') {
-                const radios = document.getElementsByName(field.id);
-                let selectedValue = '';
-                radios.forEach(radio => {
-                    if (radio.checked) {
-                        selectedValue = radio.value;
-                    }
-                });
-                contactData[field.id] = selectedValue;
-            } else if (field.type === 'checkbox') {
-                const checkbox = document.getElementById(field.id);
-                contactData[field.id] = checkbox ? checkbox.checked : false;
-            } else if (field.type === 'city') {
-                // Pour les champs city, récupérer les données JSON ou le texte
-                const input = document.getElementById(field.id);
-                if (input) {
-                    const cityJson = input.getAttribute('data-city-json');
-                    if (cityJson) {
-                        // Si on a un JSON, le parser pour sauvegarder l'objet (pas la string)
-                        try {
-                            contactData[field.id] = JSON.parse(cityJson);
-                        } catch (e) {
-                            // Si le parsing échoue, sauvegarder le texte brut
-                            contactData[field.id] = input.value;
-                        }
-                    } else {
-                        // Sinon, sauvegarder le texte brut
-                        contactData[field.id] = input.value;
-                    }
-                }
-            } else {
-                const input = document.getElementById(field.id);
-                contactData[field.id] = input ? input.value : '';
-            }
-        });
-
-        // Ancienne logique de compatibilité pour le genre (si pas de valeur dans le nouveau système)
-        if (!contactData.gender || contactData.gender === '') {
-            const genderMale = document.getElementById('genderMale');
-            const genderFemale = document.getElementById('genderFemale');
-            if (genderMale && genderMale.checked) {
-                contactData.gender = '👨 Homme';
-            } else if (genderFemale && genderFemale.checked) {
-                contactData.gender = '👩 Femme';
-            }
-        }
-
-        if (this.currentEditId) {
-            const contact = app.dataStore.contacts.find(c => c.id === this.currentEditId);
-            Object.assign(contact, contactData);
-            contact.dateModified = new Date().toISOString(); // Mettre à jour la date de modification
-            await app.dataStore.save(contact);
-        } else {
-            const newContact = {
-                id: Date.now().toString(),
-                ...contactData,
-                dateAdded: new Date().toISOString(),
-                dateModified: new Date().toISOString() // Initialiser dateModified
-            };
-            app.dataStore.contacts.push(newContact);
-            await app.dataStore.save(newContact);
-        }
-
-        app.closeAddModal();
-        this.render();
-        stats.render();
-    },
-
-    async deleteContact(contactId) {
-        // Si aucun ID n'est passé, utiliser currentViewId
-        if (!contactId) {
-            contactId = this.currentViewId;
-        }
-        
-        if (!confirm('Voulez-vous vraiment supprimer ce contact ?')) return;
-
-        const index = app.dataStore.contacts.findIndex(c => c.id === contactId);
-        if (index !== -1) {
-            app.dataStore.contacts.splice(index, 1);
-            await app.dataStore.deleteContact(contactId);
-        }
-
-        app.closeViewModal();
-        this.render();
-        stats.render();
-    },
-
-    async deleteAndUnfollow(contactId) {
-        // Si aucun ID n'est passé, utiliser currentViewId
-        if (!contactId) {
-            contactId = this.currentViewId;
-        }
-        
-        const contact = app.dataStore.contacts.find(c => c.id === contactId);
-        if (!contact) return;
-        
-        const username = contact.instagram.toLowerCase().replace('@', '');
-        
-        if (!confirm(`Supprimer ce contact ET l'ajouter à la liste "À ne plus suivre" ?\n\n@${username} sera définitivement supprimé et vous serez alerté si vous tentez de le re-suivre.`)) {
-            return;
-        }
-
-        // Ajouter à la liste "À ne plus suivre"
-        if (typeof unfollowers !== 'undefined') {
-            unfollowers.data.doNotFollowList.add(username);
-            unfollowers.saveDoNotFollowList();
-        }
-
-        // Supprimer le contact
-        const index = app.dataStore.contacts.findIndex(c => c.id === contactId);
-        if (index !== -1) {
-            app.dataStore.contacts.splice(index, 1);
-            await app.dataStore.deleteContact(contactId);
-        }
-
-        app.closeViewModal();
-        this.render();
-        stats.render();
-    },
-
-    openInstagram() {
-        // Cette fonction est appelée quand on clique sur le pseudo Instagram
-        // Le lien est déjà géré par le href dans le HTML, donc cette fonction peut être vide
-        // ou on peut l'utiliser pour des analytics si besoin
-    },
-
-    // ==========================================
-    // GESTION DES FILTRES
-    // ==========================================
-
     toggleFilterDropdown(filterType, event) {
-        event?.stopPropagation();
+        console.log('🔽 toggleFilterDropdown called for:', filterType);
+        event.stopPropagation();
         
         const dropdown = document.getElementById('filterDropdown');
-        const content = document.getElementById('filterDropdownContent');
+        const dropdownContent = document.getElementById('filterDropdownContent');
+        const button = event.currentTarget;
         
-        // Si on clique sur le même filtre, fermer
+        // Si on clique sur le même filtre, fermer le dropdown
         if (this.currentFilterDropdown === filterType && dropdown.style.display === 'block') {
-            this.closeFilterDropdown();
+            dropdown.style.display = 'none';
+            this.currentFilterDropdown = null;
             return;
         }
         
         this.currentFilterDropdown = filterType;
         
-        // Positionner le dropdown sous le bouton cliqué
-        const btn = event?.target.closest('.filter-chip');
-        if (btn) {
-            const rect = btn.getBoundingClientRect();
-            dropdown.style.top = (rect.bottom + window.scrollY) + 'px';
-            dropdown.style.left = rect.left + 'px';
-        }
+        // Générer les options en fonction du type de filtre
+        let options = [];
         
-        // Générer le contenu selon le type de filtre
         if (filterType === 'complete') {
-            content.innerHTML = `
-                <label class="filter-option">
-                    <input type="checkbox" value="oui" ${this.activeFilters.complete.includes('oui') ? 'checked' : ''} 
-                           onchange="contacts.toggleFilter('complete', 'oui')">
-                    <span>✅ Oui</span>
-                </label>
-                <label class="filter-option">
-                    <input type="checkbox" value="non" ${this.activeFilters.complete.includes('non') ? 'checked' : ''} 
-                           onchange="contacts.toggleFilter('complete', 'non')">
-                    <span>❌ Non</span>
-                </label>
-            `;
+            // Filtre spécial "Profil complet"
+            options = [
+                { value: 'oui', label: '✅ Oui' },
+                { value: 'non', label: '❌ Non' }
+            ];
+        } else if (filterType === 'country') {
+            // Filtre spécial "Pays"
+            // Extraire tous les pays uniques des contacts
+            const countries = new Set();
+            app.dataStore.contacts.forEach(contact => {
+                const allFields = app.getAllFields();
+                const cityFields = allFields.filter(f => f.type === 'city');
+                
+                if (cityFields.length > 0 && contact[cityFields[0].id]) {
+                    try {
+                        const cityData = JSON.parse(contact[cityFields[0].id]);
+                        if (cityData.country) {
+                            countries.add(cityData.country);
+                        } else {
+                            countries.add('Non défini');
+                        }
+                    } catch (e) {
+                        // Si ce n'est pas du JSON, c'est peut-être juste le texte
+                        const parts = contact[cityFields[0].id].split(',');
+                        if (parts.length > 1) {
+                            countries.add(parts[parts.length - 1].trim());
+                        } else {
+                            countries.add('Non défini');
+                        }
+                    }
+                } else {
+                    countries.add('Non défini');
+                }
+            });
+            
+            // Convertir en tableau et trier
+            const countriesArray = Array.from(countries).sort();
+            options = countriesArray.map(country => {
+                // Obtenir le drapeau si disponible
+                let flag = '🌍';
+                if (typeof city !== 'undefined' && city.getCountryFlag) {
+                    flag = city.getCountryFlag(country);
+                }
+                return {
+                    value: country,
+                    label: `${flag} ${country}`
+                };
+            });
         } else {
-            // Trouver le champ correspondant
+            // Champ normal
             const allFields = app.getAllFields();
             const field = allFields.find(f => f.id === filterType);
             
-            if (field) {
-                if (field.type === 'select' || field.type === 'radio') {
-                    // Récupérer les options/tags
-                    let options = [];
-                    if (field.type === 'select' && field.tags) {
-                        options = field.tags.map(tag => ({ value: tag.value, label: tag.label }));
-                    } else if (field.type === 'radio' && field.options) {
-                        options = field.options.map(opt => ({ value: opt, label: opt }));
-                    }
-                    
-                    content.innerHTML = options.map(opt => `
-                        <label class="filter-option">
-                            <input type="checkbox" value="${opt.value}" 
-                                   ${this.activeFilters[filterType].includes(opt.value) ? 'checked' : ''} 
-                                   onchange="contacts.toggleFilter('${filterType}', '${opt.value}')">
-                            <span>${opt.label}</span>
-                        </label>
-                    `).join('');
-                } else if (field.type === 'checkbox') {
-                    content.innerHTML = `
-                        <label class="filter-option">
-                            <input type="checkbox" value="oui" ${this.activeFilters[filterType].includes('oui') ? 'checked' : ''} 
-                                   onchange="contacts.toggleFilter('${filterType}', 'oui')">
-                            <span>✅ Oui</span>
-                        </label>
-                        <label class="filter-option">
-                            <input type="checkbox" value="non" ${this.activeFilters[filterType].includes('non') ? 'checked' : ''} 
-                                   onchange="contacts.toggleFilter('${filterType}', 'non')">
-                            <span>❌ Non</span>
-                        </label>
-                    `;
+            if (!field) {
+                console.error('Field not found:', filterType);
+                return;
+            }
+            
+            if (field.type === 'select' || field.type === 'radio') {
+                // Utiliser les tags/options du champ
+                if (field.tags) {
+                    options = field.tags.map(tag => ({
+                        value: tag.value,
+                        label: tag.label
+                    }));
+                } else if (field.options) {
+                    options = field.options.map(opt => ({
+                        value: opt,
+                        label: opt
+                    }));
                 }
+            } else if (field.type === 'checkbox') {
+                options = [
+                    { value: true, label: '✅ Oui' },
+                    { value: false, label: '❌ Non' }
+                ];
             }
         }
         
+        // Générer le HTML des options
+        let html = `<div class="filter-dropdown-title">${filterType === 'complete' ? 'Profil complet' : filterType === 'country' ? 'Pays' : app.getAllFields().find(f => f.id === filterType)?.label || filterType}</div>`;
+        html += '<div class="filter-dropdown-options">';
+        
+        options.forEach(option => {
+            const isActive = this.activeFilters[filterType]?.includes(option.value) ? 'active' : '';
+            html += `
+                <div class="filter-dropdown-option ${isActive}" 
+                     onclick="contacts.toggleFilter('${filterType}', '${option.value}')">
+                    <span>${option.label}</span>
+                    <span class="filter-check">✓</span>
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+        dropdownContent.innerHTML = html;
+        
+        // Positionner le dropdown sous le bouton
+        const rect = button.getBoundingClientRect();
         dropdown.style.display = 'block';
+        dropdown.style.left = rect.left + 'px';
+        dropdown.style.top = (rect.bottom + window.scrollY) + 'px';
     },
-    
+
     toggleFilter(filterType, value) {
+        console.log('🔘 toggleFilter:', filterType, value);
+        
         if (!this.activeFilters[filterType]) {
             this.activeFilters[filterType] = [];
         }
         
         const index = this.activeFilters[filterType].indexOf(value);
         if (index > -1) {
+            // Désactiver le filtre
             this.activeFilters[filterType].splice(index, 1);
         } else {
+            // Activer le filtre
             this.activeFilters[filterType].push(value);
         }
         
-        this.render();
-        this.updateFilterButtons();
-    },
-    
-    updateFilterButtons() {
-        // Récupérer tous les champs filtrables
-        const allFields = app.getAllFields();
-        const filterableFields = allFields.filter(field => 
-            field.type === 'select' || field.type === 'radio' || field.type === 'checkbox'
-        );
-        
-        let hasAnyFilter = false;
-        
-        filterableFields.forEach(field => {
-            const hasFilter = this.activeFilters[field.id] && this.activeFilters[field.id].length > 0;
-            const btn = document.getElementById(`filter_${field.id}_Btn`);
-            if (btn) {
-                btn.classList.toggle('active', hasFilter);
+        // Mettre à jour l'affichage du bouton
+        const button = document.getElementById(`filter_${filterType}_Btn`);
+        if (button) {
+            if (this.activeFilters[filterType].length > 0) {
+                button.classList.add('active');
+            } else {
+                button.classList.remove('active');
             }
-            if (hasFilter) hasAnyFilter = true;
+        }
+        
+        // Afficher/masquer le bouton de reset
+        this.updateResetButton();
+        
+        // Mettre à jour l'option dans le dropdown
+        this.toggleFilterDropdown(filterType, { currentTarget: button, stopPropagation: () => {} });
+        
+        // Re-render les contacts
+        this.render();
+    },
+
+    updateResetButton() {
+        const resetBtn = document.getElementById('filterResetBtn');
+        if (!resetBtn) return;
+        
+        // Vérifier si au moins un filtre est actif
+        const hasActiveFilters = Object.values(this.activeFilters).some(arr => arr.length > 0);
+        
+        if (hasActiveFilters) {
+            resetBtn.style.display = 'inline-flex';
+        } else {
+            resetBtn.style.display = 'none';
+        }
+    },
+
+    updateFilterButtons() {
+        // Mettre à jour l'affichage de tous les boutons de filtre selon l'état des filtres actifs
+        Object.keys(this.activeFilters).forEach(filterType => {
+            const button = document.getElementById(`filter_${filterType}_Btn`);
+            if (button) {
+                if (this.activeFilters[filterType].length > 0) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
+            }
         });
         
-        // Profil complet
-        const hasCompleteFilter = this.activeFilters.complete && this.activeFilters.complete.length > 0;
-        const completeBtn = document.getElementById('filter_complete_Btn');
-        if (completeBtn) {
-            completeBtn.classList.toggle('active', hasCompleteFilter);
-        }
-        if (hasCompleteFilter) hasAnyFilter = true;
-        
-        // Show/hide reset button
-        const resetBtn = document.getElementById('filterResetBtn');
-        if (resetBtn) {
-            resetBtn.style.display = hasAnyFilter ? 'flex' : 'none';
-        }
+        this.updateResetButton();
     },
-    
+
     resetFilters() {
-        this.activeFilters = {
-            gender: [],
-            relationType: [],
-            meetingPlace: [],
-            discussionStatus: [],
-            complete: []
-        };
+        console.log('🔄 resetFilters called');
         
-        // Réinitialiser aussi la barre de recherche
-        const searchBox = document.getElementById('searchBox');
-        if (searchBox) {
-            searchBox.value = '';
+        // Réinitialiser tous les filtres
+        Object.keys(this.activeFilters).forEach(key => {
+            this.activeFilters[key] = [];
+        });
+        
+        // Retirer la classe active de tous les boutons de filtre
+        document.querySelectorAll('.filter-chip.active').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        // Masquer le bouton de reset
+        this.updateResetButton();
+        
+        // Fermer le dropdown
+        const dropdown = document.getElementById('filterDropdown');
+        if (dropdown) {
+            dropdown.style.display = 'none';
         }
-        
-        this.updateFilterButtons();
-        this.closeFilterDropdown();
-        this.render();
-    },
-    
-    closeFilterDropdown() {
-        document.getElementById('filterDropdown').style.display = 'none';
         this.currentFilterDropdown = null;
         
-        // Update visual state based on actual filters, not dropdown state
-        this.updateFilterButtons();
+        // Re-render les contacts
+        this.render();
     },
 
-    // ==========================================
-    // RENDU DYNAMIQUE DU FORMULAIRE
-    // ==========================================
+    // Appliquer un filtre depuis les stats (fonction appelée depuis stats.js)
+    applyFilterFromStats(filterType, filterValue) {
+        console.log('📊 applyFilterFromStats:', filterType, filterValue);
+        
+        // Réinitialiser tous les filtres
+        this.resetFilters();
+        
+        // Appliquer le nouveau filtre
+        if (!this.activeFilters[filterType]) {
+            this.activeFilters[filterType] = [];
+        }
+        this.activeFilters[filterType].push(filterValue);
+        
+        // Mettre à jour l'affichage du bouton
+        const button = document.getElementById(`filter_${filterType}_Btn`);
+        if (button) {
+            button.classList.add('active');
+        }
+        
+        // Afficher le bouton de reset
+        this.updateResetButton();
+        
+        // Naviguer vers la page contacts
+        app.showSection('contacts');
+        
+        // Re-render les contacts
+        this.render();
+    },
 
-    renderDynamicForm() {
-        const form = document.getElementById('contactForm');
-        if (!form) return;
-
-        // Garder les champs fixes (Prénom et Instagram)
-        const fixedFieldsHTML = `
-            <div class="form-group">
-                <label>Prénom <span style="color: #ff4757;">*</span></label>
-                <input type="text" id="firstName" required>
-            </div>
-            <div class="form-group">
-                <label>Pseudo Instagram <span style="color: #ff4757;">*</span></label>
-                <div style="position: relative;">
-                    <span style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #868e96; font-weight: 600;">@</span>
-                    <input type="text" id="instagram" required style="padding-left: 36px;" oninput="this.value = this.value.toLowerCase().replace('@', '')">
+    viewProfile(contactId) {
+        this.currentViewId = contactId;
+        const contact = app.dataStore.contacts.find(c => c.id === contactId);
+        if (!contact) return;
+        
+        const modal = document.getElementById('viewModal');
+        const content = document.getElementById('viewModalContent');
+        
+        let html = `
+            <div class="view-header">
+                <div class="view-avatar">
+                    ${contact.profilePicUrl ? 
+                        `<img src="${contact.profilePicUrl}" alt="${contact.firstName}">` :
+                        `<div class="view-initial">${(contact.firstName || '?').charAt(0).toUpperCase()}</div>`
+                    }
+                </div>
+                <div class="view-title">
+                    <h2>${contact.firstName || 'Sans nom'}</h2>
+                    <div class="view-instagram">@${contact.instagram || ''}</div>
                 </div>
             </div>
+            
+            <div class="view-actions">
+                <button class="btn-icon" onclick="contacts.openEditModal('${contact.id}')" title="Modifier">✏️</button>
+                <button class="btn-icon" onclick="contacts.deleteContact('${contact.id}')" title="Supprimer">🗑️</button>
+            </div>
+            
+            <div class="view-fields">
         `;
-
-        // Générer les champs dynamiques
+        
+        // Afficher tous les champs remplis
         const allFields = app.getAllFields();
-        let dynamicFieldsHTML = '';
         
-        for (let i = 0; i < allFields.length; i++) {
-            const field = allFields[i];
-            const nextField = allFields[i + 1];
+        allFields.forEach(field => {
+            const value = contact[field.id];
             
-            // Si c'est birthYear, le sauter (il sera intégré dans birthday)
-            if (field.id === 'birthYear') {
-                continue;
+            if (value === undefined || value === null || value === '') {
+                return; // Skip empty fields
             }
             
-            // Si c'est birthday, afficher les 3 selects
-            if (field.id === 'birthday') {
-                dynamicFieldsHTML += this.renderBirthFields(null, field);
-            } else {
-                dynamicFieldsHTML += this.renderField(field);
+            let displayValue = value;
+            
+            // Formater la valeur selon le type
+            if (field.type === 'select' || field.type === 'radio') {
+                const tag = getTags().findTag(field.id, value);
+                if (tag) {
+                    displayValue = `<span class="${tag.class}">${tag.label}</span>`;
+                }
+            } else if (field.type === 'checkbox') {
+                displayValue = value === true || value === 'true' ? '✅ Oui' : '❌ Non';
+            } else if (field.type === 'date') {
+                // Formater la date
+                const date = new Date(value + 'T00:00:00');
+                displayValue = date.toLocaleDateString('fr-FR', { 
+                    day: 'numeric', 
+                    month: 'long', 
+                    year: 'numeric' 
+                });
+            } else if (field.type === 'birthdate') {
+                // Format spécial pour birthdate (jour + mois)
+                const date = new Date(value + 'T00:00:00');
+                displayValue = date.toLocaleDateString('fr-FR', { 
+                    day: 'numeric', 
+                    month: 'long'
+                });
+            } else if (field.type === 'city') {
+                try {
+                    const cityData = JSON.parse(value);
+                    // Afficher ville + pays avec drapeau
+                    let flag = '🌍';
+                    if (typeof city !== 'undefined' && cityData.countryCode) {
+                        flag = city.getFlag(cityData.countryCode);
+                    }
+                    displayValue = `${cityData.city ? cityData.city + ', ' : ''}${flag} ${cityData.country || ''}`;
+                } catch (e) {
+                    // Si ce n'est pas du JSON, afficher tel quel
+                    displayValue = value;
+                }
+            } else if (field.type === 'tel') {
+                displayValue = `<a href="tel:${value}">${value}</a>`;
+            } else if (field.type === 'email') {
+                displayValue = `<a href="mailto:${value}">${value}</a>`;
+            } else if (field.type === 'url') {
+                displayValue = `<a href="${value}" target="_blank">${value}</a>`;
             }
-        }
+            
+            html += `
+                <div class="view-field">
+                    <div class="view-field-label">${field.label}</div>
+                    <div class="view-field-value">${displayValue}</div>
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+        
+        content.innerHTML = html;
+        modal.classList.add('active');
+        modal.scrollTop = 0;
+    },
 
-        // Boutons d'action
-        const actionsHTML = `
-            <div class="form-group" style="border-top: 1px solid #e9ecef; padding-top: 20px; margin-top: 20px;">
-                <button type="button" class="btn" style="background: #6c5ce7; color: white; width: 100%;" onclick="window.fields.openAddFieldModal()">
-                    ➕ Ajouter un champ personnalisé
-                </button>
+    openEditModal(contactId) {
+        this.currentEditId = contactId;
+        const contact = app.dataStore.contacts.find(c => c.id === contactId);
+        if (!contact) return;
+        
+        // Fermer la modal de visualisation
+        document.getElementById('viewModal').classList.remove('active');
+        
+        const modal = document.getElementById('editModal');
+        const form = document.getElementById('editContactForm');
+        
+        // Générer le formulaire
+        let html = '';
+        
+        // Champs fixes
+        html += `
+            <div class="form-group">
+                <label>Prénom <span style="color: #ff4757;">*</span></label>
+                <input type="text" id="editFirstName" value="${contact.firstName || ''}" required>
             </div>
-            <div class="form-actions">
-                <button type="submit" class="btn btn-primary">💾 Enregistrer</button>
+            
+            <div class="form-group">
+                <label>Instagram <span style="color: #ff4757;">*</span></label>
+                <input type="text" id="editInstagram" value="${contact.instagram || ''}" required>
+            </div>
+            
+            <div class="form-group">
+                <label>URL Photo de profil</label>
+                <input type="url" id="editProfilePicUrl" value="${contact.profilePicUrl || ''}" placeholder="https://...">
             </div>
         `;
-
-        form.innerHTML = fixedFieldsHTML + dynamicFieldsHTML + actionsHTML;
         
-        // Gérer les placeholders des champs date
-        setTimeout(() => {
-            const dateInputs = document.querySelectorAll('input[type="date"]');
-            dateInputs.forEach(input => {
-                // Fonction pour vérifier si le champ a une valeur
-                const updatePlaceholder = () => {
-                    if (input.value) {
-                        input.classList.add('has-value');
-                    } else {
-                        input.classList.remove('has-value');
-                    }
-                };
-                
-                // Vérifier au chargement
-                updatePlaceholder();
-                
-                // Vérifier à chaque changement
-                input.addEventListener('change', updatePlaceholder);
-                input.addEventListener('input', updatePlaceholder);
-            });
-        }, 50);
+        // Champs personnalisables
+        const allFields = app.getAllFields();
         
-        // Lier les 3 selects de date de naissance
-        setTimeout(() => {
-            const daySelect = document.getElementById('birthday_day');
-            const monthSelect = document.getElementById('birthday_month');
-            const yearSelect = document.getElementById('birthday_year');
-            const birthdayInput = document.getElementById('birthday');
-            const birthYearInput = document.getElementById('birthYear');
-            
-            if (daySelect && monthSelect && yearSelect && birthdayInput && birthYearInput) {
-                // Fonction pour mettre à jour les champs cachés
-                const updateHiddenFields = () => {
-                    const day = daySelect.value;
-                    const month = monthSelect.value;
-                    const year = yearSelect.value;
-                    
-                    // Toujours sauvegarder l'année si elle est remplie
-                    if (year) {
-                        birthYearInput.value = year;
-                    } else {
-                        birthYearInput.value = '';
-                    }
-                    
-                    // Si les 3 sont remplis, créer la date complète
-                    if (day && month && year) {
-                        const paddedDay = String(day).padStart(2, '0');
-                        const paddedMonth = String(month).padStart(2, '0');
-                        birthdayInput.value = `${year}-${paddedMonth}-${paddedDay}`;
-                    } else {
-                        birthdayInput.value = '';
-                    }
-                };
-                
-                // Écouter les changements sur les 3 selects
-                daySelect.addEventListener('change', updateHiddenFields);
-                monthSelect.addEventListener('change', updateHiddenFields);
-                yearSelect.addEventListener('change', updateHiddenFields);
+        allFields.forEach(field => {
+            if (field.id === 'birthdate') {
+                html += this.renderBirthdateField(field, contact);
+            } else {
+                html += this.renderField(field);
             }
+        });
+        
+        form.innerHTML = html;
+        modal.classList.add('active');
+        modal.scrollTop = 0;
+        
+        // Initialiser les champs city après le rendu
+        setTimeout(() => {
+            this.initCityFields();
+            this.populateEditForm(contact);
         }, 100);
     },
 
-    // Rendre les champs birthYear et birthday sur la même ligne (3 selects)
-    renderBirthFields(yearField, dateField) {
-        // Générer les années de 1940 à aujourd'hui
-        const currentYear = new Date().getFullYear();
-        const years = [];
-        for (let year = currentYear; year >= 1940; year--) {
-            years.push(year);
+    populateEditForm(contact) {
+        // Remplir les champs avec les valeurs du contact
+        const allFields = app.getAllFields();
+        
+        allFields.forEach(field => {
+            const value = contact[field.id];
+            
+            if (value === undefined || value === null) {
+                return;
+            }
+            
+            if (field.type === 'select') {
+                // Pour les selects avec tag-selector
+                const hiddenInput = document.getElementById(field.id);
+                const display = document.getElementById(field.id + 'Display');
+                if (hiddenInput) {
+                    hiddenInput.value = value;
+                }
+                if (display) {
+                    const tag = getTags().findTag(field.id, value);
+                    if (tag) {
+                        display.textContent = tag.label;
+                        display.className = 'tag-selector-value';
+                    }
+                }
+            } else if (field.type === 'radio') {
+                const radio = document.querySelector(`input[name="${field.id}"][value="${value}"]`);
+                if (radio) {
+                    radio.checked = true;
+                }
+            } else if (field.type === 'checkbox') {
+                const checkbox = document.getElementById(field.id);
+                if (checkbox) {
+                    checkbox.checked = (value === true || value === 'true');
+                }
+            } else if (field.type === 'birthdate') {
+                // Format: YYYY-MM-DD
+                if (value) {
+                    const parts = value.split('-');
+                    if (parts.length === 3) {
+                        const daySelect = document.getElementById('birthday_day');
+                        const monthSelect = document.getElementById('birthday_month');
+                        const yearSelect = document.getElementById('birthday_year');
+                        
+                        if (daySelect) daySelect.value = parseInt(parts[2], 10);
+                        if (monthSelect) monthSelect.value = parseInt(parts[1], 10);
+                        if (yearSelect) yearSelect.value = parseInt(parts[0], 10);
+                    }
+                }
+            } else if (field.type === 'city') {
+                const input = document.getElementById(field.id);
+                if (input) {
+                    try {
+                        const cityData = JSON.parse(value);
+                        input.value = cityData.displayName || value;
+                        input.setAttribute('data-city-json', value);
+                    } catch (e) {
+                        input.value = value;
+                    }
+                }
+            } else {
+                // Champ simple
+                const input = document.getElementById(field.id);
+                if (input) {
+                    input.value = value;
+                }
+            }
+        });
+    },
+
+    async saveEdit() {
+        const contactId = this.currentEditId;
+        if (!contactId) return;
+        
+        const contact = app.dataStore.contacts.find(c => c.id === contactId);
+        if (!contact) return;
+        
+        // Récupérer les valeurs
+        const firstName = document.getElementById('editFirstName').value.trim();
+        const instagram = document.getElementById('editInstagram').value.trim();
+        const profilePicUrl = document.getElementById('editProfilePicUrl').value.trim();
+        
+        if (!firstName || !instagram) {
+            alert('Le prénom et Instagram sont obligatoires');
+            return;
         }
-        const yearOptions = years.map(y => `<option value="${y}">${y}</option>`).join('');
         
-        // Générer les mois
-        const months = [
-            'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-            'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
-        ];
-        const monthOptions = months.map((m, i) => `<option value="${i + 1}">${m}</option>`).join('');
+        // Mettre à jour le contact
+        contact.firstName = firstName;
+        contact.instagram = instagram;
+        contact.profilePicUrl = profilePicUrl;
         
-        // Générer les jours (1-31)
+        // Récupérer les valeurs des champs personnalisables
+        const allFields = app.getAllFields();
+        
+        allFields.forEach(field => {
+            if (field.type === 'select') {
+                const value = document.getElementById(field.id)?.value;
+                if (value !== undefined) {
+                    contact[field.id] = value;
+                }
+            } else if (field.type === 'radio') {
+                const radio = document.querySelector(`input[name="${field.id}"]:checked`);
+                if (radio) {
+                    contact[field.id] = radio.value;
+                }
+            } else if (field.type === 'checkbox') {
+                const checkbox = document.getElementById(field.id);
+                if (checkbox) {
+                    contact[field.id] = checkbox.checked;
+                }
+            } else if (field.type === 'birthdate') {
+                const day = document.getElementById('birthday_day')?.value;
+                const month = document.getElementById('birthday_month')?.value;
+                const year = document.getElementById('birthday_year')?.value;
+                
+                if (day && month) {
+                    const yearValue = year || new Date().getFullYear();
+                    contact[field.id] = `${yearValue}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    contact.birthYear = year || null;
+                }
+            } else if (field.type === 'city') {
+                const input = document.getElementById(field.id);
+                if (input) {
+                    const cityJson = input.getAttribute('data-city-json');
+                    if (cityJson) {
+                        contact[field.id] = cityJson;
+                    } else {
+                        contact[field.id] = input.value;
+                    }
+                }
+            } else {
+                const input = document.getElementById(field.id);
+                if (input) {
+                    contact[field.id] = input.value;
+                }
+            }
+        });
+        
+        // Sauvegarder dans Firebase
+        await app.saveToFirebase();
+        
+        // Fermer la modal et rafraîchir
+        document.getElementById('editModal').classList.remove('active');
+        this.render();
+        
+        console.log('✅ Contact updated');
+    },
+
+    async deleteContact(contactId) {
+        if (!confirm('Êtes-vous sûr de vouloir supprimer ce contact ?')) {
+            return;
+        }
+        
+        const index = app.dataStore.contacts.findIndex(c => c.id === contactId);
+        if (index === -1) return;
+        
+        app.dataStore.contacts.splice(index, 1);
+        
+        await app.saveToFirebase();
+        
+        document.getElementById('viewModal').classList.remove('active');
+        this.render();
+        
+        console.log('✅ Contact deleted');
+    },
+
+    closeViewModal() {
+        document.getElementById('viewModal').classList.remove('active');
+        this.currentViewId = null;
+    },
+
+    closeEditModal() {
+        document.getElementById('editModal').classList.remove('active');
+        this.currentEditId = null;
+    },
+
+    renderBirthdateField(dateField, contact = null) {
         const dayOptions = Array.from({length: 31}, (_, i) => i + 1)
-            .map(d => `<option value="${d}">${d}</option>`).join('');
+            .map(day => `<option value="${day}">${day}</option>`)
+            .join('');
+        
+        const months = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 
+                       'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+        const monthOptions = months
+            .map((month, i) => `<option value="${i + 1}">${month}</option>`)
+            .join('');
+        
+        const currentYear = new Date().getFullYear();
+        const yearOptions = Array.from({length: 100}, (_, i) => currentYear - i)
+            .map(year => `<option value="${year}">${year}</option>`)
+            .join('');
         
         const dateRequired = dateField.required ? '<span style="color: #ff4757;">*</span>' : '';
         
