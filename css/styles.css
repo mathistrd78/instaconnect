@@ -424,7 +424,6 @@ body.hide-header .container {
 .contacts-grid {
     display: grid;
     gap: 12px;
-    padding-top: 8px;
 }
 
 .contact-card {
@@ -2883,7 +2882,7 @@ body.dark-mode .emoji-search-input:focus {
 /* Marqueur de lettre dans la grille */
 .letter-divider {
     grid-column: 1 / -1;
-    padding: 16px 0 8px 0;
+    padding: 16px 16px 8px 16px;
     font-size: 16px;
     font-weight: 700;
     color: #E1306C;
@@ -2894,6 +2893,10 @@ body.dark-mode .emoji-search-input:focus {
     background: #f8f9fa;
     z-index: 100;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    margin-left: -12px;
+    margin-right: -12px;
+    padding-left: 28px;
+    padding-right: 28px;
 }
 
 /* Dark mode pour les séparateurs de lettres */
