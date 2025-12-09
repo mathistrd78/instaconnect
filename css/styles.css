@@ -301,9 +301,9 @@ body {
     left: 0;
     right: 0;
     z-index: 1000;
-    height: 242px;
-    min-height: 242px;
-    max-height: 242px;
+    height: 230px;
+    min-height: 230px;
+    max-height: 230px;
     overflow: hidden;
 }
 
@@ -386,7 +386,7 @@ h1 {
 /* Container */
 .container {
     padding: 8px 12px 12px 12px;
-    margin-top: 242px; /* Hauteur fixe du header */
+    margin-top: 230px; /* Hauteur fixe du header */
 }
 
 /* Quand le header n'est pas affiché (Stats, Analyse, Unfollowers, Profil) */
@@ -2699,14 +2699,15 @@ body.dark-mode .emoji-search-input:focus {
     font-weight: 600;
     color: #1976d2;
     margin: 0 20px 8px 20px;
-    height: 44px;
-    min-height: 44px;
-    max-height: 44px;
-    line-height: 44px;
+    height: 32px;
+    min-height: 32px;
+    max-height: 32px;
+    line-height: 32px;
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 4px;
 }
 
 #contactsCountNumber {
@@ -2885,14 +2886,15 @@ body.dark-mode .emoji-search-input:focus {
 /* Marqueur de lettre dans la grille */
 .letter-divider {
     grid-column: 1 / -1;
-    padding: 8px 16px 8px 16px;
+    padding: 0px 16px 8px 16px;
     font-size: 16px;
     font-weight: 700;
     color: #E1306C;
     border-bottom: 2px solid #E1306C;
+    border-top: 2px solid #E1306C;
     margin-bottom: 8px;
     position: sticky;
-    top: 242px; /* Hauteur fixe du header */
+    top: 230px; /* Hauteur fixe du header */
     background: #f8f9fa;
     z-index: 100;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
@@ -2900,6 +2902,7 @@ body.dark-mode .emoji-search-input:focus {
     margin-right: -12px;
     padding-left: 28px;
     padding-right: 28px;
+    padding-top: 8px;
 }
 
 /* Dark mode pour les séparateurs de lettres */
