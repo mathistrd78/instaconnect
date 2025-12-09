@@ -162,575 +162,331 @@ const tags = {
         '🕤', '🕥', '🕦', '🕧',
         
         // Flags (sélection)
-        '🏳️', '🏴', '🏴‍☠️', '🏁', '🚩', '🏳️‍🌈', '🏳️‍⚧️', '🇺🇳', '🇦🇫', '🇦🇽', '🇦🇱', '🇩🇿',
-        '🇦🇸', '🇦🇩', '🇦🇴', '🇦🇮', '🇦🇶', '🇦🇬', '🇦🇷', '🇦🇲', '🇦🇼', '🇦🇺', '🇦🇹', '🇦🇿',
-        '🇧🇸', '🇧🇭', '🇧🇩', '🇧🇧', '🇧🇾', '🇧🇪', '🇧🇿', '🇧🇯', '🇧🇲', '🇧🇹', '🇧🇴', '🇧🇦',
-        '🇧🇼', '🇧🇷', '🇮🇴', '🇻🇬', '🇧🇳', '🇧🇬', '🇧🇫', '🇧🇮', '🇰🇭', '🇨🇲', '🇨🇦', '🇮🇨',
-        '🇨🇻', '🇧🇶', '🇰🇾', '🇨🇫', '🇹🇩', '🇨🇱', '🇨🇳', '🇨🇽', '🇨🇨', '🇨🇴', '🇰🇲', '🇨🇬',
-        '🇨🇩', '🇨🇰', '🇨🇷', '🇨🇮', '🇭🇷', '🇨🇺', '🇨🇼', '🇨🇾', '🇨🇿', '🇩🇰', '🇩🇯', '🇩🇲',
-        '🇩🇴', '🇪🇨', '🇪🇬', '🇸🇻', '🇬🇶', '🇪🇷', '🇪🇪', '🇸🇿', '🇪🇹', '🇪🇺', '🇫🇰', '🇫🇴',
-        '🇫🇯', '🇫🇮', '🇫🇷', '🇬🇫', '🇵🇫', '🇹🇫', '🇬🇦', '🇬🇲', '🇬🇪', '🇩🇪', '🇬🇭', '🇬🇮',
-        '🇬🇷', '🇬🇱', '🇬🇩', '🇬🇵', '🇬🇺', '🇬🇹', '🇬🇬', '🇬🇳', '🇬🇼', '🇬🇾', '🇭🇹', '🇭🇳',
-        '🇭🇰', '🇭🇺', '🇮🇸', '🇮🇳', '🇮🇩', '🇮🇷', '🇮🇶', '🇮🇪', '🇮🇲', '🇮🇱', '🇮🇹', '🇯🇲',
-        '🇯🇵', '🇯🇪', '🇯🇴', '🇰🇿', '🇰🇪', '🇰🇮', '🇽🇰', '🇰🇼', '🇰🇬', '🇱🇦', '🇱🇻', '🇱🇧',
-        '🇱🇸', '🇱🇷', '🇱🇾', '🇱🇮', '🇱🇹', '🇱🇺', '🇲🇴', '🇲🇬', '🇲🇼', '🇲🇾', '🇲🇻', '🇲🇱',
-        '🇲🇹', '🇲🇭', '🇲🇶', '🇲🇷', '🇲🇺', '🇾🇹', '🇲🇽', '🇫🇲', '🇲🇩', '🇲🇨', '🇲🇳', '🇲🇪',
-        '🇲🇸', '🇲🇦', '🇲🇿', '🇲🇲', '🇳🇦', '🇳🇷', '🇳🇵', '🇳🇱', '🇳🇨', '🇳🇿', '🇳🇮', '🇳🇪',
-        '🇳🇬', '🇳🇺', '🇳🇫', '🇰🇵', '🇲🇰', '🇲🇵', '🇳🇴', '🇴🇲', '🇵🇰', '🇵🇼', '🇵🇸', '🇵🇦',
-        '🇵🇬', '🇵🇾', '🇵🇪', '🇵🇭', '🇵🇳', '🇵🇱', '🇵🇹', '🇵🇷', '🇶🇦', '🇷🇪', '🇷🇴', '🇷🇺',
-        '🇷🇼', '🇼🇸', '🇸🇲', '🇸🇹', '🇸🇦', '🇸🇳', '🇷🇸', '🇸🇨', '🇸🇱', '🇸🇬', '🇸🇽', '🇸🇰',
-        '🇸🇮', '🇸🇧', '🇸🇴', '🇿🇦', '🇬🇸', '🇰🇷', '🇸🇸', '🇪🇸', '🇱🇰', '🇧🇱', '🇸🇭', '🇰🇳',
-        '🇱🇨', '🇵🇲', '🇻🇨', '🇸🇩', '🇸🇷', '🇸🇪', '🇨🇭', '🇸🇾', '🇹🇼', '🇹🇯', '🇹🇿', '🇹🇭',
-        '🇹🇱', '🇹🇬', '🇹🇰', '🇹🇴', '🇹🇹', '🇹🇳', '🇹🇷', '🇹🇲', '🇹🇨', '🇹🇻', '🇺🇬', '🇺🇦',
-        '🇦🇪', '🇬🇧', '🇺🇸', '🇻🇮', '🇺🇾', '🇺🇿', '🇻🇺', '🇻🇦', '🇻🇪', '🇻🇳', '🇼🇫', '🇪🇭',
-        '🇾🇪', '🇿🇲', '🇿🇼', '🏴󠁧󠁢󠁥󠁮󠁧󠁿', '🏴󠁧󠁢󠁳󠁣󠁴󠁿', '🏴󠁧󠁢󠁷󠁬󠁳󠁿'
+        '🏁', '🚩', '🎌', '🏴', '🏳️', '🏳️‍🌈', '🏴‍☠️', '🇫🇷', '🇺🇸', '🇬🇧', '🇩🇪', '🇪🇸',
+        '🇮🇹', '🇵🇹', '🇧🇪', '🇨🇭', '🇳🇱', '🇨🇦', '🇧🇷', '🇦🇷', '🇲🇽', '🇯🇵', '🇨🇳',
+        '🇮🇳', '🇦🇺', '🇷🇺', '🇿🇦'
         ];
     },
 
     availableColors: [
-        // Roses
-        '#fd79a8', '#E1306C', '#d63031',
-        // Rouges/Oranges
-        '#ff7675', '#ff6348', '#e17055',
+        // Couleurs principales
+        '#E1306C', // Instagram pink (par défaut)
+        '#C13584', // Instagram purple
+        '#833AB4', // Instagram deep purple
+        '#5B51D8', // Instagram blue
+        '#405DE6', // Instagram indigo
+        
+        // Rouges et roses
+        '#d63031', // Red
+        '#e74c3c', // Alizarin
+        '#c0392b', // Pomegranate
+        '#e17055', // Burnt Sienna
+        '#ff7675', // Light red
+        '#fd79a8', // Pink
+        
+        // Oranges
+        '#f39c12', // Orange
+        '#e67e22', // Carrot
+        '#d35400', // Pumpkin
+        '#feca57', // Light orange
+        '#ee5a6f', // Coral
+        
         // Jaunes
-        '#feca57', '#fdcb6e',
+        '#f1c40f', // Sun Flower
+        '#fdcb6e', // Mustard
+        
         // Verts
-        '#55efc4', '#00cec9', '#00b894',
+        '#27ae60', // Nephritis
+        '#2ecc71', // Emerald
+        '#00b894', // Mint Leaf
+        '#55efc4', // Light cyan
+        '#00cec9', // Robin Egg Blue
+        
         // Bleus
-        '#74b9ff', '#0984e3',
-        // Violets
-        '#a29bfe', '#6c5ce7', '#a55eea',
+        '#3498db', // Peter River
+        '#2980b9', // Belize Hole
+        '#74b9ff', // Light blue
+        '#0984e3', // Blue
+        '#6c5ce7', // Purple
+        
+        // Violets et pourpres
+        '#9b59b6', // Amethyst
+        '#8e44ad', // Wisteria
+        '#a29bfe', // Periwinkle
+        
         // Gris
-        '#dfe6e9', '#b2bec3', '#636e72', '#2d3436'
+        '#95a5a6', // Concrete
+        '#7f8c8d', // Asbestos
+        '#868e96', // Gray
+        '#b2bec3', // Light gray
+        
+        // Marrons
+        '#6c5ce7', // Brown tint
+        '#a55eea', // Light purple
+        
+        // Noir et foncés
+        '#2d3436', // Dark gray
+        '#636e72'  // Grayish
     ],
 
-    // Fonction pour chercher des emojis par mots-clés
-    searchEmoji(searchTerm, currentEmoji) {
-        if (!searchTerm) return this.availableEmojis;
-        
-        const search = searchTerm.toLowerCase().trim();
-        const keywords = {
-            'amour': ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '🥰', '😍', '😘', '💏', '💑'],
-            'coeur': ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '💕', '💞', '💓', '💗', '💖', '💘', '💝'],
-            'sourire': ['😀', '😃', '😄', '😁', '😊', '🙂', '😉', '😌'],
-            'rire': ['😆', '😅', '🤣', '😂', '😹'],
-            'triste': ['😔', '😞', '😢', '😭', '😿', '💔', '🙁', '☹️', '😥'],
-            'pleure': ['😢', '😭', '😿', '😥'],
-            'colere': ['😡', '😠', '🤬', '😤', '💢'],
-            'bisou': ['😗', '😙', '😚', '😘', '💋', '💏'],
-            'clin': ['😉', '😜'],
-            'main': ['👋', '🤚', '🖐', '✋', '👌', '✌️', '🤞', '🤟', '🤘', '🤙', '👈', '👉', '👆', '👇', '☝️', '👍', '👎', '✊', '👊', '👏', '🙌', '👐', '🤝', '🙏'],
-            'pouce': ['👍', '👎'],
-            'ok': ['👌', '👍', '✅'],
-            'animal': ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵', '🐔', '🐧', '🐦', '🐤', '🐥'],
-            'chien': ['🐶', '🐕', '🐩', '🦮'],
-            'chat': ['🐱', '🐈', '😺', '😸', '😹', '😻', '😼', '😽', '🙀', '😿', '😾'],
-            'nourriture': ['🍎', '🍊', '🍋', '🍌', '🍉', '🍇', '🍓', '🍑', '🍒', '🍍', '🥝', '🍅', '🥑', '🍆', '🌽', '🥕', '🌶', '🥒', '🥦', '🍞', '🥐', '🥖', '🧀', '🍗', '🍔', '🍟', '🍕', '🌭', '🥪', '🌮', '🍝', '🍜', '🍲', '🍛', '🍱', '🍣', '🍤', '🍙', '🍚', '🍘', '🍥', '🍡', '🥟', '🍦', '🍧', '🍨', '🍩', '🍪', '🎂', '🍰', '🧁', '🍫', '🍬', '🍭', '🍮', '🍯'],
-            'fruit': ['🍎', '🍊', '🍋', '🍌', '🍉', '🍇', '🍓', '🍑', '🍒', '🍍', '🥝', '🍐'],
-            'pizza': ['🍕'],
-            'burger': ['🍔'],
-            'frites': ['🍟'],
-            'gateau': ['🎂', '🍰', '🧁'],
-            'boisson': ['☕', '🍵', '🧃', '🥤', '🍶', '🍺', '🍻', '🥂', '🍷', '🍸', '🍹', '🍾', '🧉'],
-            'cafe': ['☕'],
-            'biere': ['🍺', '🍻'],
-            'vin': ['🍷', '🥂', '🍾'],
-            'sport': ['⚽', '🏀', '🏈', '⚾', '🎾', '🏐', '🏉', '🎱', '🏓', '🏸', '🏒', '🏑', '🥍', '🏏', '⛳', '🏹', '🎣', '🥊', '🥋', '🎽', '🛹', '🛷', '⛸', '🥌', '🎿', '🏂', '🏋️', '🤼', '🤸', '⛹️', '🤺', '🤾', '🏌️', '🏇', '🧘', '🏄', '🏊', '🤽', '🚣', '🧗', '🚵', '🚴', '🏆', '🥇', '🥈', '🥉', '🏅'],
-            'foot': ['⚽'],
-            'basket': ['🏀'],
-            'tennis': ['🎾'],
-            'trophee': ['🏆'],
-            'medaille': ['🥇', '🥈', '🥉', '🏅'],
-            'voiture': ['🚗', '🚕', '🚙', '🚌', '🚎', '🏎', '🚓', '🚑', '🚒'],
-            'transport': ['🚗', '🚕', '🚙', '🚌', '🚎', '🏎', '🚓', '🚑', '🚒', '🚐', '🚚', '🚛', '🚜', '🚲', '🛵', '🏍', '✈️', '🚁', '🚂', '🚆', '🚇', '🚊', '🚝', '🚄', '🚅', '⛵', '🚤', '🛥', '🛳', '⛴', '🚢'],
-            'avion': ['✈️', '🛫', '🛬'],
-            'train': ['🚂', '🚆', '🚇', '🚊', '🚝', '🚄', '🚅'],
-            'velo': ['🚲', '🚴', '🚵'],
-            'nature': ['🌸', '💐', '🌹', '🥀', '🌺', '🌻', '🌼', '🌷', '🌱', '🌿', '🍀', '🌾', '🌵', '🌴', '🌳', '🌲', '🌲', '🍃', '🍂', '🍁', '🍄'],
-            'fleur': ['🌸', '💐', '🌹', '🥀', '🌺', '🌻', '🌼', '🌷'],
-            'rose': ['🌹', '🥀'],
-            'arbre': ['🌲', '🌳', '🌴', '🎄'],
-            'meteo': ['☀️', '🌤', '⛅', '🌥', '☁️', '🌦', '🌧', '⛈', '🌩', '🌨', '❄️', '☃️', '⛄', '💨', '💧', '💦', '☔', '⚡', '🌈', '🌪'],
-            'soleil': ['☀️', '🌤', '⛅', '🌞'],
-            'pluie': ['🌧', '☔', '💧', '💦'],
-            'neige': ['❄️', '☃️', '⛄', '🌨'],
-            'nuage': ['☁️', '🌤', '⛅', '🌥'],
-            'eclair': ['⚡', '⛈'],
-            'arc': ['🌈'],
-            'feu': ['🔥'],
-            'eau': ['💧', '💦', '🌊', '🚿', '🛁'],
-            'telephone': ['📱', '📲', '☎️', '📞'],
-            'ordinateur': ['💻', '🖥', '⌨️'],
-            'musique': ['🎵', '🎶', '🎤', '🎧', '🎼', '🎹', '🥁', '🎷', '🎺', '🎸', '🎻'],
-            'note': ['🎵', '🎶'],
-            'micro': ['🎤'],
-            'guitare': ['🎸'],
-            'piano': ['🎹'],
-            'terre': ['🌍', '🌎', '🌏'],
-            'planete': ['🌍', '🌎', '🌏', '🪐'],
-            'monde': ['🌍', '🌎', '🌏'],
-            'globe': ['🌍', '🌎', '🌏', '🌐'],
-            'pomme': ['🍎', '🍏'],
-            'maison': ['🏠', '🏡', '🏘', '🏚', '🏢', '🏬', '🏣', '🏤', '🏥', '🏦', '🏨', '🏪', '🏫', '🏩', '💒', '🏛', '⛪', '🕌'],
-            'ecole': ['🏫', '🎓'],
-            'hopital': ['🏥'],
-            'banque': ['🏦'],
-            'hotel': ['🏨'],
-            'etoile': ['⭐', '🌟', '✨', '💫'],
-            'lune': ['🌙', '🌝', '🌛', '🌜', '🌚', '🌕', '🌖', '🌗', '🌘', '🌑', '🌒', '🌓', '🌔'],
-            'temps': ['⏰', '⏱', '⏲', '⌚', '🕐', '🕑', '🕒', '🕓', '🕔', '🕕', '🕖', '🕗', '🕘', '🕙', '🕚', '🕛'],
-            'horloge': ['⏰', '⏱', '⏲', '🕐', '🕑', '🕒', '🕓', '🕔', '🕕', '🕖', '🕗', '🕘', '🕙', '🕚', '🕛'],
-            'montre': ['⌚'],
-            'fete': ['🎉', '🎊', '🎈', '🎁', '🎀', '🎂', '🎄', '🎃', '🎆', '🎇', '✨', '🎋', '🎍', '🎏', '🎐', '🎑', '🧧'],
-            'cadeau': ['🎁', '🎀'],
-            'ballon': ['🎈'],
-            'drapeau': ['🏳️', '🏴', '🏁', '🚩', '🏳️‍🌈', '🇫🇷'],
-            'france': ['🇫🇷'],
-            'check': ['✅', '✔️', '☑️'],
-            'croix': ['❌', '❎'],
-            'fleche': ['➡️', '⬅️', '⬆️', '⬇️', '↗️', '↘️', '↙️', '↖️', '↕️', '↔️', '↪️', '↩️', '⤴️', '⤵️'],
-            'attention': ['⚠️', '🚸'],
-            'interdit': ['🚫', '⛔', '🚷', '🚯', '🚳', '🚱', '🔞', '📵', '🚭'],
-            'question': ['❓', '❔', '⁉️'],
-            'exclamation': ['❗', '❕', '‼️'],
-            'info': ['ℹ️'],
-            'argent': ['💰', '💵', '💴', '💶', '💷', '💳', '💸', '💲', '🪙'],
-            'dollar': ['💵', '💲'],
-            'euro': ['💶'],
-        };
-        
-        // Chercher dans les mots-clés
-        const results = new Set();
-        for (const [keyword, emojis] of Object.entries(keywords)) {
-            if (keyword.includes(search)) {
-                emojis.forEach(emoji => results.add(emoji));
-            }
-        }
-        
-        // Si aucun résultat dans les mots-clés, chercher directement dans les emojis affichés
-        if (results.size === 0) {
-            return this.availableEmojis.filter(emoji => {
-                // Garder l'emoji actuel dans les résultats
-                if (emoji === currentEmoji) return true;
-                return false;
-            });
-        }
-        
-        return Array.from(results);
-    },
-
-    // État actuel de l'édition
     currentEdit: null,
-    currentContext: null,
 
-    // Récupérer tous les tags pour un type donné (supporte l'ancien ET le nouveau système)
-    getAllOptions(type) {
-        // NOUVEAU SYSTÈME : Chercher dans defaultFields et customFields
-        const allFields = [...app.defaultFields, ...app.customFields];
-        const field = allFields.find(f => f.id === type);
+    // Modal de drag & drop pour réorganiser les tags
+    openTagOrderModal(fieldType) {
+        console.log('🔧 Opening tag order modal for:', fieldType);
         
-        // Si le champ existe et est de type select
-        if (field && field.type === 'select') {
-            // Retourner field.tags (même s'il est vide [])
-            // IMPORTANT : Ne PAS vérifier field.tags.length > 0
-            // Car un tableau vide signifie "nouveau user sans tags"
-            if (field.tags !== undefined) {
-                return field.tags;
-            }
+        const allFields = [...app.defaultFields, ...app.customFields];
+        const field = allFields.find(f => f.id === fieldType);
+        
+        if (!field || !field.tags || field.tags.length === 0) {
+            alert('Aucun tag à organiser pour ce champ.');
+            return;
         }
         
-        // ANCIEN SYSTÈME (rétrocompatibilité) - utilisé SEULEMENT si field.tags n'existe pas du tout
-        // Cela arrive uniquement pour les très anciens users qui n'ont pas encore été migrés
-        const defaults = app.defaultTags[type] || [];
-        const customs = app.customTags[type] || [];
+        const modal = document.createElement('div');
+        modal.id = 'tagOrderModal';
+        modal.className = 'modal active';
+        modal.style.zIndex = '11000';
         
-        // Get values that have custom overrides
-        const customValues = new Set(customs.map(t => t.value));
-        
-        // Filter out defaults that have been customized
-        const filteredDefaults = defaults.filter(t => !customValues.has(t.value));
-        
-        // Return filtered defaults + all customs
-        return [...filteredDefaults, ...customs];
-    },
-
-    // Trouver un tag par valeur
-    findTag(type, value) {
-        return this.getAllOptions(type).find(opt => opt.value === value);
-    },
-
-    // Afficher le dropdown de sélection de tags
-    showDropdown(event, contactId, fieldType) {
-        event.stopPropagation();
-        this.currentContext = { contactId, fieldType };
-        const allOptions = this.getAllOptions(fieldType);
-        
-        this.renderOptions(allOptions);
-        
-        document.getElementById('overlay').classList.add('active');
-        document.getElementById('tagDropdown').classList.add('active');
-        
-        const searchInput = document.getElementById('tagSearchInput');
-        searchInput.value = '';
-        // Don't auto-focus to prevent keyboard popup on mobile
-        
-        searchInput.oninput = () => {
-            const filtered = allOptions.filter(opt => 
-                opt.label.toLowerCase().includes(searchInput.value.toLowerCase())
-            );
-            this.renderOptions(filtered, searchInput.value);
-        };
-    },
-
-    // Rendre les options de tags
-    renderOptions(options, searchValue = '') {
-        const list = document.getElementById('tagOptionsList');
-        
-        let html = options.map((opt, index) => `
-            <div class="tag-option" draggable="true" data-tag-value="${opt.value.replace(/"/g, '&quot;')}" data-tag-index="${index}">
-                <span class="tag-drag-handle">⋮⋮</span>
-                <div class="tag-option-content" onclick="tags.selectTag('${opt.value.replace(/'/g, "\\'")}')">
-                    <span class="tag-option-preview ${opt.class}">${opt.label}</span>
+        let tagsHTML = field.tags.map((tag, index) => `
+            <div class="tag-order-item" draggable="true" data-index="${index}" data-field="${fieldType}">
+                <div class="tag-order-handle">☰</div>
+                <div class="tag-order-content">
+                    <span class="tag ${tag.class}">${tag.label}</span>
                 </div>
-                <span class="tag-edit-btn" onclick="event.stopPropagation(); tags.openEditModal('${this.currentContext.fieldType}', '${opt.value.replace(/'/g, "\\'")}')">✏️</span>
+                <button class="tag-order-edit" onclick="event.stopPropagation(); tags.openEditModal('${fieldType}', '${tag.value}', true)">✏️</button>
             </div>
         `).join('');
         
-        if (searchValue && !options.find(opt => opt.value.toLowerCase() === searchValue.toLowerCase())) {
-            html += `
-                <div class="tag-create" onclick="tags.createAndSelect('${searchValue.replace(/'/g, "\\'")}')">
-                    <span class="tag-create-icon">+</span>
-                    Créer "${searchValue}"
+        modal.innerHTML = `
+            <div class="modal-header">
+                <h2>Organiser les tags - ${field.label}</h2>
+                <button class="close-btn" onclick="tags.closeTagOrderModal()">✕</button>
+            </div>
+            <div class="modal-content">
+                <p style="color: #868e96; margin-bottom: 16px;">Glissez-déposez pour réorganiser</p>
+                <div id="tagOrderList" class="tag-order-list">
+                    ${tagsHTML}
                 </div>
-            `;
-        }
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-secondary" onclick="tags.closeTagOrderModal()">Annuler</button>
+                <button class="btn btn-primary" onclick="tags.saveTagOrder('${fieldType}')">Enregistrer</button>
+            </div>
+        `;
         
-        list.innerHTML = html;
+        document.body.appendChild(modal);
+        document.getElementById('overlay').classList.add('active');
         
-        // Ajouter les événements drag & drop
-        this.initDragAndDrop(list);
+        // Ajouter les event listeners pour le drag & drop
+        this.initDragAndDrop();
     },
-    
-    // Initialiser le drag & drop pour les tags (compatible mobile)
-    initDragAndDrop(list) {
+
+    initDragAndDrop() {
         let draggedElement = null;
-        let touchStartY = 0;
-        let placeholder = null;
         
-        const tagOptions = list.querySelectorAll('.tag-option[draggable="true"]');
+        const items = document.querySelectorAll('.tag-order-item');
         
-        tagOptions.forEach((item) => {
-            // Touch events pour mobile (iOS)
-            item.addEventListener('touchstart', (e) => {
-                draggedElement = item;
-                touchStartY = e.touches[0].clientY;
-                item.classList.add('dragging');
-                
-                // Créer un placeholder visuel
-                placeholder = item.cloneNode(true);
-                placeholder.style.opacity = '0.3';
-                placeholder.style.pointerEvents = 'none';
-                
-                // Empêcher le scroll pendant le drag
-                e.preventDefault();
-            }, { passive: false });
+        items.forEach(item => {
+            // Empêcher le drag sur le bouton edit
+            const editBtn = item.querySelector('.tag-order-edit');
+            if (editBtn) {
+                editBtn.addEventListener('mousedown', (e) => {
+                    e.stopPropagation();
+                });
+                editBtn.addEventListener('touchstart', (e) => {
+                    e.stopPropagation();
+                });
+            }
             
-            item.addEventListener('touchmove', (e) => {
-                if (!draggedElement) return;
-                
-                e.preventDefault();
-                
-                const touch = e.touches[0];
-                const currentY = touch.clientY;
-                
-                // Trouver l'élément sous le doigt
-                const elementsAtPoint = document.elementsFromPoint(touch.clientX, touch.clientY);
-                const targetItem = elementsAtPoint.find(el => 
-                    el.classList.contains('tag-option') && el !== draggedElement
-                );
-                
-                if (targetItem && targetItem.parentNode === draggedElement.parentNode) {
-                    const rect = targetItem.getBoundingClientRect();
-                    const midpoint = rect.top + rect.height / 2;
-                    
-                    if (currentY < midpoint) {
-                        targetItem.parentNode.insertBefore(draggedElement, targetItem);
-                    } else {
-                        targetItem.parentNode.insertBefore(draggedElement, targetItem.nextSibling);
-                    }
-                }
-            }, { passive: false });
-            
-            item.addEventListener('touchend', (e) => {
-                if (!draggedElement) return;
-                
-                item.classList.remove('dragging');
-                
-                // Sauvegarder le nouvel ordre
-                this.saveTagOrder();
-                
-                draggedElement = null;
-                placeholder = null;
-            });
-            
-            // Desktop drag & drop (garde la compatibilité)
             item.addEventListener('dragstart', (e) => {
                 draggedElement = item;
                 item.classList.add('dragging');
                 e.dataTransfer.effectAllowed = 'move';
             });
             
-            item.addEventListener('dragend', (e) => {
+            item.addEventListener('dragend', () => {
                 item.classList.remove('dragging');
                 draggedElement = null;
             });
             
             item.addEventListener('dragover', (e) => {
                 e.preventDefault();
-                e.dataTransfer.dropEffect = 'move';
-                
                 if (draggedElement && draggedElement !== item) {
-                    const rect = item.getBoundingClientRect();
-                    const midpoint = rect.top + rect.height / 2;
+                    const list = item.parentNode;
+                    const draggingIndex = Array.from(list.children).indexOf(draggedElement);
+                    const targetIndex = Array.from(list.children).indexOf(item);
                     
-                    if (e.clientY < midpoint) {
-                        item.parentNode.insertBefore(draggedElement, item);
-                    } else {
+                    if (draggingIndex < targetIndex) {
                         item.parentNode.insertBefore(draggedElement, item.nextSibling);
+                    } else {
+                        item.parentNode.insertBefore(draggedElement, item);
                     }
                 }
             });
             
-            item.addEventListener('drop', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
+            // Touch events pour mobile
+            let touchStartY = 0;
+            let touchElement = null;
+            
+            item.addEventListener('touchstart', (e) => {
+                // Ne pas démarrer le drag si on clique sur le bouton edit
+                if (e.target.closest('.tag-order-edit')) {
+                    return;
+                }
                 
-                if (draggedElement) {
-                    this.saveTagOrder();
+                touchStartY = e.touches[0].clientY;
+                touchElement = item;
+                item.classList.add('dragging');
+            });
+            
+            item.addEventListener('touchmove', (e) => {
+                if (!touchElement) return;
+                e.preventDefault();
+                
+                const touchY = e.touches[0].clientY;
+                const list = item.parentNode;
+                const items = Array.from(list.children);
+                
+                // Trouver l'élément au-dessus duquel on est
+                const afterElement = items.find(child => {
+                    if (child === touchElement) return false;
+                    const box = child.getBoundingClientRect();
+                    const offset = touchY - box.top - box.height / 2;
+                    return offset < 0;
+                });
+                
+                if (afterElement) {
+                    list.insertBefore(touchElement, afterElement);
+                } else {
+                    list.appendChild(touchElement);
+                }
+            });
+            
+            item.addEventListener('touchend', () => {
+                if (touchElement) {
+                    touchElement.classList.remove('dragging');
+                    touchElement = null;
                 }
             });
         });
     },
-    
-    // Sauvegarder le nouvel ordre des tags
-    saveTagOrder() {
-        if (!this.currentContext) return;
+
+    saveTagOrder(fieldType) {
+        const list = document.getElementById('tagOrderList');
+        const items = Array.from(list.children);
         
-        const list = document.getElementById('tagOptionsList');
-        const tagElements = list.querySelectorAll('.tag-option[draggable="true"]');
-        const newOrder = Array.from(tagElements).map(el => el.getAttribute('data-tag-value'));
-        
-        // Mettre à jour l'ordre dans field.tags
         const allFields = [...app.defaultFields, ...app.customFields];
-        const field = allFields.find(f => f.id === this.currentContext.fieldType);
+        const field = allFields.find(f => f.id === fieldType);
         
-        if (field && field.tags) {
-            // Réorganiser les tags selon le nouvel ordre
-            const reorderedTags = [];
-            newOrder.forEach(value => {
-                const tag = field.tags.find(t => t.value === value);
-                if (tag) {
-                    reorderedTags.push(tag);
-                }
-            });
-            
-            field.tags = reorderedTags;
-            
-            // Sauvegarder dans Firebase
-            app.dataStore.saveUserData();
-            
-            console.log('✅ Tag order saved:', newOrder);
-        }
-    },
-
-    // Sélectionner un tag
-    selectTag(value) {
-        if (!this.currentContext) return;
+        if (!field) return;
         
-        // Check if it's a form context
-        if (this.currentContext.contactId === 'form') {
-            contacts.selectFormTag(value);
-            return;
-        }
+        // Réorganiser field.tags selon le nouvel ordre
+        const newOrder = items.map(item => {
+            const index = parseInt(item.getAttribute('data-index'));
+            return field.tags[index];
+        });
         
-        const contact = app.dataStore.contacts.find(c => c.id === this.currentContext.contactId);
-        if (contact) {
-            contact[this.currentContext.fieldType] = value;
-            app.dataStore.save();
-            contacts.render();
-        }
+        field.tags = newOrder;
         
-        this.closeDropdown();
-    },
-
-    // Créer et sélectionner un nouveau tag
-    createAndSelect(value) {
-        if (!this.currentContext) return;
-        this.addCustomTag(this.currentContext.fieldType, value);
-        this.selectTag(value);
-    },
-
-    // Ajouter un tag personnalisé
-    addCustomTag(type, value) {
-        const color = this.availableColors[Math.floor(Math.random() * this.availableColors.length)];
-        const className = 'tag-custom-' + Date.now();
-        const newTag = {
-            value: value,
-            label: '🏷️ ' + value,
-            class: className,
-            color: color
-        };
-        
-        // NOUVEAU SYSTÈME : Ajouter dans field.tags
-        const allFields = [...app.defaultFields, ...app.customFields];
-        const field = allFields.find(f => f.id === type);
-        
-        if (field && field.type === 'select') {
-            if (!field.tags) field.tags = [];
-            field.tags.push(newTag);
-            console.log('✅ Tag added to field.tags');
-        }
-        
-        // ANCIEN SYSTÈME : Pour rétrocompatibilité
-        if (app.customTags[type]) {
-            app.customTags[type].push(newTag);
-        }
-        
-        const style = document.createElement('style');
-        style.id = 'style-' + className;
-        style.textContent = `.${className} { background: ${color}; color: white; }`;
-        document.head.appendChild(style);
+        console.log('💾 Saving new tag order:', newOrder);
         
         app.dataStore.save();
-        return newTag;
+        contacts.render();
+        this.closeTagOrderModal();
     },
 
-    // Fermer le dropdown
-    closeDropdown() {
+    closeTagOrderModal() {
+        const modal = document.getElementById('tagOrderModal');
+        if (modal) modal.remove();
         document.getElementById('overlay').classList.remove('active');
-        document.getElementById('tagDropdown').classList.remove('active');
-        this.currentContext = null;
     },
 
     // Ouvrir la modale d'édition
-    openEditModal(fieldType, value) {
-        this.closeDropdown();
+    openEditModal(fieldType, value, fromOrderModal = false) {
+        // Si on vient de la modal d'ordre, la fermer temporairement
+        if (fromOrderModal) {
+            const orderModal = document.getElementById('tagOrderModal');
+            if (orderModal) {
+                orderModal.style.display = 'none';
+            }
+        }
         
-        let tag = app.customTags[fieldType].find(t => t.value === value);
-        let isDefault = false;
+        const allFields = [...app.defaultFields, ...app.customFields];
+        const field = allFields.find(f => f.id === fieldType);
+        
+        if (!field) {
+            console.error('Field not found:', fieldType);
+            return;
+        }
+        
+        // Trouver le tag
+        const tag = this.findTag(fieldType, value);
         
         if (!tag) {
-            tag = app.defaultTags[fieldType].find(t => t.value === value);
-            isDefault = true;
+            console.error('Tag not found:', value);
+            return;
         }
         
-        if (!tag) return;
+        // Vérifier si c'est un tag par défaut
+        const isDefault = field.defaultTags && field.defaultTags.some(t => t.value === value);
         
-        // Get current color - prefer tag.color if available, otherwise read from CSS
-        let currentColor = tag.color || '#868e96'; // Use saved color if exists
-        
-        if (!currentColor || currentColor === '#868e96') {
-            // Fallback: try to read from CSS if color not saved
-            const styleElement = document.getElementById('style-' + tag.class);
-            if (styleElement) {
-                const cssText = styleElement.textContent;
-                const match = cssText.match(/background:\s*(#[0-9a-fA-F]{6})/);
-                if (match) {
-                    currentColor = match[1];
-                }
-            }
-        }
-        
-        this.currentEdit = { fieldType, value, tag, isDefault, selectedColor: currentColor };
-        
-        // Rendre les emojis
-        const emojiPicker = document.getElementById('emojiPicker');
-        const currentEmoji = tag.label.split(' ')[0];
-        
-        const renderEmojis = (searchTerm = '') => {
-            let emojisToShow = [];
-            
-            if (!searchTerm) {
-                // Pas de recherche : afficher tous les emojis
-                emojisToShow = this.availableEmojis;
-            } else {
-                // Recherche : utiliser emoji-keywords.js si disponible
-                const search = searchTerm.toLowerCase().trim();
-                
-                if (typeof window.emojiKeywords !== 'undefined') {
-                    // Utiliser la base complète
-                    this.availableEmojis.forEach(emoji => {
-                        const keywords = window.emojiKeywords[emoji];
-                        if (keywords) {
-                            // Chercher mot exact OU début de mot
-                            const matches = keywords.some(keyword => {
-                                const kw = keyword.toLowerCase();
-                                return kw === search || kw.startsWith(search);
-                            });
-                            if (matches) {
-                                emojisToShow.push(emoji);
-                            }
-                        }
-                    });
-                } else {
-                    // Fallback : utiliser searchEmoji
-                    emojisToShow = this.searchEmoji(searchTerm, currentEmoji);
-                }
-            }
-            
-            // Afficher les résultats
-            if (emojisToShow.length === 0) {
-                emojiPicker.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 20px; color: #868e96;">Aucun résultat</div>';
-            } else {
-                emojiPicker.innerHTML = emojisToShow.map(emoji => `
-                    <div class="emoji-option ${currentEmoji === emoji ? 'selected' : ''}" 
-                         onclick="tags.selectEmoji('${emoji}')">${emoji}</div>
-                `).join('');
-            }
+        this.currentEdit = {
+            fieldType,
+            value,
+            tag,
+            isDefault,
+            selectedColor: tag.color || '#868e96',
+            fromOrderModal
         };
         
-        renderEmojis();
+        // Créer la modal
+        const modal = document.createElement('div');
+        modal.id = 'tagEditModal';
+        modal.className = 'modal active';
         
-        // Ajouter le listener pour la recherche
-        const emojiSearch = document.getElementById('emojiSearch');
-        if (emojiSearch) {
-            emojiSearch.value = '';
-            emojiSearch.oninput = (e) => renderEmojis(e.target.value);
-        }
-        
-        // Rendre les couleurs avec la couleur actuelle sélectionnée
-        const colorPicker = document.getElementById('colorPicker');
-        colorPicker.innerHTML = this.availableColors.map(color => `
-            <div class="color-option ${color === currentColor ? 'selected' : ''}" 
-                 style="background: ${color};"
-                 onclick="tags.selectColor('${color}')"></div>
+        // Générer les options de couleurs
+        const colorOptionsHTML = this.availableColors.map(color => `
+            <div class="color-option ${color === this.currentEdit.selectedColor ? 'selected' : ''}" 
+                 style="background: ${color};" 
+                 onclick="tags.selectColor('${color}')">
+            </div>
         `).join('');
         
-        this.updatePreview();
+        modal.innerHTML = `
+            <div class="modal-header">
+                <h2>Modifier le tag</h2>
+                <button class="close-btn" onclick="tags.closeEditModal()">✕</button>
+            </div>
+            <div class="modal-content">
+                <div class="tag-edit-preview">
+                    <label>Aperçu</label>
+                    <div id="tagPreview" class="tag" style="background: ${this.currentEdit.selectedColor}; color: white;">
+                        ${tag.label}
+                    </div>
+                </div>
+                
+                <div class="tag-edit-colors">
+                    <label>Couleur</label>
+                    <div class="color-grid">
+                        ${colorOptionsHTML}
+                    </div>
+                </div>
+                
+                ${!isDefault ? `
+                <div class="tag-edit-actions">
+                    <button class="btn btn-danger" onclick="tags.deleteTag()">Supprimer ce tag</button>
+                </div>
+                ` : ''}
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-secondary" onclick="tags.closeEditModal()">Annuler</button>
+                <button class="btn btn-primary" onclick="tags.saveEdit()">Enregistrer</button>
+            </div>
+        `;
         
-        // Show overlay and modal - overlay BEHIND modal
+        document.body.appendChild(modal);
         document.getElementById('overlay').classList.add('active');
-        document.getElementById('tagEditModal').classList.add('active');
-    },
-
-    // Sélectionner un emoji
-    selectEmoji(emoji) {
-        if (!this.currentEdit) return;
-        
-        const tagName = this.currentEdit.tag.label.replace(/^.+?\s/, '');
-        this.currentEdit.tag.label = emoji + ' ' + tagName;
-        
-        document.querySelectorAll('.emoji-option').forEach(el => el.classList.remove('selected'));
-        
-        // Find and select the clicked emoji
-        const emojiOptions = document.querySelectorAll('.emoji-option');
-        emojiOptions.forEach(el => {
-            if (el.textContent === emoji) {
-                el.classList.add('selected');
-            }
-        });
-        
-        this.updatePreview();
     },
 
     // Sélectionner une couleur
@@ -888,8 +644,19 @@ const tags = {
 
     // Fermer la modale d'édition
     closeEditModal() {
-        document.getElementById('tagEditModal').classList.remove('active');
-        document.getElementById('overlay').classList.remove('active');
+        const modal = document.getElementById('tagEditModal');
+        if (modal) modal.remove();
+        
+        // Si on vient de la modal d'ordre, la réafficher
+        if (this.currentEdit && this.currentEdit.fromOrderModal) {
+            const orderModal = document.getElementById('tagOrderModal');
+            if (orderModal) {
+                orderModal.style.display = 'block';
+            }
+        } else {
+            document.getElementById('overlay').classList.remove('active');
+        }
+        
         this.currentEdit = null;
     }
 };
