@@ -424,6 +424,7 @@ body.hide-header .container {
 .contacts-grid {
     display: grid;
     gap: 12px;
+    padding-top: 8px;
 }
 
 .contact-card {
@@ -2888,7 +2889,6 @@ body.dark-mode .emoji-search-input:focus {
     color: #E1306C;
     border-bottom: 2px solid #E1306C;
     margin-bottom: 8px;
-    margin-top: -8px;
     position: sticky;
     top: 236px; /* Hauteur fixe du header */
     background: #f8f9fa;
