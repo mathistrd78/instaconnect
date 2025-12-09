@@ -662,6 +662,8 @@ const authManager = {
                 console.log('✅ Contacts deleted from Firebase');
             }
             
+            } // Fin du if (shouldLoadFromFirebase)
+            
             console.log('✅ Contacts loaded from Firebase:', app.dataStore.contacts.length);
             
             // Mettre en cache les contacts pour les prochaines sessions
