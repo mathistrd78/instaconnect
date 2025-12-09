@@ -406,6 +406,9 @@ const app = {
     },
 
     // Fonction pour ajuster le layout de la page contacts
+    _headerHeightLocked: false,
+    _lockedHeaderHeight: null,
+    
     adjustContactsLayout() {
         const header = document.querySelector('.header');
         const container = document.querySelector('.container');
@@ -419,16 +422,45 @@ const app = {
         requestAnimationFrame(() => {
             if (header.style.display !== 'none') {
                 const headerHeight = header.offsetHeight;
-                console.log('📐 Adjusting layout - Header height:', headerHeight);
                 
-                container.style.marginTop = headerHeight + 'px';
+                // Si c'est la première fois qu'on mesure, verrouiller cette hauteur
+                if (!this._headerHeightLocked) {
+                    this._lockedHeaderHeight = headerHeight;
+                    this._headerHeightLocked = true;
+                    
+                    // Fixer la hauteur du header pour qu'elle ne change plus
+                    header.style.height = headerHeight + 'px';
+                    header.style.minHeight = headerHeight + 'px';
+                    header.style.maxHeight = headerHeight + 'px';
+                    
+                    console.log('🔒 Header height locked at:', headerHeight + 'px');
+                }
+                
+                // Utiliser toujours la hauteur verrouillée
+                const finalHeight = this._lockedHeaderHeight || headerHeight;
+                console.log('📐 Adjusting layout - Using height:', finalHeight);
+                
+                container.style.marginTop = finalHeight + 'px';
                 
                 // Ajuster la position sticky des letter-dividers
                 document.querySelectorAll('.letter-divider').forEach(divider => {
-                    divider.style.top = headerHeight + 'px';
+                    divider.style.top = finalHeight + 'px';
                 });
             }
         });
+    },
+    
+    // Réinitialiser le verrouillage (appelé au changement de page)
+    unlockHeaderHeight() {
+        this._headerHeightLocked = false;
+        this._lockedHeaderHeight = null;
+        
+        const header = document.querySelector('.header');
+        if (header) {
+            header.style.height = '';
+            header.style.minHeight = '200px';
+            header.style.maxHeight = '';
+        }
     },
 
     switchSection(section) {
@@ -467,22 +499,26 @@ const app = {
             setTimeout(() => this.adjustContactsLayout(), 100);
             setTimeout(() => this.adjustContactsLayout(), 500);
         } else if (section === 'stats') {
+            this.unlockHeaderHeight(); // Reset pour la prochaine fois
             document.getElementById('statsSection').classList.add('active');
             document.querySelectorAll('.nav-item')[1].classList.add('active');
             header.style.display = 'none';
             container.style.marginTop = '0';
             stats.render();
         } else if (section === 'analyse') {
+            this.unlockHeaderHeight(); // Reset pour la prochaine fois
             document.getElementById('analyseSection').classList.add('active');
             document.querySelectorAll('.nav-item')[2].classList.add('active');
             header.style.display = 'none';
             container.style.marginTop = '0';
         } else if (section === 'unfollowers') {
+            this.unlockHeaderHeight(); // Reset pour la prochaine fois
             document.getElementById('unfollowersSection').classList.add('active');
             document.querySelectorAll('.nav-item')[3].classList.add('active');
             header.style.display = 'none';
             container.style.marginTop = '0';
         } else if (section === 'profil') {
+            this.unlockHeaderHeight(); // Reset pour la prochaine fois
             document.getElementById('profilSection').classList.add('active');
             document.querySelectorAll('.nav-item')[4].classList.add('active');
             header.style.display = 'none';
