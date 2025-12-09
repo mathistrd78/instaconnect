@@ -233,12 +233,12 @@ const app = {
                 
                 contacts.render();
                 stats.render();
-                this.switchSection(savedSection);
                 
-                // Ajuster le layout après tout
-                if (savedSection === 'contacts') {
-                    setTimeout(() => this.adjustContactsLayout(), 200);
-                }
+                // Attendre un peu que le DOM soit mis à jour
+                setTimeout(() => {
+                    // switchSection va appeler adjustContactsLayout automatiquement
+                    this.switchSection(savedSection);
+                }, 100);
             }, 1000); // Augmenté à 1 seconde pour laisser le temps à Firebase
         }
     },
@@ -415,6 +415,16 @@ const app = {
         
         if (!header || !container) return;
         
+        // Si déjà verrouillé, utiliser la hauteur verrouillée sans remesurer
+        if (this._headerHeightLocked && this._lockedHeaderHeight) {
+            console.log('📐 Using locked height:', this._lockedHeaderHeight);
+            container.style.marginTop = this._lockedHeaderHeight + 'px';
+            document.querySelectorAll('.letter-divider').forEach(divider => {
+                divider.style.top = this._lockedHeaderHeight + 'px';
+            });
+            return;
+        }
+        
         // Forcer un reflow pour obtenir la vraie hauteur
         header.offsetHeight;
         
@@ -423,28 +433,22 @@ const app = {
             if (header.style.display !== 'none') {
                 const headerHeight = header.offsetHeight;
                 
-                // Si c'est la première fois qu'on mesure, verrouiller cette hauteur
-                if (!this._headerHeightLocked) {
-                    this._lockedHeaderHeight = headerHeight;
-                    this._headerHeightLocked = true;
-                    
-                    // Fixer la hauteur du header pour qu'elle ne change plus
-                    header.style.height = headerHeight + 'px';
-                    header.style.minHeight = headerHeight + 'px';
-                    header.style.maxHeight = headerHeight + 'px';
-                    
-                    console.log('🔒 Header height locked at:', headerHeight + 'px');
-                }
+                // Première mesure = verrouillage
+                this._lockedHeaderHeight = headerHeight;
+                this._headerHeightLocked = true;
                 
-                // Utiliser toujours la hauteur verrouillée
-                const finalHeight = this._lockedHeaderHeight || headerHeight;
-                console.log('📐 Adjusting layout - Using height:', finalHeight);
+                // Fixer la hauteur du header pour qu'elle ne change plus
+                header.style.height = headerHeight + 'px';
+                header.style.minHeight = headerHeight + 'px';
+                header.style.maxHeight = headerHeight + 'px';
                 
-                container.style.marginTop = finalHeight + 'px';
+                console.log('🔒 Header height locked at:', headerHeight + 'px');
+                
+                container.style.marginTop = headerHeight + 'px';
                 
                 // Ajuster la position sticky des letter-dividers
                 document.querySelectorAll('.letter-divider').forEach(divider => {
-                    divider.style.top = finalHeight + 'px';
+                    divider.style.top = headerHeight + 'px';
                 });
             }
         });
@@ -494,10 +498,9 @@ const app = {
             
             contacts.render();
             
-            // Ajuster le layout avec plusieurs tentatives pour gérer le timing
-            this.adjustContactsLayout();
-            setTimeout(() => this.adjustContactsLayout(), 100);
-            setTimeout(() => this.adjustContactsLayout(), 500);
+            // Ajuster le layout UNE SEULE FOIS après que tout soit chargé
+            // Ne pas faire d'appels multiples pour éviter les mesures différentes
+            setTimeout(() => this.adjustContactsLayout(), 150);
         } else if (section === 'stats') {
             this.unlockHeaderHeight(); // Reset pour la prochaine fois
             document.getElementById('statsSection').classList.add('active');
