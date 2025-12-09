@@ -175,8 +175,57 @@ const app = {
 
                 await batch.commit();
                 console.log('✅ All data saved to Firebase successfully');
+                
+                // Invalider le cache si on a sauvegardé des contacts
+                if (specificContact || this.contacts.length > 0) {
+                    localStorage.removeItem('contactsCache');
+                    localStorage.removeItem('contactsLastLoad');
+                    console.log('🗑️ Cache invalidated');
+                }
             } catch (error) {
                 console.error('❌ Error saving to Firebase:', error);
+            }
+        },
+
+        async saveMetadata() {
+            // NOUVELLE FONCTION: Sauvegarder SEULEMENT les métadonnées (tags, fields) sans toucher aux contacts
+            // Économise énormément de lectures/écritures Firebase
+            if (!authManager.currentUser) {
+                console.warn('⚠️ No user logged in, cannot save to Firebase');
+                return;
+            }
+
+            try {
+                const userId = authManager.currentUser.uid;
+                console.log('💾 SAVING METADATA ONLY to Firebase - User:', userId);
+                
+                // Nettoyer les undefined pour Firebase
+                const cleanDefaultFields = app.defaultFields.map(f => {
+                    const clean = { ...f };
+                    Object.keys(clean).forEach(key => {
+                        if (clean[key] === undefined) delete clean[key];
+                    });
+                    return clean;
+                });
+                
+                const cleanCustomFields = app.customFields.map(f => {
+                    const clean = { ...f };
+                    Object.keys(clean).forEach(key => {
+                        if (clean[key] === undefined) delete clean[key];
+                    });
+                    return clean;
+                });
+                
+                const userDoc = db.collection('users').doc(userId);
+                await userDoc.set({
+                    customTags: app.customTags,
+                    customFields: cleanCustomFields,
+                    defaultFields: cleanDefaultFields
+                }, { merge: true });
+
+                console.log('✅ Metadata saved to Firebase (1 write instead of', this.contacts.length + 1, 'writes)');
+            } catch (error) {
+                console.error('❌ Error saving metadata to Firebase:', error);
             }
         },
 
@@ -187,6 +236,11 @@ const app = {
                 const userId = authManager.currentUser.uid;
                 await db.collection('users').doc(userId).collection('contacts').doc(contactId).delete();
                 console.log('✅ Contact deleted from Firebase');
+                
+                // Invalider le cache
+                localStorage.removeItem('contactsCache');
+                localStorage.removeItem('contactsLastLoad');
+                console.log('🗑️ Cache invalidated');
             } catch (error) {
                 console.error('❌ Error deleting contact:', error);
             }
@@ -310,8 +364,8 @@ const app = {
         console.log('➕ New field created:', newField);
         this.customFields.push(newField);
         console.log('➕ customFields after push:', this.customFields.length, this.customFields);
-        this.dataStore.save();
-        console.log('➕ save() called');
+        this.dataStore.saveMetadata(); // Optimisé: sauvegarde seulement les métadonnées
+        console.log('➕ saveMetadata() called');
         return newField;
     },
 
@@ -330,7 +384,7 @@ const app = {
             }
         });
         
-        this.dataStore.save();
+        this.dataStore.saveMetadata(); // Optimisé: sauvegarde seulement les métadonnées
         return true;
     },
 
@@ -349,7 +403,7 @@ const app = {
             }
         });
         
-        this.dataStore.save();
+        this.dataStore.saveMetadata(); // Optimisé: sauvegarde seulement les métadonnées
         return true;
     },
 
