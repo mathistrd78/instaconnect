@@ -317,7 +317,7 @@ const stats = {
         const html = sortedData.map(d => {
             const percent = total > 0 ? Math.round((d.value / total) * 100) : 0;
             return `
-                <div class="legend-item">
+                <div class="legend-item" onclick="stats.onLegendClick('${d.label.replace(/'/g, "\\'")}')">
                     <div class="legend-label">
                         <div class="legend-color" style="background: ${d.color};"></div>
                         <span>${d.label}</span>
@@ -330,6 +330,60 @@ const stats = {
             `;
         }).join('');
         document.getElementById('chartLegend').innerHTML = html;
+    },
+
+    // Gérer le clic sur un élément de la légende
+    onLegendClick(label) {
+        console.log('📊 Legend clicked:', label, 'Current type:', this.currentType);
+        
+        // Déterminer le type de filtre et la valeur
+        let filterType = null;
+        let filterValue = null;
+        
+        if (this.currentType === 'pays') {
+            // Pour les pays, extraire le nom du pays (sans le drapeau)
+            filterType = 'country';
+            // Supprimer l'emoji drapeau du début
+            filterValue = label.replace(/^[^\s]+\s/, '').trim();
+        } else if (this.currentType === 'mois') {
+            // Pour les mois, on ne peut pas filtrer directement
+            console.log('⚠️ Cannot filter by month');
+            return;
+        } else {
+            // Pour les autres types (champs personnalisés)
+            filterType = this.currentType;
+            filterValue = label;
+        }
+        
+        if (!filterType || !filterValue) {
+            console.log('⚠️ No filter to apply');
+            return;
+        }
+        
+        console.log('🎯 Applying filter:', filterType, '=', filterValue);
+        
+        // Réinitialiser tous les filtres
+        contacts.activeFilters = {
+            gender: [],
+            relationType: [],
+            meetingPlace: [],
+            discussionStatus: [],
+            complete: [],
+            country: []
+        };
+        
+        // Appliquer le filtre
+        if (!contacts.activeFilters[filterType]) {
+            contacts.activeFilters[filterType] = [];
+        }
+        contacts.activeFilters[filterType].push(filterValue);
+        
+        // Basculer vers la page contacts
+        app.switchSection('contacts');
+        
+        // Mettre à jour l'interface des filtres
+        contacts.updateFilterButtons();
+        contacts.render();
     }
 };
 
