@@ -247,17 +247,12 @@ const contacts = {
         
         grid.innerHTML = html;
         
-        // Ajuster le top des letter-dividers si on est sur la page contacts
+        // Ajuster le layout si on est sur la page contacts
         if (app.currentSection === 'contacts') {
-            setTimeout(() => {
-                const header = document.querySelector('.header');
-                if (header && header.style.display !== 'none') {
-                    const headerHeight = header.offsetHeight;
-                    document.querySelectorAll('.letter-divider').forEach(divider => {
-                        divider.style.top = headerHeight + 'px';
-                    });
-                }
-            }, 10);
+            // Utiliser requestAnimationFrame pour attendre que le DOM soit mis à jour
+            requestAnimationFrame(() => {
+                app.adjustContactsLayout();
+            });
         }
     },
 
