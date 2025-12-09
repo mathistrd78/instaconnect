@@ -400,6 +400,22 @@ const app = {
         console.log('✅ Migration terminée');
     },
 
+    // Fonction centralisée pour ajuster le layout de la page contacts
+    adjustContactsLayout() {
+        const header = document.querySelector('.header');
+        const container = document.querySelector('.container');
+        
+        if (header && header.style.display !== 'none') {
+            const headerHeight = header.offsetHeight;
+            container.style.marginTop = headerHeight + 'px';
+            
+            // Ajuster la position sticky des letter-dividers
+            document.querySelectorAll('.letter-divider').forEach(divider => {
+                divider.style.top = headerHeight + 'px';
+            });
+        }
+    },
+
     switchSection(section) {
         // Reset scroll to top - body et container
         window.scrollTo(0, 0);
@@ -429,25 +445,14 @@ const app = {
             document.querySelectorAll('.nav-item')[0].classList.add('active');
             header.style.display = 'block';
             
-            // Calculer la hauteur exacte du header et ajuster
-            setTimeout(() => {
-                const headerHeight = header.offsetHeight;
-                container.style.marginTop = headerHeight + 'px';
-                
-                // Ajuster la position sticky des letter-dividers pour qu'ils se collent juste sous le header
-                // Le container a déjà un margin-top égal à la hauteur du header
-                // Donc on ne met rien (top: 0) car le letter-divider est dans le container
-                // MAIS le problème c'est que top: 0 = haut du viewport, pas haut du container
-                // Solution : mettre top = 0 dans le contexte du container qui a déjà le bon offset
-                document.querySelectorAll('.letter-divider').forEach(divider => {
-                    // Le container commence après le header grâce au margin-top
-                    // Donc top: 0 devrait suffire, MAIS le header est fixed
-                    // Il faut donc que le sticky soit relatif au header fixed
-                    divider.style.top = headerHeight + 'px';
-                });
-            }, 50);
-            
             contacts.render();
+            
+            // Utiliser requestAnimationFrame pour attendre que le rendu soit terminé
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    this.adjustContactsLayout();
+                });
+            });
         } else if (section === 'stats') {
             document.getElementById('statsSection').classList.add('active');
             document.querySelectorAll('.nav-item')[1].classList.add('active');
