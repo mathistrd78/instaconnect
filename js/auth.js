@@ -3,6 +3,7 @@ const authManager = {
     currentUser: null,
     inactivityTimer: null,
     inactivityTimeout: 10 * 60 * 1000, // 10 minutes en millisecondes
+    _dataLoaded: false, // Flag pour éviter les chargements multiples
 
     // Vérifier si un utilisateur est connecté
     checkAuth() {
@@ -12,12 +13,22 @@ const authManager = {
                 if (user) {
                     console.log('✅ User logged in:', user.email);
                     this.showApp();
-                    this.loadUserData();
+                    
+                    // Charger les données UNE SEULE FOIS
+                    if (!this._dataLoaded) {
+                        this._dataLoaded = true;
+                        this.loadUserData();
+                        console.log('📊 Data loaded for the first time');
+                    } else {
+                        console.log('⏭️ Data already loaded, skipping...');
+                    }
+                    
                     this.startInactivityTimer();
                     this.setupActivityListeners();
                     resolve(true);
                 } else {
                     console.log('❌ No user logged in');
+                    this._dataLoaded = false; // Reset le flag à la déconnexion
                     this.showAuth();
                     resolve(false);
                 }
@@ -548,10 +559,10 @@ const authManager = {
                     
                     console.log(`🔍 Filtered unfollowers: ${rawUnfollowers.length} -> ${unfollowers.data.unfollowers.length}`);
                     
-                    // Update display - Stats removed from UI
-                    // document.getElementById('followersCount').textContent = unfollowers.data.followers.length;
-                    // document.getElementById('followingCount').textContent = unfollowers.data.following.length;
-                    // document.getElementById('unfollowersCount').textContent = unfollowers.data.unfollowers.length;
+                    // Update display
+                    document.getElementById('followersCount').textContent = unfollowers.data.followers.length;
+                    document.getElementById('followingCount').textContent = unfollowers.data.following.length;
+                    document.getElementById('unfollowersCount').textContent = unfollowers.data.unfollowers.length;
                     
                     // Show appropriate section
                     if (unfollowers.data.unfollowers.length === 0) {
@@ -574,11 +585,35 @@ const authManager = {
                 unfollowers.updateCounts();
             }
 
-            // Charger les contacts UNE SEULE FOIS au démarrage (pas de listener temps réel)
-            const contactsSnapshot = await db.collection('users').doc(userId).collection('contacts').get();
+            // Charger les contacts avec système de cache
+            const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+            const lastLoadTime = localStorage.getItem('contactsLastLoad');
+            const cachedContacts = localStorage.getItem('contactsCache');
+            const now = Date.now();
             
-            app.dataStore.contacts = [];
-            const contactsToDelete = []; // Pour stocker les contacts à supprimer de Firebase
+            let shouldLoadFromFirebase = true;
+            
+            // Vérifier si on peut utiliser le cache
+            if (lastLoadTime && cachedContacts) {
+                const timeSinceLastLoad = now - parseInt(lastLoadTime);
+                if (timeSinceLastLoad < CACHE_DURATION) {
+                    shouldLoadFromFirebase = false;
+                    console.log('📦 Using cached contacts (age:', Math.round(timeSinceLastLoad / 1000), 'seconds)');
+                    app.dataStore.contacts = JSON.parse(cachedContacts);
+                } else {
+                    console.log('🔄 Cache expired (age:', Math.round(timeSinceLastLoad / 1000), 'seconds), loading from Firebase...');
+                }
+            } else {
+                console.log('🆕 No cache found, loading from Firebase...');
+            }
+            
+            if (shouldLoadFromFirebase) {
+                // Charger depuis Firebase
+                const contactsSnapshot = await db.collection('users').doc(userId).collection('contacts').get();
+                console.log('📥 Loaded', contactsSnapshot.size, 'contacts from Firebase');
+                
+                app.dataStore.contacts = [];
+                const contactsToDelete = []; // Pour stocker les contacts à supprimer de Firebase
             
             contactsSnapshot.forEach(doc => {
                 const contact = doc.data();
@@ -628,6 +663,13 @@ const authManager = {
             }
             
             console.log('✅ Contacts loaded from Firebase:', app.dataStore.contacts.length);
+            
+            // Mettre en cache les contacts pour les prochaines sessions
+            if (shouldLoadFromFirebase) {
+                localStorage.setItem('contactsCache', JSON.stringify(app.dataStore.contacts));
+                localStorage.setItem('contactsLastLoad', now.toString());
+                console.log('💾 Contacts cached for future sessions');
+            }
             
             // Re-render UI
             contacts.renderFilters(); // Regénérer les filtres avec les champs actuels
