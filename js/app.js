@@ -435,8 +435,15 @@ const app = {
                 container.style.marginTop = headerHeight + 'px';
                 
                 // Ajuster la position sticky des letter-dividers pour qu'ils se collent juste sous le header
+                // Le container a déjà un margin-top égal à la hauteur du header
+                // Donc on ne met rien (top: 0) car le letter-divider est dans le container
+                // MAIS le problème c'est que top: 0 = haut du viewport, pas haut du container
+                // Solution : mettre top = 0 dans le contexte du container qui a déjà le bon offset
                 document.querySelectorAll('.letter-divider').forEach(divider => {
-                    divider.style.top = '0px';
+                    // Le container commence après le header grâce au margin-top
+                    // Donc top: 0 devrait suffire, MAIS le header est fixed
+                    // Il faut donc que le sticky soit relatif au header fixed
+                    divider.style.top = headerHeight + 'px';
                 });
             }, 50);
             
