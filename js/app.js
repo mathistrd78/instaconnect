@@ -429,15 +429,10 @@ const app = {
             document.querySelectorAll('.nav-item')[0].classList.add('active');
             header.style.display = 'block';
             
-            // Calculer la hauteur exacte du header et ajuster le sticky
+            // Calculer la hauteur exacte du header et ajuster
             setTimeout(() => {
                 const headerHeight = header.offsetHeight;
-                container.style.marginTop = headerHeight + 'px'; // Pas d'espace supplémentaire
-                
-                // Ajuster la position sticky des letter-headers pour qu'ils se collent juste sous le header
-                document.querySelectorAll('.letter-header').forEach(letterHeader => {
-                    letterHeader.style.top = headerHeight + 'px';
-                });
+                container.style.marginTop = headerHeight + 'px';
             }, 50);
             
             contacts.render();
@@ -445,7 +440,7 @@ const app = {
             document.getElementById('statsSection').classList.add('active');
             document.querySelectorAll('.nav-item')[1].classList.add('active');
             header.style.display = 'none';
-            container.style.marginTop = '0'; // Supprimer la marge
+            container.style.marginTop = '0';
             stats.render();
         } else if (section === 'analyse') {
             document.getElementById('analyseSection').classList.add('active');
