@@ -401,19 +401,40 @@ const app = {
     },
 
     // Fonction centralisée pour ajuster le layout de la page contacts
+    _layoutAdjustmentTimer: null,
+    _lastHeaderHeight: null,
+    
     adjustContactsLayout() {
-        const header = document.querySelector('.header');
-        const container = document.querySelector('.container');
-        
-        if (header && header.style.display !== 'none') {
-            const headerHeight = header.offsetHeight;
-            container.style.marginTop = headerHeight + 'px';
-            
-            // Ajuster la position sticky des letter-dividers
-            document.querySelectorAll('.letter-divider').forEach(divider => {
-                divider.style.top = headerHeight + 'px';
-            });
+        // Debounce pour éviter les appels multiples
+        if (this._layoutAdjustmentTimer) {
+            clearTimeout(this._layoutAdjustmentTimer);
         }
+        
+        this._layoutAdjustmentTimer = setTimeout(() => {
+            const header = document.querySelector('.header');
+            const container = document.querySelector('.container');
+            
+            if (header && header.style.display !== 'none') {
+                const headerHeight = header.offsetHeight;
+                
+                // Ne rien faire si la hauteur n'a pas changé
+                if (this._lastHeaderHeight === headerHeight) {
+                    return;
+                }
+                
+                console.log('📐 Adjusting layout - Header height:', headerHeight);
+                this._lastHeaderHeight = headerHeight;
+                
+                container.style.marginTop = headerHeight + 'px';
+                
+                // Ajuster la position sticky des letter-dividers
+                document.querySelectorAll('.letter-divider').forEach(divider => {
+                    divider.style.top = headerHeight + 'px';
+                });
+            }
+            
+            this._layoutAdjustmentTimer = null;
+        }, 100);
     },
 
     switchSection(section) {
@@ -447,33 +468,33 @@ const app = {
             
             contacts.render();
             
-            // Utiliser requestAnimationFrame pour attendre que le rendu soit terminé
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    this.adjustContactsLayout();
-                });
-            });
+            // Ajuster le layout après le rendu
+            this.adjustContactsLayout();
         } else if (section === 'stats') {
             document.getElementById('statsSection').classList.add('active');
             document.querySelectorAll('.nav-item')[1].classList.add('active');
             header.style.display = 'none';
             container.style.marginTop = '0';
+            this._lastHeaderHeight = null;
             stats.render();
         } else if (section === 'analyse') {
             document.getElementById('analyseSection').classList.add('active');
             document.querySelectorAll('.nav-item')[2].classList.add('active');
             header.style.display = 'none';
-            container.style.marginTop = '0'; // Supprimer la marge
+            container.style.marginTop = '0';
+            this._lastHeaderHeight = null;
         } else if (section === 'unfollowers') {
             document.getElementById('unfollowersSection').classList.add('active');
             document.querySelectorAll('.nav-item')[3].classList.add('active');
             header.style.display = 'none';
-            container.style.marginTop = '0'; // Supprimer la marge
+            container.style.marginTop = '0';
+            this._lastHeaderHeight = null;
         } else if (section === 'profil') {
             document.getElementById('profilSection').classList.add('active');
             document.querySelectorAll('.nav-item')[4].classList.add('active');
             header.style.display = 'none';
-            container.style.marginTop = '0'; // Supprimer la marge
+            container.style.marginTop = '0';
+            this._lastHeaderHeight = null;
             this.updateProfilSection();
         }
     },
