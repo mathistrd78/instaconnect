@@ -453,19 +453,6 @@ const app = {
             }
         });
     },
-    
-    // Réinitialiser le verrouillage (appelé au changement de page)
-    unlockHeaderHeight() {
-        this._headerHeightLocked = false;
-        this._lockedHeaderHeight = null;
-        
-        const header = document.querySelector('.header');
-        if (header) {
-            header.style.height = '';
-            header.style.minHeight = '200px';
-            header.style.maxHeight = '';
-        }
-    },
 
     switchSection(section) {
         // Reset scroll to top - body et container
@@ -499,29 +486,25 @@ const app = {
             contacts.render();
             
             // Ajuster le layout UNE SEULE FOIS après que tout soit chargé
-            // Ne pas faire d'appels multiples pour éviter les mesures différentes
-            setTimeout(() => this.adjustContactsLayout(), 150);
+            // Délai de 300ms pour être sûr que renderFilters() est terminé
+            setTimeout(() => this.adjustContactsLayout(), 300);
         } else if (section === 'stats') {
-            this.unlockHeaderHeight(); // Reset pour la prochaine fois
             document.getElementById('statsSection').classList.add('active');
             document.querySelectorAll('.nav-item')[1].classList.add('active');
             header.style.display = 'none';
             container.style.marginTop = '0';
             stats.render();
         } else if (section === 'analyse') {
-            this.unlockHeaderHeight(); // Reset pour la prochaine fois
             document.getElementById('analyseSection').classList.add('active');
             document.querySelectorAll('.nav-item')[2].classList.add('active');
             header.style.display = 'none';
             container.style.marginTop = '0';
         } else if (section === 'unfollowers') {
-            this.unlockHeaderHeight(); // Reset pour la prochaine fois
             document.getElementById('unfollowersSection').classList.add('active');
             document.querySelectorAll('.nav-item')[3].classList.add('active');
             header.style.display = 'none';
             container.style.marginTop = '0';
         } else if (section === 'profil') {
-            this.unlockHeaderHeight(); // Reset pour la prochaine fois
             document.getElementById('profilSection').classList.add('active');
             document.querySelectorAll('.nav-item')[4].classList.add('active');
             header.style.display = 'none';
