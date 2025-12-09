@@ -84,6 +84,9 @@ const contacts = {
         
         filtersContainer.innerHTML = filtersHTML + specialFiltersHTML + resetButton;
         
+        // Rendre le container visible maintenant qu'il a du contenu
+        filtersContainer.style.visibility = 'visible';
+        
         // Ajouter les event listeners APRÈS avoir créé les boutons
         filterableFields.forEach(field => {
             const btn = document.getElementById(`filter_${field.id}_Btn`);
