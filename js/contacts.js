@@ -246,6 +246,19 @@ const contacts = {
         });
         
         grid.innerHTML = html;
+        
+        // Ajuster le top des letter-dividers si on est sur la page contacts
+        if (app.currentSection === 'contacts') {
+            setTimeout(() => {
+                const header = document.querySelector('.header');
+                if (header && header.style.display !== 'none') {
+                    const headerHeight = header.offsetHeight;
+                    document.querySelectorAll('.letter-divider').forEach(divider => {
+                        divider.style.top = headerHeight + 'px';
+                    });
+                }
+            }, 10);
+        }
     },
 
     getFiltered() {
