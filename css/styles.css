@@ -294,24 +294,31 @@ body {
 /* Header */
 .header {
     background: white;
-    padding: 8px 16px 10px 16px;
+    padding: 0;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     z-index: 1000;
-    min-height: 200px;
-    overflow: visible;
+    height: 224px;
+    min-height: 224px;
+    max-height: 224px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .header-top {
     display: flex;
     justify-content: center;
-    margin-bottom: 8px;
+    align-items: center;
     position: relative;
-    height: 30px;
-    min-height: 30px;
+    height: 46px;
+    min-height: 46px;
+    max-height: 46px;
+    flex-shrink: 0;
+    padding: 8px 16px;
 }
 
 h1 {
@@ -319,6 +326,7 @@ h1 {
     font-size: 22px;
     font-weight: 700;
     line-height: 30px;
+    margin: 0;
 }
 
 .search-box, .filters-toggle, .filter-select {
@@ -327,9 +335,10 @@ h1 {
     border: 2px solid #e9ecef;
     border-radius: 12px;
     font-size: 16px;
+    height: 44px;
     min-height: 44px;
     max-height: 44px;
-    height: 44px;
+    box-sizing: border-box;
 }
 
 /* Conteneur pour search + bouton calendrier */
@@ -338,9 +347,10 @@ h1 {
     align-items: center;
     gap: 12px;
     padding: 0 20px;
-    margin-bottom: 8px;
-    height: 44px;
-    min-height: 44px;
+    height: 52px;
+    min-height: 52px;
+    max-height: 52px;
+    flex-shrink: 0;
 }
 
 .search-box {
@@ -376,7 +386,7 @@ h1 {
 /* Container */
 .container {
     padding: 8px 12px 12px 12px;
-    margin-top: 200px; /* Valeur par défaut, sera ajustée dynamiquement */
+    margin-top: 224px; /* Hauteur fixe du header */
 }
 
 /* Quand le header n'est pas affiché (Stats, Analyse, Unfollowers, Profil) */
@@ -2676,16 +2686,18 @@ body.dark-mode .emoji-search-input:focus {
 
 .contacts-count {
     background: #e3f2fd;
-    padding: 6px 16px;
+    padding: 0 16px;
     border-radius: 8px;
     text-align: center;
     font-size: 14px;
     font-weight: 600;
     color: #1976d2;
-    margin: 0 20px 8px 20px;
-    height: 30px;
-    min-height: 30px;
-    line-height: 18px;
+    margin: 0 20px;
+    height: 38px;
+    min-height: 38px;
+    max-height: 38px;
+    line-height: 38px;
+    flex-shrink: 0;
 }
 
 #contactsCountNumber {
@@ -2706,9 +2718,10 @@ body.dark-mode .emoji-search-input:focus {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
+    height: 44px;
     min-height: 44px;
     max-height: 44px;
-    height: 44px;
+    flex-shrink: 0;
 }
 
 /* Masquer les filtres tant qu'ils ne sont pas rendus dynamiquement */
@@ -2871,7 +2884,7 @@ body.dark-mode .emoji-search-input:focus {
     margin-bottom: 8px;
     margin-top: -8px;
     position: sticky;
-    top: 200px; /* Valeur par défaut, sera ajustée dynamiquement */
+    top: 224px; /* Hauteur fixe du header */
     background: #f8f9fa;
     z-index: 100;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
