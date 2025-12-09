@@ -2724,7 +2724,7 @@ body.dark-mode .emoji-search-input:focus {
 .filters-horizontal {
     display: flex;
     gap: 10px;
-    padding: 0 20px;
+    padding: 0 20px 0 20px;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
