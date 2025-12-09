@@ -249,10 +249,7 @@ const contacts = {
         
         // Ajuster le layout si on est sur la page contacts
         if (app.currentSection === 'contacts') {
-            // Utiliser requestAnimationFrame pour attendre que le DOM soit mis à jour
-            requestAnimationFrame(() => {
-                app.adjustContactsLayout();
-            });
+            app.adjustContactsLayout();
         }
     },
 
