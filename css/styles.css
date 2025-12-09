@@ -301,6 +301,10 @@ body {
     left: 0;
     right: 0;
     z-index: 1000;
+    height: 188px;
+    min-height: 188px;
+    max-height: 188px;
+    overflow: hidden;
 }
 
 .header-top {
@@ -367,7 +371,7 @@ h1 {
 /* Container */
 .container {
     padding: 8px 12px 12px 12px;
-    margin-top: 168px; /* Espace pour le header fixe (sera ajusté dynamiquement) */
+    margin-top: 188px; /* Hauteur fixe du header */
 }
 
 /* Quand le header n'est pas affiché (Stats, Analyse, Unfollowers, Profil) */
@@ -2846,15 +2850,15 @@ body.dark-mode .emoji-search-input:focus {
     margin-bottom: 8px;
     margin-top: -8px;
     position: sticky;
-    top: 0;
+    top: 188px;
     background: #f8f9fa;
     z-index: 100;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
-/* Quand le header est visible, ajuster le top du letter-divider */
+/* Quand le header est visible, le letter-divider est déjà bien positionné */
 #contactsSection.active .letter-divider {
-    /* Ce sera défini dynamiquement par JavaScript */
+    /* Pas besoin de JS, c'est fixé en CSS */
 }
 
 /* Dark mode pour les séparateurs de lettres */
