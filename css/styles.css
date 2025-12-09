@@ -331,7 +331,7 @@ h1 {
     align-items: center;
     gap: 12px;
     padding: 0 20px;
-    margin-bottom: 2px;
+    margin-bottom: 8px;
 }
 
 .search-box {
@@ -2670,7 +2670,7 @@ body.dark-mode .emoji-search-input:focus {
     font-size: 14px;
     font-weight: 600;
     color: #1976d2;
-    margin: 0 20px 6px 20px;
+    margin: 0 20px 10px 20px;
 }
 
 #contactsCountNumber {
