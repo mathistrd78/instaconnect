@@ -234,15 +234,6 @@ const app = {
                 contacts.render();
                 stats.render();
                 this.switchSection(savedSection);
-                
-                // Ajuster le layout APRÈS que tout soit rendu et que le header soit à sa taille finale
-                if (savedSection === 'contacts') {
-                    // Force un recalcul car renderFilters a changé la hauteur du header
-                    this._lastHeaderHeight = null;
-                    setTimeout(() => {
-                        this.adjustContactsLayout();
-                    }, 100);
-                }
             }, 1000); // Augmenté à 1 seconde pour laisser le temps à Firebase
         }
     },
@@ -409,41 +400,14 @@ const app = {
         console.log('✅ Migration terminée');
     },
 
-    // Fonction centralisée pour ajuster le layout de la page contacts
+    // Plus besoin d'ajuster le layout car tout est fixé en CSS
+    // On garde la fonction pour compatibilité mais elle ne fait rien
     _layoutAdjustmentTimer: null,
-    _lastHeaderHeight: null,
+    _lastHeaderHeight: 188, // Hauteur fixe
     
     adjustContactsLayout() {
-        // Debounce pour éviter les appels multiples
-        if (this._layoutAdjustmentTimer) {
-            clearTimeout(this._layoutAdjustmentTimer);
-        }
-        
-        this._layoutAdjustmentTimer = setTimeout(() => {
-            const header = document.querySelector('.header');
-            const container = document.querySelector('.container');
-            
-            if (header && header.style.display !== 'none') {
-                const headerHeight = header.offsetHeight;
-                
-                // Ne rien faire si la hauteur n'a pas changé
-                if (this._lastHeaderHeight === headerHeight) {
-                    return;
-                }
-                
-                console.log('📐 Adjusting layout - Header height:', headerHeight);
-                this._lastHeaderHeight = headerHeight;
-                
-                container.style.marginTop = headerHeight + 'px';
-                
-                // Ajuster la position sticky des letter-dividers
-                document.querySelectorAll('.letter-divider').forEach(divider => {
-                    divider.style.top = headerHeight + 'px';
-                });
-            }
-            
-            this._layoutAdjustmentTimer = null;
-        }, 50);
+        // Tout est géré en CSS maintenant, cette fonction ne fait plus rien
+        // On la garde pour ne pas casser les appels existants
     },
 
     switchSection(section) {
@@ -484,26 +448,22 @@ const app = {
             document.querySelectorAll('.nav-item')[1].classList.add('active');
             header.style.display = 'none';
             container.style.marginTop = '0';
-            this._lastHeaderHeight = null;
             stats.render();
         } else if (section === 'analyse') {
             document.getElementById('analyseSection').classList.add('active');
             document.querySelectorAll('.nav-item')[2].classList.add('active');
             header.style.display = 'none';
             container.style.marginTop = '0';
-            this._lastHeaderHeight = null;
         } else if (section === 'unfollowers') {
             document.getElementById('unfollowersSection').classList.add('active');
             document.querySelectorAll('.nav-item')[3].classList.add('active');
             header.style.display = 'none';
             container.style.marginTop = '0';
-            this._lastHeaderHeight = null;
         } else if (section === 'profil') {
             document.getElementById('profilSection').classList.add('active');
             document.querySelectorAll('.nav-item')[4].classList.add('active');
             header.style.display = 'none';
             container.style.marginTop = '0';
-            this._lastHeaderHeight = null;
             this.updateProfilSection();
         }
     },
