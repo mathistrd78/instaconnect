@@ -2695,6 +2695,12 @@ body.dark-mode .emoji-search-input:focus {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
+    min-height: 44px;
+}
+
+/* Masquer les filtres tant qu'ils ne sont pas rendus dynamiquement */
+.filters-horizontal:empty {
+    visibility: hidden;
 }
 
 .filters-horizontal::-webkit-scrollbar {
