@@ -16,7 +16,7 @@ body {
     overflow-x: hidden;
 }
 
-/* Pour garder la bottom nav ancrÃ©e sur iPhone */
+/* Pour garder la bottom nav ancrée sur iPhone */
 html {
     height: 100%;
     overflow: hidden;
@@ -296,11 +296,11 @@ body {
     background: white;
     padding: 8px 16px 10px 16px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 1000 !important;
 }
 
 .header-top {
@@ -331,7 +331,7 @@ h1 {
     align-items: center;
     gap: 12px;
     padding: 0 20px;
-    margin-bottom: 2px;
+    margin-bottom: 12px;
 }
 
 .search-box {
@@ -367,10 +367,10 @@ h1 {
 /* Container */
 .container {
     padding: 8px 12px 12px 12px;
-    margin-top: 168px; /* Espace pour le header fixe (sera ajustÃ© dynamiquement) */
+    margin-top: 170px !important; /* Position fixe pour éviter les problèmes de CSS qui casse */
 }
 
-/* Quand le header n'est pas affichÃ© (Stats, Analyse, Unfollowers, Profil) */
+/* Quand le header n'est pas affiché (Stats, Analyse, Unfollowers, Profil) */
 #statsSection.active ~ * .container,
 #analyseSection.active ~ * .container,
 #unfollowersSection.active ~ * .container,
@@ -594,18 +594,18 @@ body.hide-header .container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
-    padding: 12px 16px;
+    gap: 4px; /* Réduit l'espace entre icône et texte */
+    padding: 8px 12px; /* Réduit le padding */
     background: white;
     border: 2px solid #e9ecef;
-    border-radius: 12px;
-    font-size: 11px;
+    border-radius: 8px; /* Plus carré */
+    font-size: 10px; /* Texte plus petit */
     font-weight: 600;
     color: #868e96;
     cursor: pointer;
     transition: all 0.3s ease;
-    min-width: 70px;
-    width: 70px;
+    min-width: 65px; /* Légèrement plus petit */
+    width: 65px;
 }
 
 .stat-tab.active {
@@ -615,7 +615,7 @@ body.hide-header .container {
 }
 
 .stat-tab-icon {
-    font-size: 20px;
+    font-size: 18px; /* Icône plus petite */
 }
 
 .stat-tab:active {
@@ -647,10 +647,27 @@ body.hide-header .container {
 .legend-item {
     display: flex;
     justify-content: space-between;
-    padding: 12px;
-    margin-bottom: 8px;
+    align-items: center; /* Centrer verticalement */
+    padding: 8px 12px; /* Encore plus réduit */
+    margin-bottom: 10px; /* Espace entre les items */
     background: #f8f9fa;
-    border-radius: 10px;
+    border-radius: 6px; /* Encore plus carré */
+    transition: all 0.2s ease;
+    min-height: auto; /* Pas de hauteur minimale */
+}
+
+.legend-item-clickable {
+    cursor: pointer;
+}
+
+.legend-item-clickable:hover {
+    background: #e9ecef;
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.legend-item-clickable:active {
+    transform: translateX(2px);
 }
 
 .legend-label {
@@ -658,21 +675,23 @@ body.hide-header .container {
     align-items: center;
     gap: 10px;
     font-weight: 600;
+    font-size: 14px; /* Réduire la taille du texte */
 }
 
 .legend-color {
-    width: 20px;
-    height: 20px;
-    border-radius: 6px;
+    width: 16px; /* Plus petit */
+    height: 16px; /* Plus petit */
+    border-radius: 4px;
+    flex-shrink: 0; /* Ne pas rétrécir */
 }
 
 .legend-value {
-    font-size: 18px;
+    font-size: 16px; /* Plus petit */
     font-weight: 700;
 }
 
 .legend-percent {
-    font-size: 14px;
+    font-size: 13px; /* Plus petit */
     color: #868e96;
 }
 
@@ -694,7 +713,8 @@ body.hide-header .container {
 }
 
 /* Unfollowers Section */
-.unfollowers-header {
+.unfollowers-header,
+.relations-header {
     background: white;
     padding: 12px 16px;
     margin-bottom: 6px;
@@ -703,11 +723,82 @@ body.hide-header .container {
     text-align: center;
 }
 
-.unfollowers-title {
+.unfollowers-title,
+.relations-title {
     font-size: 24px;
     font-weight: 700;
-    color: #ff4757;
+    color: #E1306C;
     margin-bottom: 0;
+}
+
+/* Styles pour les tabs Relations */
+.relations-tabs {
+    display: flex;
+    gap: 8px;
+    padding: 0 16px 8px 16px;
+    margin-bottom: 8px;
+}
+
+.relations-tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 12px 8px;
+    border: none;
+    border-radius: 12px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+.relations-tab:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.relations-tab.active {
+    background: linear-gradient(135deg, #E1306C 0%, #C13584 100%);
+    box-shadow: 0 4px 12px rgba(225, 48, 108, 0.3);
+}
+
+.relations-tab .tab-icon {
+    font-size: 20px;
+}
+
+.relations-tab.active .tab-icon,
+.relations-tab.active .tab-label,
+.relations-tab.active .tab-count {
+    color: white;
+}
+
+.relations-tab .tab-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #495057;
+}
+
+.relations-tab .tab-count {
+    font-size: 16px;
+    font-weight: 700;
+    color: #E1306C;
+}
+
+/* Contenu des tabs */
+.relations-content {
+    display: none;
+}
+
+.relations-content.active {
+    display: block;
+}
+
+.pending-date {
+    font-size: 12px;
+    color: #868e96;
+    margin-left: 8px;
 }
 
 .unfollowers-subtitle {
@@ -840,10 +931,10 @@ body.hide-header .container {
 
 .unfollowers-list-header {
     padding: 16px;
-    background: #f8f9fa;
+    background: white; /* Fond blanc en light mode */
     font-weight: 700;
-    color: #495057;
-    border-bottom: 2px solid #e9ecef;
+    color: #E1306C; /* Texte rose */
+    border-bottom: 1px solid #E1306C; /* Trait fin rose */
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -854,21 +945,26 @@ body.hide-header .container {
 }
 
 .letter-header {
-    padding: 12px 16px;
-    background: linear-gradient(135deg, #E1306C 0%, #C13584 100%);
-    color: white;
+    padding: 16px 16px 8px 16px;
+    background: white; /* Fond blanc en light mode */
+    color: #E1306C; /* Lettre en rose */
+    border-bottom: 1px solid #E1306C; /* Trait fin rose */
     font-weight: 700;
     font-size: 16px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
     position: sticky;
     top: 168px; /* Juste sous le header (hauteur approximative du header) */
     z-index: 999; /* Juste sous le header (1000) */
 }
 
-/* Sur la page unfollowers, pareil */
+/* Sur la page contacts, augmenter le z-index pour passer au-dessus du header */
+#contactsSection .letter-header {
+    z-index: 1001; /* Au-dessus du header (1000) */
+}
+
+/* Sur la page unfollowers, garder z-index par défaut */
 #unfollowersSection .letter-header {
     top: 0;
+    z-index: 999; /* En dessous du header si nécessaire */
 }
 
 .unfollower-item {
@@ -1110,10 +1206,16 @@ body.hide-header .container {
     margin-top: 12px;
 }
 
+.empty-unfollowers,
 .empty-unfollowers {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     text-align: center;
-    padding: 60px 20px;
+    padding: 80px 20px;
     color: #868e96;
+    min-height: 300px;
 }
 
 .empty-unfollowers-icon {
@@ -1215,7 +1317,7 @@ body.hide-header .container {
     z-index: 3;
 }
 
-/* CrÃ©er une sÃ©paration arrondie autour de l'onglet Analyse */
+/* Créer une séparation arrondie autour de l'onglet Analyse */
 .nav-item-main::before,
 .nav-item-main::after {
     content: '';
@@ -1351,16 +1453,23 @@ body.hide-header .container {
     padding: 16px;
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    min-height: 76px; /* Hauteur minimale pour aligner les deux items */
+}
+
+.profil-setting-item + .profil-setting-item {
+    margin-top: 12px; /* Espacement entre les items */
 }
 
 .profil-setting-info {
     display: flex;
     align-items: center;
     gap: 12px;
+    flex: 1; /* Prendre tout l'espace disponible */
 }
 
 .profil-setting-icon {
     font-size: 24px;
+    flex-shrink: 0; /* Ne pas rétrécir */
 }
 
 .profil-setting-title {
@@ -1373,6 +1482,12 @@ body.hide-header .container {
 .profil-setting-desc {
     font-size: 12px;
     color: #868e96;
+}
+
+/* Aligner le bouton et le toggle à la même hauteur */
+.profil-btn-icon,
+.toggle-switch {
+    flex-shrink: 0; /* Ne pas rétrécir */
 }
 
 /* Toggle Switch */
@@ -1616,12 +1731,44 @@ body.dark-mode .upload-subtext {
 }
 
 body.dark-mode .unfollowers-header,
+body.dark-mode .relations-header,
 body.dark-mode .unfollowers-stats {
     background: #1a1a1a;
 }
 
-body.dark-mode .unfollowers-title {
+body.dark-mode .unfollowers-title,
+body.dark-mode .relations-title {
     color: #ffffff;
+}
+
+/* Dark mode pour les tabs Relations */
+body.dark-mode .relations-tabs {
+    background: transparent;
+}
+
+body.dark-mode .relations-tab {
+    background: #2d2d2d; /* Gris foncé au lieu de blanc */
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+body.dark-mode .relations-tab:hover {
+    background: #3a3a3a;
+}
+
+body.dark-mode .relations-tab.active {
+    background: linear-gradient(135deg, #E1306C 0%, #C13584 100%);
+}
+
+body.dark-mode .relations-tab .tab-label,
+body.dark-mode .relations-tab .tab-count {
+    color: #ffffff;
+}
+
+body.dark-mode .relations-tab.active .tab-label,
+body.dark-mode .relations-tab.active .tab-count,
+body.dark-mode .relations-tab.active .tab-icon {
+    color: white;
 }
 
 body.dark-mode .unfollower-stat-card {
@@ -1637,9 +1784,14 @@ body.dark-mode .unfollowers-list {
     background: #2d2d2d;
 }
 
+body.dark-mode .empty-unfollowers {
+    color: #a0a0a0;
+}
+
 body.dark-mode .unfollowers-list-header {
-    background: #3a3a3a;
-    color: #ffffff;
+    background: #1a1a1a; /* Fond noir légèrement différent */
+    color: #E1306C; /* Texte rose */
+    border-bottom: 1px solid #E1306C; /* Trait fin rose */
 }
 
 body.dark-mode .unfollower-item {
@@ -1909,7 +2061,7 @@ body.dark-mode .empty-state-text {
     font-family: inherit;
 }
 
-/* Select annÃ©e de naissance compact */
+/* Select année de naissance compact */
 .year-select,
 .birth-select {
     width: 100% !important;
@@ -1922,7 +2074,7 @@ body.dark-mode .empty-state-text {
 @media (max-width: 768px) {
     .year-select,
     .birth-select {
-        font-size: 16px; /* EmpÃªche le zoom sur iOS */
+        font-size: 16px; /* Empêche le zoom sur iOS */
         max-height: 250px;
     }
 }
@@ -2145,9 +2297,9 @@ body.dark-mode .tag-selector-value {
     min-height: 56px;
     gap: 12px;
     transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
-    user-select: none; /* EmpÃªche la sÃ©lection de texte pendant le drag */
+    user-select: none; /* Empêche la sélection de texte pendant le drag */
     -webkit-user-select: none;
-    touch-action: none; /* EmpÃªche le scroll pendant le drag sur mobile */
+    touch-action: none; /* Empêche le scroll pendant le drag sur mobile */
 }
 
 .tag-option.dragging {
@@ -2431,7 +2583,7 @@ body.dark-mode .emoji-search-input:focus {
     display: inline-block;
     max-width: 400px;
     width: 100%;
-    height: 250px; /* Hauteur fixe rÃ©duite */
+    height: 250px; /* Hauteur fixe réduite */
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
@@ -2451,7 +2603,7 @@ body.dark-mode .emoji-search-input:focus {
     left: 0;
     width: 100%;
     height: 100%;
-    background: #000000; /* Noir opaque Ã  100% */
+    background: #000000; /* Noir opaque à 100% */
     border-radius: 12px;
     display: flex;
     align-items: center;
@@ -2462,7 +2614,7 @@ body.dark-mode .emoji-search-input:focus {
 }
 
 .video-overlay:hover {
-    background: #1a1a1a; /* LÃ©gÃ¨rement plus clair au hover */
+    background: #1a1a1a; /* Légèrement plus clair au hover */
 }
 
 .play-button {
@@ -2612,7 +2764,7 @@ body.dark-mode .emoji-search-input:focus {
 }
 
 /* Nouveaux styles pour les filtres horizontaux */
-/* Bouton calendrier sÃ©parÃ© (rose) */
+/* Bouton calendrier séparé (rose) */
 .btn-calendar-separate {
     background: linear-gradient(135deg, #E1306C 0%, #fd79a8 100%);
     color: white;
@@ -2643,7 +2795,7 @@ body.dark-mode .emoji-search-input:focus {
     font-size: 14px;
     font-weight: 600;
     color: #1976d2;
-    margin: 0 20px 6px 20px;
+    margin: 0 20px 12px 20px; /* Augmenté de 6px à 12px */
 }
 
 #contactsCountNumber {
@@ -2659,7 +2811,7 @@ body.dark-mode .emoji-search-input:focus {
 
 .filters-horizontal {
     display: flex;
-    gap: 8px;
+    gap: 10px; /* Augmenté de 8px à 10px pour plus d'espace */
     padding: 0 20px 12px 20px;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -2674,10 +2826,10 @@ body.dark-mode .emoji-search-input:focus {
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 8px 14px;
+    padding: 6px 12px; /* Réduit de 8px 14px à 6px 12px pour être plus carré */
     background: white;
     border: 2px solid #e9ecef;
-    border-radius: 20px;
+    border-radius: 8px; /* Réduit de 20px à 8px pour être plus carré */
     font-size: 13px;
     font-weight: 600;
     color: #495057;
@@ -2685,6 +2837,7 @@ body.dark-mode .emoji-search-input:focus {
     white-space: nowrap;
     transition: all 0.2s ease;
     flex-shrink: 0;
+    height: 36px; /* Hauteur fixe pour uniformité */
 }
 
 .filter-chip:hover {
@@ -2781,7 +2934,7 @@ body.dark-mode .emoji-search-input:focus {
 }
 
 .filter-option-checkbox::after {
-    content: 'âœ“';
+    content: '✓';
     display: none;
     font-size: 12px;
     font-weight: bold;
@@ -2791,7 +2944,7 @@ body.dark-mode .emoji-search-input:focus {
     display: block;
 }
 
-/* Fix pour le dropdown des filtres - z-index dÃ©jÃ  dÃ©fini dans .header principal */
+/* Fix pour le dropdown des filtres - z-index déjà défini dans .header principal */
 
 .filter-dropdown {
     position: absolute;
@@ -2809,22 +2962,29 @@ body.dark-mode .emoji-search-input:focus {
 /* Marqueur de lettre dans la grille */
 .letter-divider {
     grid-column: 1 / -1;
-    padding: 16px 0 8px 0;
+    padding: 16px 16px 8px 16px;
     font-size: 16px;
     font-weight: 700;
     color: #E1306C;
-    border-bottom: 2px solid #E1306C;
+    background: white;
+    border-bottom: 1px solid #E1306C;
     margin-bottom: 8px;
-    position: sticky;
-    top: 165px;
-    background: #f8f9fa;
-    z-index: 10;
+    position: sticky !important;
+    top: 168px !important; /* Position fixe sous le header */
+    z-index: 999 !important;
 }
 
-/* Dark mode pour les sÃ©parateurs de lettres */
+/* Dark mode pour les séparateurs de lettres */
 body.dark-mode .letter-divider {
-    background: #212529;
-    color: #E1306C;
+    background: #1a1a1a; /* Fond légèrement différent en dark mode */
+    color: #E1306C; /* Lettre rose */
+    border-bottom: 1px solid #E1306C; /* Trait fin rose */
+}
+
+body.dark-mode .letter-header {
+    background: #1a1a1a; /* Fond légèrement différent en dark mode */
+    color: #E1306C; /* Lettre rose */
+    border-bottom: 1px solid #E1306C; /* Trait fin rose */
 }
 
 /* Dark mode pour la page d'authentification */
@@ -2921,6 +3081,12 @@ body.dark-mode .auth-message-success {
     color: #868e96;
 }
 
+.field-item-actions {
+    display: flex;
+    gap: 4px;
+}
+
+.field-item-edit,
 .field-item-delete {
     background: transparent;
     border: none;
@@ -2931,11 +3097,17 @@ body.dark-mode .auth-message-success {
     transition: all 0.2s;
 }
 
+.field-item-edit:hover {
+    background: #e3f2fd;
+    transform: scale(1.1);
+}
+
 .field-item-delete:hover {
     background: #fff5f5;
     transform: scale(1.1);
 }
 
+.field-item-edit:active,
 .field-item-delete:active {
     transform: scale(0.95);
 }
@@ -3027,7 +3199,7 @@ body.dark-mode .auth-message-success {
     color: #ecf0f1;
 }
 
-/* Bouton icÃ´ne pour les settings */
+/* Bouton icône pour les settings */
 .profil-btn-icon {
     background: transparent;
     border: none;
@@ -3098,7 +3270,7 @@ body.dark-mode .tag-dropdown-title {
     color: #ffffff;
 }
 
-/* Dark mode - Modal content (pour Ã©viter le fond blanc) */
+/* Dark mode - Modal content (pour éviter le fond blanc) */
 body.dark-mode .modal-content {
     background: #2d2d2d;
 }
@@ -3152,7 +3324,7 @@ body.dark-mode .modal-content {
 
 .profile-actions .btn {
     width: 100%;
-    flex: none; /* DÃ©sactiver flex: 1 pour forcer width: 100% */
+    flex: none; /* Désactiver flex: 1 pour forcer width: 100% */
 }
 
 .view-detail-item {
@@ -3562,7 +3734,7 @@ body.dark-mode .btn-calendar-inline:hover {
     background: rgba(255, 255, 255, 0.1);
 }
 
-/* AmÃ©liorer le champ date pour forcer l'affichage du picker */
+/* Améliorer le champ date pour forcer l'affichage du picker */
 input[type="date"],
 .date-input {
     position: relative;
@@ -3570,12 +3742,12 @@ input[type="date"],
     min-width: 150px;
     max-width: 100%;
     width: 100%;
-    padding: 14px 16px !important; /* MÃªme padding que les autres inputs */
+    padding: 14px 16px !important; /* Même padding que les autres inputs */
     height: auto;
-    min-height: 52px; /* MÃªme hauteur que les autres inputs */
+    min-height: 52px; /* Même hauteur que les autres inputs */
 }
 
-/* Placeholder personnalisÃ© pour iOS (span) */
+/* Placeholder personnalisé pour iOS (span) */
 .date-placeholder {
     position: absolute;
     left: 16px;
@@ -3594,7 +3766,7 @@ input[type="date"].has-value + .date-placeholder,
     display: none;
 }
 
-/* Sur iOS, masquer la valeur par dÃ©faut du champ date vide */
+/* Sur iOS, masquer la valeur par défaut du champ date vide */
 input[type="date"]:not(.has-value),
 .date-input:not(.has-value) {
     color: transparent;
@@ -3625,7 +3797,7 @@ input[type="date"]:not(:focus):invalid,
     color: #999;
 }
 
-/* Forcer l'affichage de l'icÃ´ne calendrier */
+/* Forcer l'affichage de l'icône calendrier */
 input[type="date"]::-webkit-calendar-picker-indicator,
 .date-input::-webkit-calendar-picker-indicator {
     cursor: pointer;
@@ -3646,7 +3818,7 @@ input[type="date"]::-moz-calendar-picker-indicator,
     cursor: pointer;
 }
 
-/* Mobile : forcer l'affichage de l'icÃ´ne */
+/* Mobile : forcer l'affichage de l'icône */
 @media (max-width: 768px) {
     input[type="date"],
     .date-input {
@@ -3663,7 +3835,7 @@ input[type="date"]::-moz-calendar-picker-indicator,
     }
 }
 
-/* Dark mode pour le bouton calendrier sÃ©parÃ© */
+/* Dark mode pour le bouton calendrier séparé */
 body.dark-mode .btn-calendar-separate {
     background: linear-gradient(135deg, #E1306C 0%, #c7275e 100%);
 }
@@ -3822,7 +3994,7 @@ body.dark-mode .btn-calendar-separate:hover {
     }
 }
 
-/* Ajuster les tailles des jours pour grands Ã©crans */
+/* Ajuster les tailles des jours pour grands écrans */
 @media (min-width: 1200px) {
     .calendar-day {
         min-height: 100px;
@@ -3933,4 +4105,14 @@ body.dark-mode .no-meeting-text {
     .no-meeting-text {
         font-size: 15px;
     }
+}
+
+/* Fix pour le bouton d'édition des tags sur iPhone */
+.tag-edit-btn {
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
 }
