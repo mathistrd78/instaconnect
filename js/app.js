@@ -433,6 +433,11 @@ const app = {
             setTimeout(() => {
                 const headerHeight = header.offsetHeight;
                 container.style.marginTop = headerHeight + 'px';
+                
+                // Ajuster la position sticky des letter-dividers pour qu'ils se collent juste sous le header
+                document.querySelectorAll('.letter-divider').forEach(divider => {
+                    divider.style.top = '0px';
+                });
             }, 50);
             
             contacts.render();
