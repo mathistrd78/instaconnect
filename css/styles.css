@@ -301,9 +301,9 @@ body {
     left: 0;
     right: 0;
     z-index: 1000;
-    height: 224px;
-    min-height: 224px;
-    max-height: 224px;
+    height: 236px;
+    min-height: 236px;
+    max-height: 236px;
     overflow: hidden;
 }
 
@@ -386,7 +386,7 @@ h1 {
 /* Container */
 .container {
     padding: 8px 12px 12px 12px;
-    margin-top: 224px; /* Hauteur fixe du header */
+    margin-top: 236px; /* Hauteur fixe du header */
 }
 
 /* Quand le header n'est pas affiché (Stats, Analyse, Unfollowers, Profil) */
@@ -888,6 +888,7 @@ body.hide-header .container {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    border-bottom: 1px solid #E1306C;
 }
 
 .letter-section {
@@ -2889,7 +2890,7 @@ body.dark-mode .emoji-search-input:focus {
     margin-bottom: 8px;
     margin-top: -8px;
     position: sticky;
-    top: 224px; /* Hauteur fixe du header */
+    top: 236px; /* Hauteur fixe du header */
     background: #f8f9fa;
     z-index: 100;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
