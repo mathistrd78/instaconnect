@@ -385,7 +385,7 @@ h1 {
 
 /* Container */
 .container {
-    padding: 8px 12px 12px 12px;
+    padding: 0 12px 12px 12px;
     margin-top: 230px; /* Hauteur fixe du header */
 }
 
@@ -2886,12 +2886,12 @@ body.dark-mode .emoji-search-input:focus {
 /* Marqueur de lettre dans la grille */
 .letter-divider {
     grid-column: 1 / -1;
-    padding: 0px 16px 8px 16px;
+    padding: 8px 16px 8px 16px;
     font-size: 16px;
     font-weight: 700;
     color: #E1306C;
     border-bottom: 2px solid #E1306C;
-    border-top: 2px solid #E1306C;
+    margin: 0;
     margin-bottom: 8px;
     position: sticky;
     top: 230px; /* Hauteur fixe du header */
@@ -2902,7 +2902,6 @@ body.dark-mode .emoji-search-input:focus {
     margin-right: -12px;
     padding-left: 28px;
     padding-right: 28px;
-    padding-top: 8px;
 }
 
 /* Dark mode pour les séparateurs de lettres */
