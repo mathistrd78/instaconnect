@@ -10,7 +10,8 @@ const contacts = {
         relationType: [],
         meetingPlace: [],
         discussionStatus: [],
-        complete: [] // 'oui' ou 'non'
+        complete: [], // 'oui' ou 'non'
+        country: [] // Filtre par pays
     },
     currentFilterDropdown: null,
 
@@ -54,9 +55,10 @@ const contacts = {
         );
         console.log('🔍 Filterable fields:', filterableFields.length, filterableFields.map(f => f.label));
         
-        // Ajouter "Profil complet" comme filtre spécial
+        // Ajouter "Profil complet" et "Pays" comme filtres spéciaux
         const specialFilters = [
-            { id: 'complete', label: 'Profil complet' }
+            { id: 'complete', label: 'Profil complet' },
+            { id: 'country', label: 'Pays' }
         ];
         
         // Générer les boutons de filtres
@@ -305,6 +307,30 @@ const contacts = {
                 if (this.activeFilters.complete.includes('oui')) return isComplete;
                 if (this.activeFilters.complete.includes('non')) return !isComplete;
                 return false;
+            });
+        }
+        
+        // Filtre par pays
+        if (this.activeFilters.country && this.activeFilters.country.length > 0) {
+            result = result.filter(contact => {
+                // Parser la location du contact
+                let locationData = null;
+                if (contact.location) {
+                    if (typeof contact.location === 'object') {
+                        locationData = contact.location;
+                    } else if (typeof contact.location === 'string' && contact.location.startsWith('{')) {
+                        try {
+                            locationData = JSON.parse(contact.location);
+                        } catch (e) {
+                            locationData = typeof city !== 'undefined' ? city.parseLocation(contact.location) : null;
+                        }
+                    } else {
+                        locationData = typeof city !== 'undefined' ? city.parseLocation(contact.location) : null;
+                    }
+                }
+                
+                const country = locationData && locationData.country ? locationData.country : 'Non défini';
+                return this.activeFilters.country.includes(country);
             });
         }
         
@@ -755,6 +781,19 @@ const contacts = {
                     <span>❌ Non</span>
                 </label>
             `;
+        } else if (filterType === 'country') {
+            // Filtre par pays : récupérer tous les pays des contacts
+            if (typeof city !== 'undefined') {
+                const countryStats = city.getCountryStats(app.dataStore.contacts);
+                content.innerHTML = countryStats.map(stat => `
+                    <label class="filter-option">
+                        <input type="checkbox" value="${stat.country}" 
+                               ${this.activeFilters.country.includes(stat.country) ? 'checked' : ''} 
+                               onchange="contacts.toggleFilter('country', '${stat.country.replace(/'/g, "\\'")}')">
+                        <span>${stat.flag} ${stat.country} (${stat.count})</span>
+                    </label>
+                `).join('');
+            }
         } else {
             // Trouver le champ correspondant
             const allFields = app.getAllFields();
@@ -840,6 +879,14 @@ const contacts = {
         }
         if (hasCompleteFilter) hasAnyFilter = true;
         
+        // Pays
+        const hasCountryFilter = this.activeFilters.country && this.activeFilters.country.length > 0;
+        const countryBtn = document.getElementById('filter_country_Btn');
+        if (countryBtn) {
+            countryBtn.classList.toggle('active', hasCountryFilter);
+        }
+        if (hasCountryFilter) hasAnyFilter = true;
+        
         // Show/hide reset button
         const resetBtn = document.getElementById('filterResetBtn');
         if (resetBtn) {
@@ -853,7 +900,8 @@ const contacts = {
             relationType: [],
             meetingPlace: [],
             discussionStatus: [],
-            complete: []
+            complete: [],
+            country: []
         };
         
         // Réinitialiser aussi la barre de recherche
