@@ -336,6 +336,12 @@ const stats = {
     onLegendClick(label) {
         console.log('📊 Legend clicked:', label, 'Current type:', this.currentType);
         
+        // Bloquer le clic sur "Non défini"
+        if (label === 'Non défini' || label.includes('Non défini')) {
+            console.log('⚠️ Cannot filter by "Non défini"');
+            return;
+        }
+        
         // Déterminer le type de filtre et la valeur
         let filterType = null;
         let filterValue = null;
@@ -362,17 +368,24 @@ const stats = {
         
         console.log('🎯 Applying filter:', filterType, '=', filterValue);
         
-        // Réinitialiser tous les filtres
+        // Réinitialiser TOUS les filtres (y compris les champs personnalisés)
+        const allFields = app.getAllFields();
+        const filterableFields = allFields.filter(field => 
+            field.type === 'select' || field.type === 'radio' || field.type === 'checkbox'
+        );
+        
+        // Créer un objet de filtres vide pour tous les champs
         contacts.activeFilters = {
-            gender: [],
-            relationType: [],
-            meetingPlace: [],
-            discussionStatus: [],
             complete: [],
             country: []
         };
         
-        // Appliquer le filtre
+        // Ajouter tous les champs dynamiques
+        filterableFields.forEach(field => {
+            contacts.activeFilters[field.id] = [];
+        });
+        
+        // Appliquer le filtre sélectionné
         if (!contacts.activeFilters[filterType]) {
             contacts.activeFilters[filterType] = [];
         }
