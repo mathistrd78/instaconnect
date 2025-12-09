@@ -461,7 +461,7 @@ const fields = {
         });
         
         // Sauvegarder dans Firebase
-        app.dataStore.save();
+        app.dataStore.saveMetadata(); // Optimisé: sauvegarde seulement les métadonnées
         
         console.log('✅ Ordre des champs sauvegardé');
     },
