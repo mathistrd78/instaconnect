@@ -594,8 +594,9 @@ body.hide-header .container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
-    padding: 12px 16px;
+    justify-content: center;
+    gap: 4px;
+    padding: 8px 12px;
     background: white;
     border: 2px solid #e9ecef;
     border-radius: 12px;
@@ -606,6 +607,7 @@ body.hide-header .container {
     transition: all 0.3s ease;
     min-width: 70px;
     width: 70px;
+    height: 70px;
 }
 
 .stat-tab.active {
@@ -662,6 +664,16 @@ body.hide-header .container {
 
 .legend-item:active {
     transform: translateX(2px);
+}
+
+.legend-item[onclick*="Non défini"] {
+    cursor: default;
+    opacity: 0.6;
+}
+
+.legend-item[onclick*="Non défini"]:hover {
+    background: #f8f9fa;
+    transform: none;
 }
 
 .legend-label {
@@ -2832,10 +2844,12 @@ body.dark-mode .emoji-search-input:focus {
     color: #E1306C;
     border-bottom: 2px solid #E1306C;
     margin-bottom: 8px;
+    margin-top: -8px;
     position: sticky;
     top: 0;
     background: #f8f9fa;
-    z-index: 10;
+    z-index: 100;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 /* Dark mode pour les séparateurs de lettres */
