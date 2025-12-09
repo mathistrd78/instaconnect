@@ -479,73 +479,74 @@ const city = {
         // Mapping des noms de pays vers codes (100+ pays)
         const countryNames = {
             // Europe
-            'france': 'FR', 'espagne': 'ES', 'italie': 'IT', 'allemagne': 'DE',
-            'royaume-uni': 'GB', 'uk': 'GB', 'angleterre': 'GB',
-            'portugal': 'PT', 'belgique': 'BE', 'suisse': 'CH',
-            'pays-bas': 'NL', 'hollande': 'NL', 'autriche': 'AT',
-            'grèce': 'GR', 'grece': 'GR', 'turquie': 'TR',
-            'pologne': 'PL', 'suède': 'SE', 'suede': 'SE',
-            'norvège': 'NO', 'norvege': 'NO', 'danemark': 'DK',
-            'finlande': 'FI', 'irlande': 'IE', 'islande': 'IS',
-            'luxembourg': 'LU', 'malte': 'MT', 'chypre': 'CY',
-            'république tchèque': 'CZ', 'tchéquie': 'CZ',
-            'hongrie': 'HU', 'roumanie': 'RO', 'bulgarie': 'BG',
-            'croatie': 'HR', 'slovénie': 'SI', 'slovaquie': 'SK',
-            'estonie': 'EE', 'lettonie': 'LV', 'lituanie': 'LT',
-            'serbie': 'RS', 'monténégro': 'ME', 'bosnie': 'BA',
-            'albanie': 'AL', 'macédoine': 'MK',
+            'france': 'FR', 'espagne': 'ES', 'spain': 'ES', 'italie': 'IT', 'italy': 'IT',
+            'allemagne': 'DE', 'germany': 'DE', 'deutschland': 'DE',
+            'royaume-uni': 'GB', 'uk': 'GB', 'angleterre': 'GB', 'united kingdom': 'GB', 'england': 'GB',
+            'portugal': 'PT', 'belgique': 'BE', 'belgium': 'BE', 'suisse': 'CH', 'switzerland': 'CH',
+            'pays-bas': 'NL', 'hollande': 'NL', 'netherlands': 'NL', 'autriche': 'AT', 'austria': 'AT',
+            'grèce': 'GR', 'grece': 'GR', 'greece': 'GR', 'turquie': 'TR', 'turkey': 'TR',
+            'pologne': 'PL', 'poland': 'PL', 'suède': 'SE', 'suede': 'SE', 'sweden': 'SE',
+            'norvège': 'NO', 'norvege': 'NO', 'norway': 'NO', 'danemark': 'DK', 'denmark': 'DK',
+            'finlande': 'FI', 'finland': 'FI', 'irlande': 'IE', 'ireland': 'IE', 'islande': 'IS', 'iceland': 'IS',
+            'luxembourg': 'LU', 'malte': 'MT', 'malta': 'MT', 'chypre': 'CY', 'cyprus': 'CY',
+            'république tchèque': 'CZ', 'tchéquie': 'CZ', 'czech republic': 'CZ',
+            'hongrie': 'HU', 'hungary': 'HU', 'roumanie': 'RO', 'romania': 'RO', 'bulgarie': 'BG', 'bulgaria': 'BG',
+            'croatie': 'HR', 'croatia': 'HR', 'slovénie': 'SI', 'slovenia': 'SI', 'slovaquie': 'SK', 'slovakia': 'SK',
+            'estonie': 'EE', 'estonia': 'EE', 'lettonie': 'LV', 'latvia': 'LV', 'lituanie': 'LT', 'lithuania': 'LT',
+            'serbie': 'RS', 'serbia': 'RS', 'monténégro': 'ME', 'montenegro': 'ME', 'bosnie': 'BA', 'bosnia': 'BA',
+            'albanie': 'AL', 'albania': 'AL', 'macédoine': 'MK', 'macedonia': 'MK',
             
             // Amériques
-            'états-unis': 'US', 'etats-unis': 'US', 'usa': 'US',
-            'canada': 'CA', 'mexique': 'MX',
-            'brésil': 'BR', 'bresil': 'BR', 'argentine': 'AR',
-            'chili': 'CL', 'pérou': 'PE', 'perou': 'PE',
-            'colombie': 'CO', 'venezuela': 'VE', 'équateur': 'EC',
-            'bolivie': 'BO', 'paraguay': 'PY', 'uruguay': 'UY',
+            'états-unis': 'US', 'etats-unis': 'US', 'usa': 'US', 'united states': 'US',
+            'canada': 'CA', 'mexique': 'MX', 'mexico': 'MX',
+            'brésil': 'BR', 'bresil': 'BR', 'brazil': 'BR', 'argentine': 'AR', 'argentina': 'AR',
+            'chili': 'CL', 'chile': 'CL', 'pérou': 'PE', 'perou': 'PE', 'peru': 'PE',
+            'colombie': 'CO', 'colombia': 'CO', 'venezuela': 'VE', 'équateur': 'EC', 'ecuador': 'EC',
+            'bolivie': 'BO', 'bolivia': 'BO', 'paraguay': 'PY', 'uruguay': 'UY',
             'costa rica': 'CR', 'panama': 'PA', 'cuba': 'CU',
-            'république dominicaine': 'DO', 'haïti': 'HT', 'haiti': 'HT',
-            'jamaïque': 'JM', 'jamaique': 'JM',
-            'trinité-et-tobago': 'TT', 'bahamas': 'BS', 'barbade': 'BB',
+            'république dominicaine': 'DO', 'dominican republic': 'DO', 'haïti': 'HT', 'haiti': 'HT',
+            'jamaïque': 'JM', 'jamaique': 'JM', 'jamaica': 'JM',
+            'trinité-et-tobago': 'TT', 'trinidad and tobago': 'TT', 'bahamas': 'BS', 'barbade': 'BB', 'barbados': 'BB',
             
             // Asie
-            'japon': 'JP', 'chine': 'CN', 'inde': 'IN',
-            'corée du sud': 'KR', 'coree du sud': 'KR',
-            'corée du nord': 'KP', 'coree du nord': 'KP',
-            'thaïlande': 'TH', 'thailande': 'TH',
-            'vietnam': 'VN', 'indonésie': 'ID', 'indonesie': 'ID',
-            'philippines': 'PH', 'malaisie': 'MY', 'singapour': 'SG',
+            'japon': 'JP', 'japan': 'JP', 'chine': 'CN', 'china': 'CN', 'inde': 'IN', 'india': 'IN',
+            'corée du sud': 'KR', 'coree du sud': 'KR', 'south korea': 'KR',
+            'corée du nord': 'KP', 'coree du nord': 'KP', 'north korea': 'KP',
+            'thaïlande': 'TH', 'thailande': 'TH', 'thailand': 'TH',
+            'vietnam': 'VN', 'indonésie': 'ID', 'indonesie': 'ID', 'indonesia': 'ID',
+            'philippines': 'PH', 'malaisie': 'MY', 'malaysia': 'MY', 'singapour': 'SG', 'singapore': 'SG',
             'pakistan': 'PK', 'bangladesh': 'BD', 'sri lanka': 'LK',
             'népal': 'NP', 'nepal': 'NP',
-            'afghanistan': 'AF', 'iran': 'IR', 'irak': 'IQ',
-            'syrie': 'SY', 'liban': 'LB', 'jordanie': 'JO',
+            'afghanistan': 'AF', 'iran': 'IR', 'irak': 'IQ', 'iraq': 'IQ',
+            'syrie': 'SY', 'syria': 'SY', 'liban': 'LB', 'lebanon': 'LB', 'jordanie': 'JO', 'jordan': 'JO',
             'israël': 'IL', 'israel': 'IL', 'palestine': 'PS',
-            'arabie saoudite': 'SA', 'émirats arabes unis': 'AE',
-            'koweït': 'KW', 'koweit': 'KW', 'qatar': 'QA',
+            'arabie saoudite': 'SA', 'saudi arabia': 'SA', 'émirats arabes unis': 'AE', 'united arab emirates': 'AE', 'uae': 'AE',
+            'koweït': 'KW', 'koweit': 'KW', 'kuwait': 'KW', 'qatar': 'QA',
             'oman': 'OM', 'yémen': 'YE', 'yemen': 'YE',
             
             // Afrique
-            'maroc': 'MA', 'algérie': 'DZ', 'algerie': 'DZ',
-            'tunisie': 'TN', 'égypte': 'EG', 'egypte': 'EG',
-            'libye': 'LY', 'soudan': 'SD',
-            'afrique du sud': 'ZA',
-            'kenya': 'KE', 'tanzanie': 'TZ', 'ouganda': 'UG',
-            'éthiopie': 'ET', 'ethiopie': 'ET',
+            'maroc': 'MA', 'morocco': 'MA', 'algérie': 'DZ', 'algerie': 'DZ', 'algeria': 'DZ',
+            'tunisie': 'TN', 'tunisia': 'TN', 'égypte': 'EG', 'egypte': 'EG', 'egypt': 'EG',
+            'libye': 'LY', 'libya': 'LY', 'soudan': 'SD', 'sudan': 'SD',
+            'afrique du sud': 'ZA', 'south africa': 'ZA',
+            'kenya': 'KE', 'tanzanie': 'TZ', 'tanzania': 'TZ', 'ouganda': 'UG', 'uganda': 'UG',
+            'éthiopie': 'ET', 'ethiopie': 'ET', 'ethiopia': 'ET',
             'ghana': 'GH', 'nigeria': 'NG', 'sénégal': 'SN', 'senegal': 'SN',
-            'côte d\'ivoire': 'CI', 'cote d\'ivoire': 'CI',
-            'cameroun': 'CM', 'congo': 'CD', 'angola': 'AO',
-            'zimbabwe': 'ZW', 'mozambique': 'MZ', 'namibie': 'NA',
-            'botswana': 'BW', 'zambie': 'ZM', 'malawi': 'MW',
+            'côte d\'ivoire': 'CI', 'cote d\'ivoire': 'CI', 'ivory coast': 'CI',
+            'cameroun': 'CM', 'cameroon': 'CM', 'congo': 'CD', 'angola': 'AO',
+            'zimbabwe': 'ZW', 'mozambique': 'MZ', 'namibie': 'NA', 'namibia': 'NA',
+            'botswana': 'BW', 'zambie': 'ZM', 'zambia': 'ZM', 'malawi': 'MW',
             
             // Océanie
-            'australie': 'AU', 'nouvelle-zélande': 'NZ',
-            'nouvelle-zelande': 'NZ', 'fidji': 'FJ',
-            'papouasie-nouvelle-guinée': 'PG',
+            'australie': 'AU', 'australia': 'AU', 'nouvelle-zélande': 'NZ', 'new zealand': 'NZ',
+            'nouvelle-zelande': 'NZ', 'fidji': 'FJ', 'fiji': 'FJ',
+            'papouasie-nouvelle-guinée': 'PG', 'papua new guinea': 'PG',
             
             // Russie & anciennes républiques
-            'russie': 'RU', 'ukraine': 'UA', 'biélorussie': 'BY',
-            'kazakhstan': 'KZ', 'ouzbékistan': 'UZ',
-            'géorgie': 'GE', 'georgie': 'GE', 'arménie': 'AM',
-            'azerbaïdjan': 'AZ', 'azerbaidjan': 'AZ'
+            'russie': 'RU', 'russia': 'RU', 'ukraine': 'UA', 'biélorussie': 'BY', 'belarus': 'BY',
+            'kazakhstan': 'KZ', 'ouzbékistan': 'UZ', 'uzbekistan': 'UZ',
+            'géorgie': 'GE', 'georgie': 'GE', 'georgia': 'GE', 'arménie': 'AM', 'armenia': 'AM',
+            'azerbaïdjan': 'AZ', 'azerbaidjan': 'AZ', 'azerbaijan': 'AZ'
         };
         
         // Si c'est un seul mot, vérifier si c'est un nom de pays
@@ -625,8 +626,9 @@ const city = {
                 location = this.parseLocation(contact.location);
             }
             
-            if (location && location.country) {
-                const key = location.country;
+            if (location && location.countryCode) {
+                // Grouper par countryCode pour éviter les doublons (Germany/Allemagne)
+                const key = location.countryCode;
                 if (!countryCount[key]) {
                     countryCount[key] = {
                         country: location.country,
