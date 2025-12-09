@@ -234,6 +234,15 @@ const app = {
                 contacts.render();
                 stats.render();
                 this.switchSection(savedSection);
+                
+                // Ajuster le layout APRÈS que tout soit rendu et que le header soit à sa taille finale
+                if (savedSection === 'contacts') {
+                    // Force un recalcul car renderFilters a changé la hauteur du header
+                    this._lastHeaderHeight = null;
+                    setTimeout(() => {
+                        this.adjustContactsLayout();
+                    }, 100);
+                }
             }, 1000); // Augmenté à 1 seconde pour laisser le temps à Firebase
         }
     },
@@ -434,7 +443,7 @@ const app = {
             }
             
             this._layoutAdjustmentTimer = null;
-        }, 100);
+        }, 50);
     },
 
     switchSection(section) {
