@@ -700,18 +700,20 @@ const tags = {
             const contact = app.dataStore.contacts.find(c => c.id === this.currentContext?.contactId);
             if (contact && contact[fieldType] === value) {
                 contact[fieldType] = '';
-                
-                // Invalider le cache pour forcer le rechargement
-                localStorage.removeItem('contactsCache');
-                localStorage.removeItem('contactsLastLoad');
-                console.log('🗑️ Cache invalidated - forcing reload');
-                
-                app.dataStore.save(contact).then(() => {
-                    contacts.render();
-                    
-                    // Forcer le rechargement depuis Firebase
-                    console.log('🔄 Reloading data from Firebase...');
-                    authManager.loadUserData().then(() => {
+                app.dataStore.save(contact);
+                contacts.render();
+            }
+            
+            // Supprimer le tag orphelin de field.tags
+            const allFields = [...app.defaultFields, ...app.customFields];
+            const field = allFields.find(f => f.id === fieldType);
+            if (field && field.tags) {
+                const originalLength = field.tags.length;
+                field.tags = field.tags.filter(t => t.value !== value);
+                if (field.tags.length < originalLength) {
+                    console.log(`🗑️ Removed orphan tag "${value}" from field.tags`);
+                    // Sauvegarder les métadonnées (1 écriture au lieu de 939 lectures)
+                    app.dataStore.saveMetadata().then(() => {
                         // Rouvrir le dropdown avec la liste mise à jour
                         if (this.currentContext) {
                             setTimeout(() => {
@@ -723,7 +725,7 @@ const tags = {
                             }, 200);
                         }
                     });
-                });
+                }
             }
             
             return;
