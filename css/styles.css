@@ -304,7 +304,7 @@ body {
     height: 230px;
     min-height: 230px;
     max-height: 230px;
-    overflow: hidden;
+    overflow: visible; /* Permet au dropdown des filtres de dépasser */
 }
 
 .header-top {
