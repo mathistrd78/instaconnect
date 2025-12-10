@@ -2241,9 +2241,9 @@ body.dark-mode .tag-selector-value {
 
 .tag-option-content {
     flex: 1;
-    cursor: pointer;
     display: flex;
     align-items: center;
+    pointer-events: none; /* Rendre le conteneur non-cliquable */
 }
 
 .tag-option-preview-container {
@@ -2258,6 +2258,8 @@ body.dark-mode .tag-selector-value {
     font-size: 14px;
     font-weight: 600;
     display: inline-block;
+    cursor: pointer;
+    pointer-events: auto; /* Seul le tag est cliquable */
 }
 
 .tag-edit-btn {
