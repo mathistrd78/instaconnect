@@ -948,7 +948,11 @@ const contacts = {
             const hasFilter = this.activeFilters[field.id] && this.activeFilters[field.id].length > 0;
             const btn = document.getElementById(`filter_${normalizedId}_Btn`);
             if (btn) {
-                btn.classList.toggle('active', hasFilter);
+                if (hasFilter) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
             }
             if (hasFilter) hasAnyFilter = true;
         });
@@ -957,7 +961,11 @@ const contacts = {
         const hasCompleteFilter = this.activeFilters.complete && this.activeFilters.complete.length > 0;
         const completeBtn = document.getElementById('filter_complete_Btn');
         if (completeBtn) {
-            completeBtn.classList.toggle('active', hasCompleteFilter);
+            if (hasCompleteFilter) {
+                completeBtn.classList.add('active');
+            } else {
+                completeBtn.classList.remove('active');
+            }
         }
         if (hasCompleteFilter) hasAnyFilter = true;
         
@@ -965,7 +973,11 @@ const contacts = {
         const hasCountryFilter = this.activeFilters.country && this.activeFilters.country.length > 0;
         const countryBtn = document.getElementById('filter_country_Btn');
         if (countryBtn) {
-            countryBtn.classList.toggle('active', hasCountryFilter);
+            if (hasCountryFilter) {
+                countryBtn.classList.add('active');
+            } else {
+                countryBtn.classList.remove('active');
+            }
         }
         if (hasCountryFilter) hasAnyFilter = true;
         
@@ -1003,9 +1015,6 @@ const contacts = {
     closeFilterDropdown() {
         document.getElementById('filterDropdown').style.display = 'none';
         this.currentFilterDropdown = null;
-        
-        // Update visual state based on actual filters, not dropdown state
-        this.updateFilterButtons();
     },
 
     // ==========================================
