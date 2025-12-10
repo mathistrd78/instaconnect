@@ -912,8 +912,6 @@ const contacts = {
     },
     
     toggleFilter(filterType, value) {
-        console.log('🔍 toggleFilter called:', filterType, value);
-        
         if (!this.activeFilters[filterType]) {
             this.activeFilters[filterType] = [];
         }
@@ -921,13 +919,9 @@ const contacts = {
         const index = this.activeFilters[filterType].indexOf(value);
         if (index > -1) {
             this.activeFilters[filterType].splice(index, 1);
-            console.log('❌ Removed filter:', filterType, value);
         } else {
             this.activeFilters[filterType].push(value);
-            console.log('✅ Added filter:', filterType, value);
         }
-        
-        console.log('📊 Active filters:', JSON.stringify(this.activeFilters));
         
         this.render();
         this.updateFilterButtons();
@@ -989,8 +983,6 @@ const contacts = {
     },
     
     resetFilters() {
-        console.log('🔄 Resetting all filters');
-        
         // Réinitialiser tous les filtres (y compris les champs personnalisés)
         Object.keys(this.activeFilters).forEach(key => {
             this.activeFilters[key] = [];
@@ -1004,8 +996,6 @@ const contacts = {
         if (searchBox) {
             searchBox.value = '';
         }
-        
-        console.log('✅ All filters reset');
         
         this.updateFilterButtons();
         this.closeFilterDropdown();
