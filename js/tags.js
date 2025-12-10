@@ -335,7 +335,6 @@ const tags = {
             // IMPORTANT : Ne PAS vérifier field.tags.length > 0
             // Car un tableau vide signifie "nouveau user sans tags"
             if (field.tags !== undefined) {
-                console.log(`📋 getAllOptions(${type}):`, field.tags.length, 'tags from field.tags');
                 return field.tags;
             }
         }
@@ -344,8 +343,6 @@ const tags = {
         // Cela arrive uniquement pour les très anciens users qui n'ont pas encore été migrés
         const defaults = app.defaultTags[type] || [];
         const customs = app.customTags[type] || [];
-        
-        console.log(`📋 getAllOptions(${type}): Using old system - ${defaults.length} defaults + ${customs.length} customs`);
         
         // Get values that have custom overrides
         const customValues = new Set(customs.map(t => t.value));
