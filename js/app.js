@@ -115,7 +115,7 @@ const app = {
             console.log('📦 Data will be loaded from Firebase');
         },
         
-        async save(specificContact = null) {
+        async save(specificContact = null, saveMetadataWithContact = false) {
             // Sauvegarder dans Firebase au lieu de localStorage
             if (!authManager.currentUser) {
                 console.warn('⚠️ No user logged in, cannot save to Firebase');
@@ -133,6 +133,7 @@ const app = {
                     console.log('💾 Saving specific contact:', specificContact.id);
                     const contactRef = db.collection('users').doc(userId).collection('contacts').doc(specificContact.id);
                     batch.set(contactRef, specificContact);
+                    console.log('📊 1 write (1 contact)');
                 } else if (this.contacts.length > 0) {
                     // Sauvegarder tous les contacts seulement s'il y en a
                     console.log('💾 Saving ALL contacts in batch:', this.contacts.length);
@@ -140,38 +141,43 @@ const app = {
                     this.contacts.forEach(contact => {
                         batch.set(contactsRef.doc(contact.id), contact);
                     });
+                    console.log(`📊 ${this.contacts.length} writes (all contacts)`);
                 }
 
-                // TOUJOURS sauvegarder les tags et champs personnalisés
-                console.log('📤 Saving customTags to Firebase:', JSON.stringify(app.customTags));
-                console.log('📤 Saving customFields to Firebase:', JSON.stringify(app.customFields));
-                console.log('📤 Saving defaultFields to Firebase');
-                
-                // Nettoyer les undefined pour Firebase (Firebase n'accepte pas undefined)
-                const cleanDefaultFields = app.defaultFields.map(f => {
-                    const clean = { ...f };
-                    // Supprimer les propriétés undefined
-                    Object.keys(clean).forEach(key => {
-                        if (clean[key] === undefined) delete clean[key];
+                // Sauvegarder les métadonnées SEULEMENT si demandé explicitement
+                if (saveMetadataWithContact) {
+                    console.log('📤 Saving customTags to Firebase:', JSON.stringify(app.customTags));
+                    console.log('📤 Saving customFields to Firebase:', JSON.stringify(app.customFields));
+                    console.log('📤 Saving defaultFields to Firebase');
+                    
+                    // Nettoyer les undefined pour Firebase (Firebase n'accepte pas undefined)
+                    const cleanDefaultFields = app.defaultFields.map(f => {
+                        const clean = { ...f };
+                        // Supprimer les propriétés undefined
+                        Object.keys(clean).forEach(key => {
+                            if (clean[key] === undefined) delete clean[key];
+                        });
+                        return clean;
                     });
-                    return clean;
-                });
-                
-                const cleanCustomFields = app.customFields.map(f => {
-                    const clean = { ...f };
-                    // Supprimer les propriétés undefined
-                    Object.keys(clean).forEach(key => {
-                        if (clean[key] === undefined) delete clean[key];
+                    
+                    const cleanCustomFields = app.customFields.map(f => {
+                        const clean = { ...f };
+                        // Supprimer les propriétés undefined
+                        Object.keys(clean).forEach(key => {
+                            if (clean[key] === undefined) delete clean[key];
+                        });
+                        return clean;
                     });
-                    return clean;
-                });
-                
-                const userDoc = db.collection('users').doc(userId);
-                batch.set(userDoc, {
-                    customTags: app.customTags,
-                    customFields: cleanCustomFields,
-                    defaultFields: cleanDefaultFields
-                }, { merge: true });
+                    
+                    const userDoc = db.collection('users').doc(userId);
+                    batch.set(userDoc, {
+                        customTags: app.customTags,
+                        customFields: cleanCustomFields,
+                        defaultFields: cleanDefaultFields
+                    }, { merge: true });
+                    
+                    console.log('📊 +1 write (metadata)');
+                }
 
                 await batch.commit();
                 console.log('✅ All data saved to Firebase successfully');
@@ -223,7 +229,8 @@ const app = {
                     defaultFields: cleanDefaultFields
                 }, { merge: true });
 
-                console.log('✅ Metadata saved to Firebase (1 write instead of', this.contacts.length + 1, 'writes)');
+                console.log('✅ Metadata saved to Firebase');
+                console.log('📊 1 write (metadata only - saved', this.contacts.length, 'contact writes)');
             } catch (error) {
                 console.error('❌ Error saving metadata to Firebase:', error);
             }
