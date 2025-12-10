@@ -2199,7 +2199,7 @@ body.dark-mode .tag-selector-value {
     transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
     user-select: none; /* Empêche la sélection de texte pendant le drag */
     -webkit-user-select: none;
-    touch-action: none; /* Empêche le scroll pendant le drag sur mobile */
+    touch-action: pan-y; /* Permet le scroll vertical */
 }
 
 .tag-option.dragging {
@@ -2209,13 +2209,7 @@ body.dark-mode .tag-selector-value {
 }
 
 .tag-option[draggable="true"] {
-    cursor: grab;
-    cursor: -webkit-grab;
-}
-
-.tag-option[draggable="true"]:active {
-    cursor: grabbing;
-    cursor: -webkit-grabbing;
+    cursor: default; /* Pas de cursor grab sur toute la ligne */
 }
 
 .tag-drag-handle {
@@ -2235,9 +2229,10 @@ body.dark-mode .tag-selector-value {
     cursor: -webkit-grabbing;
 }
 
-.tag-option:active {
+/* Supprimer l'effet :active sur la ligne pour éviter la sélection visuelle */
+/* .tag-option:active {
     background: #f8f9fa;
-}
+} */
 
 .tag-option-content {
     flex: 1;
