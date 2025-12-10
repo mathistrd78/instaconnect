@@ -523,9 +523,9 @@ const app = {
         }
         
         // Mettre à jour les statistiques
-        document.getElementById('profilFollowersCount').textContent = unfollowers.data.followers.length;
-        document.getElementById('profilFollowingCount').textContent = unfollowers.data.following.length;
         document.getElementById('profilContactsCount').textContent = app.dataStore.contacts.length;
+        document.getElementById('profilFollowersCount').textContent = unfollowers.data.followers.length;
+        document.getElementById('profilUnfollowersCount').textContent = unfollowers.data.unfollowers.length;
         
         // Synchroniser le toggle du mode sombre
         const darkModeToggle = document.getElementById('darkModeToggle');
