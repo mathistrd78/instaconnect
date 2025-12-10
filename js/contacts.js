@@ -759,9 +759,12 @@ const contacts = {
         
         this.currentFilterDropdown = filterType;
         
-        // Scroller le filtre cliqué au centre de la barre de filtres
+        // Détecter si on est sur mobile
+        const isMobile = window.innerWidth <= 768;
+        
+        // Scroller le filtre cliqué au centre de la barre de filtres (mobile uniquement)
         const btn = event?.target.closest('.filter-chip');
-        if (btn) {
+        if (btn && isMobile) {
             const filtersContainer = document.querySelector('.filters-horizontal');
             const btnRect = btn.getBoundingClientRect();
             const containerRect = filtersContainer.getBoundingClientRect();
@@ -776,26 +779,37 @@ const contacts = {
                 left: scrollOffset,
                 behavior: 'smooth'
             });
-            
-            // Attendre la fin du scroll pour positionner le dropdown
-            setTimeout(() => {
-                // Positionner le dropdown centré horizontalement sur l'écran
-                const rect = btn.getBoundingClientRect();
-                const dropdownWidth = 300; // Largeur approximative du dropdown
-                const screenWidth = window.innerWidth;
-                
-                // Centrer le dropdown horizontalement
-                const left = Math.max(20, Math.min(
-                    (screenWidth - dropdownWidth) / 2,
-                    screenWidth - dropdownWidth - 20
-                ));
-                
-                dropdown.style.top = (rect.bottom + window.scrollY) + 'px';
-                dropdown.style.left = left + 'px';
-                dropdown.style.right = 'auto'; // Retirer right pour utiliser left
-                dropdown.style.width = dropdownWidth + 'px';
-            }, 300); // Attendre la fin de l'animation smooth
         }
+        
+        // Attendre la fin du scroll pour positionner le dropdown
+        const positionDelay = (isMobile && btn) ? 300 : 0;
+        setTimeout(() => {
+            if (btn) {
+                const rect = btn.getBoundingClientRect();
+                
+                if (isMobile) {
+                    // MOBILE: Centrer le dropdown horizontalement sur l'écran
+                    const dropdownWidth = 300;
+                    const screenWidth = window.innerWidth;
+                    
+                    const left = Math.max(20, Math.min(
+                        (screenWidth - dropdownWidth) / 2,
+                        screenWidth - dropdownWidth - 20
+                    ));
+                    
+                    dropdown.style.top = (rect.bottom + window.scrollY) + 'px';
+                    dropdown.style.left = left + 'px';
+                    dropdown.style.right = 'auto';
+                    dropdown.style.width = dropdownWidth + 'px';
+                } else {
+                    // PC: Positionner le dropdown sous le bouton cliqué
+                    dropdown.style.top = (rect.bottom + window.scrollY) + 'px';
+                    dropdown.style.left = rect.left + 'px';
+                    dropdown.style.right = 'auto';
+                    dropdown.style.width = Math.max(rect.width, 250) + 'px'; // Min 250px, ou largeur du bouton
+                }
+            }
+        }, positionDelay);
         
         // Générer le contenu selon le type de filtre
         if (filterType === 'complete') {
@@ -951,20 +965,23 @@ const contacts = {
     },
     
     resetFilters() {
-        this.activeFilters = {
-            gender: [],
-            relationType: [],
-            meetingPlace: [],
-            discussionStatus: [],
-            complete: [],
-            country: []
-        };
+        console.log('🔄 Resetting all filters');
+        
+        // Réinitialiser tous les filtres (y compris les champs personnalisés)
+        Object.keys(this.activeFilters).forEach(key => {
+            this.activeFilters[key] = [];
+        });
+        
+        // Ou plus simple : recréer un objet vide
+        this.activeFilters = {};
         
         // Réinitialiser aussi la barre de recherche
         const searchBox = document.getElementById('searchBox');
         if (searchBox) {
             searchBox.value = '';
         }
+        
+        console.log('✅ All filters reset');
         
         this.updateFilterButtons();
         this.closeFilterDropdown();
