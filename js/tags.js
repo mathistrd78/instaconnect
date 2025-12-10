@@ -407,6 +407,30 @@ const tags = {
         
         list.innerHTML = html;
         
+        // Ajouter les événements tactiles pour les boutons d'édition (iOS fix)
+        const editButtons = list.querySelectorAll('.tag-edit-btn');
+        editButtons.forEach(btn => {
+            // Empêcher que le touchstart du drag n'interfère
+            btn.addEventListener('touchstart', (e) => {
+                e.stopPropagation();
+            }, { passive: true });
+            
+            // Ajouter un listener tactile pour l'édition
+            btn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Extraire les paramètres du onclick
+                const onclickAttr = btn.getAttribute('onclick');
+                const match = onclickAttr.match(/tags\.openEditModal\('([^']+)',\s*'([^']+)'\)/);
+                if (match) {
+                    const fieldType = match[1];
+                    const value = match[2].replace(/\\'/g, "'"); // Restaurer les apostrophes échappées
+                    this.openEditModal(fieldType, value);
+                }
+            }, { passive: false });
+        });
+        
         // Ajouter les événements drag & drop
         this.initDragAndDrop(list);
     },
