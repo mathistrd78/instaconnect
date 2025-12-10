@@ -759,12 +759,42 @@ const contacts = {
         
         this.currentFilterDropdown = filterType;
         
-        // Positionner le dropdown sous le bouton cliqué
+        // Scroller le filtre cliqué au centre de la barre de filtres
         const btn = event?.target.closest('.filter-chip');
         if (btn) {
-            const rect = btn.getBoundingClientRect();
-            dropdown.style.top = (rect.bottom + window.scrollY) + 'px';
-            dropdown.style.left = rect.left + 'px';
+            const filtersContainer = document.querySelector('.filters-horizontal');
+            const btnRect = btn.getBoundingClientRect();
+            const containerRect = filtersContainer.getBoundingClientRect();
+            
+            // Calculer la position pour centrer le bouton
+            const btnCenter = btnRect.left + btnRect.width / 2;
+            const containerCenter = containerRect.left + containerRect.width / 2;
+            const scrollOffset = btnCenter - containerCenter;
+            
+            // Scroller pour centrer le bouton
+            filtersContainer.scrollBy({
+                left: scrollOffset,
+                behavior: 'smooth'
+            });
+            
+            // Attendre la fin du scroll pour positionner le dropdown
+            setTimeout(() => {
+                // Positionner le dropdown centré horizontalement sur l'écran
+                const rect = btn.getBoundingClientRect();
+                const dropdownWidth = 300; // Largeur approximative du dropdown
+                const screenWidth = window.innerWidth;
+                
+                // Centrer le dropdown horizontalement
+                const left = Math.max(20, Math.min(
+                    (screenWidth - dropdownWidth) / 2,
+                    screenWidth - dropdownWidth - 20
+                ));
+                
+                dropdown.style.top = (rect.bottom + window.scrollY) + 'px';
+                dropdown.style.left = left + 'px';
+                dropdown.style.right = 'auto'; // Retirer right pour utiliser left
+                dropdown.style.width = dropdownWidth + 'px';
+            }, 300); // Attendre la fin de l'animation smooth
         }
         
         // Générer le contenu selon le type de filtre
@@ -835,6 +865,26 @@ const contacts = {
         }
         
         dropdown.style.display = 'block';
+        
+        // Ajouter un listener pour fermer le dropdown en cliquant n'importe où
+        setTimeout(() => {
+            document.addEventListener('click', this.handleOutsideClick, { once: true });
+        }, 0);
+    },
+    
+    handleOutsideClick(e) {
+        // Ne rien faire si on clique à l'intérieur du dropdown
+        const dropdown = document.getElementById('filterDropdown');
+        if (dropdown && dropdown.contains(e.target)) {
+            // Re-ajouter le listener pour le prochain clic
+            setTimeout(() => {
+                document.addEventListener('click', contacts.handleOutsideClick, { once: true });
+            }, 0);
+            return;
+        }
+        
+        // Fermer le dropdown
+        contacts.closeFilterDropdown();
     },
     
     toggleFilter(filterType, value) {
