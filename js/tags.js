@@ -404,6 +404,31 @@ const tags = {
             </div>
         `).join('');
         
+        // Ajouter les événements tactiles pour la sélection de tags (iOS fix)
+        setTimeout(() => {
+            const tagContents = list.querySelectorAll('.tag-option-content');
+            tagContents.forEach(content => {
+                // Empêcher que le touchstart du drag n'interfère
+                content.addEventListener('touchstart', (e) => {
+                    e.stopPropagation();
+                }, { passive: true });
+                
+                // Ajouter un listener tactile pour la sélection
+                content.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // Extraire les paramètres du onclick
+                    const onclickAttr = content.getAttribute('onclick');
+                    const match = onclickAttr.match(/tags\.selectTag\('([^']+)'\)/);
+                    if (match) {
+                        const value = match[1].replace(/\\'/g, "'"); // Restaurer les apostrophes échappées
+                        this.selectTag(value);
+                    }
+                }, { passive: false });
+            });
+        }, 0);
+        
         if (searchValue && !options.find(opt => opt.value.toLowerCase() === searchValue.toLowerCase())) {
             html += `
                 <div class="tag-create" onclick="tags.createAndSelect('${searchValue.replace(/'/g, "\\'")}')">
@@ -650,15 +675,34 @@ const tags = {
     openEditModal(fieldType, value) {
         this.closeDropdown();
         
+        // Vérifier que customTags[fieldType] existe
+        if (!app.customTags[fieldType]) {
+            app.customTags[fieldType] = [];
+        }
+        
         let tag = app.customTags[fieldType].find(t => t.value === value);
         let isDefault = false;
         
-        if (!tag) {
+        if (!tag && app.defaultTags[fieldType]) {
             tag = app.defaultTags[fieldType].find(t => t.value === value);
             isDefault = true;
         }
         
-        if (!tag) return;
+        // Si le tag n'existe nulle part, c'est un tag orphelin (supprimé mais encore dans un contact)
+        if (!tag) {
+            console.warn(`⚠️ Tag orphelin détecté: ${value} dans ${fieldType}`);
+            alert(`Ce tag "${value}" n'existe plus dans la liste des tags. Il sera supprimé de ce contact.`);
+            
+            // Supprimer le tag du contact actuel
+            const contact = app.dataStore.contacts.find(c => c.id === this.currentContext?.contactId);
+            if (contact && contact[fieldType] === value) {
+                contact[fieldType] = '';
+                app.dataStore.save(contact);
+                contacts.render();
+            }
+            
+            return;
+        }
         
         // Get current color - prefer tag.color if available, otherwise read from CSS
         let currentColor = tag.color || '#868e96'; // Use saved color if exists
@@ -907,7 +951,17 @@ const tags = {
         
         if (!confirm('Supprimer ce tag ?')) return;
         
-        app.customTags[fieldType] = app.customTags[fieldType].filter(t => t.value !== value);
+        // ANCIEN SYSTÈME : Supprimer de customTags
+        if (app.customTags[fieldType]) {
+            app.customTags[fieldType] = app.customTags[fieldType].filter(t => t.value !== value);
+        }
+        
+        // NOUVEAU SYSTÈME : Supprimer de field.tags
+        const allFields = [...app.defaultFields, ...app.customFields];
+        const field = allFields.find(f => f.id === fieldType);
+        if (field && field.tags) {
+            field.tags = field.tags.filter(t => t.value !== value);
+        }
         
         // Mettre à jour les contacts qui utilisent ce tag
         const modifiedContacts = [];
