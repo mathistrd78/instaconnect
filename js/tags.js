@@ -446,6 +446,11 @@ const tags = {
         tagOptions.forEach((item) => {
             // Touch events pour mobile (iOS)
             item.addEventListener('touchstart', (e) => {
+                // NE PAS démarrer le drag si on touche le bouton d'édition
+                if (e.target.closest('.tag-edit-btn')) {
+                    return;
+                }
+                
                 draggedElement = item;
                 touchStartY = e.touches[0].clientY;
                 item.classList.add('dragging');
