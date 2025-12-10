@@ -362,9 +362,9 @@ const unfollowers = {
                 }
             }
 
-            // Save to Firebase
+            // Save to Firebase (with metadata since we might have many new contacts)
             document.getElementById('analyseProgressText').textContent = 'Sauvegarde...';
-            await app.dataStore.save();
+            await app.dataStore.save(null, true); // null = all contacts, true = save metadata too
 
             // Update counts
             this.updateCounts();
