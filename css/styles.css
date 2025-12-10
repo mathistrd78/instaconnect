@@ -2800,9 +2800,6 @@ body.dark-mode .emoji-search-input:focus {
 
 .filter-dropdown {
     position: absolute;
-    top: 100%;
-    left: 20px;
-    right: 20px;
     background: white;
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.15);
@@ -2810,6 +2807,7 @@ body.dark-mode .emoji-search-input:focus {
     max-height: 300px;
     overflow-y: auto;
     margin-top: 8px;
+    width: 300px; /* Largeur fixe définie par JS */
 }
 
 .filter-dropdown-content {
