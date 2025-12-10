@@ -350,7 +350,7 @@ h1 {
     min-height: 52px;
     max-height: 52px;
     flex-shrink: 0;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
 }
 
 .search-box {
@@ -2732,6 +2732,8 @@ body.dark-mode .emoji-search-input:focus {
     min-height: 44px;
     max-height: 44px;
     flex-shrink: 0;
+    align-items: center;
+    box-sizing: border-box;
 }
 
 /* Masquer les filtres tant qu'ils ne sont pas rendus dynamiquement */
@@ -2762,6 +2764,9 @@ body.dark-mode .emoji-search-input:focus {
     max-height: 32px;
     height: 32px;
     line-height: 18px;
+    box-sizing: border-box;
+    margin: 0;
+}
 }
 
 .filter-chip:hover {
