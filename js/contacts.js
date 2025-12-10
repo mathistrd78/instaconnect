@@ -841,9 +841,9 @@ const contacts = {
                     
                     content.innerHTML = options.map(opt => `
                         <label class="filter-option">
-                            <input type="checkbox" value="${opt.value}" 
+                            <input type="checkbox" value="${opt.value.replace(/"/g, '&quot;')}" 
                                    ${this.activeFilters[filterType].includes(opt.value) ? 'checked' : ''} 
-                                   onchange="contacts.toggleFilter('${filterType}', '${opt.value}')">
+                                   onchange="contacts.toggleFilter('${filterType.replace(/'/g, "\\'")}', '${opt.value.replace(/'/g, "\\'")}')">
                             <span>${opt.label}</span>
                         </label>
                     `).join('');
@@ -851,12 +851,12 @@ const contacts = {
                     content.innerHTML = `
                         <label class="filter-option">
                             <input type="checkbox" value="oui" ${this.activeFilters[filterType].includes('oui') ? 'checked' : ''} 
-                                   onchange="contacts.toggleFilter('${filterType}', 'oui')">
+                                   onchange="contacts.toggleFilter('${filterType.replace(/'/g, "\\'")}', 'oui')">
                             <span>✅ Oui</span>
                         </label>
                         <label class="filter-option">
                             <input type="checkbox" value="non" ${this.activeFilters[filterType].includes('non') ? 'checked' : ''} 
-                                   onchange="contacts.toggleFilter('${filterType}', 'non')">
+                                   onchange="contacts.toggleFilter('${filterType.replace(/'/g, "\\'")}', 'non')">
                             <span>❌ Non</span>
                         </label>
                     `;
@@ -888,6 +888,8 @@ const contacts = {
     },
     
     toggleFilter(filterType, value) {
+        console.log('🔍 toggleFilter called:', filterType, value);
+        
         if (!this.activeFilters[filterType]) {
             this.activeFilters[filterType] = [];
         }
@@ -895,9 +897,13 @@ const contacts = {
         const index = this.activeFilters[filterType].indexOf(value);
         if (index > -1) {
             this.activeFilters[filterType].splice(index, 1);
+            console.log('❌ Removed filter:', filterType, value);
         } else {
             this.activeFilters[filterType].push(value);
+            console.log('✅ Added filter:', filterType, value);
         }
+        
+        console.log('📊 Active filters:', JSON.stringify(this.activeFilters));
         
         this.render();
         this.updateFilterButtons();
