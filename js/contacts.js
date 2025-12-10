@@ -62,19 +62,23 @@ const contacts = {
         ];
         
         // Générer les boutons de filtres
-        const filtersHTML = filterableFields.map(field => `
-            <button class="filter-chip" id="filter_${field.id}_Btn" data-filter-type="${field.id}">
+        const filtersHTML = filterableFields.map(field => {
+            const normalizedId = field.id.replace(/[^a-zA-Z0-9_-]/g, '_');
+            return `
+            <button class="filter-chip" id="filter_${normalizedId}_Btn" data-filter-type="${field.id}">
                 <span>${field.label}</span>
                 <span class="filter-arrow">▼</span>
             </button>
-        `).join('');
+        `}).join('');
         
-        const specialFiltersHTML = specialFilters.map(filter => `
-            <button class="filter-chip" id="filter_${filter.id}_Btn" data-filter-type="${filter.id}">
+        const specialFiltersHTML = specialFilters.map(filter => {
+            const normalizedId = filter.id.replace(/[^a-zA-Z0-9_-]/g, '_');
+            return `
+            <button class="filter-chip" id="filter_${normalizedId}_Btn" data-filter-type="${filter.id}">
                 <span>${filter.label}</span>
                 <span class="filter-arrow">▼</span>
             </button>
-        `).join('');
+        `}).join('');
         
         const resetButton = `
             <button class="filter-chip filter-reset" id="filterResetBtn" style="display: none;">
@@ -86,7 +90,8 @@ const contacts = {
         
         // Ajouter les event listeners APRÈS avoir créé les boutons
         filterableFields.forEach(field => {
-            const btn = document.getElementById(`filter_${field.id}_Btn`);
+            const normalizedId = field.id.replace(/[^a-zA-Z0-9_-]/g, '_');
+            const btn = document.getElementById(`filter_${normalizedId}_Btn`);
             if (btn) {
                 btn.addEventListener('click', (e) => {
                     console.log('🔘 Filter clicked:', field.id);
@@ -759,6 +764,11 @@ const contacts = {
         
         this.currentFilterDropdown = filterType;
         
+        // S'assurer que activeFilters[filterType] existe
+        if (!this.activeFilters[filterType]) {
+            this.activeFilters[filterType] = [];
+        }
+        
         // Détecter si on est sur mobile
         const isMobile = window.innerWidth <= 768;
         
@@ -815,12 +825,12 @@ const contacts = {
         if (filterType === 'complete') {
             content.innerHTML = `
                 <label class="filter-option">
-                    <input type="checkbox" value="oui" ${this.activeFilters.complete.includes('oui') ? 'checked' : ''} 
+                    <input type="checkbox" value="oui" ${(this.activeFilters.complete || []).includes('oui') ? 'checked' : ''} 
                            onchange="contacts.toggleFilter('complete', 'oui')">
                     <span>✅ Oui</span>
                 </label>
                 <label class="filter-option">
-                    <input type="checkbox" value="non" ${this.activeFilters.complete.includes('non') ? 'checked' : ''} 
+                    <input type="checkbox" value="non" ${(this.activeFilters.complete || []).includes('non') ? 'checked' : ''} 
                            onchange="contacts.toggleFilter('complete', 'non')">
                     <span>❌ Non</span>
                 </label>
@@ -832,7 +842,7 @@ const contacts = {
                 content.innerHTML = countryStats.map(stat => `
                     <label class="filter-option">
                         <input type="checkbox" value="${stat.country}" 
-                               ${this.activeFilters.country.includes(stat.country) ? 'checked' : ''} 
+                               ${(this.activeFilters.country || []).includes(stat.country) ? 'checked' : ''} 
                                onchange="contacts.toggleFilter('country', '${stat.country.replace(/'/g, "\\'")}')">
                         <span>${stat.flag} ${stat.country} (${stat.count})</span>
                     </label>
@@ -933,8 +943,10 @@ const contacts = {
         let hasAnyFilter = false;
         
         filterableFields.forEach(field => {
+            // Normaliser l'ID pour éviter les caractères spéciaux dans les IDs HTML
+            const normalizedId = field.id.replace(/[^a-zA-Z0-9_-]/g, '_');
             const hasFilter = this.activeFilters[field.id] && this.activeFilters[field.id].length > 0;
-            const btn = document.getElementById(`filter_${field.id}_Btn`);
+            const btn = document.getElementById(`filter_${normalizedId}_Btn`);
             if (btn) {
                 btn.classList.toggle('active', hasFilter);
             }
