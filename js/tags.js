@@ -375,9 +375,17 @@ const tags = {
         // Don't auto-focus to prevent keyboard popup on mobile
         
         searchInput.oninput = () => {
-            const filtered = allOptions.filter(opt => 
-                opt.label.toLowerCase().includes(searchInput.value.toLowerCase())
-            );
+            const searchTerm = searchInput.value.toLowerCase();
+            const filtered = allOptions.filter(opt => {
+                // Filtrer sur la valeur du tag (sans emoji) ET sur le label (avec emoji)
+                const valueLower = opt.value.toLowerCase();
+                const labelLower = opt.label.toLowerCase();
+                // Vérifier si le tag commence par le terme de recherche
+                return valueLower.startsWith(searchTerm) || 
+                       labelLower.startsWith(searchTerm) ||
+                       // Aussi chercher après l'emoji (ex: "👥 Ami" → chercher "ami")
+                       labelLower.split(' ').some(word => word.startsWith(searchTerm));
+            });
             this.renderOptions(filtered, searchInput.value);
         };
     },
@@ -444,13 +452,10 @@ const tags = {
         const tagOptions = list.querySelectorAll('.tag-option[draggable="true"]');
         
         tagOptions.forEach((item) => {
-            // Touch events pour mobile (iOS)
-            item.addEventListener('touchstart', (e) => {
-                // NE PAS démarrer le drag si on touche le bouton d'édition
-                if (e.target.closest('.tag-edit-btn')) {
-                    return;
-                }
-                
+            const dragHandle = item.querySelector('.tag-drag-handle');
+            
+            // Touch events pour mobile (iOS) - UNIQUEMENT sur l'icône de drag
+            dragHandle.addEventListener('touchstart', (e) => {
                 draggedElement = item;
                 touchStartY = e.touches[0].clientY;
                 item.classList.add('dragging');
@@ -464,7 +469,7 @@ const tags = {
                 e.preventDefault();
             }, { passive: false });
             
-            item.addEventListener('touchmove', (e) => {
+            dragHandle.addEventListener('touchmove', (e) => {
                 if (!draggedElement) return;
                 
                 e.preventDefault();
@@ -490,7 +495,7 @@ const tags = {
                 }
             }, { passive: false });
             
-            item.addEventListener('touchend', (e) => {
+            dragHandle.addEventListener('touchend', (e) => {
                 if (!draggedElement) return;
                 
                 item.classList.remove('dragging');
@@ -904,15 +909,41 @@ const tags = {
         
         app.customTags[fieldType] = app.customTags[fieldType].filter(t => t.value !== value);
         
+        // Mettre à jour les contacts qui utilisent ce tag
+        const modifiedContacts = [];
         app.dataStore.contacts.forEach(contact => {
             if (contact[fieldType] === value) {
                 contact[fieldType] = '';
+                modifiedContacts.push(contact);
             }
         });
         
-        app.dataStore.save(); // Note: modifie les contacts, donc save() complet nécessaire
-        contacts.render();
+        // Fermer la modale d'édition immédiatement
         this.closeEditModal();
+        
+        // Re-rendre le dropdown immédiatement pour voir le tag supprimé
+        if (this.currentContext) {
+            this.renderTagsList();
+        }
+        
+        // Rafraîchir l'affichage des contacts
+        contacts.render();
+        
+        // Sauvegarder les métadonnées (tag supprimé)
+        app.dataStore.saveMetadata().catch(err => {
+            console.error('Erreur lors de la sauvegarde des métadonnées:', err);
+            alert('Erreur lors de la sauvegarde. Rechargez la page.');
+        });
+        
+        // Si des contacts ont été modifiés, les sauvegarder aussi
+        if (modifiedContacts.length > 0) {
+            console.log(`💾 Sauvegarde de ${modifiedContacts.length} contacts modifiés...`);
+            Promise.all(modifiedContacts.map(contact => 
+                app.dataStore.save(contact)
+            )).catch(err => {
+                console.error('Erreur lors de la sauvegarde des contacts:', err);
+            });
+        }
     },
 
     // Fermer la modale d'édition
