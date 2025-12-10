@@ -700,18 +700,29 @@ const tags = {
             const contact = app.dataStore.contacts.find(c => c.id === this.currentContext?.contactId);
             if (contact && contact[fieldType] === value) {
                 contact[fieldType] = '';
+                
+                // Invalider le cache pour forcer le rechargement
+                localStorage.removeItem('contactsCache');
+                localStorage.removeItem('contactsLastLoad');
+                console.log('🗑️ Cache invalidated - forcing reload');
+                
                 app.dataStore.save(contact).then(() => {
                     contacts.render();
                     
-                    // Rouvrir le dropdown avec la liste mise à jour
-                    if (this.currentContext) {
-                        setTimeout(() => {
-                            const allOptions = this.getAllOptions(fieldType);
-                            this.renderOptions(allOptions);
-                            document.getElementById('overlay').classList.add('active');
-                            document.getElementById('tagDropdown').classList.add('active');
-                        }, 100);
-                    }
+                    // Forcer le rechargement depuis Firebase
+                    console.log('🔄 Reloading data from Firebase...');
+                    authManager.loadUserData().then(() => {
+                        // Rouvrir le dropdown avec la liste mise à jour
+                        if (this.currentContext) {
+                            setTimeout(() => {
+                                const allOptions = this.getAllOptions(fieldType);
+                                console.log('📋 Reopening dropdown with', allOptions.length, 'tags');
+                                this.renderOptions(allOptions);
+                                document.getElementById('overlay').classList.add('active');
+                                document.getElementById('tagDropdown').classList.add('active');
+                            }, 200);
+                        }
+                    });
                 });
             }
             
