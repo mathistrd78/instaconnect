@@ -335,6 +335,7 @@ const tags = {
             // IMPORTANT : Ne PAS vérifier field.tags.length > 0
             // Car un tableau vide signifie "nouveau user sans tags"
             if (field.tags !== undefined) {
+                console.log(`📋 getAllOptions(${type}):`, field.tags.length, 'tags from field.tags');
                 return field.tags;
             }
         }
@@ -343,6 +344,8 @@ const tags = {
         // Cela arrive uniquement pour les très anciens users qui n'ont pas encore été migrés
         const defaults = app.defaultTags[type] || [];
         const customs = app.customTags[type] || [];
+        
+        console.log(`📋 getAllOptions(${type}): Using old system - ${defaults.length} defaults + ${customs.length} customs`);
         
         // Get values that have custom overrides
         const customValues = new Set(customs.map(t => t.value));
@@ -397,8 +400,8 @@ const tags = {
         let html = options.map((opt, index) => `
             <div class="tag-option" draggable="true" data-tag-value="${opt.value.replace(/"/g, '&quot;')}" data-tag-index="${index}">
                 <span class="tag-drag-handle">⋮⋮</span>
-                <div class="tag-option-content" onclick="tags.selectTag('${opt.value.replace(/'/g, "\\'")}')">
-                    <span class="tag-option-preview ${opt.class}">${opt.label}</span>
+                <div class="tag-option-content">
+                    <span class="tag-option-preview ${opt.class}" onclick="tags.selectTag('${opt.value.replace(/'/g, "\\'")}')">${opt.label}</span>
                 </div>
                 <span class="tag-edit-btn" onclick="event.stopPropagation(); tags.openEditModal('${this.currentContext.fieldType}', '${opt.value.replace(/'/g, "\\'")}')">✏️</span>
             </div>
@@ -406,20 +409,20 @@ const tags = {
         
         // Ajouter les événements tactiles pour la sélection de tags (iOS fix)
         setTimeout(() => {
-            const tagContents = list.querySelectorAll('.tag-option-content');
-            tagContents.forEach(content => {
+            const tagPreviews = list.querySelectorAll('.tag-option-preview');
+            tagPreviews.forEach(preview => {
                 // Empêcher que le touchstart du drag n'interfère
-                content.addEventListener('touchstart', (e) => {
+                preview.addEventListener('touchstart', (e) => {
                     e.stopPropagation();
                 }, { passive: true });
                 
                 // Ajouter un listener tactile pour la sélection
-                content.addEventListener('touchend', (e) => {
+                preview.addEventListener('touchend', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     
                     // Extraire les paramètres du onclick
-                    const onclickAttr = content.getAttribute('onclick');
+                    const onclickAttr = preview.getAttribute('onclick');
                     const match = onclickAttr.match(/tags\.selectTag\('([^']+)'\)/);
                     if (match) {
                         const value = match[1].replace(/\\'/g, "'"); // Restaurer les apostrophes échappées
@@ -697,8 +700,19 @@ const tags = {
             const contact = app.dataStore.contacts.find(c => c.id === this.currentContext?.contactId);
             if (contact && contact[fieldType] === value) {
                 contact[fieldType] = '';
-                app.dataStore.save(contact);
-                contacts.render();
+                app.dataStore.save(contact).then(() => {
+                    contacts.render();
+                    
+                    // Rouvrir le dropdown avec la liste mise à jour
+                    if (this.currentContext) {
+                        setTimeout(() => {
+                            const allOptions = this.getAllOptions(fieldType);
+                            this.renderOptions(allOptions);
+                            document.getElementById('overlay').classList.add('active');
+                            document.getElementById('tagDropdown').classList.add('active');
+                        }, 100);
+                    }
+                });
             }
             
             return;
