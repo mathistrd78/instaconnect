@@ -598,8 +598,8 @@ const tags = {
             
             field.tags = reorderedTags;
             
-            // Sauvegarder dans Firebase
-            app.dataStore.saveUserData();
+            // Sauvegarder dans Firebase (seulement les métadonnées)
+            app.dataStore.saveMetadata();
             
             console.log('✅ Tag order saved:', newOrder);
         }
@@ -618,7 +618,8 @@ const tags = {
         const contact = app.dataStore.contacts.find(c => c.id === this.currentContext.contactId);
         if (contact) {
             contact[this.currentContext.fieldType] = value;
-            app.dataStore.save();
+            // Sauvegarder SEULEMENT ce contact (1 écriture au lieu de 500+)
+            app.dataStore.save(contact);
             contacts.render();
         }
         
