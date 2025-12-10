@@ -93,7 +93,29 @@
         
         <!-- Nouveaux filtres horizontaux -->
         <div class="filters-horizontal">
-            <!-- Les filtres seront générés dynamiquement par renderFilters() -->
+            <button class="filter-chip" id="filterGenderBtn" onclick="contacts.toggleFilterDropdown('gender', event)">
+                <span>Sexe</span>
+                <span class="filter-arrow">▼</span>
+            </button>
+            <button class="filter-chip" id="filterRelationBtn" onclick="contacts.toggleFilterDropdown('relationType', event)">
+                <span>Type de relation</span>
+                <span class="filter-arrow">▼</span>
+            </button>
+            <button class="filter-chip" id="filterLieuBtn" onclick="contacts.toggleFilterDropdown('meetingPlace', event)">
+                <span>Lieu de rencontre</span>
+                <span class="filter-arrow">▼</span>
+            </button>
+            <button class="filter-chip" id="filterStatutBtn" onclick="contacts.toggleFilterDropdown('discussionStatus', event)">
+                <span>Statut</span>
+                <span class="filter-arrow">▼</span>
+            </button>
+            <button class="filter-chip" id="filterCompleteBtn" onclick="contacts.toggleFilterDropdown('complete', event)">
+                <span>Profil complet</span>
+                <span class="filter-arrow">▼</span>
+            </button>
+            <button class="filter-chip filter-reset" id="filterResetBtn" onclick="contacts.resetFilters()" style="display: none;">
+                <span>✕ Réinitialiser</span>
+            </button>
         </div>
         
         <!-- Dropdown pour les filtres -->
@@ -277,6 +299,21 @@
             </div>
 
             <div id="unfollowersResults">
+                <div class="unfollowers-stats">
+                    <div class="unfollower-stat-card">
+                        <div class="unfollower-stat-value" id="followersCount">0</div>
+                        <div class="unfollower-stat-label">Followers</div>
+                    </div>
+                    <div class="unfollower-stat-card">
+                        <div class="unfollower-stat-value" id="followingCount">0</div>
+                        <div class="unfollower-stat-label">Following</div>
+                    </div>
+                    <div class="unfollower-stat-card">
+                        <div class="unfollower-stat-value" id="unfollowersCount">0</div>
+                        <div class="unfollower-stat-label">Unfollowers</div>
+                    </div>
+                </div>
+
                 <div class="unfollowers-list">
                     <div class="unfollowers-list-header">
                         <span>Liste des unfollowers</span>
@@ -303,16 +340,16 @@
             
             <div class="profil-stats">
                 <div class="profil-stat-card">
+                    <div class="profil-stat-number" id="profilContactsCount">0</div>
+                    <div class="profil-stat-label">Contacts</div>
+                </div>
+                <div class="profil-stat-card">
                     <div class="profil-stat-number" id="profilFollowersCount">0</div>
                     <div class="profil-stat-label">Followers</div>
                 </div>
                 <div class="profil-stat-card">
-                    <div class="profil-stat-number" id="profilFollowingCount">0</div>
-                    <div class="profil-stat-label">Following</div>
-                </div>
-                <div class="profil-stat-card">
-                    <div class="profil-stat-number" id="profilContactsCount">0</div>
-                    <div class="profil-stat-label">Contacts</div>
+                    <div class="profil-stat-number" id="profilUnfollowersCount">0</div>
+                    <div class="profil-stat-label">Unfollowers</div>
                 </div>
             </div>
             
@@ -389,7 +426,7 @@
             <button class="tag-dropdown-close" onclick="tags.closeDropdown()">✕</button>
         </div>
         <div class="tag-search">
-            <input type="text" id="tagSearchInput" placeholder="Créer un nouveau tag">
+            <input type="text" id="tagSearchInput" placeholder="Rechercher ou créer un nouveau tag">
         </div>
         <div class="tag-options" id="tagOptionsList"></div>
     </div>
