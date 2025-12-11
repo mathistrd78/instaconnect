@@ -1111,8 +1111,12 @@ const unfollowers = {
         this.data.doNotFollowList.delete(username);
         this.saveDoNotFollowList();
         
-        // Close and refresh the modal
+        // Close modal
         document.querySelector('body > div[style*="position: fixed"]')?.remove();
+        
+        // Refresh the list and counts
+        this.renderList();
+        this.updateCounts();
         
         alert(`@${username} retiré de la liste "À ne plus suivre".`);
     },
