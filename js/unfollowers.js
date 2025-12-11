@@ -140,10 +140,10 @@ const unfollowers = {
                     this.data.followers = data.unfollowersData.followers || [];
                     this.data.unfollowers = data.unfollowersData.unfollowers || [];
                     
-                    // Update display
-                    document.getElementById('followersCount').textContent = this.data.followers.length;
-                    document.getElementById('followingCount').textContent = this.data.following.length;
-                    document.getElementById('unfollowersCount').textContent = this.data.unfollowers.length;
+                    // Update display (stats cards removed from UI)
+                    // document.getElementById('followersCount').textContent = this.data.followers.length;
+                    // document.getElementById('followingCount').textContent = this.data.following.length;
+                    // document.getElementById('unfollowersCount').textContent = this.data.unfollowers.length;
                     
                     // Show appropriate section
                     if (this.data.unfollowers.length === 0) {
@@ -277,10 +277,10 @@ const unfollowers = {
             // Save unfollowers data to Firebase
             await this.saveUnfollowersDataToFirebase();
             
-            // Update unfollowers display
-            document.getElementById('followersCount').textContent = followersList.length;
-            document.getElementById('followingCount').textContent = followingList.length;
-            document.getElementById('unfollowersCount').textContent = this.data.unfollowers.length;
+            // Update unfollowers display (stats cards removed from UI)
+            // document.getElementById('followersCount').textContent = followersList.length;
+            // document.getElementById('followingCount').textContent = followingList.length;
+            // document.getElementById('unfollowersCount').textContent = this.data.unfollowers.length;
             
             // Show unfollowers section
             if (this.data.unfollowers.length === 0) {
