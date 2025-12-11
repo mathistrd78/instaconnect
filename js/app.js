@@ -529,10 +529,10 @@ const app = {
             userEmailEl.textContent = authManager.currentUser.email;
         }
         
-        // Mettre à jour les statistiques
-        document.getElementById('profilContactsCount').textContent = app.dataStore.contacts.length;
+        // Mettre à jour les statistiques - NOUVEL ORDRE: Followers, Following, Contacts
         document.getElementById('profilFollowersCount').textContent = unfollowers.data.followers.length;
-        document.getElementById('profilUnfollowersCount').textContent = unfollowers.data.unfollowers.length;
+        document.getElementById('profilFollowingCount').textContent = unfollowers.data.following.length;
+        document.getElementById('profilContactsCount').textContent = app.dataStore.contacts.length;
         
         // Synchroniser le toggle du mode sombre
         const darkModeToggle = document.getElementById('darkModeToggle');
