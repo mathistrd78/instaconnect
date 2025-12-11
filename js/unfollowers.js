@@ -621,7 +621,7 @@ const unfollowers = {
         if (contactsToDelete.length > 0) {
             console.log(`🗑️ Deleting ${contactsToDelete.length} contact(s) who no longer follow you...`);
             
-            const deletedNames = contactsToDelete.map(c => c.firstName);
+            const deletedNames = contactsToDelete.map(c => `@${c.instagramUsername}`);
             
             for (const contact of contactsToDelete) {
                 const index = app.dataStore.contacts.findIndex(c => c.id === contact.id);
