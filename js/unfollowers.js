@@ -643,10 +643,10 @@ const unfollowers = {
         // Hide analyzing
         document.getElementById('analyzingState').style.display = 'none';
 
-        // Update stats - NOUVEL ORDRE: Followers, Following, Unfollowers
-        document.getElementById('followersCount').textContent = this.data.followers.length;
-        document.getElementById('followingCount').textContent = this.data.following.length;
-        document.getElementById('unfollowersCount').textContent = this.data.unfollowers.length;
+        // Update stats - stats cards removed from UI
+        // document.getElementById('followersCount').textContent = this.data.followers.length;
+        // document.getElementById('followingCount').textContent = this.data.following.length;
+        // document.getElementById('unfollowersCount').textContent = this.data.unfollowers.length;
         
         // Update normal unfollowers count
         const normalCountEl = document.getElementById('normalCount');
@@ -785,15 +785,15 @@ const unfollowers = {
             }
         }
         
-        // NOUVEAU: Diminuer le compteur de following
-        const followingCountEl = document.getElementById('followingCount');
-        if (followingCountEl) {
-            const currentFollowing = parseInt(followingCountEl.textContent);
-            followingCountEl.textContent = currentFollowing - 1;
-        }
+        // NOUVEAU: Diminuer le compteur de following (stats cards removed from UI)
+        // const followingCountEl = document.getElementById('followingCount');
+        // if (followingCountEl) {
+        //     const currentFollowing = parseInt(followingCountEl.textContent);
+        //     followingCountEl.textContent = currentFollowing - 1;
+        // }
         
-        // Update unfollowers counter
-        document.getElementById('unfollowersCount').textContent = this.data.unfollowers.length;
+        // Update unfollowers counter (stats cards removed from UI)
+        // document.getElementById('unfollowersCount').textContent = this.data.unfollowers.length;
         
         // Update counts (including doNotFollowCount)
         this.updateCounts();
@@ -821,8 +821,8 @@ const unfollowers = {
             return user !== username;
         });
         
-        // Update counter
-        document.getElementById('unfollowersCount').textContent = this.data.unfollowers.length;
+        // Update counter (stats cards removed from UI)
+        // document.getElementById('unfollowersCount').textContent = this.data.unfollowers.length;
         
         // Re-render (disparaît immédiatement)
         if (this.data.unfollowers.length === 0) {
