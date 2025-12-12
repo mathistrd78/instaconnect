@@ -1279,7 +1279,7 @@ const unfollowers = {
                 <div class="unfollowers-list-header">
                     <span>Liste des fans</span>
                 </div>
-                <div style="padding: 12px;">
+                <div style="padding: 0 12px 12px 12px;">
         `;
         
         letters.forEach((letter, index) => {
@@ -1342,7 +1342,7 @@ const unfollowers = {
                 <div class="unfollowers-list-header">
                     <span>Liste des demandes</span>
                 </div>
-                <div style="padding: 12px;">
+                <div style="padding: 0 12px 12px 12px;">
         `;
         
         letters.forEach((letter, index) => {
