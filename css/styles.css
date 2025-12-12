@@ -405,9 +405,9 @@ h1 {
     display: block;
 }
 
-/* Hide header on Stats and Unfollowers */
+/* Hide header on Stats and Relations */
 #statsSection.active ~ body .header,
-#unfollowersSection.active ~ body .header {
+#relationsSection.active ~ body .header {
     display: none;
 }
 
@@ -4129,4 +4129,36 @@ body.dark-mode .fan-card {
 #fansTab .letter-divider,
 #pendingTab .letter-divider {
     top: 51px; /* Hauteur des tabs */
+}
+
+/* Rendre les tabs vraiment fixes sur mobile */
+@media (max-width: 768px) {
+    .relations-tabs {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+    }
+    
+    /* Ajouter un padding-top pour compenser les tabs fixes */
+    #relationsSection.active {
+        padding-top: 51px; /* Hauteur des tabs */
+    }
+}
+
+/* Rendre les tabs vraiment fixes sur desktop aussi */
+@media (min-width: 769px) {
+    .relations-tabs {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+    }
+    
+    /* Ajouter un padding-top pour compenser les tabs fixes */
+    #relationsSection.active {
+        padding-top: 51px; /* Hauteur des tabs */
+    }
 }
