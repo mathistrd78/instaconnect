@@ -732,6 +732,12 @@ const unfollowers = {
     },
 
     renderList() {
+        // Update counter in banner
+        const bannerCount = document.getElementById('unfollowersCountBanner');
+        if (bannerCount) {
+            bannerCount.textContent = this.data.unfollowers.length;
+        }
+        
         const list = document.getElementById('unfollowersList');
         
         // Helper function to get first meaningful letter (ignore special chars)
@@ -787,7 +793,7 @@ const unfollowers = {
                         <div class="unfollower-actions">
                             ${!isMarked ? `
                                 <button class="btn-emoji-normal" onclick="unfollowers.markAsNormal('${username}')" title="Marquer comme normal">
-                                    ⭐
+                                    ✅
                                 </button>
                                 <button class="btn-emoji-unfollow" onclick="unfollowers.markAsUnfollowed('${username}')" title="Marquer comme unfollowed">
                                     ❌
@@ -1273,16 +1279,18 @@ const unfollowers = {
                 <div class="unfollowers-list-header">
                     <span>Liste des fans</span>
                 </div>
-                <div id="contactsList" class="contacts-list" style="padding: 12px;">
+                <div style="padding: 12px;">
         `;
         
         letters.forEach(letter => {
             html += `<div class="letter-divider">${letter}</div>`;
             grouped[letter].forEach(username => {
                 html += `
-                    <a href="https://www.instagram.com/${username}" target="_blank" class="contact-card" style="text-decoration: none; color: #E1306C; font-weight: 600;">
-                        @${username}
-                    </a>
+                    <div style="padding: 12px 16px; background: white; margin-bottom: 8px; border-radius: 8px;">
+                        <a href="https://www.instagram.com/${username}" target="_blank" style="text-decoration: none; color: #E1306C; font-weight: 600; font-size: 15px;">
+                            @${username}
+                        </a>
+                    </div>
                 `;
             });
         });
@@ -1323,8 +1331,8 @@ const unfollowers = {
         
         let html = `
             <!-- Bandeau jaune avec compteur -->
-            <div style="padding: 16px 20px; background: #fff3cd; border-radius: 8px; margin: 20px 20px 16px 20px;">
-                <div style="font-size: 24px; font-weight: 700; color: #856404;">${this.data.pendingRequests.length} Demandes en attente</div>
+            <div style="padding: 16px 20px; background: #e3f2fd; border-radius: 8px; margin: 20px 20px 16px 20px;">
+                <div style="font-size: 24px; font-weight: 700; color: #1976d2;">${this.data.pendingRequests.length} Demandes en attente</div>
                 <div style="font-size: 13px; color: #6c757d; margin-top: 4px;">Comptes privés dont vous avez fait la demande</div>
             </div>
             
@@ -1332,18 +1340,18 @@ const unfollowers = {
                 <div class="unfollowers-list-header">
                     <span>Liste des demandes</span>
                 </div>
-                <div id="contactsList" class="contacts-list" style="padding: 12px;">
+                <div style="padding: 12px;">
         `;
         
         letters.forEach(letter => {
             html += `<div class="letter-divider">${letter}</div>`;
             grouped[letter].forEach(req => {
                 html += `
-                    <div class="contact-card" style="display: flex; justify-content: space-between; align-items: center;">
-                        <a href="https://www.instagram.com/${req.username}" target="_blank" style="text-decoration: none; color: #E1306C; font-weight: 600;">
+                    <div style="padding: 12px 16px; background: white; margin-bottom: 8px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                        <a href="https://www.instagram.com/${req.username}" target="_blank" style="text-decoration: none; color: #E1306C; font-weight: 600; font-size: 15px;">
                             @${req.username}
                         </a>
-                        <button class="btn-mark" style="background: #6c757d; color: white; font-size: 12px; padding: 4px 8px;" onclick="unfollowers.cancelPendingRequest('${req.username}')">
+                        <button class="btn-mark" style="background: #6c757d; color: white; font-size: 12px; padding: 6px 12px; border-radius: 6px;" onclick="unfollowers.cancelPendingRequest('${req.username}')">
                             J'ai annulé
                         </button>
                     </div>
