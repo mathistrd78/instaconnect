@@ -282,10 +282,25 @@
             </div>
         </div>
 
-        <!-- Section Unfollowers -->
-        <div id="unfollowersSection" class="section">
+        <!-- Section Relations (Unfollowers, Fans, Demandes) -->
+        <div id="relationsSection" class="section">
+            <!-- Tabs pour les 3 sections -->
+            <div class="relations-tabs">
+                <button class="relation-tab active" data-tab="unfollowers" onclick="unfollowers.switchTab('unfollowers')">
+                    💔 Unfollowers
+                </button>
+                <button class="relation-tab" data-tab="fans" onclick="unfollowers.switchTab('fans')">
+                    ⭐ Fans
+                </button>
+                <button class="relation-tab" data-tab="pending" onclick="unfollowers.switchTab('pending')">
+                    ⏳ Demandes en attente
+                </button>
+            </div>
+
+            <!-- TAB 1: Unfollowers (contenu existant) -->
+            <div id="unfollowersTab" class="relation-tab-content active">
             <div class="unfollowers-header">
-                <div class="unfollowers-title">🔴 Unfollowers</div>
+                <div class="unfollowers-title">💔 Unfollowers</div>
             </div>
 
             <!-- Boutons toujours visibles -->
@@ -311,6 +326,19 @@
                 <div class="empty-unfollowers-icon">📊</div>
                 <div style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">Aucune analyse effectuée</div>
                 <div style="font-size: 14px;">Allez dans l'onglet "Analyse" pour analyser votre export Instagram</div>
+            </div>
+        </div>
+            </div>
+            <!-- Fin TAB 1: Unfollowers -->
+
+            <!-- TAB 2: Fans -->
+            <div id="fansTab" class="relation-tab-content">
+                <div id="fansListContainer"></div>
+            </div>
+
+            <!-- TAB 3: Demandes en attente -->
+            <div id="pendingTab" class="relation-tab-content">
+                <div id="pendingListContainer"></div>
             </div>
         </div>
     </div>
@@ -391,9 +419,9 @@
             <span class="nav-icon">🔍</span>
             <span>Analyse</span>
         </div>
-        <div class="nav-item" onclick="app.switchSection('unfollowers')">
-            <span class="nav-icon">🔴</span>
-            <span>Unfollowers</span>
+        <div class="nav-item" onclick="app.switchSection('relations')">
+            <span class="nav-icon">👥</span>
+            <span>Relations</span>
         </div>
         <div class="nav-item" onclick="app.switchSection('profil')">
             <span class="nav-icon">👤</span>
