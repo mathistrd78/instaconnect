@@ -4012,3 +4012,91 @@ body.dark-mode .no-meeting-text {
         font-size: 15px;
     }
 }
+
+/* ==========================================
+   RELATIONS - TABS (Unfollowers, Fans, Pending)
+   ========================================== */
+
+.relations-tabs {
+    display: flex;
+    gap: 0;
+    background: white;
+    border-bottom: 2px solid #e9ecef;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+body.dark-mode .relations-tabs {
+    background: #1e1e1e;
+    border-bottom-color: #2d2d2d;
+}
+
+.relation-tab {
+    flex: 1;
+    padding: 16px 12px;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    font-weight: 600;
+    color: #6c757d;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+    margin-bottom: -2px;
+}
+
+.relation-tab:hover {
+    color: #495057;
+    background: #f8f9fa;
+}
+
+body.dark-mode .relation-tab {
+    color: #adb5bd;
+}
+
+body.dark-mode .relation-tab:hover {
+    color: #e9ecef;
+    background: #2d2d2d;
+}
+
+.relation-tab.active {
+    color: #e1306c;
+    border-bottom-color: #e1306c;
+}
+
+body.dark-mode .relation-tab.active {
+    color: #ff6b9d;
+    border-bottom-color: #ff6b9d;
+}
+
+.relation-tab-content {
+    display: none;
+    padding: 20px;
+}
+
+.relation-tab-content.active {
+    display: block;
+}
+
+/* Empty state pour Fans et Pending */
+.empty-state {
+    text-align: center;
+    padding: 80px 20px;
+}
+
+body.dark-mode .empty-state div[style*="color: #212529"] {
+    color: #e9ecef !important;
+}
+
+body.dark-mode .empty-state div[style*="color: #6c757d"] {
+    color: #adb5bd !important;
+}
+
+/* Responsive tabs */
+@media (max-width: 480px) {
+    .relation-tab {
+        padding: 12px 8px;
+        font-size: 13px;
+    }
+}
