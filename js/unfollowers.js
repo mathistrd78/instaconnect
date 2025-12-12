@@ -341,6 +341,12 @@ const unfollowers = {
             // document.getElementById('followingCount').textContent = followingList.length;
             // document.getElementById('unfollowersCount').textContent = this.data.unfollowers.length;
             
+            // Update unfollowers count in banner
+            const bannerCount = document.getElementById('unfollowersCountBanner');
+            if (bannerCount) {
+                bannerCount.textContent = this.data.unfollowers.length;
+            }
+            
             // Show unfollowers section
             if (this.data.unfollowers.length === 0) {
                 document.getElementById('unfollowersResults').style.display = 'none';
@@ -1245,30 +1251,48 @@ const unfollowers = {
             return;
         }
         
-        const html = this.data.fans.map(username => `
-            <div class="unfollower-item" style="background: white; padding: 16px; border-radius: 12px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 18px;">
-                        ${username.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                        <div style="font-weight: 600; color: #212529;">@${username}</div>
-                        <div style="font-size: 13px; color: #6c757d;">Vous suit mais vous ne le suivez pas</div>
-                    </div>
-                </div>
-                <a href="https://www.instagram.com/${username}" target="_blank" class="btn-mark" style="background: #e1306c; color: white;">
-                    Voir le profil
-                </a>
-            </div>
-        `).join('');
+        // Grouper par lettre
+        const grouped = {};
+        this.data.fans.forEach(username => {
+            const letter = username.charAt(0).toUpperCase();
+            if (!grouped[letter]) grouped[letter] = [];
+            grouped[letter].push(username);
+        });
         
-        container.innerHTML = `
-            <div style="padding: 16px 20px; background: #e3f2fd; border-radius: 8px; margin-bottom: 16px;">
-                <div style="font-size: 24px; font-weight: 700; color: #1976d2;">${this.data.fans.length}</div>
-                <div style="font-size: 13px; color: #6c757d;">Fans (vous suivent mais vous ne les suivez pas)</div>
+        // Trier les lettres
+        const letters = Object.keys(grouped).sort();
+        
+        let html = `
+            <!-- Bandeau bleu avec compteur -->
+            <div style="padding: 16px 20px; background: #e3f2fd; border-radius: 8px; margin: 20px 20px 16px 20px;">
+                <div style="font-size: 24px; font-weight: 700; color: #1976d2;">${this.data.fans.length} Fans</div>
+                <div style="font-size: 13px; color: #6c757d; margin-top: 4px;">Vous suivent mais vous ne les suivez pas</div>
             </div>
-            ${html}
+            
+            <div class="unfollowers-list">
+                <div class="unfollowers-list-header">
+                    <span>Liste des fans</span>
+                </div>
+                <div id="contactsList" class="contacts-list" style="padding: 12px;">
         `;
+        
+        letters.forEach(letter => {
+            html += `<div class="letter-divider">${letter}</div>`;
+            grouped[letter].forEach(username => {
+                html += `
+                    <a href="https://www.instagram.com/${username}" target="_blank" class="contact-card" style="text-decoration: none; color: #E1306C; font-weight: 600;">
+                        @${username}
+                    </a>
+                `;
+            });
+        });
+        
+        html += `
+                </div>
+            </div>
+        `;
+        
+        container.innerHTML = html;
     },
     
     renderPendingRequests() {
@@ -1286,38 +1310,53 @@ const unfollowers = {
             return;
         }
         
-        const html = this.data.pendingRequests.map(req => {
-            const date = new Date(req.timestamp * 1000).toLocaleDateString('fr-FR');
-            return `
-                <div class="unfollower-item" style="background: white; padding: 16px; border-radius: 12px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
-                    <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
-                        <div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 18px;">
-                            ${req.username.charAt(0).toUpperCase()}
-                        </div>
-                        <div>
-                            <div style="font-weight: 600; color: #212529;">@${req.username}</div>
-                            <div style="font-size: 13px; color: #6c757d;">Demande envoyée le ${date}</div>
-                        </div>
-                    </div>
-                    <div style="display: flex; gap: 8px;">
-                        <a href="https://www.instagram.com/${req.username}" target="_blank" class="btn-mark" style="background: #007bff; color: white;">
-                            Voir
+        // Grouper par lettre
+        const grouped = {};
+        this.data.pendingRequests.forEach(req => {
+            const letter = req.username.charAt(0).toUpperCase();
+            if (!grouped[letter]) grouped[letter] = [];
+            grouped[letter].push(req);
+        });
+        
+        // Trier les lettres
+        const letters = Object.keys(grouped).sort();
+        
+        let html = `
+            <!-- Bandeau jaune avec compteur -->
+            <div style="padding: 16px 20px; background: #fff3cd; border-radius: 8px; margin: 20px 20px 16px 20px;">
+                <div style="font-size: 24px; font-weight: 700; color: #856404;">${this.data.pendingRequests.length} Demandes en attente</div>
+                <div style="font-size: 13px; color: #6c757d; margin-top: 4px;">Comptes privés dont vous avez fait la demande</div>
+            </div>
+            
+            <div class="unfollowers-list">
+                <div class="unfollowers-list-header">
+                    <span>Liste des demandes</span>
+                </div>
+                <div id="contactsList" class="contacts-list" style="padding: 12px;">
+        `;
+        
+        letters.forEach(letter => {
+            html += `<div class="letter-divider">${letter}</div>`;
+            grouped[letter].forEach(req => {
+                html += `
+                    <div class="contact-card" style="display: flex; justify-content: space-between; align-items: center;">
+                        <a href="https://www.instagram.com/${req.username}" target="_blank" style="text-decoration: none; color: #E1306C; font-weight: 600;">
+                            @${req.username}
                         </a>
-                        <button class="btn-mark" style="background: #6c757d; color: white;" onclick="unfollowers.cancelPendingRequest('${req.username}')">
+                        <button class="btn-mark" style="background: #6c757d; color: white; font-size: 12px; padding: 4px 8px;" onclick="unfollowers.cancelPendingRequest('${req.username}')">
                             J'ai annulé
                         </button>
                     </div>
-                </div>
-            `;
-        }).join('');
+                `;
+            });
+        });
         
-        container.innerHTML = `
-            <div style="padding: 16px 20px; background: #fff3cd; border-radius: 8px; margin-bottom: 16px;">
-                <div style="font-size: 24px; font-weight: 700; color: #856404;">${this.data.pendingRequests.length}</div>
-                <div style="font-size: 13px; color: #6c757d;">Demandes d'abonnement en attente</div>
+        html += `
+                </div>
             </div>
-            ${html}
         `;
+        
+        container.innerHTML = html;
     },
     
     cancelPendingRequest(username) {
