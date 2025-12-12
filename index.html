@@ -299,14 +299,16 @@
 
             <!-- TAB 1: Unfollowers (contenu existant) -->
             <div id="unfollowersTab" class="relation-tab-content active">
-            <div class="unfollowers-header">
-                <div class="unfollowers-title">💔 Unfollowers</div>
+            <!-- Bandeau bleu avec compteur -->
+            <div style="padding: 16px 20px; background: #e3f2fd; border-radius: 8px; margin: 20px 20px 16px 20px;">
+                <div style="font-size: 24px; font-weight: 700; color: #1976d2;"><span id="unfollowersCountBanner">0</span> Unfollowers</div>
+                <div style="font-size: 13px; color: #6c757d; margin-top: 4px;">Vous les suivez mais ils ne vous suivent pas</div>
             </div>
 
             <!-- Boutons toujours visibles -->
             <div class="unfollowers-permanent-actions">
-                <button class="unfollowers-action-btn" onclick="unfollowers.showNormalUnfollowers()" style="background: #feca57; color: #2d3436;">
-                    ⭐ Unfollowers normaux (<span id="normalCount">0</span>)
+                <button class="unfollowers-action-btn" onclick="unfollowers.showNormalUnfollowers()" style="background: #d4edda; color: #155724;">
+                    ✅ Unfollowers normaux (<span id="normalCount">0</span>)
                 </button>
                 <button class="unfollowers-action-btn" onclick="unfollowers.showDoNotFollowList()" style="background: #ff7675; color: white;">
                     ❌ À ne plus suivre (<span id="doNotFollowCount">0</span>)
