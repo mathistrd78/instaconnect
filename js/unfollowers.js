@@ -1283,9 +1283,9 @@ const unfollowers = {
         `;
         
         letters.forEach((letter, index) => {
-            // Pas de margin-top pour le premier divider pour qu'il soit collé
-            const marginTop = index === 0 ? '0' : '';
-            html += `<div class="letter-divider" style="margin-top: ${marginTop};">${letter}</div>`;
+            // Première divider sans margin en haut
+            const firstClass = index === 0 ? ' first-divider' : '';
+            html += `<div class="letter-divider${firstClass}">${letter}</div>`;
             grouped[letter].forEach(username => {
                 html += `
                     <div class="fan-card">
@@ -1346,9 +1346,9 @@ const unfollowers = {
         `;
         
         letters.forEach((letter, index) => {
-            // Pas de margin-top pour le premier divider
-            const marginTop = index === 0 ? '0' : '';
-            html += `<div class="letter-divider" style="margin-top: ${marginTop};">${letter}</div>`;
+            // Première divider sans margin en haut
+            const firstClass = index === 0 ? ' first-divider' : '';
+            html += `<div class="letter-divider${firstClass}">${letter}</div>`;
             grouped[letter].forEach(req => {
                 html += `
                     <div class="fan-card" style="display: flex; justify-content: space-between; align-items: center;">
@@ -1356,7 +1356,7 @@ const unfollowers = {
                             @${req.username}
                         </a>
                         <button class="btn-mark" style="background: #6c757d; color: white; font-size: 12px; padding: 6px 12px; border-radius: 6px;" onclick="unfollowers.cancelPendingRequest('${req.username}')">
-                            J'ai annulé
+                            Demande annulée
                         </button>
                     </div>
                 `;
