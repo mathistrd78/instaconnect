@@ -4024,7 +4024,7 @@ body.dark-mode .no-meeting-text {
     border-bottom: 2px solid #e9ecef;
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 200; /* Au-dessus des letter-dividers (z-index: 100) */
 }
 
 body.dark-mode .relations-tabs {
@@ -4118,4 +4118,15 @@ body.dark-mode .fan-card {
     .relation-tab-content {
         padding: 0 20px;
     }
+}
+
+/* Premier letter-divider collé en haut */
+.letter-divider.first-divider {
+    margin-top: 0 !important;
+}
+
+/* Ajuster le top des letter-dividers dans les tabs fans/pending (sans header) */
+#fansTab .letter-divider,
+#pendingTab .letter-divider {
+    top: 51px; /* Hauteur des tabs */
 }
