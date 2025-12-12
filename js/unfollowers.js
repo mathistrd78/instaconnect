@@ -1270,7 +1270,7 @@ const unfollowers = {
         
         let html = `
             <!-- Bandeau bleu avec compteur -->
-            <div style="padding: 16px 20px; background: #e3f2fd; border-radius: 8px; margin: 20px 20px 16px 20px;">
+            <div style="padding: 16px 20px; background: #e3f2fd; border-radius: 8px; margin: 16px 0 16px 0;">
                 <div style="font-size: 24px; font-weight: 700; color: #1976d2;">${this.data.fans.length} Fans</div>
                 <div style="font-size: 13px; color: #6c757d; margin-top: 4px;">Vous suivent mais vous ne les suivez pas</div>
             </div>
@@ -1282,11 +1282,13 @@ const unfollowers = {
                 <div style="padding: 12px;">
         `;
         
-        letters.forEach(letter => {
-            html += `<div class="letter-divider">${letter}</div>`;
+        letters.forEach((letter, index) => {
+            // Pas de margin-top pour le premier divider pour qu'il soit collé
+            const marginTop = index === 0 ? '0' : '';
+            html += `<div class="letter-divider" style="margin-top: ${marginTop};">${letter}</div>`;
             grouped[letter].forEach(username => {
                 html += `
-                    <div style="padding: 12px 16px; background: white; margin-bottom: 8px; border-radius: 8px;">
+                    <div class="fan-card">
                         <a href="https://www.instagram.com/${username}" target="_blank" style="text-decoration: none; color: #E1306C; font-weight: 600; font-size: 15px;">
                             @${username}
                         </a>
@@ -1331,7 +1333,7 @@ const unfollowers = {
         
         let html = `
             <!-- Bandeau jaune avec compteur -->
-            <div style="padding: 16px 20px; background: #e3f2fd; border-radius: 8px; margin: 20px 20px 16px 20px;">
+            <div style="padding: 16px 20px; background: #e3f2fd; border-radius: 8px; margin: 16px 0 16px 0;">
                 <div style="font-size: 24px; font-weight: 700; color: #1976d2;">${this.data.pendingRequests.length} Demandes en attente</div>
                 <div style="font-size: 13px; color: #6c757d; margin-top: 4px;">Comptes privés dont vous avez fait la demande</div>
             </div>
@@ -1343,11 +1345,13 @@ const unfollowers = {
                 <div style="padding: 12px;">
         `;
         
-        letters.forEach(letter => {
-            html += `<div class="letter-divider">${letter}</div>`;
+        letters.forEach((letter, index) => {
+            // Pas de margin-top pour le premier divider
+            const marginTop = index === 0 ? '0' : '';
+            html += `<div class="letter-divider" style="margin-top: ${marginTop};">${letter}</div>`;
             grouped[letter].forEach(req => {
                 html += `
-                    <div style="padding: 12px 16px; background: white; margin-bottom: 8px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                    <div class="fan-card" style="display: flex; justify-content: space-between; align-items: center;">
                         <a href="https://www.instagram.com/${req.username}" target="_blank" style="text-decoration: none; color: #E1306C; font-weight: 600; font-size: 15px;">
                             @${req.username}
                         </a>
