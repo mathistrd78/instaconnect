@@ -1072,8 +1072,8 @@ body.dark-mode .letter-header {
 /* Nouveaux boutons emoji uniquement */
 .btn-emoji-normal {
     padding: 8px 12px;
-    background: #fdcb6e;
-    color: #2d3436;
+    background: #d4edda;  /* Vert pâle */
+    color: #155724;       /* Texte vert foncé */
     border: none;
     border-radius: 8px;
     font-size: 20px;
@@ -1087,7 +1087,7 @@ body.dark-mode .letter-header {
 }
 
 .btn-emoji-normal:active {
-    background: #f0b849;
+    background: #c3e6cb;  /* Vert pâle plus foncé au clic */
     transform: scale(0.95);
 }
 
