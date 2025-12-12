@@ -508,8 +508,8 @@ const app = {
             document.querySelectorAll('.nav-item')[2].classList.add('active');
             header.style.display = 'none';
             container.style.marginTop = '0';
-        } else if (section === 'unfollowers') {
-            document.getElementById('unfollowersSection').classList.add('active');
+        } else if (section === 'relations') {
+            document.getElementById('relationsSection').classList.add('active');
             document.querySelectorAll('.nav-item')[3].classList.add('active');
             header.style.display = 'none';
             container.style.marginTop = '0';
