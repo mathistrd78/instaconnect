@@ -1,17 +1,21 @@
-// unfollowers.js - Analyse des unfollowers Instagram
+// unfollowers.js - Analyse des relations Instagram (unfollowers, fans, demandes)
 const unfollowers = {
     data: {
         following: [],
         followers: [],
         unfollowers: [],
+        fans: [],                    // NOUVEAU: followers qui ne me suivent pas en retour
+        pendingRequests: [],         // NOUVEAU: demandes d'abonnement en attente
         marked: new Set(),
         normalUnfollowers: new Set(), // Influenceurs, marques...
-        doNotFollowList: new Set(), // Personnes à ne plus suivre
-        normalCategories: {} // Catégories des unfollowers normaux
+        doNotFollowList: new Set(),   // Personnes à ne plus suivre
+        normalCategories: {},         // Catégories des unfollowers normaux
+        cancelledRequests: new Set()  // NOUVEAU: demandes annulées (localStorage)
     },
     
-    pendingFile: null, // Fichier en attente d'analyse
-    pendingFileAnalyse: null, // Fichier en attente pour création de contacts
+    currentTab: 'unfollowers', // NOUVEAU: onglet actif
+    pendingFile: null,
+    pendingFileAnalyse: null,
 
     init() {
         // Load saved lists
@@ -28,6 +32,23 @@ const unfollowers = {
         const savedCategories = localStorage.getItem('normalCategories');
         if (savedCategories) {
             this.data.normalCategories = JSON.parse(savedCategories);
+        }
+        
+        // NOUVEAU: Charger les demandes annulées
+        const savedCancelled = localStorage.getItem('cancelledRequests');
+        if (savedCancelled) {
+            this.data.cancelledRequests = new Set(JSON.parse(savedCancelled));
+        }
+        
+        // NOUVEAU: Charger les fans et pending depuis localStorage
+        const savedFans = localStorage.getItem('fansData');
+        if (savedFans) {
+            this.data.fans = JSON.parse(savedFans);
+        }
+        
+        const savedPending = localStorage.getItem('pendingRequestsData');
+        if (savedPending) {
+            this.data.pendingRequests = JSON.parse(savedPending);
         }
         
         // Update counts
@@ -227,12 +248,15 @@ const unfollowers = {
             // Find following and followers files
             let followingFile = null;
             let followersFile = null;
+            let pendingFile = null; // NOUVEAU
 
             contents.forEach((relativePath, zipEntry) => {
                 if (relativePath.includes('following.json')) {
                     followingFile = zipEntry;
                 } else if (relativePath.includes('followers_1.json')) {
                     followersFile = zipEntry;
+                } else if (relativePath.includes('pending_follow_requests.json')) {
+                    pendingFile = zipEntry; // NOUVEAU
                 }
             });
 
@@ -248,6 +272,13 @@ const unfollowers = {
 
             const followingData = JSON.parse(followingText);
             const followersData = JSON.parse(followersText);
+            
+            // NOUVEAU: Parser les demandes en attente
+            let pendingData = null;
+            if (pendingFile) {
+                const pendingText = await pendingFile.async('text');
+                pendingData = JSON.parse(pendingText);
+            }
 
             document.getElementById('analyseProgressText').textContent = 'Analyse des followers...';
 
@@ -273,6 +304,34 @@ const unfollowers = {
                 !this.data.normalUnfollowers.has(u) && 
                 !this.data.doNotFollowList.has(u)
             );
+            
+            // NOUVEAU: Calculer les FANS (followers qui ne sont pas dans following)
+            const followingSetLower = new Set(followingList.map(u => u.toLowerCase()));
+            this.data.fans = followersList.filter(f => 
+                !followingSetLower.has(f.toLowerCase())
+            );
+            console.log(`⭐ ${this.data.fans.length} fans détectés`);
+            
+            // NOUVEAU: Extraire les demandes en attente
+            if (pendingData && pendingData.relationships_follow_requests_sent) {
+                this.data.pendingRequests = pendingData.relationships_follow_requests_sent
+                    .flatMap(item => item.string_list_data || [])
+                    .map(entry => ({
+                        username: entry.value,
+                        timestamp: entry.timestamp,
+                        href: entry.href
+                    }))
+                    // Filtrer celles annulées
+                    .filter(req => !this.data.cancelledRequests.has(req.username));
+                
+                console.log(`⏳ ${this.data.pendingRequests.length} demandes en attente`);
+            } else {
+                this.data.pendingRequests = [];
+            }
+            
+            // Sauvegarder dans localStorage
+            localStorage.setItem('fansData', JSON.stringify(this.data.fans));
+            localStorage.setItem('pendingRequestsData', JSON.stringify(this.data.pendingRequests));
             
             // Save unfollowers data to Firebase
             await this.saveUnfollowersDataToFirebase();
@@ -1140,5 +1199,141 @@ const unfollowers = {
         const uploadZone = document.getElementById('uploadZone');
         uploadZone.querySelector('.upload-text').textContent = 'Cliquez ou glissez votre export Instagram';
         uploadZone.querySelector('.upload-subtext').textContent = 'Fichier ZIP uniquement';
+    },
+    
+    // ==========================================
+    // NOUVELLES FONCTIONS POUR RELATIONS
+    // ==========================================
+    
+    switchTab(tabName) {
+        this.currentTab = tabName;
+        
+        // Update tab buttons
+        document.querySelectorAll('.relation-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        document.querySelector(`[data-tab="${tabName}"]`)?.classList.add('active');
+        
+        // Hide all contents
+        document.querySelectorAll('.relation-tab-content').forEach(content => {
+            content.classList.remove('active');
+        });
+        
+        // Show selected content
+        document.getElementById(`${tabName}Tab`)?.classList.add('active');
+        
+        // Render
+        if (tabName === 'fans') {
+            this.renderFans();
+        } else if (tabName === 'pending') {
+            this.renderPendingRequests();
+        }
+    },
+    
+    renderFans() {
+        const container = document.getElementById('fansListContainer');
+        if (!container) return;
+        
+        if (this.data.fans.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div style="font-size: 48px; margin-bottom: 16px;">⭐</div>
+                    <div style="font-size: 18px; font-weight: 600; color: #212529; margin-bottom: 8px;">Aucun fan</div>
+                    <div style="color: #6c757d;">Toutes les personnes qui vous suivent, vous les suivez en retour !</div>
+                </div>
+            `;
+            return;
+        }
+        
+        const html = this.data.fans.map(username => `
+            <div class="unfollower-item" style="background: white; padding: 16px; border-radius: 12px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 18px;">
+                        ${username.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                        <div style="font-weight: 600; color: #212529;">@${username}</div>
+                        <div style="font-size: 13px; color: #6c757d;">Vous suit mais vous ne le suivez pas</div>
+                    </div>
+                </div>
+                <a href="https://www.instagram.com/${username}" target="_blank" class="btn-mark" style="background: #e1306c; color: white;">
+                    Voir le profil
+                </a>
+            </div>
+        `).join('');
+        
+        container.innerHTML = `
+            <div style="padding: 16px 20px; background: #e3f2fd; border-radius: 8px; margin-bottom: 16px;">
+                <div style="font-size: 24px; font-weight: 700; color: #1976d2;">${this.data.fans.length}</div>
+                <div style="font-size: 13px; color: #6c757d;">Fans (vous suivent mais vous ne les suivez pas)</div>
+            </div>
+            ${html}
+        `;
+    },
+    
+    renderPendingRequests() {
+        const container = document.getElementById('pendingListContainer');
+        if (!container) return;
+        
+        if (this.data.pendingRequests.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div style="font-size: 48px; margin-bottom: 16px;">⏳</div>
+                    <div style="font-size: 18px; font-weight: 600; color: #212529; margin-bottom: 8px;">Aucune demande en attente</div>
+                    <div style="color: #6c757d;">Vous n'avez pas de demandes d'abonnement en attente</div>
+                </div>
+            `;
+            return;
+        }
+        
+        const html = this.data.pendingRequests.map(req => {
+            const date = new Date(req.timestamp * 1000).toLocaleDateString('fr-FR');
+            return `
+                <div class="unfollower-item" style="background: white; padding: 16px; border-radius: 12px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
+                        <div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 18px;">
+                            ${req.username.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; color: #212529;">@${req.username}</div>
+                            <div style="font-size: 13px; color: #6c757d;">Demande envoyée le ${date}</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <a href="https://www.instagram.com/${req.username}" target="_blank" class="btn-mark" style="background: #007bff; color: white;">
+                            Voir
+                        </a>
+                        <button class="btn-mark" style="background: #6c757d; color: white;" onclick="unfollowers.cancelPendingRequest('${req.username}')">
+                            J'ai annulé
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        container.innerHTML = `
+            <div style="padding: 16px 20px; background: #fff3cd; border-radius: 8px; margin-bottom: 16px;">
+                <div style="font-size: 24px; font-weight: 700; color: #856404;">${this.data.pendingRequests.length}</div>
+                <div style="font-size: 13px; color: #6c757d;">Demandes d'abonnement en attente</div>
+            </div>
+            ${html}
+        `;
+    },
+    
+    cancelPendingRequest(username) {
+        // Ajouter aux annulées
+        this.data.cancelledRequests.add(username);
+        
+        // Retirer des pending
+        this.data.pendingRequests = this.data.pendingRequests.filter(req => req.username !== username);
+        
+        // Sauvegarder
+        localStorage.setItem('cancelledRequests', JSON.stringify([...this.data.cancelledRequests]));
+        localStorage.setItem('pendingRequestsData', JSON.stringify(this.data.pendingRequests));
+        
+        // Re-render
+        this.renderPendingRequests();
+        
+        console.log(`✅ Demande pour @${username} marquée comme annulée`);
     }
 };
