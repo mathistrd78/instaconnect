@@ -888,7 +888,7 @@ body.hide-header .container {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid #E1306C;
+    border-bottom: 3px solid #E1306C; /* Plus épais */
 }
 
 .letter-section {
@@ -2885,7 +2885,7 @@ body.dark-mode .emoji-search-input:focus {
     font-size: 16px;
     font-weight: 700;
     color: #E1306C;
-    border-bottom: 2px solid #E1306C;
+    border-bottom: 1px solid #E1306C; /* Plus fin */
     margin: 0;
     margin-bottom: 8px;
     position: sticky;
