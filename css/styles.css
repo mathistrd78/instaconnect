@@ -4072,7 +4072,7 @@ body.dark-mode .relation-tab.active {
 
 .relation-tab-content {
     display: none;
-    padding: 20px;
+    padding: 0; /* Pas de padding pour que le bandeau touche le haut */
 }
 
 .relation-tab-content.active {
@@ -4098,5 +4098,24 @@ body.dark-mode .empty-state div[style*="color: #6c757d"] {
     .relation-tab {
         padding: 12px 8px;
         font-size: 13px;
+    }
+}
+
+/* Cards pour Fans et Demandes en attente */
+.fan-card {
+    padding: 12px 16px;
+    background: white;
+    margin-bottom: 8px;
+    border-radius: 8px;
+}
+
+body.dark-mode .fan-card {
+    background: #2d2d2d;
+}
+
+/* Padding pour les tabs Relations sur desktop */
+@media (min-width: 769px) {
+    .relation-tab-content {
+        padding: 0 20px;
     }
 }
