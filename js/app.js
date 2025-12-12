@@ -520,6 +520,11 @@ const app = {
             container.style.marginTop = '0';
             this.updateProfilSection();
         }
+        
+        // IMPORTANT: Réinitialiser les tabs Relations à "Unfollowers" quand on quitte la section
+        if (section !== 'relations') {
+            unfollowers.switchTab('unfollowers');
+        }
     },
 
     updateProfilSection() {
