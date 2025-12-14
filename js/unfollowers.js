@@ -214,18 +214,21 @@ const unfollowers = {
             return;
         }
 
-        // Store file and show analyse button
+        // Store file
         this.pendingFileAnalyse = file;
-        document.getElementById('analyseButtonContainer').style.display = 'block';
         
         // Update upload zone text
         const uploadZone = document.getElementById('uploadZoneAnalyse');
         uploadZone.querySelector('.upload-text').textContent = '✅ Fichier chargé : ' + file.name;
-        uploadZone.querySelector('.upload-subtext').textContent = 'Cliquez sur "Créer les fiches" pour continuer';
+        uploadZone.querySelector('.upload-subtext').textContent = 'Cliquez sur "Lancer l\'analyse" ci-dessous';
     },
     
     async analyzeFileForContacts() {
-        if (!this.pendingFileAnalyse) return;
+        // Vérifier qu'un fichier a été sélectionné
+        if (!this.pendingFileAnalyse) {
+            alert('⚠️ Veuillez d\'abord sélectionner un fichier ZIP Instagram avant de lancer l\'analyse.');
+            return;
+        }
         
         await this.processZipFileForContacts(this.pendingFileAnalyse);
     },
@@ -439,27 +442,27 @@ const unfollowers = {
             document.getElementById('analyseResults').style.display = 'block';
 
             const statsHTML = `
-                <div style="background: white; padding: 16px; border-radius: 8px; text-align: center;">
-                    <div style="font-size: 24px; font-weight: 700; color: #28a745; margin-bottom: 4px;">${created}</div>
-                    <div style="font-size: 13px; color: #6c757d;">Contacts créés</div>
-                </div>
-                <div style="background: white; padding: 16px; border-radius: 8px; text-align: center;">
-                    <div style="font-size: 24px; font-weight: 700; color: #ffc107; margin-bottom: 4px;">${alreadyExists}</div>
-                    <div style="font-size: 13px; color: #6c757d;">Déjà existants</div>
+                <div style="background: white; padding: 12px 16px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="font-size: 14px; color: #6c757d;">Contacts créés</div>
+                    <div style="font-size: 20px; font-weight: 700; color: #28a745;">${created}</div>
                 </div>
                 ${deletedCount > 0 ? `
-                <div style="background: white; padding: 16px; border-radius: 8px; text-align: center;">
-                    <div style="font-size: 24px; font-weight: 700; color: #dc3545; margin-bottom: 4px;">${deletedCount}</div>
-                    <div style="font-size: 13px; color: #6c757d;">Contacts supprimés</div>
+                <div style="background: white; padding: 12px 16px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="font-size: 14px; color: #6c757d;">Contacts supprimés</div>
+                    <div style="font-size: 20px; font-weight: 700; color: #dc3545;">${deletedCount}</div>
                 </div>
                 ` : ''}
-                <div style="background: white; padding: 16px; border-radius: 8px; text-align: center;">
-                    <div style="font-size: 24px; font-weight: 700; color: #ff7675; margin-bottom: 4px;">${this.data.unfollowers.length}</div>
-                    <div style="font-size: 13px; color: #6c757d;">Unfollowers</div>
+                <div style="background: white; padding: 12px 16px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="font-size: 14px; color: #6c757d;">Unfollowers</div>
+                    <div style="font-size: 20px; font-weight: 700; color: #ff7675;">${this.data.unfollowers.length}</div>
                 </div>
-                <div style="background: white; padding: 16px; border-radius: 8px; text-align: center;">
-                    <div style="font-size: 24px; font-weight: 700; color: #007bff; margin-bottom: 4px;">${mutualFollowersFiltered.length}</div>
-                    <div style="font-size: 13px; color: #6c757d;">Followers mutuels</div>
+                <div style="background: white; padding: 12px 16px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="font-size: 14px; color: #6c757d;">Fans</div>
+                    <div style="font-size: 20px; font-weight: 700; color: #667eea;">${this.data.fans.length}</div>
+                </div>
+                <div style="background: white; padding: 12px 16px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="font-size: 14px; color: #6c757d;">Demandes en attente</div>
+                    <div style="font-size: 20px; font-weight: 700; color: #f093fb;">${this.data.pendingRequests.length}</div>
                 </div>
             `;
 
