@@ -321,8 +321,8 @@ const unfollowers = {
                         timestamp: entry.timestamp,
                         href: entry.href
                     }))
-                    // Filtrer celles annulées
-                    .filter(req => !this.data.cancelledRequests.has(req.username));
+                    // Filtrer celles annulées (s'assurer que cancelledRequests existe)
+                    .filter(req => !(this.data.cancelledRequests || new Set()).has(req.username));
                 
                 console.log(`⏳ ${this.data.pendingRequests.length} demandes en attente`);
             } else {
@@ -686,7 +686,10 @@ const unfollowers = {
         if (contactsToDelete.length > 0) {
             console.log(`🗑️ Deleting ${contactsToDelete.length} contact(s) who no longer follow you...`);
             
-            const deletedNames = contactsToDelete.map(c => `@${c.instagramUsername}`);
+            const deletedNames = contactsToDelete.map(c => {
+                const username = c.instagram ? c.instagram.replace('@', '') : 'unknown';
+                return `@${username}`;
+            });
             
             for (const contact of contactsToDelete) {
                 const index = app.dataStore.contacts.findIndex(c => c.id === contact.id);
