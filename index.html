@@ -180,25 +180,29 @@
                     <p class="analyse-subtitle">Créez automatiquement des fiches contacts pour vos followers mutuels</p>
                 </div>
 
-                <!-- Upload zone en premier -->
-                <div class="upload-zone-analyse" id="uploadZoneAnalyse">
+                <!-- Upload zone cliquable -->
+                <div class="upload-zone-analyse" id="uploadZoneAnalyse" onclick="document.getElementById('zipFileInputAnalyse').click()" style="cursor: pointer;">
                     <div class="upload-icon">📤</div>
                     <div class="upload-text">Sélectionnez votre export Instagram</div>
                     <div class="upload-subtext">Fichier ZIP uniquement</div>
                 </div>
                 
-                <div style="text-align: center; margin-top: 12px;">
-                    <input type="file" id="zipFileInputAnalyse" accept=".zip,application/zip,application/x-zip-compressed,application/octet-stream" 
-                           style="display: none;" onchange="unfollowers.handleFileUploadAnalyse(event)">
-                    <button onclick="document.getElementById('zipFileInputAnalyse').click()" class="btn btn-primary" 
-                           style="display: block; margin: 0 auto; padding: 12px 20px; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; max-width: 280px;">
-                        📁 Choisir un fichier ZIP
-                    </button>
-                </div>
+                <input type="file" id="zipFileInputAnalyse" accept=".zip,application/zip,application/x-zip-compressed,application/octet-stream" 
+                       style="display: none;" onchange="unfollowers.handleFileUploadAnalyse(event)">
                 
-                <div id="analyseButtonContainer" style="display: none; text-align: center; margin-top: 16px;">
+                <!-- Bouton toujours visible -->
+                <div style="text-align: center; margin-top: 16px;">
                     <button class="btn btn-primary" onclick="unfollowers.analyzeFileForContacts()" style="width: 100%; max-width: 400px;">
                         🚀 Lancer l'analyse complète
+                    </button>
+                </div>
+
+                <!-- Encart Analyse terminée (déplacé ici, avant les instructions) -->
+                <div id="analyseResults" style="display: none; padding: 20px; background: #f8f9fa; border-radius: 12px; margin-top: 24px;">
+                    <h3 style="font-size: 18px; margin-bottom: 16px; color: #28a745;">✅ Analyse terminée !</h3>
+                    <div id="analyseStats" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;"></div>
+                    <button class="btn btn-primary" onclick="app.switchSection('contacts')" style="width: 100%;">
+                        👁️ Voir mes contacts
                     </button>
                 </div>
 
@@ -271,44 +275,19 @@
                     <div style="font-size: 16px; color: #495057; font-weight: 600; margin-top: 16px;">Analyse en cours...</div>
                     <div id="analyseProgressText" style="font-size: 14px; color: #6c757d; margin-top: 8px;"></div>
                 </div>
-
-                <div id="analyseResults" style="display: none; padding: 20px; background: #f8f9fa; border-radius: 12px; margin-top: 24px;">
-                    <h3 style="font-size: 18px; margin-bottom: 16px; color: #28a745;">✅ Analyse terminée !</h3>
-                    <div id="analyseStats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px;"></div>
-                    <button class="btn btn-primary" onclick="app.switchSection('contacts')" style="width: 100%;">
-                        👁️ Voir mes contacts
-                    </button>
-                </div>
             </div>
         </div>
 
-        <!-- Section Relations (Unfollowers, Fans, Demandes) -->
-        <div id="relationsSection" class="section">
-            <!-- Tabs pour les 3 sections -->
-            <div class="relations-tabs">
-                <button class="relation-tab active" data-tab="unfollowers" onclick="unfollowers.switchTab('unfollowers')">
-                    💔 Unfollowers
-                </button>
-                <button class="relation-tab" data-tab="fans" onclick="unfollowers.switchTab('fans')">
-                    ⭐ Fans
-                </button>
-                <button class="relation-tab" data-tab="pending" onclick="unfollowers.switchTab('pending')">
-                    ⏳ En attente
-                </button>
-            </div>
-
-            <!-- TAB 1: Unfollowers (contenu existant) -->
-            <div id="unfollowersTab" class="relation-tab-content active">
-            <!-- Bandeau bleu avec compteur -->
-            <div style="padding: 16px 20px; background: #e3f2fd; border-radius: 8px; margin: 16px 0 16px 0;">
-                <div style="font-size: 24px; font-weight: 700; color: #1976d2;"><span id="unfollowersCountBanner">0</span> Unfollowers</div>
-                <div style="font-size: 13px; color: #6c757d; margin-top: 4px;">Vous les suivez mais ils ne vous suivent pas</div>
+        <!-- Section Unfollowers -->
+        <div id="unfollowersSection" class="section">
+            <div class="unfollowers-header">
+                <div class="unfollowers-title">🔴 Unfollowers</div>
             </div>
 
             <!-- Boutons toujours visibles -->
             <div class="unfollowers-permanent-actions">
-                <button class="unfollowers-action-btn" onclick="unfollowers.showNormalUnfollowers()" style="background: #d4edda; color: #155724;">
-                    ✅ Unfollowers normaux (<span id="normalCount">0</span>)
+                <button class="unfollowers-action-btn" onclick="unfollowers.showNormalUnfollowers()" style="background: #feca57; color: #2d3436;">
+                    ⭐ Unfollowers normaux (<span id="normalCount">0</span>)
                 </button>
                 <button class="unfollowers-action-btn" onclick="unfollowers.showDoNotFollowList()" style="background: #ff7675; color: white;">
                     ❌ À ne plus suivre (<span id="doNotFollowCount">0</span>)
@@ -328,19 +307,6 @@
                 <div class="empty-unfollowers-icon">📊</div>
                 <div style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">Aucune analyse effectuée</div>
                 <div style="font-size: 14px;">Allez dans l'onglet "Analyse" pour analyser votre export Instagram</div>
-            </div>
-        </div>
-            </div>
-            <!-- Fin TAB 1: Unfollowers -->
-
-            <!-- TAB 2: Fans -->
-            <div id="fansTab" class="relation-tab-content">
-                <div id="fansListContainer"></div>
-            </div>
-
-            <!-- TAB 3: Demandes en attente -->
-            <div id="pendingTab" class="relation-tab-content">
-                <div id="pendingListContainer"></div>
             </div>
         </div>
     </div>
@@ -421,9 +387,9 @@
             <span class="nav-icon">🔍</span>
             <span>Analyse</span>
         </div>
-        <div class="nav-item" onclick="app.switchSection('relations')">
-            <span class="nav-icon">👥</span>
-            <span>Relations</span>
+        <div class="nav-item" onclick="app.switchSection('unfollowers')">
+            <span class="nav-icon">🔴</span>
+            <span>Unfollowers</span>
         </div>
         <div class="nav-item" onclick="app.switchSection('profil')">
             <span class="nav-icon">👤</span>
