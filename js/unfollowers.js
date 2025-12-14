@@ -482,7 +482,6 @@ const unfollowers = {
             // Reset file
             this.pendingFileAnalyse = null;
             document.getElementById('zipFileInputAnalyse').value = '';
-            document.getElementById('analyseButtonContainer').style.display = 'none';
             
             // Reset upload zone
             const uploadZone = document.getElementById('uploadZoneAnalyse');
