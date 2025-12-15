@@ -2,14 +2,15 @@
   "name": "InstaConnect - Mon CRM Instagram",
   "short_name": "InstaConnect",
   "description": "Gérez vos contacts Instagram avec style",
-  "start_url": "/instaconnect/index.html",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#667eea",
   "theme_color": "#E1306C",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "icon.png",
+      "src": "/icon.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
