@@ -94,14 +94,16 @@ const biometricAuth = {
             }
 
             const credentialData = JSON.parse(credentialDataStr);
-            console.log('🔐 Tentative d\'authentification biométrique...');
+            console.log('🔐 Tentative d\'authentification biométrique automatique...');
 
             // Générer un challenge
             const challenge = new Uint8Array(32);
             crypto.getRandomValues(challenge);
 
             // Demander l'authentification biométrique
+            // mediation: "conditional" permet l'authentification automatique
             const assertion = await navigator.credentials.get({
+                mediation: "conditional", // Authentification automatique sans clic
                 publicKey: {
                     challenge: challenge,
                     timeout: 60000,
