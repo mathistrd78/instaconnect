@@ -57,7 +57,7 @@ const contacts = {
         
         // Ajouter "Favoris", "Profil complet" et "Pays" comme filtres spéciaux
         const specialFilters = [
-            { id: 'favorites', label: '⭐ Favoris' },
+            { id: 'favorites', label: 'Favoris' },
             { id: 'complete', label: 'Profil complet' },
             { id: 'country', label: 'Pays' }
         ];
