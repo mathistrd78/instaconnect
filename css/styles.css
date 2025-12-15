@@ -4162,3 +4162,36 @@ body.dark-mode .fan-card {
         padding-top: 51px; /* Hauteur des tabs */
     }
 }
+
+/* Cacher les tabs quand on n'est pas sur la section Relations */
+.relations-tabs {
+    display: none;
+}
+
+#relationsSection.active .relations-tabs {
+    display: flex;
+}
+
+/* Bouton modifier (crayon) pour les champs */
+.field-item-edit {
+    background: transparent;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.field-item-edit:hover {
+    background: #e3f2fd;
+    transform: scale(1.1);
+}
+
+.field-item-edit:active {
+    transform: scale(0.95);
+}
+
+body.dark-mode .field-item-edit:hover {
+    background: #1e3a5f;
+}
