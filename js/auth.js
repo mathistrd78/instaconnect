@@ -8,23 +8,37 @@ const authManager = {
     // Vérifier si un utilisateur est connecté
     async checkAuth() {
         return new Promise(async (resolve) => {
-            // Tentative d'authentification biométrique AVANT tout
-            if (typeof biometricAuth !== 'undefined' && await biometricAuth.isAvailable() && biometricAuth.isEnabled()) {
-                console.log('🔐 Tentative d\'authentification biométrique...');
-                const credentials = await biometricAuth.authenticate();
-                
-                if (credentials) {
-                    console.log('✅ Authentification biométrique réussie, connexion automatique...');
-                    // Connexion automatique avec les credentials récupérés
-                    const result = await this.login(credentials.email, credentials.password);
-                    if (result.success) {
-                        console.log('✅ Connexion automatique réussie');
-                        // Le reste sera géré par onAuthStateChanged
+            // Vérifier si on doit afficher la landing page
+            const justLoggedOut = localStorage.getItem('justLoggedOut') === 'true';
+            const landingPage = document.getElementById('landingPage');
+            const showLanding = !justLoggedOut && landingPage && landingPage.style.display !== 'none';
+            
+            // Attendre la fin de l'animation landing AVANT de tenter la biométrie
+            const biometricDelay = showLanding ? 3500 : 0; // 3.5s après le début si landing page
+            
+            setTimeout(async () => {
+                // Tentative d'authentification biométrique
+                if (typeof biometricAuth !== 'undefined' && await biometricAuth.isAvailable() && biometricAuth.isEnabled()) {
+                    console.log('🔐 Tentative d\'authentification biométrique...');
+                    const credentials = await biometricAuth.authenticate();
+                    
+                    if (credentials) {
+                        console.log('✅ Authentification biométrique réussie, connexion automatique...');
+                        // Connexion automatique avec les credentials récupérés
+                        const result = await this.login(credentials.email, credentials.password);
+                        if (result.success) {
+                            console.log('✅ Connexion automatique réussie');
+                            // Redirection immédiate - masquer auth page
+                            const authPage = document.getElementById('authPage');
+                            if (authPage) {
+                                authPage.style.display = 'none';
+                            }
+                        }
+                    } else {
+                        console.log('⚠️ Authentification biométrique annulée ou échouée');
                     }
-                } else {
-                    console.log('⚠️ Authentification biométrique annulée ou échouée');
                 }
-            }
+            }, biometricDelay);
             
             auth.onAuthStateChanged((user) => {
                 this.currentUser = user;
@@ -109,6 +123,25 @@ const authManager = {
     showAuth() {
         document.getElementById('authPage').style.display = 'flex';
         document.getElementById('appPage').style.display = 'none';
+        
+        // Vérifier si la biométrie est disponible et afficher le switch
+        if (typeof biometricAuth !== 'undefined') {
+            setTimeout(async () => {
+                const available = await biometricAuth.isAvailable();
+                const switchEl = document.getElementById('biometricSwitch');
+                const toggleEl = document.getElementById('biometricToggle');
+                
+                if (available && switchEl) {
+                    switchEl.style.display = 'block';
+                    // Cocher si déjà activé
+                    if (toggleEl) {
+                        toggleEl.checked = biometricAuth.isEnabled();
+                    }
+                } else if (switchEl) {
+                    switchEl.style.display = 'none';
+                }
+            }, 100);
+        }
     },
 
     // Afficher l'application
@@ -177,25 +210,21 @@ const authManager = {
             const userCredential = await auth.signInWithEmailAndPassword(email, password);
             console.log('✅ Login successful:', userCredential.user.email);
             
-            // Proposer l'enregistrement biométrique si disponible et pas encore activé
-            if (typeof biometricAuth !== 'undefined' && !biometricAuth.isEnabled()) {
-                setTimeout(async () => {
-                    const available = await biometricAuth.isAvailable();
-                    if (available) {
-                        const enable = confirm('🔐 Voulez-vous activer Face ID / Touch ID pour vos prochaines connexions ?');
-                        if (enable) {
-                            // Sauvegarder les credentials
-                            biometricAuth.saveCredentials(email, password);
-                            // Enregistrer la biométrie
-                            const registered = await biometricAuth.register(userCredential.user.uid, email);
-                            if (registered) {
-                                alert('✅ Face ID / Touch ID activé avec succès !');
-                            } else {
-                                alert('❌ Impossible d\'activer la biométrie. Vous pourrez réessayer plus tard dans les paramètres.');
-                            }
-                        }
+            // Vérifier si l'utilisateur veut activer la biométrie (via le switch)
+            if (typeof biometricAuth !== 'undefined') {
+                const biometricToggle = document.getElementById('biometricToggle');
+                if (biometricToggle && biometricToggle.checked && !biometricAuth.isEnabled()) {
+                    console.log('🔐 Activation de la biométrie demandée...');
+                    // Sauvegarder les credentials
+                    biometricAuth.saveCredentials(email, password);
+                    // Enregistrer la biométrie
+                    const registered = await biometricAuth.register(userCredential.user.uid, email);
+                    if (registered) {
+                        console.log('✅ Biométrie activée avec succès');
+                    } else {
+                        console.log('❌ Échec activation biométrie');
                     }
-                }, 1000);
+                }
             }
             
             return { success: true };
