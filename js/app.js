@@ -602,7 +602,7 @@ const app = {
 
     // Dark Mode Management
     loadDarkModePreference() {
-        const darkMode = localStorage.getItem('darkMode') === 'true';
+        const darkMode = localStorage.getItem('darkMode') !== 'false';
         if (darkMode) {
             document.body.classList.add('dark-mode');
         }
