@@ -102,6 +102,18 @@ const fields = {
     // Fermer la modal
     closeAddFieldModal() {
         document.getElementById('addFieldModal').classList.remove('active');
+        
+        // Réinitialiser le mode édition
+        this.isEditMode = false;
+        this.editingFieldId = null;
+        
+        // Réinitialiser le titre et le bouton
+        document.querySelector('#addFieldModal .modal-header h2').textContent = '➕ Ajouter un champ';
+        document.querySelector('#addFieldModal .btn-primary').textContent = '✅ Créer le champ';
+        
+        // Réinitialiser le formulaire
+        document.getElementById('addFieldForm').reset();
+        document.getElementById('fieldOptionsSection').style.display = 'none';
     },
 
     // Sauvegarder le nouveau champ
@@ -123,25 +135,78 @@ const fields = {
             required
         };
         
-        // Pour select et radio, récupérer les options
-        if (type === 'select' || type === 'radio') {
+        // Pour select, radio et checkbox, récupérer les options
+        if (type === 'select' || type === 'radio' || type === 'checkbox') {
             const optionsText = document.getElementById('newFieldOptions').value.trim();
-            if (!optionsText && type === 'radio') {
-                alert('Veuillez entrer au moins 2 options pour un champ à choix unique');
+            if (!optionsText && (type === 'radio' || type === 'checkbox')) {
+                alert('Veuillez entrer au moins 2 options');
                 return;
             }
             
-            if (type === 'radio') {
+            if (type === 'radio' || type === 'checkbox' || type === 'select') {
                 fieldData.options = optionsText.split('\n').map(o => o.trim()).filter(o => o);
-                if (fieldData.options.length < 2) {
-                    alert('Un champ à choix unique nécessite au moins 2 options');
+                if ((type === 'radio' || type === 'checkbox') && fieldData.options.length < 2) {
+                    alert('Ce type de champ nécessite au moins 2 options');
                     return;
                 }
             }
         }
         
-        // Ajouter le champ
-        app.addCustomField(fieldData);
+        // MODE ÉDITION : mettre à jour le champ existant avec mapping
+        if (this.isEditMode && this.editingFieldId) {
+            const oldField = app.customFields.find(f => f.id === this.editingFieldId);
+            if (!oldField) {
+                alert('❌ Erreur : champ introuvable');
+                return;
+            }
+            
+            // Créer un mapping des anciennes vers nouvelles options (si applicable)
+            let optionsMapping = null;
+            if ((oldField.type === 'radio' || oldField.type === 'checkbox' || oldField.type === 'select') && 
+                (type === 'radio' || type === 'checkbox' || type === 'select')) {
+                optionsMapping = this.createOptionsMapping(oldField.options || [], fieldData.options || []);
+            }
+            
+            // Mettre à jour le champ
+            const fieldIndex = app.customFields.findIndex(f => f.id === this.editingFieldId);
+            if (fieldIndex !== -1) {
+                app.customFields[fieldIndex] = {
+                    ...app.customFields[fieldIndex],
+                    ...fieldData
+                };
+            }
+            
+            // Appliquer le mapping sur tous les contacts
+            if (optionsMapping) {
+                console.log('🔄 Applying options mapping to all contacts...', optionsMapping);
+                app.dataStore.contacts.forEach(contact => {
+                    const oldValue = contact[this.editingFieldId];
+                    if (oldValue !== undefined && oldValue !== null && oldValue !== '') {
+                        if (Array.isArray(oldValue)) {
+                            // Pour checkbox : mapper chaque valeur
+                            contact[this.editingFieldId] = oldValue.map(v => optionsMapping[v] || v);
+                        } else {
+                            // Pour radio/select : mapper la valeur unique
+                            contact[this.editingFieldId] = optionsMapping[oldValue] || oldValue;
+                        }
+                    }
+                });
+            }
+            
+            // Sauvegarder dans Firebase
+            app.dataStore.saveMetadata();
+            app.dataStore.save();
+            
+            alert(`✅ Champ "${label}" modifié avec succès`);
+            
+            // Réinitialiser le mode édition
+            this.isEditMode = false;
+            this.editingFieldId = null;
+        } 
+        // MODE CRÉATION : ajouter un nouveau champ
+        else {
+            app.addCustomField(fieldData);
+        }
         
         // Fermer la modal
         this.closeAddFieldModal();
@@ -277,11 +342,14 @@ const fields = {
                         </div>
                     </div>
                     ${!isDefault ? `
+                        <button class="field-item-edit" onclick="fields.editField('${field.id}')" title="Modifier">
+                            ✏️
+                        </button>
                         <button class="field-item-delete" onclick="fields.deleteField('${field.id}')" title="Supprimer">
                             🗑️
                         </button>
                     ` : `
-                        <div style="width: 32px;"></div>
+                        <div style="width: 64px;"></div>
                     `}
                 </div>
             `;
@@ -471,6 +539,56 @@ const fields = {
     onDragOver(event) {},
     onDrop(event, targetFieldId) {},
     onDragEnd(event) {},
+
+    // Créer un mapping des anciennes options vers les nouvelles
+    createOptionsMapping(oldOptions, newOptions) {
+        const mapping = {};
+        
+        // Mapper par index : oldOptions[0] -> newOptions[0], oldOptions[1] -> newOptions[1], etc.
+        oldOptions.forEach((oldOption, index) => {
+            if (index < newOptions.length) {
+                mapping[oldOption] = newOptions[index];
+            } else {
+                // Si plus de nouvelles options que d'anciennes, garder l'ancienne valeur
+                mapping[oldOption] = oldOption;
+            }
+        });
+        
+        console.log('📋 Options mapping created:', mapping);
+        return mapping;
+    },
+
+    // Modifier un champ personnalisé
+    editField(fieldId) {
+        const field = app.customFields.find(f => f.id === fieldId);
+        if (!field) return;
+        
+        // Fermer le modal de gestion
+        this.closeManageFieldsModal();
+        
+        // Ouvrir le modal de création en mode édition
+        this.isEditMode = true;
+        this.editingFieldId = fieldId;
+        
+        // Pré-remplir les champs avec les données existantes
+        setTimeout(() => {
+            document.getElementById('fieldLabel').value = field.label;
+            document.getElementById('fieldType').value = field.type;
+            document.getElementById('fieldRequired').checked = field.required || false;
+            
+            // Afficher les options si c'est un champ avec options
+            if (field.type === 'select' || field.type === 'radio' || field.type === 'checkbox') {
+                this.showOptionsInput();
+                document.getElementById('fieldOptions').value = (field.options || []).join('\n');
+            }
+            
+            // Changer le titre et le texte du bouton
+            document.querySelector('#addFieldModal .modal-header h2').textContent = '✏️ Modifier le champ';
+            document.querySelector('#addFieldModal .btn-primary').textContent = '💾 Enregistrer les modifications';
+        }, 100);
+        
+        this.openAddFieldModal();
+    },
 
     // Supprimer un champ personnalisé
     deleteField(fieldId) {
