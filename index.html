@@ -675,7 +675,20 @@
             const result = await authManager.login(email, password);
             console.log('📦 Result:', result);
             
-            if (!result.success) {
+            if (result.success) {
+                // Connexion réussie - afficher l'app immédiatement
+                console.log('✅ Login successful, showing app...');
+                message.textContent = '✅ Connexion réussie !';
+                message.className = 'auth-message auth-message-success';
+                
+                // Attendre un peu que Firebase se synchronise
+                setTimeout(() => {
+                    if (authManager.currentUser) {
+                        authManager.showApp();
+                        authManager.loadUserData();
+                    }
+                }, 500);
+            } else if (!result.success) {
                 message.textContent = '❌ ' + result.error;
                 message.className = 'auth-message auth-message-error';
             }
