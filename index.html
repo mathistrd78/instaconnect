@@ -368,7 +368,7 @@
             
             <!-- Section Paramètres -->
             <div class="profil-settings">
-                <div class="profil-setting-item">
+                <div class="profil-setting-item" onclick="fields.openManageFieldsModal()" style="cursor: pointer;">
                     <div class="profil-setting-info">
                         <div class="profil-setting-icon">⚙️</div>
                         <div>
@@ -376,7 +376,7 @@
                             <div class="profil-setting-desc">Organiser et supprimer les champs personnalisés</div>
                         </div>
                     </div>
-                    <button class="profil-btn-icon" onclick="fields.openManageFieldsModal()">
+                    <button class="profil-btn-icon" onclick="event.stopPropagation(); fields.openManageFieldsModal()">
                         ➜
                     </button>
                 </div>
