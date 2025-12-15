@@ -149,6 +149,12 @@ const authManager = {
         document.getElementById('authPage').style.display = 'none';
         document.getElementById('appPage').style.display = 'block';
         
+        // Afficher le loader
+        const loader = document.getElementById('appLoader');
+        if (loader) {
+            loader.style.display = 'flex';
+        }
+        
         // Afficher l'email de l'utilisateur
         const userEmailEl = document.getElementById('userEmail');
         if (userEmailEl && this.currentUser) {
@@ -662,18 +668,33 @@ const authManager = {
             
             let shouldLoadFromFirebase = true;
             
-            // Vérifier si on peut utiliser le cache
-            if (lastLoadTime && cachedContacts) {
+            // Afficher immédiatement le cache si disponible (pour une UX fluide)
+            if (cachedContacts) {
+                console.log('⚡ Displaying cached contacts immediately...');
+                app.dataStore.contacts = JSON.parse(cachedContacts);
+                // Render immédiatement pour que l'utilisateur voie ses contacts
+                contacts.renderFilters();
+                contacts.render();
+                stats.renderTabs();
+                stats.render();
+                // Masquer le loader
+                const loader = document.getElementById('appLoader');
+                if (loader) {
+                    loader.style.display = 'none';
+                }
+            }
+            
+            // Vérifier si on doit recharger depuis Firebase
+            if (lastLoadTime) {
                 const timeSinceLastLoad = now - parseInt(lastLoadTime);
                 if (timeSinceLastLoad < CACHE_DURATION) {
                     shouldLoadFromFirebase = false;
-                    console.log('📦 Using cached contacts (age:', Math.round(timeSinceLastLoad / 1000), 'seconds)');
-                    app.dataStore.contacts = JSON.parse(cachedContacts);
+                    console.log('📦 Cache is fresh (age:', Math.round(timeSinceLastLoad / 1000), 'seconds), no need to reload');
                 } else {
-                    console.log('🔄 Cache expired (age:', Math.round(timeSinceLastLoad / 1000), 'seconds), loading from Firebase...');
+                    console.log('🔄 Cache expired (age:', Math.round(timeSinceLastLoad / 1000), 'seconds), reloading from Firebase in background...');
                 }
             } else {
-                console.log('🆕 No cache found, loading from Firebase...');
+                console.log('🆕 No cache timestamp, loading from Firebase...');
             }
             
             if (shouldLoadFromFirebase) {
@@ -742,14 +763,21 @@ const authManager = {
                 console.log('💾 Contacts cached for future sessions');
             }
             
-            // Re-render UI
-            contacts.renderFilters(); // Regénérer les filtres avec les champs actuels
+            // Re-render UI avec les données fraîches de Firebase
+            contacts.renderFilters();
             contacts.render();
-            stats.renderTabs(); // Regénérer les onglets avec les champs actuels
+            stats.renderTabs();
             stats.render();
+            
+            console.log('✅ Fresh data loaded from Firebase');
 
         } catch (error) {
             console.error('❌ Error loading user data:', error);
+            // Masquer le loader en cas d'erreur
+            const loader = document.getElementById('appLoader');
+            if (loader) {
+                loader.style.display = 'none';
+            }
         }
     },
 
