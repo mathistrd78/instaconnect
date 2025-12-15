@@ -206,6 +206,84 @@ body {
     opacity: 0.7;
 }
 
+/* Switch biométrique */
+.biometric-switch {
+    margin: 16px 0;
+    padding: 12px;
+    background: rgba(225, 48, 108, 0.05);
+    border-radius: 12px;
+    border: 2px solid rgba(225, 48, 108, 0.1);
+}
+
+.switch-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+.switch-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+}
+
+/* Toggle switch */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 28px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.3s;
+    border-radius: 28px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background: linear-gradient(135deg, #E1306C 0%, #C13584 100%);
+}
+
+input:checked + .slider:before {
+    transform: translateX(22px);
+}
+
+body.dark-mode .switch-label {
+    color: #fff;
+}
+
+body.dark-mode .biometric-switch {
+    background: rgba(225, 48, 108, 0.1);
+    border-color: rgba(225, 48, 108, 0.2);
+}
+
 .auth-message {
     margin-top: 16px;
     padding: 12px;
