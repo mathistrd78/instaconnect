@@ -4195,3 +4195,45 @@ body.dark-mode .fan-card {
 body.dark-mode .field-item-edit:hover {
     background: #1e3a5f;
 }
+
+/* Bouton favoris (étoile) */
+.btn-favorite {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    min-height: 36px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: #ffd700;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    padding: 0;
+}
+
+.btn-favorite:hover {
+    background: rgba(255, 215, 0, 0.1);
+    transform: scale(1.1);
+}
+
+.btn-favorite:active {
+    transform: scale(0.95);
+}
+
+.btn-favorite.favorite-active {
+    color: #ffd700;
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+}
+
+body.dark-mode .btn-favorite {
+    color: #ffd700;
+}
+
+body.dark-mode .btn-favorite:hover {
+    background: rgba(255, 215, 0, 0.15);
+}
