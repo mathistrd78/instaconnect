@@ -570,24 +570,25 @@ const fields = {
         this.isEditMode = true;
         this.editingFieldId = fieldId;
         
+        // Ouvrir le modal d'abord
+        this.openAddFieldModal();
+        
         // Pré-remplir les champs avec les données existantes
         setTimeout(() => {
-            document.getElementById('fieldLabel').value = field.label;
-            document.getElementById('fieldType').value = field.type;
-            document.getElementById('fieldRequired').checked = field.required || false;
+            document.getElementById('newFieldLabel').value = field.label;
+            document.getElementById('newFieldType').value = field.type;
+            document.getElementById('newFieldRequired').checked = field.required || false;
             
             // Afficher les options si c'est un champ avec options
             if (field.type === 'select' || field.type === 'radio' || field.type === 'checkbox') {
-                this.showOptionsInput();
-                document.getElementById('fieldOptions').value = (field.options || []).join('\n');
+                document.getElementById('fieldOptionsSection').style.display = 'block';
+                document.getElementById('newFieldOptions').value = (field.options || []).join('\n');
             }
             
             // Changer le titre et le texte du bouton
             document.querySelector('#addFieldModal .modal-header h2').textContent = '✏️ Modifier le champ';
             document.querySelector('#addFieldModal .btn-primary').textContent = '💾 Enregistrer les modifications';
         }, 100);
-        
-        this.openAddFieldModal();
     },
 
     // Supprimer un champ personnalisé
