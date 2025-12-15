@@ -55,8 +55,9 @@ const contacts = {
         );
         console.log('🔍 Filterable fields:', filterableFields.length, filterableFields.map(f => f.label));
         
-        // Ajouter "Profil complet" et "Pays" comme filtres spéciaux
+        // Ajouter "Favoris", "Profil complet" et "Pays" comme filtres spéciaux
         const specialFilters = [
+            { id: 'favorites', label: '⭐ Favoris' },
             { id: 'complete', label: 'Profil complet' },
             { id: 'country', label: 'Pays' }
         ];
@@ -230,9 +231,14 @@ const contacts = {
                             <div class="contact-name">${contact.firstName}${flag}</div>
                             <a href="https://instagram.com/${contact.instagram.replace('@', '')}" target="_blank" rel="noopener noreferrer" class="contact-instagram">${contact.instagram}</a>
                         </div>
-                        <button class="btn-view-eye" onclick="contacts.viewProfile('${contact.id}')" title="Voir le profil">
-                            👁️
-                        </button>
+                        <div style="display: flex; gap: 4px; align-items: center;">
+                            <button class="btn-favorite ${contact.favorite ? 'favorite-active' : ''}" onclick="contacts.toggleFavorite('${contact.id}')" title="${contact.favorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}">
+                                ${contact.favorite ? '⭐' : '☆'}
+                            </button>
+                            <button class="btn-view-eye" onclick="contacts.viewProfile('${contact.id}')" title="Voir le profil">
+                                👁️
+                            </button>
+                        </div>
                     </div>
                     <div class="contact-tags">
                         <span class="tag-mini ${relTag?.class || ''}" onclick="tags.showDropdown(event, '${contact.id}', 'relationType')">
@@ -315,6 +321,16 @@ const contacts = {
             });
         }
         
+        // Filtre favoris
+        if (this.activeFilters.favorites && this.activeFilters.favorites.length > 0) {
+            result = result.filter(contact => {
+                const isFavorite = contact.favorite === true;
+                if (this.activeFilters.favorites.includes('oui')) return isFavorite;
+                if (this.activeFilters.favorites.includes('non')) return !isFavorite;
+                return false;
+            });
+        }
+        
         // Filtre par pays
         if (this.activeFilters.country && this.activeFilters.country.length > 0) {
             result = result.filter(contact => {
@@ -363,6 +379,22 @@ const contacts = {
         }
         
         return true;
+    },
+
+    toggleFavorite(contactId) {
+        const contact = app.dataStore.contacts.find(c => c.id === contactId);
+        if (!contact) return;
+        
+        // Inverser le statut favori
+        contact.favorite = !contact.favorite;
+        
+        // Sauvegarder dans Firebase
+        app.dataStore.save(contact);
+        
+        // Re-render la liste
+        this.render();
+        
+        console.log(`${contact.favorite ? '⭐' : '☆'} ${contact.firstName} ${contact.favorite ? 'ajouté aux' : 'retiré des'} favoris`);
     },
 
     viewProfile(contactId) {
@@ -822,7 +854,20 @@ const contacts = {
         }, positionDelay);
         
         // Générer le contenu selon le type de filtre
-        if (filterType === 'complete') {
+        if (filterType === 'favorites') {
+            content.innerHTML = `
+                <label class="filter-option">
+                    <input type="checkbox" value="oui" ${(this.activeFilters.favorites || []).includes('oui') ? 'checked' : ''} 
+                           onchange="contacts.toggleFilter('favorites', 'oui')">
+                    <span>⭐ Oui</span>
+                </label>
+                <label class="filter-option">
+                    <input type="checkbox" value="non" ${(this.activeFilters.favorites || []).includes('non') ? 'checked' : ''} 
+                           onchange="contacts.toggleFilter('favorites', 'non')">
+                    <span>☆ Non</span>
+                </label>
+            `;
+        } else if (filterType === 'complete') {
             content.innerHTML = `
                 <label class="filter-option">
                     <input type="checkbox" value="oui" ${(this.activeFilters.complete || []).includes('oui') ? 'checked' : ''} 
@@ -962,6 +1007,18 @@ const contacts = {
             }
         }
         if (hasCompleteFilter) hasAnyFilter = true;
+        
+        // Favoris
+        const hasFavoritesFilter = this.activeFilters.favorites && this.activeFilters.favorites.length > 0;
+        const favoritesBtn = document.getElementById('filter_favorites_Btn');
+        if (favoritesBtn) {
+            if (hasFavoritesFilter) {
+                favoritesBtn.classList.add('active');
+            } else {
+                favoritesBtn.classList.remove('active');
+            }
+        }
+        if (hasFavoritesFilter) hasAnyFilter = true;
         
         // Pays
         const hasCountryFilter = this.activeFilters.country && this.activeFilters.country.length > 0;
