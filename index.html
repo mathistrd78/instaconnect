@@ -45,6 +45,18 @@
                 <h2>Connexion</h2>
                 <input type="email" id="loginEmail" placeholder="Email" class="auth-input" autocomplete="off">
                 <input type="password" id="loginPassword" placeholder="Mot de passe" class="auth-input" autocomplete="off">
+                
+                <!-- Switch biométrique -->
+                <div id="biometricSwitch" class="biometric-switch" style="display: none;">
+                    <label class="switch-container">
+                        <span class="switch-label">🔐 Activer Face ID / Touch ID</span>
+                        <label class="switch">
+                            <input type="checkbox" id="biometricToggle">
+                            <span class="slider"></span>
+                        </label>
+                    </label>
+                </div>
+                
                 <button onclick="handleLogin()" class="auth-btn auth-btn-primary">Se connecter</button>
                 <div class="auth-link" onclick="showSignup()">Pas de compte ? S'inscrire</div>
                 <div class="auth-link" onclick="showResetPassword()">Mot de passe oublié ?</div>
