@@ -34,11 +34,24 @@ const authManager = {
                             const result = await this.login(credentials.email, credentials.password);
                             if (result.success) {
                                 console.log('✅ Connexion automatique réussie');
-                                // Redirection immédiate - masquer auth page
+                                
+                                // Masquer auth page et afficher app immédiatement
                                 const authPage = document.getElementById('authPage');
+                                const appPage = document.getElementById('appPage');
                                 if (authPage) {
                                     authPage.style.display = 'none';
                                 }
+                                if (appPage) {
+                                    appPage.style.display = 'block';
+                                }
+                                
+                                // Afficher le loader
+                                const loader = document.getElementById('appLoader');
+                                if (loader) {
+                                    loader.style.display = 'flex';
+                                }
+                                
+                                console.log('⚡ App displayed immediately after biometric auth');
                             }
                         } else {
                             console.log('⚠️ Authentification biométrique annulée ou échouée');
@@ -325,6 +338,30 @@ const authManager = {
             await auth.signOut();
             console.log('✅ Logout successful');
             this.showAuth();
+            
+            // Relancer la tentative de biométrie après un court délai
+            if (typeof biometricAuth !== 'undefined' && biometricAuth.isEnabled()) {
+                setTimeout(async () => {
+                    console.log('🔐 Tentative de reconnexion biométrique après déconnexion...');
+                    try {
+                        const credentials = await biometricAuth.authenticate();
+                        
+                        if (credentials) {
+                            console.log('✅ Reconnexion biométrique réussie');
+                            const result = await this.login(credentials.email, credentials.password);
+                            if (result.success) {
+                                // Masquer auth et afficher app
+                                document.getElementById('authPage').style.display = 'none';
+                                document.getElementById('appPage').style.display = 'block';
+                                const loader = document.getElementById('appLoader');
+                                if (loader) loader.style.display = 'flex';
+                            }
+                        }
+                    } catch (error) {
+                        console.log('Biométrie annulée ou échouée après déconnexion');
+                    }
+                }, 500); // 500ms après l'affichage de la page de connexion
+            }
         } catch (error) {
             console.error('❌ Logout error:', error);
             alert('Erreur lors de la déconnexion');
