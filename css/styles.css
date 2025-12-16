@@ -2010,11 +2010,28 @@ body.dark-mode .empty-state-text {
     margin: 0;
     flex: 1;
     text-align: center;
+    padding: 0 50px; /* Espace pour ne pas être caché par la croix */
 }
 
 .modal-header .close-btn {
     position: absolute;
     right: 16px;
+}
+
+/* Mobile : réduire la taille du titre */
+@media (max-width: 768px) {
+    .modal-header h2 {
+        font-size: 1.3rem;
+    }
+    
+    .modal-header h3 {
+        font-size: 1.1rem;
+    }
+    
+    .modal-header h2,
+    .modal-header h3 {
+        padding: 0 60px; /* Plus d'espace sur mobile */
+    }
 }
 
 .close-btn {
