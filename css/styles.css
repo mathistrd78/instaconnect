@@ -1999,8 +1999,22 @@ body.dark-mode .empty-state-text {
     padding: 16px;
     border-bottom: 1px solid #e9ecef;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
+    align-items: center;
+    position: relative;
     z-index: 10;
+}
+
+.modal-header h2,
+.modal-header h3 {
+    margin: 0;
+    flex: 1;
+    text-align: center;
+}
+
+.modal-header .close-btn {
+    position: absolute;
+    right: 16px;
 }
 
 .close-btn {
