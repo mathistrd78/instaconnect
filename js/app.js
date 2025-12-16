@@ -602,10 +602,18 @@ const app = {
 
     // Dark Mode Management
     loadDarkModePreference() {
-        const darkMode = localStorage.getItem('darkMode') !== 'false';
+        // Dark mode activé par défaut (sauf si explicitement désactivé)
+        const darkModeSetting = localStorage.getItem('darkMode');
+        const darkMode = darkModeSetting === null ? true : darkModeSetting === 'true';
+        
         if (darkMode) {
             document.body.classList.add('dark-mode');
+            // Si pas encore défini, le définir comme activé par défaut
+            if (darkModeSetting === null) {
+                localStorage.setItem('darkMode', 'true');
+            }
         }
+        
         // Update toggle state when visiting profile
         setTimeout(() => {
             const toggle = document.getElementById('darkModeToggle');
