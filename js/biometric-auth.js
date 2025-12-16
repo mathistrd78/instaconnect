@@ -100,10 +100,8 @@ const biometricAuth = {
             const challenge = new Uint8Array(32);
             crypto.getRandomValues(challenge);
 
-            // Demander l'authentification biométrique
-            // mediation: "conditional" permet l'authentification automatique
+            // Demander l'authentification biométrique IMMÉDIATE
             const assertion = await navigator.credentials.get({
-                mediation: "conditional", // Authentification automatique sans clic
                 publicKey: {
                     challenge: challenge,
                     timeout: 60000,
