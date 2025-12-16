@@ -332,35 +332,8 @@ const unfollowers = {
                 this.data.pendingRequests = [];
             }
             
-            // Sauvegarder dans localStorage
-            localStorage.setItem('fansData', JSON.stringify(this.data.fans));
-            localStorage.setItem('pendingRequestsData', JSON.stringify(this.data.pendingRequests));
-            
-            // Save unfollowers data to Firebase
-            await this.saveUnfollowersDataToFirebase();
-            
-            // Update unfollowers display (stats cards removed from UI)
-            // document.getElementById('followersCount').textContent = followersList.length;
-            // document.getElementById('followingCount').textContent = followingList.length;
-            // document.getElementById('unfollowersCount').textContent = this.data.unfollowers.length;
-            
-            // Update unfollowers count in banner
-            const bannerCount = document.getElementById('unfollowersCountBanner');
-            if (bannerCount) {
-                bannerCount.textContent = this.data.unfollowers.length;
-            }
-            
-            // Show unfollowers section
-            if (this.data.unfollowers.length === 0) {
-                document.getElementById('unfollowersResults').style.display = 'none';
-                document.getElementById('emptyUnfollowers').style.display = 'block';
-                document.getElementById('emptyUnfollowers').querySelector('div:nth-child(2)').textContent = 'Aucun unfollower !';
-                document.getElementById('emptyUnfollowers').querySelector('div:nth-child(3)').textContent = 'Tout le monde que vous suivez vous suit en retour';
-            } else {
-                document.getElementById('unfollowersResults').style.display = 'block';
-                document.getElementById('emptyUnfollowers').style.display = 'none';
-                this.renderList();
-            }
+            // NE PAS SAUVEGARDER ENCORE - Attendre la confirmation de l'utilisateur
+            // La sauvegarde sera faite après la vérification des suppressions
 
             document.getElementById('analyseProgressText').textContent = 'Identification des followers mutuels...';
 
@@ -372,11 +345,75 @@ const unfollowers = {
                 !this.data.normalUnfollowers.has(username)
             );
 
-            // NOUVEAU: Vérifier et supprimer les contacts qui ne sont plus followers
+            // ÉTAPE 1 : VÉRIFIER les contacts à supprimer (SANS LES SUPPRIMER)
             document.getElementById('analyseProgressText').textContent = 'Vérification des contacts existants...';
-            const deletedResult = await this.cleanupContactsNotFollowingDuringAnalyse(followersList);
-            const deletedCount = deletedResult.count;
-            const deletedNames = deletedResult.names;
+            
+            const contactsToDelete = [];
+            const followerUsernamesLower = followersList.map(f => f.toLowerCase());
+            
+            for (const contact of app.dataStore.contacts) {
+                const instagramUsername = contact.instagram.toLowerCase().replace('@', '');
+                if (!followerUsernamesLower.includes(instagramUsername)) {
+                    contactsToDelete.push(contact);
+                }
+            }
+            
+            // ÉTAPE 2 : Si des suppressions sont détectées, demander confirmation AVANT toute modification
+            if (contactsToDelete.length > 0) {
+                console.log(`⚠️ ${contactsToDelete.length} contact(s) to delete - asking for confirmation BEFORE any modification...`);
+                
+                const confirmed = confirm(
+                    `⚠️ ATTENTION\n\n` +
+                    `${contactsToDelete.length} fiche(s) contact(s) vont être supprimées.\n\n` +
+                    `Souhaitez-vous continuer ?`
+                );
+                
+                if (!confirmed) {
+                    // ANNULATION COMPLÈTE - Aucune modification effectuée
+                    console.log('❌ Analysis cancelled by user - NO modifications made');
+                    document.getElementById('analyseProgress').style.display = 'none';
+                    
+                    // Afficher message d'annulation
+                    alert(
+                        `❌ Analyse annulée, aucune modification effectuée.\n\n` +
+                        `Si le nombre de fiches contacts à supprimer vous paraît incohérent, ` +
+                        `vérifiez que vous avez bien sélectionné "Depuis le début" lors de l'export Instagram.`
+                    );
+                    
+                    // Fermer le modal des relations
+                    const relationsModal = document.getElementById('relationsModal');
+                    if (relationsModal) {
+                        relationsModal.style.display = 'none';
+                    }
+                    return; // Arrêter l'analyse complètement
+                }
+            }
+            
+            // ÉTAPE 3 : L'utilisateur a confirmé (ou pas de suppressions), procéder aux modifications
+            
+            // Supprimer les contacts
+            let deletedCount = 0;
+            let deletedNames = [];
+            
+            if (contactsToDelete.length > 0) {
+                console.log(`🗑️ User confirmed - Deleting ${contactsToDelete.length} contact(s)...`);
+                
+                deletedNames = contactsToDelete.map(c => {
+                    const username = c.instagram ? c.instagram.replace('@', '') : 'unknown';
+                    return `@${username}`;
+                });
+                
+                for (const contact of contactsToDelete) {
+                    const index = app.dataStore.contacts.findIndex(c => c.id === contact.id);
+                    if (index !== -1) {
+                        app.dataStore.contacts.splice(index, 1);
+                        await app.dataStore.deleteContact(contact.id);
+                        deletedCount++;
+                    }
+                }
+                
+                console.log(`✅ ${deletedCount} contact(s) deleted`);
+            }
 
             document.getElementById('analyseProgressText').textContent = 'Création des fiches contacts...';
 
@@ -433,6 +470,31 @@ const unfollowers = {
             // Save to Firebase (with metadata since we might have many new contacts)
             document.getElementById('analyseProgressText').textContent = 'Sauvegarde...';
             await app.dataStore.save(null, true); // null = all contacts, true = save metadata too
+            
+            // Maintenant que l'utilisateur a confirmé, sauvegarder les données des fans/pending/unfollowers
+            localStorage.setItem('fansData', JSON.stringify(this.data.fans));
+            localStorage.setItem('pendingRequestsData', JSON.stringify(this.data.pendingRequests));
+            
+            // Save unfollowers data to Firebase
+            await this.saveUnfollowersDataToFirebase();
+            
+            // Update unfollowers count in banner
+            const bannerCount = document.getElementById('unfollowersCountBanner');
+            if (bannerCount) {
+                bannerCount.textContent = this.data.unfollowers.length;
+            }
+            
+            // Show unfollowers section
+            if (this.data.unfollowers.length === 0) {
+                document.getElementById('unfollowersResults').style.display = 'none';
+                document.getElementById('emptyUnfollowers').style.display = 'block';
+                document.getElementById('emptyUnfollowers').querySelector('div:nth-child(2)').textContent = 'Aucun unfollower !';
+                document.getElementById('emptyUnfollowers').querySelector('div:nth-child(3)').textContent = 'Tout le monde que vous suivez vous suit en retour';
+            } else {
+                document.getElementById('unfollowersResults').style.display = 'block';
+                document.getElementById('emptyUnfollowers').style.display = 'none';
+                this.renderList();
+            }
 
             // Update counts
             this.updateCounts();
@@ -684,9 +746,35 @@ const unfollowers = {
             }
         }
 
-        // Supprimer les contacts qui ne sont plus followers
+        // Si des contacts doivent être supprimés, demander confirmation
         if (contactsToDelete.length > 0) {
-            console.log(`🗑️ Deleting ${contactsToDelete.length} contact(s) who no longer follow you...`);
+            console.log(`⚠️ ${contactsToDelete.length} contact(s) to delete - asking for confirmation...`);
+            
+            // Demander confirmation à l'utilisateur
+            const confirmed = confirm(
+                `⚠️ ATTENTION\n\n` +
+                `${contactsToDelete.length} fiche(s) contact(s) vont être supprimées.\n\n` +
+                `Ces contacts ne sont plus dans votre liste de followers.\n\n` +
+                `Êtes-vous sûr de vouloir continuer ?`
+            );
+            
+            if (!confirmed) {
+                // Annulation de l'analyse
+                console.log('❌ Analysis cancelled by user');
+                
+                // Afficher un message d'annulation
+                alert(
+                    `❌ Analyse annulée\n\n` +
+                    `Si le nombre de fiches contacts à supprimer vous paraît incohérent, ` +
+                    `vérifiez que vous avez bien sélectionné "Depuis le début" lors de l'export Instagram.`
+                );
+                
+                // Retourner un objet spécial pour indiquer l'annulation
+                return { count: 0, names: [], cancelled: true };
+            }
+            
+            // L'utilisateur a confirmé, procéder à la suppression
+            console.log(`🗑️ User confirmed - Deleting ${contactsToDelete.length} contact(s)...`);
             
             const deletedNames = contactsToDelete.map(c => {
                 const username = c.instagram ? c.instagram.replace('@', '') : 'unknown';
