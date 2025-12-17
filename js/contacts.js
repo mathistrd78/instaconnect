@@ -229,7 +229,7 @@ const contacts = {
                     <div class="contact-header">
                         <div class="contact-info">
                             <div class="contact-name">${contact.firstName}${flag}</div>
-                            <a href="https://instagram.com/${contact.instagram.replace('@', '')}" target="_blank" rel="noopener noreferrer" class="contact-instagram">${contact.instagram}</a>
+                            <a href="#" onclick="openInstagram('${contact.instagram}', event); return false;" class="contact-instagram">${contact.instagram}</a>
                         </div>
                         <div style="display: flex; gap: 4px; align-items: center;">
                             <button class="btn-favorite ${contact.favorite ? 'favorite-active' : ''}" onclick="contacts.toggleFavorite('${contact.id}')" title="${contact.favorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}">
@@ -405,8 +405,10 @@ const contacts = {
 
         // Prénom et Instagram
         document.getElementById('profileName').textContent = contact.firstName;
-        document.getElementById('profileInsta').href = `https://instagram.com/${contact.instagram.replace('@', '')}`;
-        document.getElementById('profileInsta').textContent = contact.instagram;
+        const profileInsta = document.getElementById('profileInsta');
+        profileInsta.href = '#';
+        profileInsta.onclick = (e) => { openInstagram(contact.instagram, e); return false; };
+        profileInsta.textContent = contact.instagram;
 
         // Générer dynamiquement les détails
         const allFields = app.getAllFields();
