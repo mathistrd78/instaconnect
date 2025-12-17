@@ -880,7 +880,7 @@ const unfollowers = {
                 return `
                     <div class="unfollower-item ${isMarked ? 'unfollowed' : ''}" id="user-${username.replace(/[^a-zA-Z0-9]/g, '_')}">
                         <div class="unfollower-info">
-                            <a href="https://instagram.com/${username}" target="_blank" rel="noopener noreferrer" class="unfollower-username-link">@${username}</a>
+                            <a href="#" onclick="openInstagram('${username}', event); return false;" class="unfollower-username-link">@${username}</a>
                             ${dateStr}
                         </div>
                         <div class="unfollower-actions">
@@ -1099,7 +1099,7 @@ const unfollowers = {
                 <div class="unfollower-item" style="padding: 12px;">
                     <div class="unfollower-info">
                         <div class="unfollower-username">
-                            <a href="https://instagram.com/${username}" target="_blank" rel="noopener noreferrer" class="unfollower-username-link" style="color: #E1306C; text-decoration: none;">@${username}</a>
+                            <a href="#" onclick="openInstagram('${username}', event); return false;" class="unfollower-username-link" style="color: #E1306C; text-decoration: none;">@${username}</a>
                         </div>
                     </div>
                     <div style="display: flex; gap: 6px; align-items: center;">
@@ -1253,7 +1253,7 @@ const unfollowers = {
             <div class="unfollower-item">
                 <div class="unfollower-info">
                     <div class="unfollower-username">
-                        <a href="https://instagram.com/${username}" target="_blank" rel="noopener noreferrer" class="unfollower-username-link" style="color: #E1306C; text-decoration: none;">@${username}</a>
+                        <a href="#" onclick="openInstagram('${username}', event); return false;" class="unfollower-username-link" style="color: #E1306C; text-decoration: none;">@${username}</a>
                     </div>
                 </div>
                 <button class="btn-mark" onclick="unfollowers.removeFromDoNotFollow('${username}')" style="background: #ff4757; color: white;">
@@ -1382,7 +1382,7 @@ const unfollowers = {
             grouped[letter].forEach(username => {
                 html += `
                     <div class="fan-card">
-                        <a href="https://www.instagram.com/${username}" target="_blank" style="text-decoration: none; color: #E1306C; font-weight: 600; font-size: 15px;">
+                        <a href="#" onclick="openInstagram('${username}', event); return false;" style="text-decoration: none; color: #E1306C; font-weight: 600; font-size: 15px;">
                             @${username}
                         </a>
                     </div>
@@ -1445,7 +1445,7 @@ const unfollowers = {
             grouped[letter].forEach(req => {
                 html += `
                     <div class="fan-card" style="display: flex; justify-content: space-between; align-items: center;">
-                        <a href="https://www.instagram.com/${req.username}" target="_blank" style="text-decoration: none; color: #E1306C; font-weight: 600; font-size: 15px;">
+                        <a href="#" onclick="openInstagram('${req.username}', event); return false;" style="text-decoration: none; color: #E1306C; font-weight: 600; font-size: 15px;">
                             @${req.username}
                         </a>
                         <button class="btn-mark" style="background: #6c757d; color: white; font-size: 12px; padding: 6px 12px; border-radius: 6px;" onclick="unfollowers.cancelPendingRequest('${req.username}')">
